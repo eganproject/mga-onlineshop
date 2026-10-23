@@ -37,10 +37,10 @@ class AppServiceProvider extends ServiceProvider
             'rajaongkir' => new RajaOngkirShippingProvider(
                 config('services.rajaongkir.api_key'),
                 config('services.rajaongkir.base_url'),
-                config('shop.shipping.origin_city_id'),
+                config('shop.shipping.origin_district_id'),
                 config('shop.shipping.couriers'),
             ),
-            default => new FakeShippingProvider,
+            default => new FakeShippingProvider(config('shop.shipping.origin_district_id')),
         });
     }
 

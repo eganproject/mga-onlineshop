@@ -93,7 +93,7 @@ class CheckoutService
                 'recipient_name' => $address->recipient_name,
                 'recipient_phone' => $address->phone,
                 'shipping_address' => $address->fullAddress(),
-                'destination_id' => $address->destination_id,
+                'destination_id' => $address->district_id,
                 'courier' => $rate->courier,
                 'courier_service' => $rate->service,
                 'shipping_etd' => $rate->etd,

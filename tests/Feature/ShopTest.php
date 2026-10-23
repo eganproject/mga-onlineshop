@@ -72,6 +72,29 @@ class ShopTest extends TestCase
         $this->assertSame([], session('cart'));
     }
 
+    public function test_cart_tells_customer_when_stock_changed(): void
+    {
+        $kabel = Product::factory()->create(['name' => 'Kabel USB-C', 'stock' => 5]);
+        $casing = Product::factory()->create(['name' => 'Casing Bening', 'stock' => 2]);
+
+        $this->post(route('cart.store', $kabel), ['quantity' => 4]);
+        $this->post(route('cart.store', $casing));
+
+        $kabel->forceFill(['stock' => 2])->save();
+        $casing->forceFill(['stock' => 0])->save();
+
+        $this->get(route('cart.index'))
+            ->assertOk()
+            ->assertSee('Keranjangmu kami perbarui')
+            ->assertSee('Jumlah Kabel USB-C disesuaikan menjadi 2 karena stok tersisa 2.')
+            ->assertSee('Casing Bening dihapus dari keranjang')
+            ->assertSee('Sisa 2');
+
+        // Pesan hanya tampil sekali.
+        $this->get(route('cart.index'))->assertOk()->assertDontSee('Keranjangmu kami perbarui');
+        $this->assertSame([$kabel->id => 2], session('cart'));
+    }
+
     public function test_out_of_stock_product_cannot_be_added(): void
     {
         $product = Product::factory()->outOfStock()->create();
@@ -188,10 +211,6 @@ class ShopTest extends TestCase
         ] as $url) {
             $this->get($url)->assertOk();
         }
-
-        $this->getJson(route('account.addresses.destinations', ['q' => 'bandung']))
-            ->assertOk()
-            ->assertJsonPath('data.0.city', 'Kota Bandung');
     }
 
     public function test_first_address_becomes_default(): void
@@ -202,8 +221,9 @@ class ShopTest extends TestCase
             'label' => 'Kantor',
             'recipient_name' => 'Budi',
             'phone' => '081234567890',
-            'province' => 'DKI Jakarta',
-            'city' => 'Jakarta Selatan',
+            'province_id' => '1',
+            'city_id' => '101',
+            'district_id' => '10101',
             'address_line' => 'Jl. Sudirman 1',
         ])->assertRedirect(route('account.addresses.index'));
 

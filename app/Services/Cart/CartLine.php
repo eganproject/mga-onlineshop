@@ -19,6 +19,17 @@ final readonly class CartLine
         return CartService::key($this->product->id, $this->variant?->id);
     }
 
+    /** Nama untuk ditampilkan, contoh: "Casing iPhone 15 (Hitam)". */
+    public function name(): string
+    {
+        return $this->variant ? "{$this->product->name} ({$this->variant->name})" : $this->product->name;
+    }
+
+    public function isLowStock(): bool
+    {
+        return $this->availableStock() <= config('shop.low_stock_threshold');
+    }
+
     public function unitPrice(): int
     {
         return $this->variant?->price ?? $this->product->price;

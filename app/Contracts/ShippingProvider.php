@@ -2,22 +2,28 @@
 
 namespace App\Contracts;
 
-use App\Data\Destination;
+use App\Data\Region;
 use App\Data\ShippingRate;
 
+/**
+ * Penyedia data wilayah dan ongkos kirim. Wilayah bertingkat:
+ * provinsi → kota/kabupaten → kecamatan. Ongkir dihitung per kecamatan.
+ */
 interface ShippingProvider
 {
-    /**
-     * Cari lokasi tujuan berdasarkan kata kunci (nama kecamatan/kota).
-     *
-     * @return list<Destination>
-     */
-    public function searchDestinations(string $keyword): array;
+    /** @return list<Region> */
+    public function provinces(): array;
+
+    /** @return list<Region> */
+    public function cities(string $provinceId): array;
+
+    /** @return list<Region> */
+    public function districts(string $cityId): array;
 
     /**
-     * Hitung ongkir dari gudang ke tujuan untuk berat tertentu (gram).
+     * Hitung ongkir dari gudang ke kecamatan tujuan untuk berat tertentu (gram).
      *
      * @return list<ShippingRate>
      */
-    public function rates(string $destinationId, int $weight): array;
+    public function rates(string $districtId, int $weight): array;
 }

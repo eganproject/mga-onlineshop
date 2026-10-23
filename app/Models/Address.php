@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'label', 'recipient_name', 'phone', 'province', 'city', 'district',
-    'postal_code', 'address_line', 'destination_id', 'is_default',
+    'label', 'recipient_name', 'phone', 'province_id', 'province', 'city_id', 'city',
+    'district_id', 'district', 'postal_code', 'address_line', 'is_default',
 ])]
 class Address extends Model
 {
@@ -23,6 +23,12 @@ class Address extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Ongkir hanya bisa dihitung bila kecamatan sudah dipilih dari data wilayah. */
+    public function canShip(): bool
+    {
+        return filled($this->district_id);
     }
 
     /** Alamat lengkap dalam satu baris, dipakai sebagai salinan di pesanan. */

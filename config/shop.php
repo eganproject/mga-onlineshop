@@ -39,15 +39,19 @@ return [
     | Pengiriman
     |--------------------------------------------------------------------------
     |
-    | origin_city_id adalah ID kota/kecamatan asal pengiriman sesuai data
-    | RajaOngkir. Driver "fake" dipakai untuk development lokal tanpa API key.
+    | origin_district_id: ID kecamatan gudang asal pengiriman sesuai data
+    | RajaOngkir. Cari ID-nya dengan `php artisan ongkir:wilayah`.
+    | Driver "fake" dipakai untuk development lokal tanpa API key.
+    | cache_minutes: lama hasil cek ongkir disimpan (hemat kuota API).
     |
     */
 
     'shipping' => [
         'driver' => env('SHIPPING_DRIVER', 'fake'),
-        'origin_city_id' => env('SHOP_ORIGIN_CITY_ID'),
-        'couriers' => explode(':', env('RAJAONGKIR_COURIERS', 'jne:sicepat:jnt:pos:tiki')),
+        // SHOP_ORIGIN_CITY_ID tetap dibaca untuk kompatibilitas .env lama.
+        'origin_district_id' => env('SHOP_ORIGIN_DISTRICT_ID', env('SHOP_ORIGIN_CITY_ID')),
+        'couriers' => array_values(array_filter(explode(':', env('RAJAONGKIR_COURIERS', 'jne:sicepat:jnt:pos:tiki')))),
+        'cache_minutes' => (int) env('SHIPPING_CACHE_MINUTES', 360),
     ],
 
     /*

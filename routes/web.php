@@ -55,6 +55,7 @@ Route::post('/keluar', [Auth\AuthenticatedSessionController::class, 'destroy'])-
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/checkout', [Shop\CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [Shop\CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/ongkir', [Shop\CheckoutController::class, 'rates'])->name('checkout.rates')->middleware('throttle:60,1');
 
     Route::prefix('akun')->name('account.')->group(function () {
         Route::get('/', Account\DashboardController::class)->name('dashboard');
@@ -64,7 +65,11 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::post('/pesanan/{order}/batal', [Account\OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/pesanan/{order}/simulasi-bayar', [Account\OrderController::class, 'simulatePayment'])->name('orders.simulate-payment');
 
-        Route::get('/alamat/cari-lokasi', [Account\AddressController::class, 'destinations'])->name('addresses.destinations');
+        Route::controller(Account\RegionController::class)->prefix('wilayah')->name('regions.')->middleware('throttle:120,1')->group(function () {
+            Route::get('/provinsi', 'provinces')->name('provinces');
+            Route::get('/provinsi/{province}/kota', 'cities')->name('cities');
+            Route::get('/kota/{city}/kecamatan', 'districts')->name('districts');
+        });
         Route::patch('/alamat/{address}/utama', [Account\AddressController::class, 'makeDefault'])->name('addresses.default');
         Route::resource('alamat', Account\AddressController::class)
             ->except('show')

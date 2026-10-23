@@ -12,6 +12,9 @@
                 <p class="mt-2 text-sm font-semibold text-stone-800">{{ $address->recipient_name }}</p>
                 <p class="text-sm text-stone-600">{{ $address->phone }}</p>
                 <p class="mt-1 flex-1 text-sm text-stone-500">{{ $address->fullAddress() }}</p>
+                @unless ($address->canShip())
+                    <p class="mt-2 flex gap-1.5 text-xs text-amber-700"><x-icon name="warning" class="size-4 shrink-0" /> Lengkapi kecamatan agar ongkir bisa dihitung.</p>
+                @endunless
                 <div class="mt-4 flex flex-wrap items-center gap-1 border-t border-stone-100 pt-3">
                     <a href="{{ route('account.addresses.edit', $address) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> Edit</a>
                     @unless ($address->is_default)

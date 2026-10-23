@@ -38,12 +38,14 @@ class DatabaseSeeder extends Seeder
                 'label' => 'Rumah',
                 'recipient_name' => 'Budi Santoso',
                 'phone' => '081311112222',
+                'province_id' => '2',
                 'province' => 'Jawa Barat',
+                'city_id' => '201',
                 'city' => 'Kota Bandung',
+                'district_id' => '20101',
                 'district' => 'Coblong',
                 'postal_code' => '40132',
                 'address_line' => 'Jl. Dago No. 10, RT 02/RW 05',
-                'destination_id' => '2001',
                 'is_default' => true,
             ]);
         }

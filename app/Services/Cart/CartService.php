@@ -16,6 +16,9 @@ class CartService
 {
     private const KEY = 'cart';
 
+    /** Pesan perubahan isi keranjang (stok berubah/produk nonaktif) yang belum ditampilkan. */
+    private const NOTICES_KEY = 'cart_notices';
+
     private ?Collection $lines = null;
 
     public function __construct(private readonly Session $session) {}
@@ -53,6 +56,7 @@ class CartService
 
         // Buang item yang produk/variannya sudah tidak aktif/terhapus, dan sesuaikan dengan stok.
         $clean = [];
+        $notices = [];
         $lines = collect();
 
         foreach ($raw as $key => $qty) {
@@ -61,6 +65,10 @@ class CartService
             $variant = $variantId ? $variants->get($variantId) : null;
 
             if (! $this->purchasable($product, $variantId, $variant)) {
+                $notices[] = $product
+                    ? ($variant ? "{$product->name} ({$variant->name})" : $product->name).' dihapus dari keranjang karena stok habis atau tidak tersedia.'
+                    : 'Satu produk dihapus dari keranjang karena sudah tidak dijual.';
+
                 continue;
             }
 
@@ -68,10 +76,18 @@ class CartService
             $line = new CartLine($product, min($qty, $variant?->stock ?? $product->stock), $variant);
             $clean[$line->key()] = $line->quantity;
             $lines->push($line);
+
+            if ($line->quantity < $qty) {
+                $notices[] = "Jumlah {$line->name()} disesuaikan menjadi {$line->quantity} karena stok tersisa {$line->availableStock()}.";
+            }
         }
 
         if ($clean != $raw) {
             $this->session->put(self::KEY, $clean);
+        }
+
+        if ($notices !== []) {
+            $this->session->put(self::NOTICES_KEY, [...(array) $this->session->get(self::NOTICES_KEY, []), ...$notices]);
         }
 
         return $this->lines = $lines;
@@ -108,9 +124,21 @@ class CartService
         return $this->lines()->first(fn (CartLine $line) => $line->key() === $key);
     }
 
+    /**
+     * Ambil (lalu hapus) pesan penyesuaian keranjang agar bisa ditampilkan sekali.
+     *
+     * @return list<string>
+     */
+    public function adjustments(): array
+    {
+        $this->lines();
+
+        return array_values(array_unique((array) $this->session->pull(self::NOTICES_KEY, [])));
+    }
+
     public function clear(): void
     {
-        $this->session->forget(self::KEY);
+        $this->session->forget([self::KEY, self::NOTICES_KEY]);
         $this->lines = null;
     }
 

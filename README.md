@@ -51,12 +51,13 @@ app/
     ├── Cart/           CartService (keranjang berbasis session)
     ├── Orders/         CheckoutService (kunci & kurangi stok), OrderService (status)
     ├── Payment/        FakePaymentGateway, MidtransPaymentGateway
-    └── Shipping/       FakeShippingProvider, RajaOngkirShippingProvider
+    └── Shipping/       ShippingService (cache & urutkan ongkir), FakeShippingProvider, RajaOngkirShippingProvider
 ```
 
 - Harga disimpan sebagai rupiah utuh (integer), berat produk dalam gram.
 - Pesanan menyimpan salinan alamat & harga saat checkout, jadi riwayat tidak berubah.
-- Ongkir selalu dihitung ulang di server saat pesanan dibuat.
+- Alamat memakai wilayah bertingkat provinsi → kota → kecamatan; nama wilayah diambil dari penyedia ongkir, bukan dari form.
+- Ongkir dihitung per kecamatan, disimpan di cache (`SHIPPING_CACHE_MINUTES`, default 360) dan selalu dihitung ulang di server saat pesanan dibuat.
 - Warna brand diatur di `resources/css/app.css` (`--color-brand-*`).
 
 ## Integrasi Midtrans & RajaOngkir
@@ -73,8 +74,18 @@ MIDTRANS_IS_PRODUCTION=false
 
 SHIPPING_DRIVER=rajaongkir
 RAJAONGKIR_API_KEY=...
-SHOP_ORIGIN_CITY_ID=...   # ID lokasi gudang di RajaOngkir
+SHOP_ORIGIN_DISTRICT_ID=...   # ID kecamatan gudang di RajaOngkir
 ```
+
+Cari ID kecamatan gudang setelah API key diisi:
+
+```bash
+php artisan ongkir:wilayah                 # daftar provinsi
+php artisan ongkir:wilayah --provinsi=ID   # daftar kota
+php artisan ongkir:wilayah --kota=ID       # daftar kecamatan (salin ID-nya)
+```
+
+Data wilayah RajaOngkir disimpan di cache 30 hari agar hemat kuota.
 
 URL notifikasi Midtrans: `https://domain-anda/webhooks/midtrans` (juga tampil di Admin › Integrasi).
 

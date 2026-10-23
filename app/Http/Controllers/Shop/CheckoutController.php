@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers\Shop;
 
-use App\Contracts\ShippingProvider;
 use App\Data\ShippingRate;
+use App\Exceptions\ShippingUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Services\Cart\CartService;
 use App\Services\Orders\CheckoutService;
+use App\Services\Shipping\ShippingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Throwable;
 
 class CheckoutController extends Controller
 {
     public function __construct(
         private readonly CartService $cart,
-        private readonly ShippingProvider $shipping,
+        private readonly ShippingService $shipping,
     ) {}
 
     public function index(Request $request): View|RedirectResponse
@@ -29,28 +29,40 @@ class CheckoutController extends Controller
         }
 
         $addresses = $request->user()->addresses()->orderByDesc('is_default')->latest()->get();
-        $address = $addresses->firstWhere('id', (int) $request->query('alamat')) ?? $addresses->first();
-
-        [$rates, $shippingError] = $address ? $this->ratesFor($address) : [[], null];
+        $address = $addresses->firstWhere('id', (int) $request->query('alamat', old('address_id'))) ?? $addresses->first();
 
         return view('shop.checkout', [
             'lines' => $this->cart->lines(),
+            'adjustments' => $this->cart->adjustments(),
             'subtotal' => $this->cart->subtotal(),
             'weight' => $this->cart->totalWeight(),
             'addresses' => $addresses,
             'address' => $address,
-            'rates' => $rates,
-            'shippingError' => $shippingError,
+            'quote' => $address ? $this->quote($address) : ['rates' => [], 'error' => null],
         ]);
+    }
+
+    /** Ongkir untuk alamat terpilih (JSON), dipanggil saat pelanggan mengganti alamat. */
+    public function rates(Request $request): JsonResponse
+    {
+        $data = $request->validate(['address_id' => ['required', 'integer']]);
+        $address = $request->user()->addresses()->findOrFail($data['address_id']);
+
+        if ($this->cart->isEmpty()) {
+            return response()->json(['rates' => [], 'error' => 'Keranjang belanja masih kosong.'], 422);
+        }
+
+        return response()->json($this->quote($address));
     }
 
     public function store(Request $request, CheckoutService $checkout): RedirectResponse
     {
         $data = $request->validate([
             'address_id' => ['required', 'integer'],
-            'shipping' => ['required', 'string'],
+            'shipping' => ['required', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
+            'address_id.required' => 'Pilih alamat pengiriman terlebih dahulu.',
             'shipping.required' => 'Pilih layanan pengiriman terlebih dahulu.',
         ]);
 
@@ -58,8 +70,11 @@ class CheckoutController extends Controller
         $address = $request->user()->addresses()->findOrFail($data['address_id']);
 
         // Ongkir dihitung ulang di server, tidak pernah dipercaya dari form.
-        [$rates] = $this->ratesFor($address);
-        $rate = collect($rates)->first(fn (ShippingRate $r) => $r->key() === $data['shipping']);
+        try {
+            $rate = $this->shipping->findRate($address, $this->cart->totalWeight(), $data['shipping']);
+        } catch (ShippingUnavailableException $e) {
+            throw ValidationException::withMessages(['shipping' => $e->getMessage()]);
+        }
 
         if (! $rate) {
             throw ValidationException::withMessages(['shipping' => 'Layanan pengiriman tidak tersedia. Silakan pilih ulang.']);
@@ -71,19 +86,13 @@ class CheckoutController extends Controller
             ->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
     }
 
-    /** @return array{0: list<ShippingRate>, 1: ?string} */
-    private function ratesFor(Address $address): array
+    /** @return array{rates: list<ShippingRate>, error: ?string} */
+    private function quote(Address $address): array
     {
-        if (! $address->destination_id) {
-            return [[], 'Alamat ini belum memiliki lokasi tujuan. Edit alamat dan pilih kecamatan dari daftar.'];
-        }
-
         try {
-            return [$this->shipping->rates($address->destination_id, $this->cart->totalWeight()), null];
-        } catch (Throwable $e) {
-            Log::warning('Gagal mengambil ongkir', ['error' => $e->getMessage()]);
-
-            return [[], 'Ongkos kirim sedang tidak bisa dihitung. Coba beberapa saat lagi.'];
+            return ['rates' => $this->shipping->rates($address, $this->cart->totalWeight()), 'error' => null];
+        } catch (ShippingUnavailableException $e) {
+            return ['rates' => [], 'error' => $e->getMessage()];
         }
     }
 }

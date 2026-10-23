@@ -17,7 +17,9 @@ class CartController extends Controller
     {
         return view('shop.cart', [
             'lines' => $this->cart->lines(),
+            'adjustments' => $this->cart->adjustments(),
             'subtotal' => $this->cart->subtotal(),
+            'weight' => $this->cart->totalWeight(),
         ]);
     }
 
@@ -65,7 +67,7 @@ class CartController extends Controller
         $final = $this->cart->update($line, $data['quantity']);
 
         if ($final < $data['quantity']) {
-            return back()->with('error', "Stok {$cartLine->product->name} hanya tersisa {$cartLine->availableStock()}.");
+            return back()->with('error', "Stok {$cartLine->name()} hanya tersisa {$cartLine->availableStock()}.");
         }
 
         return back();
@@ -76,7 +78,7 @@ class CartController extends Controller
         $cartLine = $this->cart->find($line);
         $this->cart->remove($line);
 
-        return back()->with('success', ($cartLine?->product->name ?? 'Produk').' dihapus dari keranjang.');
+        return back()->with('success', ($cartLine?->name() ?? 'Produk').' dihapus dari keranjang.');
     }
 
     private function variantLabel(Product $product): string

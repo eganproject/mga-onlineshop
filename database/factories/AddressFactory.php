@@ -16,13 +16,21 @@ class AddressFactory extends Factory
             'label' => 'Rumah',
             'recipient_name' => fake()->name(),
             'phone' => fake()->numerify('08##########'),
+            'province_id' => '2',
             'province' => 'Jawa Barat',
+            'city_id' => '201',
             'city' => 'Kota Bandung',
+            'district_id' => '20101',
             'district' => 'Coblong',
             'postal_code' => '40132',
             'address_line' => fake()->streetAddress(),
-            'destination_id' => '2001',
             'is_default' => true,
         ];
+    }
+
+    /** Alamat lama yang belum memilih wilayah dari daftar (ongkir belum bisa dihitung). */
+    public function withoutRegion(): static
+    {
+        return $this->state(['province_id' => null, 'city_id' => null, 'district_id' => null]);
     }
 }

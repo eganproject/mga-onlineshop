@@ -7,6 +7,8 @@
             @endif
         </div>
 
+        <x-cart-notices :notices="$adjustments" class="mt-6" />
+
         @if ($lines->isEmpty())
             <x-empty-state icon="bag" title="Keranjangmu masih kosong" description="Yuk, temukan aksesoris favoritmu dan tambahkan ke keranjang." class="py-20">
                 <a href="{{ route('products.index') }}" class="btn btn-ink btn-pill">Mulai belanja</a>
@@ -38,6 +40,7 @@
                                     <p class="shrink-0 font-semibold">@rupiah($line->subtotal())</p>
                                 </div>
                                 <div class="mt-auto flex items-center justify-between pt-4">
+                                    <div class="flex items-center gap-3">
                                     <form method="POST" action="{{ route('cart.update', $line->key()) }}" class="inline-flex items-center rounded-full border border-stone-300">
                                         @csrf
                                         @method('PATCH')
@@ -45,6 +48,10 @@
                                         <span class="w-8 text-center text-sm font-semibold">{{ $line->quantity }}</span>
                                         <button name="quantity" value="{{ $line->quantity + 1 }}" class="grid size-9 place-items-center rounded-full hover:bg-sand-100 disabled:opacity-30" aria-label="Tambah" @disabled($line->quantity >= $line->availableStock())><x-icon name="plus" class="size-3.5" /></button>
                                     </form>
+                                    @if ($line->isLowStock())
+                                        <span class="text-xs font-medium text-amber-700">Sisa {{ $line->availableStock() }}</span>
+                                    @endif
+                                    </div>
                                     <form method="POST" action="{{ route('cart.destroy', $line->key()) }}">
                                         @csrf
                                         @method('DELETE')
@@ -61,6 +68,7 @@
                         <h2 class="font-display text-lg font-extrabold tracking-tight uppercase">Ringkasan</h2>
                         <dl class="mt-5 space-y-3 text-sm">
                             <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd class="font-semibold">@rupiah($subtotal)</dd></div>
+                            <div class="flex justify-between"><dt class="text-stone-500">Berat total</dt><dd class="text-stone-700">{{ number_format(max($weight, 1) / 1000, 2, ',', '.') }} kg</dd></div>
                             <div class="flex justify-between"><dt class="text-stone-500">Ongkir</dt><dd class="text-stone-500">Dihitung saat checkout</dd></div>
                         </dl>
                         <div class="mt-5 flex justify-between border-t border-stone-200 pt-5 text-base font-semibold">
