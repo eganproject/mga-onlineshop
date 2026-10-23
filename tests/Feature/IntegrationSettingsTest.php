@@ -179,6 +179,19 @@ class IntegrationSettingsTest extends TestCase
         $this->assertSame(3, ActivityLog::where('action', 'integrations.test')->count());
     }
 
+    public function test_firebase_test_explains_disabled_authentication(): void
+    {
+        config(['services.firebase.api_key' => 'AIzaTest', 'services.firebase.project_id' => 'mga-shop']);
+
+        Http::fake([
+            'identitytoolkit.googleapis.com/*' => Http::response(['error' => ['code' => 400, 'message' => 'CONFIGURATION_NOT_FOUND']], 400),
+        ]);
+
+        $this->actingAs($this->superadmin)->post(route('admin.integrations.test', 'firebase'))
+            ->assertSessionHas('integration_test.firebase.ok', false);
+        $this->assertStringContainsString('Authentication belum diaktifkan', session('integration_test.firebase.message'));
+    }
+
     public function test_undecryptable_secret_falls_back_to_env(): void
     {
         config(['services.rajaongkir.api_key' => 'env-key']);

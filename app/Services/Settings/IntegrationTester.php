@@ -131,7 +131,17 @@ class IntegrationTester
             ->get('https://identitytoolkit.googleapis.com/v1/projects', ['key' => $apiKey]);
 
         if (! $response->successful()) {
-            return $this->result(false, 'API key ditolak Firebase: '.$this->apiMessage($response, 'error.message'));
+            $error = (string) $response->json('error.message');
+
+            // Kode dari Firebase yang sering muncul saat setup, diterjemahkan ke langkah perbaikannya.
+            $hint = match (true) {
+                str_starts_with($error, 'CONFIGURATION_NOT_FOUND') => 'Authentication belum diaktifkan di project ini. Buka Firebase › Build › Authentication › Get started, lalu aktifkan provider Google. Bila sudah, pastikan API key berasal dari project yang sama.',
+                str_contains($error, 'API key not valid') => 'API key tidak dikenal. Salin ulang Web API Key dari Firebase › Project settings › General.',
+                str_contains($error, 'referer') || str_contains($error, 'Referer') => 'API key dibatasi HTTP referrer. Tambahkan '.rtrim($appUrl, '/').'/* di Google Cloud Console › Credentials.',
+                default => null,
+            };
+
+            return $this->result(false, 'API key ditolak Firebase: '.$this->apiMessage($response, 'error.message').($hint ? ". {$hint}" : ''));
         }
 
         $notes = [];
