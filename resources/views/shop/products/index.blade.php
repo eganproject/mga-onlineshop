@@ -71,7 +71,7 @@
         {{-- Toolbar --}}
         <div class="sticky top-16 z-30 border-b border-stone-200 bg-white/95 backdrop-blur lg:top-[72px]">
             <div class="shop-container flex h-14 items-center justify-between gap-3">
-                <button type="button" @click="filters = true" class="flex items-center gap-2 text-sm font-semibold lg:hidden">
+                <button type="button" @click="filters = true" class="-ml-2 flex min-h-11 items-center gap-2 px-2 text-sm font-semibold lg:hidden">
                     <x-icon name="filter" class="size-4" /> Filter
                     @if ($filterCount)
                         <span class="grid size-5 place-items-center rounded-full bg-ink text-[10px] text-white">{{ $filterCount }}</span>
@@ -83,7 +83,7 @@
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endforeach
                     <label for="sort" class="hidden text-sm text-stone-500 sm:block">Urutkan</label>
-                    <select id="sort" name="urut" class="rounded-full border-stone-300 py-2 pl-4 pr-9 text-sm font-semibold focus:border-ink focus:ring-ink/10">
+                    <select id="sort" name="urut" class="rounded-full border-stone-300 py-2 pl-4 pr-9 text-base font-semibold lg:text-sm focus:border-ink focus:ring-ink/10">
                         @foreach ($sorts as $key => $label)
                             <option value="{{ $key }}" @selected($sort === $key)>{{ $label }}</option>
                         @endforeach
@@ -112,12 +112,12 @@
                     <div class="flex-1 divide-y divide-stone-200 px-5 lg:px-0">
                         <div class="py-5 lg:pt-0" role="group" aria-labelledby="f-stock">
                             <h3 id="f-stock" class="eyebrow text-stone-500">Ketersediaan</h3>
-                            <div class="mt-4 space-y-3">
-                                <label class="flex cursor-pointer items-center gap-3 text-sm">
+                            <div class="mt-2 lg:mt-4 lg:space-y-3">
+                                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm lg:min-h-0">
                                     <input type="checkbox" name="tersedia" value="1" class="size-4 rounded-none border-stone-400 text-ink focus:ring-ink/20" @checked(request()->boolean('tersedia'))>
                                     Hanya yang tersedia
                                 </label>
-                                <label class="flex cursor-pointer items-center gap-3 text-sm">
+                                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm lg:min-h-0">
                                     <input type="checkbox" name="promo" value="1" class="size-4 rounded-none border-stone-400 text-ink focus:ring-ink/20" @checked(request()->boolean('promo'))>
                                     Sedang diskon
                                 </label>
@@ -136,10 +136,10 @@
                             <div class="mt-4 grid grid-cols-2 gap-2">
                                 <label class="sr-only" for="harga_min">Harga minimum</label>
                                 <input id="harga_min" type="text" name="harga_min" x-model="min" x-money placeholder="Min Rp"
-                                       class="w-full border-stone-300 px-3 py-2 text-sm focus:border-ink focus:ring-ink/10">
+                                       class="w-full border-stone-300 px-3 py-2.5 text-base lg:py-2 lg:text-sm focus:border-ink focus:ring-ink/10">
                                 <label class="sr-only" for="harga_max">Harga maksimum</label>
                                 <input id="harga_max" type="text" name="harga_max" x-model="max" x-money placeholder="Maks Rp"
-                                       class="w-full border-stone-300 px-3 py-2 text-sm focus:border-ink focus:ring-ink/10">
+                                       class="w-full border-stone-300 px-3 py-2.5 text-base lg:py-2 lg:text-sm focus:border-ink focus:ring-ink/10">
                             </div>
                         </div>
                     </div>

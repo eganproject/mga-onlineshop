@@ -2,13 +2,13 @@
     @if ($toReview->isNotEmpty())
         <section class="mb-10">
             <h3 class="eyebrow text-stone-500">Menunggu ulasanmu</h3>
-            <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+            <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 @foreach ($toReview as $product)
-                    <li class="card flex items-center gap-4 p-3">
+                    <li class="card flex min-w-0 items-center gap-4 p-3">
                         <x-product-image :product="$product" class="size-16 shrink-0" />
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-semibold">{{ $product->name }}</p>
-                            <a href="{{ route('products.show', $product) }}#tulis-ulasan" class="link-underline mt-1 inline-block text-xs font-semibold">Tulis ulasan</a>
+                            <a href="{{ route('products.show', $product) }}#tulis-ulasan" class="link-underline inline-block py-2 text-xs font-semibold lg:mt-1 lg:py-0">Tulis ulasan</a>
                         </div>
                     </li>
                 @endforeach
@@ -19,7 +19,7 @@
     <section>
         <h3 class="eyebrow text-stone-500">Ulasan yang sudah kamu tulis</h3>
         @forelse ($reviews as $review)
-            <article class="card mt-4 p-5">
+            <article class="card mt-4 p-4 sm:p-5">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="min-w-0">
                         @if ($review->product)

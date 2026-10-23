@@ -27,7 +27,7 @@
                     <span class="sr-only">Cari artikel</span>
                     <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                     <input type="search" name="q" value="{{ $search }}" placeholder="Cari artikel..."
-                           class="h-11 w-full rounded-full border-0 bg-stone-100 pl-10 pr-4 text-sm placeholder:text-stone-400 focus:bg-white focus:ring-2 focus:ring-brand-500/40">
+                           class="h-11 w-full rounded-full border-0 bg-stone-100 pl-10 pr-4 text-base placeholder:text-stone-400 lg:text-sm focus:bg-white focus:ring-2 focus:ring-brand-500/40">
                 </label>
             </form>
         </div>

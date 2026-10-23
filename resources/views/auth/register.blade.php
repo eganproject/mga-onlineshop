@@ -28,6 +28,6 @@
         <button class="btn btn-ink rounded-full w-full py-3">Daftar sekarang</button>
     </form>
     <p class="mt-8 text-center text-sm text-stone-500">
-        Sudah punya akun? <a href="{{ route('login') }}" class="font-semibold text-ink underline underline-offset-4">Masuk</a>
+        Sudah punya akun? <a href="{{ route('login') }}" class="inline-block py-2.5 font-semibold text-ink underline underline-offset-4 lg:py-0">Masuk</a>
     </p>
 </x-layouts.auth>

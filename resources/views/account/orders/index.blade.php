@@ -8,9 +8,9 @@
     </form>
     <div class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div class="inline-flex gap-1 rounded-2xl bg-white p-1 ring-1 ring-stone-200/70">
-            <a href="{{ route('account.orders.index', array_filter(['q' => request('q')])) }}" @class(['whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold', 'bg-stone-900 text-white' => ! $status, 'text-stone-600 hover:bg-stone-50' => $status])>Semua</a>
+            <a href="{{ route('account.orders.index', array_filter(['q' => request('q')])) }}" @class(['whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-semibold lg:py-2', 'bg-stone-900 text-white' => ! $status, 'text-stone-600 hover:bg-stone-50' => $status])>Semua</a>
             @foreach (\App\Enums\OrderStatus::cases() as $case)
-                <a href="{{ route('account.orders.index', array_filter(['status' => $case->value, 'q' => request('q')])) }}" @class(['whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold', 'bg-stone-900 text-white' => $status === $case, 'text-stone-600 hover:bg-stone-50' => $status !== $case])>{{ $case->label() }}</a>
+                <a href="{{ route('account.orders.index', array_filter(['status' => $case->value, 'q' => request('q')])) }}" @class(['whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-semibold lg:py-2', 'bg-stone-900 text-white' => $status === $case, 'text-stone-600 hover:bg-stone-50' => $status !== $case])>{{ $case->label() }}</a>
             @endforeach
         </div>
     </div>

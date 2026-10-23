@@ -9,7 +9,7 @@
     $stepTimes = $order->statusHistories->reject->isNoteOnly()->keyBy(fn ($h) => $h->status->value);
 @endphp
 <x-layouts.account :title="'Pesanan '.$order->code">
-    <a href="{{ route('account.orders.index') }}" class="mb-3 inline-flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-800"><x-icon name="arrow-left" class="size-4" /> Semua pesanan</a>
+    <a href="{{ route('account.orders.index') }}" class="mb-1 inline-flex min-h-11 items-center gap-1 text-sm lg:mb-3 lg:min-h-0 font-medium text-stone-500 hover:text-stone-800"><x-icon name="arrow-left" class="size-4" /> Semua pesanan</a>
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-stone-900">{{ $order->code }}</h1>

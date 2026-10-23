@@ -21,7 +21,7 @@
         <div class="card overflow-hidden xl:col-span-2">
             <div class="flex items-center justify-between p-5">
                 <h2 class="font-bold text-stone-900">Pesanan terakhir</h2>
-                <a href="{{ route('account.orders.index') }}" class="text-xs font-semibold text-ink">Lihat semua</a>
+                <a href="{{ route('account.orders.index') }}" class="-my-2 py-3 text-xs font-semibold text-ink lg:my-0 lg:py-0">Lihat semua</a>
             </div>
             @forelse ($recentOrders as $order)
                 <a href="{{ route('account.orders.show', $order) }}" class="flex items-center justify-between gap-3 border-t border-stone-100 px-5 py-4 hover:bg-stone-50/60">
@@ -43,7 +43,7 @@
         <div class="card p-5">
             <div class="flex items-center justify-between">
                 <h2 class="font-bold text-stone-900">Alamat utama</h2>
-                <a href="{{ route('account.addresses.index') }}" class="text-xs font-semibold text-ink">Kelola</a>
+                <a href="{{ route('account.addresses.index') }}" class="-my-2 py-3 text-xs font-semibold text-ink lg:my-0 lg:py-0">Kelola</a>
             </div>
             @if ($defaultAddress)
                 <div class="mt-4 text-sm">

@@ -84,6 +84,12 @@
     .btn-sm {
         @apply rounded-lg px-3 py-1.5 text-xs;
     }
+    /* Layar sentuh kecil: tombol kecil tetap mudah ditekan (>= 40px). */
+    @media (pointer: coarse) and (width < 64rem) {
+        .btn-sm {
+            min-height: 2.5rem;
+        }
+    }
     .btn-primary {
         @apply bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700 focus-visible:outline-brand-600;
     }
@@ -142,6 +148,38 @@
     .shop-container {
         @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
     }
+    /* HP landscape (viewport-fit=cover): jangan sampai isi tertutup notch. */
+    @supports (padding: max(0px)) {
+        @media (orientation: landscape) and (max-width: 1023.98px) {
+            .shop-container {
+                padding-left: max(1.5rem, env(safe-area-inset-left));
+                padding-right: max(1.5rem, env(safe-area-inset-right));
+            }
+        }
+    }
+
+    /* Navigasi bawah (mobile). Tinggi 4rem + safe area iOS. */
+    .bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+    .bottom-nav-item {
+        @apply relative flex h-full w-full flex-col items-center justify-center gap-1 text-[11px] leading-none font-medium text-stone-500 transition select-none active:scale-95;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .bottom-nav-item.is-active {
+        @apply font-semibold text-brand-700;
+    }
+    .bottom-nav-item.is-active::before {
+        @apply absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-b-full bg-brand-600 content-[''];
+    }
+    /* Ruang kosong di bawah halaman supaya tidak tertutup navigasi bawah / bar beli. */
+    @media (width < 64rem) {
+        .bottom-nav-spacer {
+            padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+        }
+    }
     .display {
         @apply font-display font-extrabold tracking-tight uppercase;
     }
@@ -164,7 +202,7 @@
         @apply underline decoration-1 underline-offset-4 transition hover:decoration-2;
     }
     .chip {
-        @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-ink;
+        @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-ink max-lg:min-h-11;
     }
     .chip-active {
         @apply border-ink bg-ink text-white hover:border-ink;
@@ -184,6 +222,15 @@
     }
     .table-base td {
         @apply px-4 py-3.5 text-stone-700;
+    }
+}
+
+/* iOS Safari memperbesar halaman saat fokus ke input < 16px: di layar sentuh kecil pakai 16px. */
+@media (pointer: coarse) and (width < 64rem) {
+    .input,
+    .ts-wrapper .ts-control,
+    .ts-wrapper .ts-control input {
+        font-size: 1rem;
     }
 }
 

@@ -6,6 +6,7 @@
     'canonical' => null,
     'type' => 'website',
     'noindex' => false,
+    'viewportFit' => false,
 ])
 @php
     $pageTitle = ($title ? $title.' · ' : '').config('shop.name').' - '.config('shop.full_name');
@@ -18,7 +19,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1{{ $viewportFit ? ', viewport-fit=cover' : '' }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#21939f">
     <title>{{ $pageTitle }}</title>

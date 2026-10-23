@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false, 'bottomNav' => true])
 @php
     $user = auth()->user();
     $announcements = \App\Support\Storefront::announcements();
@@ -10,7 +10,7 @@
     $articleNav = ['label' => 'Artikel', 'url' => route('articles.index'), 'active' => request()->routeIs('articles.*')];
     $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
-<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" body-class="bg-white text-ink">
+<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" :viewport-fit="true" body-class="bg-white text-ink">
     @isset($head)
         <x-slot:head>{{ $head }}</x-slot:head>
     @endisset
@@ -45,7 +45,7 @@
                                    stop() { clearInterval(this.t) } }"
                          x-init="play()" @mouseenter="stop()" @mouseleave="play()" aria-live="polite">
                         @if (count($announcements) > 1)
-                            <button type="button" @click="go(-1)" class="absolute left-0 grid size-7 place-items-center text-white/60 hover:text-white lg:static lg:mr-3" aria-label="Pengumuman sebelumnya">
+                            <button type="button" @click="go(-1)" class="absolute left-0 grid size-9 place-items-center text-white/60 hover:text-white lg:static lg:mr-3 lg:size-7" aria-label="Pengumuman sebelumnya">
                                 <x-icon name="chevron-left" class="size-3.5" />
                             </button>
                         @endif
@@ -54,13 +54,13 @@
                                 <p x-show="i === {{ $loop->index }}" @if (! $loop->first) x-cloak @endif
                                    x-transition:enter="transition duration-500 ease-out" x-transition:enter-start="translate-y-full opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
                                    x-transition:leave="transition duration-300 ease-in" x-transition:leave-start="opacity-100" x-transition:leave-end="-translate-y-full opacity-0"
-                                   class="absolute inset-0 flex items-center justify-center truncate px-7 text-center font-medium tracking-wide lg:px-0">
+                                   class="absolute inset-0 flex items-center justify-center truncate px-9 text-center font-medium tracking-wide lg:px-0">
                                     <span class="truncate">{{ $text }}</span>
                                 </p>
                             @endforeach
                         </div>
                         @if (count($announcements) > 1)
-                            <button type="button" @click="go(1)" class="absolute right-0 grid size-7 place-items-center text-white/60 hover:text-white lg:static lg:ml-3" aria-label="Pengumuman berikutnya">
+                            <button type="button" @click="go(1)" class="absolute right-0 grid size-9 place-items-center text-white/60 hover:text-white lg:static lg:ml-3 lg:size-7" aria-label="Pengumuman berikutnya">
                                 <x-icon name="chevron-right" class="size-3.5" />
                             </button>
                         @endif
@@ -84,15 +84,17 @@
         {{-- Header --}}
         <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
             <div class="shop-container flex h-16 items-center gap-2 lg:h-[76px] lg:gap-8">
-                {{-- Mobile: menu --}}
-                <button type="button" @click="menu = true" class="-ml-2 grid size-10 shrink-0 place-items-center rounded-full hover:bg-sand-100 lg:hidden" aria-label="Buka menu">
-                    <x-icon name="menu" />
-                </button>
-
                 {{-- Logo --}}
-                <a href="{{ route('home') }}" class="shrink-0" aria-label="{{ config('shop.full_name') }}">
+                <a href="{{ route('home') }}" class="shrink-0 py-1 lg:py-0" aria-label="{{ config('shop.full_name') }}">
                     <x-logo class="h-9 lg:h-11" />
                 </a>
+
+                {{-- Mobile: kolom cari (menu utama ada di navigasi bawah) --}}
+                <button type="button" @click="search = true"
+                        class="ml-2 flex h-11 min-w-0 flex-1 items-center gap-2.5 rounded-full bg-stone-100 px-4 text-left text-sm text-stone-400 transition active:bg-stone-200 lg:hidden">
+                    <x-icon name="search" class="size-[18px] shrink-0 text-stone-500" />
+                    <span class="truncate">{{ request('q') ?: 'Cari casing, charger...' }}</span>
+                </button>
 
                 {{-- Navigasi utama (desktop, di tengah) --}}
                 <nav class="hidden flex-1 items-center justify-center gap-8 lg:flex" aria-label="Navigasi utama">
@@ -135,7 +137,7 @@
                 </nav>
 
                 {{-- Kanan --}}
-                <div class="ml-auto flex items-center gap-0.5 lg:ml-0 lg:gap-1">
+                <div @class(['flex items-center gap-0.5 lg:ml-0 lg:gap-1', 'ml-auto' => ! $bottomNav, 'max-lg:hidden' => $bottomNav])>
                     <form action="{{ route('products.index') }}" method="GET" role="search" class="mr-2 hidden xl:block">
                         <label class="relative block">
                             <span class="sr-only">Cari produk</span>
@@ -144,7 +146,7 @@
                                    class="h-10 w-56 rounded-full border-0 bg-stone-100 pl-10 pr-4 text-sm placeholder:text-stone-400 focus:bg-white focus:ring-2 focus:ring-brand-500/40">
                         </label>
                     </form>
-                    <button type="button" @click="search = true" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 xl:hidden" aria-label="Cari">
+                    <button type="button" @click="search = true" class="hidden size-10 place-items-center rounded-full hover:bg-sand-100 lg:grid xl:hidden" aria-label="Cari">
                         <x-icon name="search" />
                     </button>
 
@@ -181,12 +183,8 @@
                         </a>
                     @endauth
 
-                    <a href="{{ $accountUrl }}" class="hidden size-10 place-items-center rounded-full hover:bg-sand-100 sm:grid lg:hidden" aria-label="Akun">
-                        <x-icon name="user" />
-                    </a>
-
                     @unless ($user?->isAdmin())
-                        <a href="{{ $user ? route('account.wishlist') : route('login') }}" class="relative grid size-10 place-items-center rounded-full hover:bg-sand-100"
+                        <a href="{{ $user ? route('account.wishlist') : route('login') }}" class="relative grid size-11 lg:size-10 place-items-center rounded-full hover:bg-sand-100"
                            x-data="{ count: {{ $wishlistCount }} }" @wishlist-updated.window="count = $event.detail.count" aria-label="Wishlist">
                             <x-icon name="heart" />
                             <span x-show="count > 0" x-text="count > 99 ? '99+' : count" @if (! $wishlistCount) x-cloak @endif
@@ -194,7 +192,7 @@
                         </a>
                     @endunless
 
-                    <a href="{{ route('cart.index') }}" class="relative -mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
+                    <a href="{{ route('cart.index') }}" class="relative -mr-1 grid size-11 lg:size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
                         <x-icon name="bag" />
                         @if ($cartCount > 0)
                             <span class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-accent-500 px-1 text-[10px] leading-[18px] font-bold text-white">
@@ -239,62 +237,77 @@
             </div>
         </div>
 
-        {{-- Menu mobile --}}
-        <div x-show="menu" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+        {{-- Panel "Jelajahi" (tab Kategori di navigasi bawah, mobile) --}}
+        <div x-show="menu" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-labelledby="explore-title" id="explore-sheet">
             <div x-show="menu" x-transition.opacity @click="menu = false" class="absolute inset-0 bg-ink/40"></div>
             <div x-show="menu"
-                 x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
-                 x-transition:leave="transition duration-200 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
-                 class="relative flex h-full w-[86%] max-w-sm flex-col overflow-y-auto bg-white">
-                <div class="flex h-16 items-center justify-between border-b border-stone-200 px-4">
-                    <x-wordmark />
-                    <button type="button" @click="menu = false" class="-mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100" aria-label="Tutup menu">
+                 x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+                 x-transition:leave="transition duration-200 ease-in" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+                 class="absolute inset-x-0 bottom-0 flex max-h-[88dvh] flex-col rounded-t-3xl bg-white shadow-2xl">
+                <div class="flex shrink-0 items-center justify-between px-5 pt-3">
+                    <span class="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-stone-300" aria-hidden="true"></span>
+                    <h2 id="explore-title" class="mt-3 font-display text-xl font-extrabold tracking-tight uppercase">Jelajahi</h2>
+                    <button type="button" @click="menu = false" class="-mr-2 mt-3 grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Tutup">
                         <x-icon name="x" />
                     </button>
                 </div>
-                <nav class="flex-1 px-4 py-4">
-                    <ul class="divide-y divide-stone-100">
-                        @foreach ([...$nav, $promoNav, $articleNav] as $item)
+                <div class="overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+                    <ul class="mt-3 grid grid-cols-4 gap-2">
+                        @foreach ([
+                            ['Semua', 'cube', $nav[0], 'bg-brand-50 text-brand-700'],
+                            ['Terbaru', 'sparkles', $nav[1], 'bg-sand-100 text-ink'],
+                            ['Promo', 'tag', $promoNav, 'bg-accent-50 text-accent-600'],
+                            ['Artikel', 'newspaper', $articleNav, 'bg-stone-100 text-stone-700'],
+                        ] as [$label, $icon, $item, $tone])
                             <li>
-                                <a href="{{ $item['url'] }}" class="flex items-center justify-between py-4 font-display text-xl font-extrabold tracking-tight uppercase">
-                                    {{ $item['label'] }} <x-icon name="chevron-right" class="size-5 text-stone-400" />
+                                <a href="{{ $item['url'] }}" class="flex flex-col items-center gap-2 rounded-2xl py-2 text-center text-xs font-semibold active:bg-sand-50">
+                                    <span class="grid size-12 place-items-center rounded-2xl {{ $tone }} {{ $item['active'] ? 'ring-2 ring-current' : '' }}"><x-icon :name="$icon" class="size-6" /></span>
+                                    {{ $label }}
                                 </a>
                             </li>
                         @endforeach
                     </ul>
+
                     @if ($navCategories->isNotEmpty())
                         <p class="eyebrow mt-6 text-stone-400">Kategori</p>
-                        <ul class="mt-2">
+                        <ul class="mt-1 divide-y divide-stone-100">
                             @foreach ($navCategories as $category)
-                                <li><a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="block py-2.5 text-[15px] font-medium">{{ $category->name }}</a></li>
+                                @php($current = request('kategori') === $category->slug)
+                                <li>
+                                    <a href="{{ route('products.index', ['kategori' => $category->slug]) }}" @if ($current) aria-current="page" @endif
+                                       @class(['flex min-h-12 items-center justify-between gap-3 py-3 text-[15px] font-medium', 'text-brand-700 font-semibold' => $current])>
+                                        {{ $category->name }} <x-icon name="chevron-right" class="size-4 shrink-0 text-stone-400" />
+                                    </a>
+                                </li>
                             @endforeach
                         </ul>
                     @endif
-                </nav>
-                <div class="border-t border-stone-200 bg-sand-50 p-4">
-                    @auth
-                        <p class="text-sm font-semibold">{{ $user->name }}</p>
-                        <p class="text-xs text-stone-500">{{ $user->email }}</p>
-                        <div class="mt-4 grid grid-cols-2 gap-2">
-                            @if ($user->isAdmin())
-                                <a href="{{ route('admin.dashboard') }}" class="btn btn-ink btn-pill col-span-2 py-2.5">Admin Panel</a>
-                            @else
-                                <a href="{{ route('account.dashboard') }}" class="btn btn-ink btn-pill py-2.5">Akun saya</a>
-                                <a href="{{ route('account.orders.index') }}" class="btn btn-outline btn-pill py-2.5">Pesanan</a>
-                                <a href="{{ route('account.wishlist') }}" class="btn btn-outline btn-pill col-span-2 py-2.5"><x-icon name="heart" class="size-4" /> Wishlist ({{ $wishlistCount }})</a>
-                            @endif
-                        </div>
-                        <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                            @csrf
-                            <button class="text-sm font-semibold text-rose-600">Keluar</button>
-                        </form>
-                    @else
-                        <p class="text-sm text-stone-600">Masuk untuk checkout dan melacak pesananmu.</p>
-                        <div class="mt-4 grid grid-cols-2 gap-2">
-                            <a href="{{ route('login') }}" class="btn btn-ink btn-pill py-2.5">Masuk</a>
-                            <a href="{{ route('register') }}" class="btn btn-outline btn-pill py-2.5">Daftar</a>
-                        </div>
-                    @endauth
+
+                    <div class="mt-5 rounded-2xl bg-sand-50 p-4">
+                        @auth
+                            <p class="truncate text-sm font-semibold">{{ $user->name }}</p>
+                            <p class="truncate text-xs text-stone-500">{{ $user->email }}</p>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                @if ($user->isAdmin())
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-ink btn-pill col-span-2 py-3">Admin Panel</a>
+                                @else
+                                    <a href="{{ route('account.orders.index') }}" class="btn btn-ink btn-pill py-3"><x-icon name="receipt" class="size-4" /> Pesanan</a>
+                                    <a href="{{ route('account.addresses.index') }}" class="btn btn-outline btn-pill py-3"><x-icon name="map-pin" class="size-4" /> Alamat</a>
+                                @endif
+                            </div>
+                        @else
+                            <p class="text-sm text-stone-600">Masuk untuk checkout dan melacak pesananmu.</p>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <a href="{{ route('login') }}" class="btn btn-ink btn-pill py-3">Masuk</a>
+                                <a href="{{ route('register') }}" class="btn btn-outline btn-pill py-3">Daftar</a>
+                            </div>
+                        @endauth
+                        @if (config('shop.whatsapp'))
+                            <a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="mt-3 flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-brand-700">
+                                <x-icon name="chat" class="size-4" /> Butuh bantuan? Chat WhatsApp
+                            </a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,7 +317,7 @@
         </main>
 
         {{-- Footer --}}
-        <footer class="mt-20 bg-ink text-white">
+        <footer class="bottom-nav-spacer mt-20 bg-ink text-white">
             <div class="shop-container py-14 lg:py-20">
                 <div class="grid gap-12 lg:grid-cols-12">
                     <div class="lg:col-span-5">
@@ -322,31 +335,31 @@
                     <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
                         <div>
                             <h3 class="eyebrow text-white/40">Belanja</h3>
-                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
-                                <li><a href="{{ route('products.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Semua produk</a></li>
+                            <ul class="mt-3 text-sm text-white/80 lg:mt-4 lg:space-y-2.5">
+                                <li><a href="{{ route('products.index') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Semua produk</a></li>
                                 @foreach ($navCategories->take(5) as $category)
-                                    <li><a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="hover:text-white hover:underline hover:underline-offset-4">{{ $category->name }}</a></li>
+                                    <li><a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">{{ $category->name }}</a></li>
                                 @endforeach
                             </ul>
                         </div>
                         <div>
                             <h3 class="eyebrow text-white/40">Bantuan</h3>
-                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
-                                <li><a href="{{ auth()->check() ? route('account.orders.index') : route('login') }}" class="hover:text-white hover:underline hover:underline-offset-4">Lacak pesanan</a></li>
-                                <li><a href="{{ $accountUrl }}" class="hover:text-white hover:underline hover:underline-offset-4">Akun saya</a></li>
-                                <li><a href="{{ route('cart.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Keranjang</a></li>
-                                <li><a href="{{ route('articles.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Artikel &amp; tips</a></li>
+                            <ul class="mt-3 text-sm text-white/80 lg:mt-4 lg:space-y-2.5">
+                                <li><a href="{{ auth()->check() ? route('account.orders.index') : route('login') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Lacak pesanan</a></li>
+                                <li><a href="{{ $accountUrl }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Akun saya</a></li>
+                                <li><a href="{{ route('cart.index') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Keranjang</a></li>
+                                <li><a href="{{ route('articles.index') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Artikel &amp; tips</a></li>
                                 @if (config('shop.whatsapp'))
-                                    <li><a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="hover:text-white hover:underline hover:underline-offset-4">WhatsApp</a></li>
+                                    <li><a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">WhatsApp</a></li>
                                 @endif
                             </ul>
                         </div>
                         <div class="col-span-2 sm:col-span-1">
                             <h3 class="eyebrow text-white/40">Kenapa MGA</h3>
-                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
-                                <li class="flex items-center gap-2"><x-icon name="shield" class="size-4 text-white/50" /> Original & bergaransi</li>
-                                <li class="flex items-center gap-2"><x-icon name="truck" class="size-4 text-white/50" /> Kirim se-Indonesia</li>
-                                <li class="flex items-center gap-2"><x-icon name="lock" class="size-4 text-white/50" /> Pembayaran aman</li>
+                            <ul class="mt-3 text-sm text-white/80 lg:mt-4 lg:space-y-2.5">
+                                <li class="flex min-h-9 items-center gap-2 lg:min-h-0"><x-icon name="shield" class="size-4 text-white/50" /> Original & bergaransi</li>
+                                <li class="flex min-h-9 items-center gap-2 lg:min-h-0"><x-icon name="truck" class="size-4 text-white/50" /> Kirim se-Indonesia</li>
+                                <li class="flex min-h-9 items-center gap-2 lg:min-h-0"><x-icon name="lock" class="size-4 text-white/50" /> Pembayaran aman</li>
                             </ul>
                             @if (config('shop.instagram'))
                                 <a href="https://instagram.com/{{ ltrim(config('shop.instagram'), '@') }}" target="_blank" rel="noopener" class="mt-5 inline-block text-sm text-white/80 hover:text-white hover:underline hover:underline-offset-4">Instagram &#64;{{ ltrim(config('shop.instagram'), '@') }}</a>
@@ -367,5 +380,9 @@
                 </div>
             </div>
         </footer>
+
+        @if ($bottomNav)
+            <x-bottom-nav :cart-count="$cartCount" :wishlist-count="$wishlistCount" />
+        @endif
     </div>
 </x-layouts.base>

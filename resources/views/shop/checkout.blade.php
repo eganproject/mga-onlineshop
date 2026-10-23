@@ -1,6 +1,6 @@
-<x-layouts.shop title="Checkout">
-    <div class="shop-container py-10 lg:py-14">
-        <h1 class="display border-b border-stone-200 pb-6 text-4xl leading-none sm:text-6xl">Checkout</h1>
+<x-layouts.shop title="Checkout" :bottom-nav="false">
+    <div class="shop-container py-6 sm:py-10 lg:py-14">
+        <h1 class="display border-b border-stone-200 pb-5 text-4xl leading-none sm:pb-6 sm:text-6xl">Checkout</h1>
 
         <x-cart-notices :notices="$adjustments" class="mt-4" />
 
@@ -27,16 +27,16 @@
         <form id="voucher-form" method="POST" action="{{ route('checkout.voucher.apply') }}" @submit.prevent="applyVoucher()">@csrf</form>
         <form id="voucher-remove-form" method="POST" action="{{ route('checkout.voucher.remove') }}" @submit.prevent="removeVoucher()">@csrf @method('DELETE')</form>
 
-        <form method="POST" action="{{ route('checkout.store') }}" class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12"
+        <form method="POST" action="{{ route('checkout.store') }}" class="mt-6 grid grid-cols-1 gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-3 lg:gap-12"
               @submit="submitting = true">
             @csrf
             <div class="min-w-0 space-y-6 lg:col-span-2">
                 {{-- Alamat --}}
-                <section class="border border-stone-200 p-5 sm:p-6">
+                <section class="border border-stone-200 p-4 sm:p-6">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="flex items-center gap-2 font-display text-base font-extrabold tracking-tight uppercase sm:text-lg"><x-icon name="map-pin" class="size-5 text-ink" /> Alamat pengiriman</h2>
                         @if ($addresses->isNotEmpty())
-                            <a href="{{ route('account.addresses.create', ['redirect_to' => 'checkout']) }}" class="shrink-0 text-sm font-semibold text-ink hover:underline hover:underline-offset-4">+ Baru</a>
+                            <a href="{{ route('account.addresses.create', ['redirect_to' => 'checkout']) }}" class="-my-2 shrink-0 py-2.5 text-sm font-semibold text-ink lg:my-0 lg:py-0 hover:underline hover:underline-offset-4">+ Baru</a>
                         @endif
                     </div>
                     @if ($addresses->isEmpty())
@@ -60,7 +60,7 @@
                                     @unless ($item->canShip())
                                         <span class="mt-2 flex items-center gap-1.5 text-xs font-medium text-amber-700"><x-icon name="warning" class="size-4 shrink-0" /> Kecamatan belum dipilih</span>
                                     @endunless
-                                    <a href="{{ route('account.addresses.edit', [$item, 'redirect_to' => 'checkout']) }}" class="mt-2 inline-block text-xs font-semibold text-stone-500 underline-offset-4 hover:text-ink hover:underline">
+                                    <a href="{{ route('account.addresses.edit', [$item, 'redirect_to' => 'checkout']) }}" class="mt-1 inline-block py-2 text-xs font-semibold lg:mt-2 lg:py-0 text-stone-500 underline-offset-4 hover:text-ink hover:underline">
                                         {{ $item->canShip() ? 'Ubah' : 'Lengkapi alamat' }}
                                     </a>
                                 </label>
@@ -71,7 +71,7 @@
                 </section>
 
                 {{-- Pengiriman --}}
-                <section class="border border-stone-200 p-5 sm:p-6" aria-live="polite">
+                <section class="border border-stone-200 p-4 sm:p-6" aria-live="polite">
                     <div class="flex flex-wrap items-end justify-between gap-2">
                         <h2 class="flex items-center gap-2 font-display text-base font-extrabold tracking-tight uppercase sm:text-lg"><x-icon name="truck" class="size-5 text-ink" /> Pilih pengiriman</h2>
                         <p class="text-xs text-stone-500">Total berat {{ number_format(max($weight, 1) / 1000, 2, ',', '.') }} kg</p>
@@ -99,20 +99,20 @@
                         <div x-show="!loading && rates.length" x-cloak>
                             {{-- Filter kurir --}}
                             <div x-show="couriers.length > 1" class="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
-                                <button type="button" @click="courier = ''" class="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                                <button type="button" @click="courier = ''" class="min-h-10 shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold transition sm:min-h-0 sm:px-3.5"
                                         :class="courier === '' ? 'border-ink bg-ink text-white' : 'border-stone-300 text-stone-600 hover:border-stone-400'">Semua</button>
                                 <template x-for="item in couriers" :key="item.code">
-                                    <button type="button" @click="courier = item.code" class="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition"
+                                    <button type="button" @click="courier = item.code" class="min-h-10 shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold transition sm:min-h-0 sm:px-3.5"
                                             :class="courier === item.code ? 'border-ink bg-ink text-white' : 'border-stone-300 text-stone-600 hover:border-stone-400'" x-text="item.name"></button>
                                 </template>
                             </div>
 
                             <div class="mt-3 grid gap-2" role="radiogroup" aria-label="Layanan pengiriman">
                                 <template x-for="item in visibleRates" :key="item.key">
-                                    <label class="flex min-w-0 cursor-pointer items-center gap-3 border p-4 transition"
+                                    <label class="flex min-w-0 cursor-pointer items-center gap-3 border p-3 transition sm:p-4"
                                            :class="selected === item.key ? 'border-ink bg-sand-50' : 'border-stone-200 hover:border-stone-300'">
                                         <input type="radio" name="shipping" :value="item.key" x-model="selected" class="text-ink focus:ring-ink/20">
-                                        <span class="grid size-10 shrink-0 place-items-center rounded-full bg-stone-100 text-[11px] font-bold tracking-tight text-stone-700 uppercase" x-text="item.courier.slice(0, 4)"></span>
+                                        <span class="hidden size-10 shrink-0 place-items-center rounded-full bg-stone-100 text-[11px] min-[400px]:grid sm:grid font-bold tracking-tight text-stone-700 uppercase" x-text="item.courier.slice(0, 4)"></span>
                                         <span class="min-w-0 flex-1">
                                             <span class="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-stone-900">
                                                 <span x-text="`${item.courier_name} · ${item.service}`"></span>
@@ -143,7 +143,7 @@
                     <x-input-error for="shipping" />
                 </section>
 
-                <section class="border border-stone-200 p-5 sm:p-6">
+                <section class="border border-stone-200 p-4 sm:p-6">
                     <x-form.textarea name="notes" label="Catatan untuk penjual" optional rows="2" maxlength="500" placeholder="Contoh: warna cadangan hitam" />
                 </section>
             </div>
@@ -157,7 +157,7 @@
                 $initialTotal = max(\App\Services\Promo\VoucherService::MIN_PAYABLE, $subtotal - $initialDiscount + $initialShipping - $initialShippingDiscount);
             @endphp
             <div class="min-w-0 lg:sticky lg:top-24 lg:self-start">
-                <div class="border border-stone-200 p-5 sm:p-6">
+                <div class="border border-stone-200 p-4 sm:p-6">
                     <h2 class="font-display text-lg font-extrabold tracking-tight uppercase">Ringkasan pesanan</h2>
                     <ul class="mt-4 max-h-64 space-y-3 overflow-y-auto">
                         @foreach ($lines as $line)
@@ -186,7 +186,7 @@
                                 <p class="truncate font-mono text-sm font-bold tracking-wide text-stone-900" x-text="voucher?.code">{{ $voucher['code'] ?? '' }}</p>
                                 <p class="truncate text-xs text-emerald-800" x-text="voucher?.benefit">{{ $voucher['benefit'] ?? '' }}</p>
                             </div>
-                            <button form="voucher-remove-form" class="shrink-0 text-xs font-semibold text-stone-500 underline-offset-4 hover:text-rose-600 hover:underline" :disabled="voucherLoading">Lepas</button>
+                            <button form="voucher-remove-form" class="-my-2 shrink-0 py-2.5 text-xs font-semibold lg:my-0 lg:py-0 text-stone-500 underline-offset-4 hover:text-rose-600 hover:underline" :disabled="voucherLoading">Lepas</button>
                         </div>
 
                         <div x-show="!voucher" @if ($voucher) x-cloak @endif class="mt-3 flex gap-2">
@@ -238,6 +238,20 @@
                         <span x-text="submitting ? 'Memproses...' : 'Buat pesanan & bayar'">Buat pesanan & bayar</span>
                     </button>
                     <p class="mt-3 text-center text-xs text-stone-400">Pembayaran aman diproses oleh payment gateway.</p>
+                </div>
+            </div>
+
+            {{-- Bar bayar di mobile: total selalu terlihat --}}
+            <div class="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_-12px_rgb(15_23_42/0.18)] backdrop-blur lg:hidden">
+                <div class="flex items-center gap-3 px-4 py-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs text-stone-500">Total bayar</p>
+                        <p class="truncate text-base font-bold text-stone-900" x-text="rupiah(total)">@rupiah($initialTotal)</p>
+                    </div>
+                    <button class="btn btn-ink shrink-0 rounded-full px-6 py-3.5 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canSubmit" @disabled(! $address || empty($quote['rates']))>
+                        <x-icon name="lock" class="size-4" />
+                        <span x-text="submitting ? 'Memproses...' : 'Buat pesanan'">Buat pesanan</span>
+                    </button>
                 </div>
             </div>
         </form>

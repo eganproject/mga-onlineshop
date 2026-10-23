@@ -21,14 +21,14 @@
         </div>
 
         {{-- Form --}}
-        <div class="flex flex-col px-5 py-8 sm:px-10">
+        <div class="flex flex-col px-5 py-4 sm:px-10 sm:py-8">
             <div class="flex items-center justify-between lg:justify-end">
-                <a href="{{ route('home') }}" class="lg:hidden"><x-wordmark /></a>
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-800">
+                <a href="{{ route('home') }}" class="py-1 lg:hidden"><x-wordmark /></a>
+                <a href="{{ route('home') }}" class="-mr-2 inline-flex min-h-11 items-center gap-1.5 px-2 text-sm font-medium text-stone-500 hover:text-stone-800 lg:mr-0 lg:min-h-0 lg:px-0">
                     <x-icon name="arrow-left" class="size-4" /> Kembali ke toko
                 </a>
             </div>
-            <div class="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
+            <div class="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8 sm:py-10">
                 <h1 class="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{{ $heading }}</h1>
                 @if ($subheading)
                     <p class="mt-2 text-sm text-stone-500">{{ $subheading }}</p>

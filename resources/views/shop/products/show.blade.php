@@ -1,4 +1,4 @@
-<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product">
+<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product" :bottom-nav="! $product->inStock()">
     <x-slot:head>
         <meta property="product:price:amount" content="{{ $product->price }}">
         <meta property="product:price:currency" content="IDR">
@@ -150,7 +150,7 @@
                             <div class="mt-3 inline-flex items-center rounded-full border border-stone-300">
                                 <button type="button" @click="qty = Math.max(1, qty - 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Kurangi"><x-icon name="minus" class="size-4" /></button>
                                 <input type="number" name="quantity" x-model.number="qty" min="1" :max="max" value="1" aria-label="Jumlah"
-                                       class="w-12 border-0 bg-transparent p-0 text-center text-sm font-semibold focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                                       class="w-12 border-0 bg-transparent p-0 text-center text-base font-semibold lg:text-sm focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
                                 <button type="button" @click="qty = Math.min(max, qty + 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Tambah"><x-icon name="plus" class="size-4" /></button>
                             </div>
                             <p x-ref="variantHint" x-show="needsVariant" class="mt-4 hidden text-sm font-medium text-brand-700">Pilih {{ mb_strtolower($product->variant_label ?: 'varian') }} terlebih dahulu.</p>

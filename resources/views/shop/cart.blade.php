@@ -44,9 +44,9 @@
                                     <form method="POST" action="{{ route('cart.update', $line->key()) }}" class="inline-flex items-center rounded-full border border-stone-300">
                                         @csrf
                                         @method('PATCH')
-                                        <button name="quantity" value="{{ $line->quantity - 1 }}" class="grid size-9 place-items-center rounded-full hover:bg-sand-100" aria-label="Kurangi"><x-icon name="minus" class="size-3.5" /></button>
+                                        <button name="quantity" value="{{ $line->quantity - 1 }}" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:size-9" aria-label="Kurangi"><x-icon name="minus" class="size-3.5" /></button>
                                         <span class="w-8 text-center text-sm font-semibold">{{ $line->quantity }}</span>
-                                        <button name="quantity" value="{{ $line->quantity + 1 }}" class="grid size-9 place-items-center rounded-full hover:bg-sand-100 disabled:opacity-30" aria-label="Tambah" @disabled($line->quantity >= $line->availableStock())><x-icon name="plus" class="size-3.5" /></button>
+                                        <button name="quantity" value="{{ $line->quantity + 1 }}" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 disabled:opacity-30 lg:size-9" aria-label="Tambah" @disabled($line->quantity >= $line->availableStock())><x-icon name="plus" class="size-3.5" /></button>
                                     </form>
                                     @if ($line->isLowStock())
                                         <span class="text-xs font-medium text-amber-700">Sisa {{ $line->availableStock() }}</span>
@@ -55,7 +55,7 @@
                                     <form method="POST" action="{{ route('cart.destroy', $line->key()) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="link-underline text-xs font-semibold text-stone-500 hover:text-rose-600">Hapus</button>
+                                        <button class="link-underline -my-2 py-3 text-xs font-semibold text-stone-500 hover:text-rose-600 lg:my-0 lg:py-0">Hapus</button>
                                     </form>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@
                             <span>Total</span><span>@rupiah($subtotal)</span>
                         </div>
                         <a href="{{ route('checkout.index') }}" class="btn btn-ink btn-pill mt-6 w-full py-4">Checkout <x-icon name="arrow-right" class="size-4" /></a>
-                        <a href="{{ route('products.index') }}" class="link-underline mt-4 block text-center text-sm font-semibold">Lanjut belanja</a>
+                        <a href="{{ route('products.index') }}" class="link-underline mx-auto mt-2 block w-fit py-3 text-center text-sm font-semibold lg:mt-4 lg:py-0">Lanjut belanja</a>
                         <ul class="mt-6 space-y-2 border-t border-stone-200 pt-5 text-xs text-stone-500">
                             <li class="flex items-center gap-2"><x-icon name="lock" class="size-4" /> Pembayaran aman & terenkripsi</li>
                             <li class="flex items-center gap-2"><x-icon name="shield" class="size-4" /> Produk original bergaransi</li>

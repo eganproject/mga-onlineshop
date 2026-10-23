@@ -74,7 +74,7 @@
                 </p>
                 <label x-show="tab === 'best'" class="flex h-10 items-center gap-1 rounded-md border border-stone-200 bg-white pl-3 text-xs sm:text-sm">
                     <span class="font-semibold">Urutkan:</span>
-                    <select x-model="sort" class="h-full border-0 bg-transparent py-0 pr-8 pl-1 text-xs focus:ring-0 sm:text-sm">
+                    <select x-model="sort" class="h-full border-0 bg-transparent py-0 pr-8 pl-1 text-base focus:ring-0 lg:text-sm">
                         @foreach ($sorts as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach

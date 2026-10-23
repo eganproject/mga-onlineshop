@@ -11,12 +11,12 @@
         <div>
             <div class="flex items-center justify-between">
                 <label for="password" class="label">Password</label>
-                <a href="{{ route('password.request') }}" class="mb-1.5 text-xs font-semibold text-ink underline underline-offset-4">Lupa password?</a>
+                <a href="{{ route('password.request') }}" class="-my-2 mb-0 py-2.5 text-xs font-semibold text-ink underline underline-offset-4 lg:my-0 lg:mb-1.5 lg:py-0">Lupa password?</a>
             </div>
             <div class="relative">
                 <input id="password" :type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password"
                        placeholder="••••••••" class="input pr-11">
-                <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600" aria-label="Tampilkan password">
+                <button type="button" @click="show = !show" class="absolute right-0.5 top-1/2 grid size-10 -translate-y-1/2 place-items-center text-stone-400 hover:text-stone-600" aria-label="Tampilkan password">
                     <x-icon name="eye" class="size-5" />
                 </button>
             </div>
@@ -28,6 +28,6 @@
         <button class="btn btn-ink rounded-full w-full py-3">Masuk</button>
     </form>
     <p class="mt-8 text-center text-sm text-stone-500">
-        Belum punya akun? <a href="{{ route('register') }}" class="font-semibold text-ink underline underline-offset-4">Daftar gratis</a>
+        Belum punya akun? <a href="{{ route('register') }}" class="inline-block py-2.5 font-semibold text-ink underline underline-offset-4 lg:py-0">Daftar gratis</a>
     </p>
 </x-layouts.auth>
