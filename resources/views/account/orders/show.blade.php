@@ -76,7 +76,9 @@
                                         </label>
                                     @endforeach
                                 </div>
-                                <textarea x-show="reason === 'Lainnya'" x-cloak name="reason_detail" rows="2" maxlength="200" class="input" placeholder="Ceritakan alasannya (opsional)"></textarea>
+                                <div x-show="reason === 'Lainnya'" x-cloak>
+                                    <x-form.textarea name="reason_detail" rows="2" maxlength="200" placeholder="Ceritakan alasannya (opsional)" />
+                                </div>
                                 <div class="flex gap-2 pt-2">
                                     <button type="button" class="btn btn-secondary flex-1" @click="open = false">Kembali</button>
                                     <button class="btn btn-danger flex-1">Batalkan pesanan</button>

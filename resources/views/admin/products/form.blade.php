@@ -32,14 +32,7 @@
         @endif
     </x-admin.page-header>
 
-    @if ($errors->any())
-        <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-            <p class="font-semibold">Periksa kembali isian berikut:</p>
-            <ul class="mt-1 list-disc pl-5">
-                @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-            </ul>
-        </div>
-    @endif
+    <x-form.errors />
 
     <form method="POST" enctype="multipart/form-data"
           action="{{ $editing ? route('admin.products.update', $product) : route('admin.products.store') }}"
@@ -52,38 +45,14 @@
             {{-- Informasi --}}
             <div class="card space-y-5 p-6">
                 <h2 class="font-bold text-stone-900">Informasi produk</h2>
-                <div>
-                    <label for="name" class="label">Nama produk</label>
-                    <input id="name" name="name" value="{{ old('name', $product->name) }}" required maxlength="255" placeholder="Contoh: Casing iPhone 15 Clear Magsafe" class="input @error('name') input-error @enderror">
-                    <x-input-error for="name" />
-                </div>
+                <x-form.input name="name" label="Nama produk" :value="$product->name" required maxlength="255" placeholder="Contoh: Casing iPhone 15 Clear Magsafe" />
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label for="category_id" class="label">Kategori</label>
-                        <select id="category_id" name="category_id" class="input">
-                            <option value="">Tanpa kategori</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>{{ $category->parent_id ? '— '.$category->name : $category->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error for="category_id" />
-                    </div>
-                    <div>
-                        <label for="sku" class="label">SKU induk <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="sku" name="sku" value="{{ old('sku', $product->sku) }}" maxlength="64" class="input @error('sku') input-error @enderror">
-                        <x-input-error for="sku" />
-                    </div>
+                    <x-form.category-select name="category_id" label="Kategori" :categories="$categories" :selected="$product->category_id" placeholder="Tanpa kategori" />
+                    <x-form.input name="sku" label="SKU induk" optional :value="$product->sku" maxlength="64" />
                 </div>
-                <div>
-                    <label for="description" class="label">Deskripsi</label>
-                    <textarea id="description" name="description" rows="7" placeholder="Jelaskan spesifikasi, kompatibilitas, dan isi paket..." class="input">{{ old('description', $product->description) }}</textarea>
-                    <x-input-error for="description" />
-                </div>
-                <div>
-                    <label for="slug" class="label">Slug URL <span class="font-normal text-stone-400">(kosongkan untuk otomatis)</span></label>
-                    <input id="slug" name="slug" value="{{ old('slug', $product->slug) }}" class="input @error('slug') input-error @enderror">
-                    <x-input-error for="slug" />
-                </div>
+                <x-form.textarea name="description" label="Deskripsi" :value="$product->description" rows="7" maxlength="10000"
+                                 placeholder="Jelaskan spesifikasi, kompatibilitas, dan isi paket..." />
+                <x-form.input name="slug" label="Slug URL" optional="kosongkan untuk otomatis" :value="$product->slug" />
             </div>
 
             {{-- Galeri --}}
@@ -153,31 +122,12 @@
 
                 {{-- Tanpa varian --}}
                 <div x-show="!hasVariants" class="mt-5 grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label for="price" class="label">Harga jual</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-stone-400">Rp</span>
-                            <input id="price" name="price" inputmode="numeric" value="{{ old('price', $product->price) }}" :required="!hasVariants" :disabled="hasVariants" class="input pl-10 @error('price') input-error @enderror">
-                        </div>
-                        <x-input-error for="price" />
-                    </div>
-                    <div>
-                        <label for="compare_at_price" class="label">Harga coret <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-stone-400">Rp</span>
-                            <input id="compare_at_price" name="compare_at_price" inputmode="numeric" value="{{ old('compare_at_price', $product->compare_at_price) }}" :disabled="hasVariants" class="input pl-10">
-                        </div>
-                        <x-input-error for="compare_at_price" />
-                    </div>
-                    <div>
-                        <label for="stock" class="label">Stok</label>
-                        <input id="stock" type="number" min="0" name="stock" value="{{ old('stock', $product->stock ?? 0) }}" :required="!hasVariants" :disabled="hasVariants" class="input @error('stock') input-error @enderror">
-                        <input type="hidden" name="stock_original" value="{{ old('stock_original', $editing && ! $product->has_variants ? $product->stock : '') }}" :disabled="hasVariants">
-                        @if ($editing)
-                            <p class="mt-1.5 text-xs text-stone-400">Perubahan tercatat di riwayat stok.</p>
-                        @endif
-                        <x-input-error for="stock" />
-                    </div>
+                    <x-form.money name="price" label="Harga jual" :value="$product->price" x-bind:required="!hasVariants" x-bind:disabled="hasVariants" />
+                    <x-form.money name="compare_at_price" label="Harga coret" optional :value="$product->compare_at_price" x-bind:disabled="hasVariants"
+                                  hint="Harga sebelum diskon, tampil dicoret." />
+                    <x-form.number name="stock" label="Stok" :value="$product->stock ?? 0" min="0" suffix="pcs" x-bind:required="!hasVariants" x-bind:disabled="hasVariants"
+                                   :hint="$editing ? 'Perubahan tercatat di riwayat stok.' : null" />
+                    <input type="hidden" name="stock_original" value="{{ old('stock_original', $editing && ! $product->has_variants ? $product->stock : '') }}" :disabled="hasVariants">
                 </div>
 
                 {{-- Dengan varian --}}
@@ -192,7 +142,7 @@
                             <div class="flex-1">
                                 <label class="label">Isi semua varian</label>
                                 <div class="flex gap-2">
-                                    <input x-model="bulkPrice" inputmode="numeric" placeholder="Harga" class="input">
+                                    <input x-model="bulkPrice" x-money placeholder="Harga" class="input">
                                     <input x-model="bulkStock" type="number" min="0" placeholder="Stok" class="input">
                                 </div>
                             </div>
@@ -202,7 +152,7 @@
 
                     <x-input-error for="variants" />
                     <div class="-mx-6 overflow-x-auto">
-                        <table class="table-base min-w-[860px]">
+                        <table class="table-base min-w-[940px]">
                             <thead class="bg-stone-50/70">
                                 <tr><th class="w-8"></th><th>Nama varian</th><th>SKU</th><th>Harga</th><th>Harga coret</th><th>Stok</th><th>Berat (gr)</th><th>Foto</th><th class="text-center">Aktif</th><th></th></tr>
                             </thead>
@@ -216,10 +166,10 @@
                                             <input :name="`variants[${index}][name]`" x-model="variant.name" required maxlength="100" placeholder="Hitam" :disabled="!hasVariants" class="input min-w-36">
                                         </td>
                                         <td><input :name="`variants[${index}][sku]`" x-model="variant.sku" maxlength="64" :disabled="!hasVariants" class="input min-w-28"></td>
-                                        <td><input :name="`variants[${index}][price]`" x-model="variant.price" inputmode="numeric" required :disabled="!hasVariants" class="input min-w-28"></td>
-                                        <td><input :name="`variants[${index}][compare_at_price]`" x-model="variant.compare_at_price" inputmode="numeric" :disabled="!hasVariants" class="input min-w-28"></td>
+                                        <td><div class="relative"><span class="input-addon left-3">Rp</span><input :name="`variants[${index}][price]`" x-model="variant.price" x-money required :disabled="!hasVariants" class="input min-w-32 pl-9 tabular-nums"></div></td>
+                                        <td><div class="relative"><span class="input-addon left-3">Rp</span><input :name="`variants[${index}][compare_at_price]`" x-model="variant.compare_at_price" x-money :disabled="!hasVariants" class="input min-w-32 pl-9 tabular-nums"></div></td>
                                         <td>
-                                            <input type="number" min="0" :name="`variants[${index}][stock]`" x-model="variant.stock" required :disabled="!hasVariants" class="input w-24">
+                                            <x-form.number wrapper-class="w-32" min="0" x-bind:name="`variants[${index}][stock]`" x-model="variant.stock" required x-bind:disabled="!hasVariants" />
                                         </td>
                                         <td><input type="number" min="1" :name="`variants[${index}][weight]`" x-model="variant.weight" placeholder="Ikut produk" :disabled="!hasVariants" class="input w-28"></td>
                                         <td>
@@ -267,10 +217,8 @@
             </div>
 
             <div class="card p-6">
-                <label for="weight" class="label">Berat (gram)</label>
-                <input id="weight" type="number" min="1" name="weight" value="{{ old('weight', $product->weight) }}" required class="input @error('weight') input-error @enderror">
-                <p class="mt-1.5 text-xs text-stone-400">Dipakai untuk menghitung ongkos kirim. Varian bisa punya berat sendiri.</p>
-                <x-input-error for="weight" />
+                <x-form.number name="weight" label="Berat" :value="$product->weight" min="1" suffix="gram" required
+                               hint="Dipakai untuk menghitung ongkos kirim. Varian bisa punya berat sendiri." />
             </div>
 
             <div class="lg:sticky lg:top-24">

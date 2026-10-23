@@ -10,13 +10,9 @@
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau SKU..." class="input pl-10">
             </div>
-            <select name="kategori" class="input sm:w-48">
-                <option value="">Semua kategori</option>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" @selected(request('kategori') == $category->id)>{{ $category->parent_id ? '— '.$category->name : $category->name }}</option>
-                @endforeach
-            </select>
-            <select name="status" class="input sm:w-44">
+            <x-form.category-select name="kategori" :categories="$categories" :selected="request('kategori')" placeholder="Semua kategori"
+                                    wrapper-class="sm:w-56" aria-label="Filter kategori" />
+            <select name="status" class="input sm:w-44" x-searchable aria-label="Filter status">
                 <option value="">Semua status</option>
                 @foreach (['aktif' => 'Aktif', 'nonaktif' => 'Nonaktif', 'unggulan' => 'Unggulan', 'stok-menipis' => 'Stok menipis', 'stok-habis' => 'Stok habis'] as $value => $label)
                     <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>

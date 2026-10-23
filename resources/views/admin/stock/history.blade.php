@@ -8,7 +8,7 @@
     <div class="card overflow-hidden">
         <form method="GET" class="flex flex-wrap gap-3 border-b border-stone-100 p-4" x-data @change="$el.submit()">
             @if ($product)<input type="hidden" name="produk" value="{{ $product->id }}">@endif
-            <select name="jenis" class="input sm:w-52">
+            <select name="jenis" class="input sm:w-52" x-searchable aria-label="Filter jenis">
                 <option value="">Semua jenis</option>
                 @foreach (\App\Enums\StockMovementType::cases() as $case)
                     <option value="{{ $case->value }}" @selected($type === $case)>{{ $case->label() }}</option>

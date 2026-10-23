@@ -11,13 +11,13 @@
 
     <div class="card overflow-hidden"
          x-data="{ open: false, item: {}, mode: 'add' }"
-         @adjust-stock.window="item = $event.detail; mode = 'add'; open = true; $nextTick(() => $refs.qty.focus())">
+         @adjust-stock.window="item = $event.detail; mode = 'add'; open = true; $nextTick(() => document.getElementById('adjust-qty')?.focus())">
         <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
             <div class="relative flex-1 sm:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau SKU..." class="input pl-10">
             </div>
-            <select name="status" class="input sm:w-48">
+            <select name="status" class="input sm:w-48" x-searchable aria-label="Filter stok">
                 <option value="">Semua stok</option>
                 <option value="menipis" @selected(request('status') === 'menipis')>Menipis (≤ {{ $threshold }})</option>
                 <option value="habis" @selected(request('status') === 'habis')>Habis</option>
@@ -101,10 +101,7 @@
                     @endforeach
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label for="adjust-qty" class="label">Jumlah</label>
-                        <input id="adjust-qty" x-ref="qty" type="number" name="quantity" min="0" required class="input">
-                    </div>
+                    <x-form.number id="adjust-qty" name="quantity" label="Jumlah" min="0" required />
                     <div>
                         <label for="adjust-type" class="label">Jenis</label>
                         <select id="adjust-type" name="type" class="input" x-effect="$el.value = mode === 'add' ? 'restock' : 'adjustment'">

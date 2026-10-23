@@ -15,11 +15,7 @@
         <input id="email" type="email" name="email" value="{{ old('email', $user->email) }}" required class="input @error('email') input-error @enderror">
         <x-input-error for="email" />
     </div>
-    <div>
-        <label for="phone" class="label">No. HP</label>
-        <input id="phone" type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="input @error('phone') input-error @enderror">
-        <x-input-error for="phone" />
-    </div>
+    <x-form.phone name="phone" label="No. HP" :value="$user->phone" />
     <button class="btn btn-ink rounded-full">Simpan perubahan</button>
 </form>
 

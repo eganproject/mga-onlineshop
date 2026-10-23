@@ -86,10 +86,9 @@
                         </div>
                         <div>
                             <label for="note" class="label" x-text="status === 'cancelled' ? 'Alasan pembatalan' : 'Catatan (opsional)'">Catatan (opsional)</label>
-                            <textarea id="note" name="note" rows="2" maxlength="250" class="input @error('note') input-error @enderror"
-                                      :required="status === 'cancelled'"
-                                      :placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'">{{ old('note') }}</textarea>
-                            <x-input-error for="note" />
+                            <x-form.textarea name="note" rows="2" maxlength="250"
+                                             x-bind:required="status === 'cancelled'"
+                                             x-bind:placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'" />
                         </div>
                         <button class="btn btn-primary w-full" :class="status === 'cancelled' && '!bg-rose-600 hover:!bg-rose-700'"
                                 onclick="return this.form.status.value !== 'cancelled' || confirm(@js($order->paid_at ? 'Batalkan pesanan ini? Stok dikembalikan dan dana pelanggan perlu dikembalikan manual.' : 'Batalkan pesanan ini? Stok akan dikembalikan.'))">

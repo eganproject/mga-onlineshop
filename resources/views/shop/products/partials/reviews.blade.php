@@ -60,12 +60,8 @@
                             <label for="review-title" class="label">Judul <span class="font-normal text-stone-400">(opsional)</span></label>
                             <input id="review-title" name="title" maxlength="120" value="{{ old('title', $myReview?->title) }}" class="input" placeholder="Ringkas pengalamanmu">
                         </div>
-                        <div class="mt-4">
-                            <label for="review-body" class="label">Ulasan</label>
-                            <textarea id="review-body" name="body" rows="4" maxlength="2000" required minlength="10" @class(['input', 'input-error' => $reviewErrors->has('body')])
-                                      placeholder="Bagaimana kualitas, kecocokan, dan pengirimannya?">{{ old('body', $myReview?->body) }}</textarea>
-                            @if ($reviewErrors->has('body'))<p class="mt-1 text-xs text-rose-600">{{ $reviewErrors->first('body') }}</p>@endif
-                        </div>
+                        <x-form.textarea id="review-body" name="body" label="Ulasan" bag="review" wrapper-class="mt-4" :value="$myReview?->body"
+                                         rows="4" maxlength="2000" required minlength="10" placeholder="Bagaimana kualitas, kecocokan, dan pengirimannya?" />
                         <button class="btn btn-ink btn-pill mt-5 w-full">{{ $myReview ? 'Perbarui ulasan' : 'Kirim ulasan' }}</button>
                     </form>
                 @elseif (! auth()->check())

@@ -22,7 +22,7 @@
             </nav>
             <form method="GET" class="flex gap-2">
                 @if ($activeStatus)<input type="hidden" name="status" value="{{ $activeStatus->value }}">@endif
-                <select name="rating" class="input w-auto pr-9" onchange="this.form.submit()" aria-label="Filter rating">
+                <select name="rating" class="input w-44" x-data x-searchable onchange="this.form.submit()" aria-label="Filter rating">
                     <option value="">Semua rating</option>
                     @for ($i = 5; $i >= 1; $i--)
                         <option value="{{ $i }}" @selected(request('rating') == $i)>{{ $i }} bintang</option>
@@ -90,8 +90,7 @@
 
                 <form method="POST" action="{{ route('admin.reviews.update', $review) }}" x-show="reply" x-cloak class="mt-4 lg:pl-[72px]">
                     @csrf @method('PATCH')
-                    <label for="reply-{{ $review->id }}" class="label">Balasan toko (tampil di bawah ulasan)</label>
-                    <textarea id="reply-{{ $review->id }}" name="admin_reply" rows="3" maxlength="2000" class="input">{{ $review->admin_reply }}</textarea>
+                    <x-form.textarea :id="'reply-'.$review->id" name="admin_reply" label="Balasan toko (tampil di bawah ulasan)" :value="$review->admin_reply" rows="3" maxlength="2000" />
                     <div class="mt-2 flex gap-2">
                         <button class="btn btn-primary btn-sm">Simpan balasan</button>
                         <button type="button" @click="reply = false" class="btn btn-ghost btn-sm">Batal</button>

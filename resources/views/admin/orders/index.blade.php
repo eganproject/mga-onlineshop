@@ -25,9 +25,9 @@
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Kode, nama, HP, email, atau resi..." class="input pl-10" aria-label="Cari pesanan">
             </div>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex">
-                <label class="block"><span class="sr-only">Dari tanggal</span><input type="date" name="from" value="{{ request('from') }}" class="input" title="Dari tanggal"></label>
-                <label class="block"><span class="sr-only">Sampai tanggal</span><input type="date" name="to" value="{{ request('to') }}" class="input" title="Sampai tanggal"></label>
-                <select name="courier" class="input pr-9" aria-label="Kurir">
+                <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()"
+                                   placeholder="Semua tanggal" wrapper-class="col-span-2 lg:w-64" aria-label="Rentang tanggal" />
+                <select name="courier" class="input lg:w-44" x-data x-searchable aria-label="Kurir">
                     <option value="">Semua kurir</option>
                     @foreach ($couriers as $courier)
                         <option value="{{ $courier }}" @selected(request('courier') === $courier)>{{ strtoupper($courier) }}</option>

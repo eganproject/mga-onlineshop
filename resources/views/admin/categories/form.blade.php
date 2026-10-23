@@ -14,27 +14,15 @@
                 <input id="name" name="name" value="{{ old('name', $category->name) }}" required class="input @error('name') input-error @enderror">
                 <x-input-error for="name" />
             </div>
-            <div>
-                <label for="parent_id" class="label">Induk kategori</label>
-                <select id="parent_id" name="parent_id" class="input @error('parent_id') input-error @enderror">
-                    <option value="">Tidak ada (kategori utama)</option>
-                    @foreach ($parents as $parent)
-                        <option value="{{ $parent->id }}" @selected(old('parent_id', $category->parent_id) == $parent->id)>{{ $parent->name }}</option>
-                    @endforeach
-                </select>
-                <p class="mt-1.5 text-xs text-stone-400">Pilih induk untuk menjadikannya subkategori, mis. Casing HP › Casing iPhone.</p>
-                <x-input-error for="parent_id" />
-            </div>
+            <x-form.select name="parent_id" label="Induk kategori" placeholder="Tidak ada (kategori utama)" :search="true"
+                :options="$parents->pluck('name', 'id')->all()" :selected="$category->parent_id"
+                hint="Pilih induk untuk menjadikannya subkategori, mis. Casing HP › Casing iPhone." />
             <div>
                 <label for="slug" class="label">Slug URL <span class="font-normal text-stone-400">(kosongkan untuk otomatis)</span></label>
                 <input id="slug" name="slug" value="{{ old('slug', $category->slug) }}" class="input @error('slug') input-error @enderror">
                 <x-input-error for="slug" />
             </div>
-            <div>
-                <label for="description" class="label">Deskripsi</label>
-                <textarea id="description" name="description" rows="4" class="input">{{ old('description', $category->description) }}</textarea>
-                <x-input-error for="description" />
-            </div>
+            <x-form.textarea name="description" label="Deskripsi" optional :value="$category->description" rows="4" maxlength="1000" />
         </div>
 
         <div class="space-y-6">
@@ -43,21 +31,8 @@
                     <span><span class="block text-sm font-semibold text-stone-800">Tampilkan di toko</span><span class="text-xs text-stone-500">Nonaktifkan untuk menyembunyikan</span></span>
                     <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $category->is_active))>
                 </label>
-                <div>
-                    <label for="sort_order" class="label">Urutan tampil</label>
-                    <input id="sort_order" type="number" min="0" name="sort_order" value="{{ old('sort_order', $category->sort_order ?? 0) }}" class="input">
-                </div>
-                <div>
-                    <label for="image" class="label">Gambar</label>
-                    @if ($category->imageUrl())
-                        <img src="{{ $category->imageUrl() }}" alt="" class="mb-3 aspect-video w-full rounded-xl object-cover">
-                        <label class="mb-3 flex items-center gap-2 text-sm text-stone-600">
-                            <input type="checkbox" name="remove_image" value="1" class="checkbox"> Hapus gambar
-                        </label>
-                    @endif
-                    <input id="image" type="file" name="image" accept="image/*" class="block w-full text-sm text-stone-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100">
-                    <x-input-error for="image" />
-                </div>
+                <x-form.number name="sort_order" label="Urutan tampil" :value="$category->sort_order ?? 0" min="0" />
+                <x-form.image-upload name="image" label="Gambar" optional :current="$category->imageUrl()" remove-name="remove_image" />
             </div>
             <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan kategori' }}</button>
         </div>

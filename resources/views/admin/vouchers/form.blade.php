@@ -2,7 +2,6 @@
     use App\Enums\VoucherType;
     $editing = $voucher->exists;
     $type = old('type', $voucher->type?->value ?? 'percent');
-    $dt = fn ($field) => old($field, $voucher->{$field}?->format('Y-m-d\TH:i'));
 @endphp
 <x-layouts.admin :title="$editing ? 'Edit Voucher' : 'Buat Voucher'">
     <x-admin.page-header :title="$editing ? 'Edit voucher '.$voucher->code : 'Buat voucher'" :back="route('admin.vouchers.index')" />
@@ -62,48 +61,31 @@
                             <span x-show="type === 'fixed'" x-cloak>Nominal potongan (Rp)</span>
                             <span x-show="type === 'free_shipping'" x-cloak>Maksimal ongkir ditanggung (Rp)</span>
                         </label>
-                        <input id="value" name="value" inputmode="numeric" value="{{ old('value', $voucher->value) }}" class="input @error('value') input-error @enderror">
+                        <div class="relative" x-data>
+                            <span class="input-addon" x-show="type !== 'percent'" x-cloak>Rp</span>
+                            <span class="input-addon right-3.5 left-auto" x-show="type === 'percent'">%</span>
+                            <input id="value" name="value" x-money value="{{ \App\Support\FormField::thousands(old('value', $voucher->value)) }}"
+                                   :class="type === 'percent' ? 'pr-10' : 'pl-10'" class="input tabular-nums @error('value') input-error @enderror">
+                        </div>
                         <p x-show="type === 'free_shipping'" x-cloak class="mt-1.5 text-xs text-stone-400">Isi 0 untuk gratis ongkir penuh.</p>
                         <x-input-error for="value" />
                     </div>
                     <div x-show="type === 'percent'">
-                        <label for="max_discount" class="label">Maksimal diskon (Rp) <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="max_discount" name="max_discount" inputmode="numeric" value="{{ old('max_discount', $voucher->max_discount) }}" placeholder="Tanpa batas" class="input @error('max_discount') input-error @enderror">
-                        <x-input-error for="max_discount" />
+                        <x-form.money name="max_discount" label="Maksimal diskon" optional :value="$voucher->max_discount" placeholder="Tanpa batas" />
                     </div>
-                    <div>
-                        <label for="min_spend" class="label">Minimal belanja (Rp)</label>
-                        <input id="min_spend" name="min_spend" inputmode="numeric" value="{{ old('min_spend', $voucher->min_spend) }}" placeholder="0" class="input @error('min_spend') input-error @enderror">
-                        <p class="mt-1.5 text-xs text-stone-400">Dihitung dari subtotal barang, sebelum ongkir.</p>
-                        <x-input-error for="min_spend" />
-                    </div>
+                    <x-form.money name="min_spend" label="Minimal belanja" :value="$voucher->min_spend" placeholder="0"
+                                  hint="Dihitung dari subtotal barang, sebelum ongkir." />
                 </div>
             </div>
 
             <div class="card space-y-5 p-6">
                 <h2 class="font-bold text-stone-900">Batas pemakaian & periode</h2>
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label for="quota" class="label">Kuota total <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="quota" type="number" min="1" name="quota" value="{{ old('quota', $voucher->quota) }}" placeholder="Tanpa batas" class="input @error('quota') input-error @enderror">
-                        @if ($editing)<p class="mt-1.5 text-xs text-stone-400">Sudah dipakai {{ $used }} kali. Pesanan batal mengembalikan kuota.</p>@endif
-                        <x-input-error for="quota" />
-                    </div>
-                    <div>
-                        <label for="per_user_limit" class="label">Batas per pelanggan <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="per_user_limit" type="number" min="1" name="per_user_limit" value="{{ old('per_user_limit', $voucher->per_user_limit) }}" placeholder="Tanpa batas" class="input @error('per_user_limit') input-error @enderror">
-                        <x-input-error for="per_user_limit" />
-                    </div>
-                    <div>
-                        <label for="starts_at" class="label">Mulai berlaku <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="starts_at" type="datetime-local" name="starts_at" value="{{ $dt('starts_at') }}" class="input @error('starts_at') input-error @enderror">
-                        <x-input-error for="starts_at" />
-                    </div>
-                    <div>
-                        <label for="ends_at" class="label">Berakhir <span class="font-normal text-stone-400">(opsional)</span></label>
-                        <input id="ends_at" type="datetime-local" name="ends_at" value="{{ $dt('ends_at') }}" class="input @error('ends_at') input-error @enderror">
-                        <x-input-error for="ends_at" />
-                    </div>
+                    <x-form.number name="quota" label="Kuota total" optional :value="$voucher->quota" min="1" placeholder="Tanpa batas"
+                                   :hint="$editing ? 'Sudah dipakai '.$used.' kali. Pesanan batal mengembalikan kuota.' : null" />
+                    <x-form.number name="per_user_limit" label="Batas per pelanggan" optional :value="$voucher->per_user_limit" min="1" placeholder="Tanpa batas" />
+                    <x-form.date name="starts_at" label="Mulai berlaku" optional time :value="$voucher->starts_at" />
+                    <x-form.date name="ends_at" label="Berakhir" optional time :value="$voucher->ends_at" />
                 </div>
                 <p class="text-xs text-stone-400">Waktu mengikuti zona {{ config('app.timezone') }}.</p>
             </div>
