@@ -12,6 +12,7 @@ use App\Models\ProductImport;
 use App\Services\Catalog\Transfer\ProductExporter;
 use App\Services\Catalog\Transfer\Spreadsheet;
 use App\Services\Catalog\Transfer\StockImporter;
+use App\Support\AdminList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class ProductTransferController extends Controller
         return view('admin.products.transfer', [
             'canProducts' => in_array(ImportType::Products, $types, true),
             'canStock' => in_array(ImportType::Stock, $types, true),
-            'imports' => ProductImport::with('user')->whereIn('type', $types)->latest('id')->limit(10)->get(),
+            'imports' => AdminList::paginate(ProductImport::with('user')->whereIn('type', $types)->latest('id'), $request, 10, 'riwayat')->fragment('riwayat'),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'parent_id']),
             'modes' => StockImporter::MODES,
             'maxUploadKb' => self::MAX_UPLOAD_KB,

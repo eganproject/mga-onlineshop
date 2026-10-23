@@ -91,7 +91,8 @@
                                              x-bind:placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'" />
                         </div>
                         <button class="btn btn-primary w-full" :class="status === 'cancelled' && '!bg-rose-600 hover:!bg-rose-700'"
-                                onclick="return this.form.status.value !== 'cancelled' || confirm(@js($order->paid_at ? 'Batalkan pesanan ini? Stok dikembalikan dan dana pelanggan perlu dikembalikan manual.' : 'Batalkan pesanan ini? Stok akan dikembalikan.'))">
+                                data-confirm-tone="danger" data-confirm-title="Batalkan pesanan {{ $order->code }}?" data-confirm-ok="Ya, batalkan pesanan"
+                                :data-confirm="status === 'cancelled' ? @js($order->paid_at ? 'Stok dikembalikan otomatis. Pesanan ini sudah dibayar, jadi dana pelanggan perlu dikembalikan manual.' : 'Stok dikembalikan otomatis dan pelanggan tidak bisa membayar pesanan ini lagi.') : null">
                             Simpan status
                         </button>
                     </form>
@@ -120,10 +121,12 @@
 
             <div class="card p-5">
                 <h2 class="font-bold text-stone-900">Pelanggan</h2>
-                <a href="{{ route('admin.customers.show', $order->user) }}" class="mt-3 flex items-center gap-3 rounded-xl p-2 -m-2 hover:bg-stone-50">
+                @php($customerTag = auth()->user()->can('customers.view') ? 'a' : 'div')
+                <{{ $customerTag }} @if ($customerTag === 'a') href="{{ route('admin.customers.show', $order->user) }}" @endif
+                    @class(['mt-3 flex items-center gap-3 rounded-xl p-2 -m-2', 'hover:bg-stone-50' => $customerTag === 'a'])>
                     <span class="grid size-10 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">{{ $order->user->initials() }}</span>
                     <span class="min-w-0"><span class="block truncate font-semibold text-stone-800">{{ $order->user->name }}</span><span class="block truncate text-xs text-stone-500">{{ $order->user->email }}</span></span>
-                </a>
+                </{{ $customerTag }}>
             </div>
 
             <div class="card p-5 text-sm">

@@ -25,7 +25,7 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Voucher</th><th>Manfaat</th><th>Pemakaian</th><th>Periode</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="kode">Voucher</x-admin.sort-link></th><th>Manfaat</th><th><x-admin.sort-link column="pemakaian" desc>Pemakaian</x-admin.sort-link></th><th><x-admin.sort-link column="berakhir">Periode</x-admin.sort-link></th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($vouchers as $voucher)
                             @php [$stateLabel, $stateClass] = Voucher::stateLabel($voucher->state($voucher->redemptions_count)); @endphp
@@ -66,7 +66,7 @@
                                 <td>
                                     <div class="flex justify-end gap-1">
                                         <a href="{{ route('admin.vouchers.edit', $voucher) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                                        <x-confirm-delete :action="route('admin.vouchers.destroy', $voucher)" message="Hapus voucher {{ $voucher->code }}? Pesanan yang sudah memakainya tidak berubah." />
+                                        <x-confirm-delete :action="route('admin.vouchers.destroy', $voucher)" title="Hapus voucher {{ $voucher->code }}?" message="Voucher tidak bisa dipakai lagi. Pesanan yang sudah memakainya tidak berubah." />
                                     </div>
                                 </td>
                             </tr>
@@ -74,9 +74,7 @@
                     </tbody>
                 </table>
             </div>
-            @if ($vouchers->hasPages())
-                <div class="border-t border-stone-100 p-4">{{ $vouchers->links() }}</div>
-            @endif
+            <x-admin.pagination :paginator="$vouchers" label="voucher" />
         @endif
     </div>
 </x-layouts.admin>

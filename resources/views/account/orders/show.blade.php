@@ -34,7 +34,9 @@
                     @endif
                 </p>
             </div>
-            <form method="POST" action="{{ route('account.orders.complete', $order) }}" onsubmit="return confirm('Pastikan paket sudah diterima dan isinya sesuai. Lanjutkan?')">
+            <form method="POST" action="{{ route('account.orders.complete', $order) }}"
+                  data-confirm-title="Pesanan sudah diterima?" data-confirm-ok="Ya, sudah diterima"
+                  data-confirm="Pastikan paket sudah sampai dan isinya sesuai. Pesanan akan ditandai selesai.">
                 @csrf
                 <button class="btn btn-ink w-full rounded-full sm:w-auto"><x-icon name="check-circle" class="size-4" /> Pesanan diterima</button>
             </form>

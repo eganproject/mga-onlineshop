@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import forms from './forms';
+import dialogs from './components/dialogs';
 import productForm from './components/product-form';
 import productPage from './components/product-page';
 import regionPicker from './components/region-picker';
@@ -13,6 +14,7 @@ import shareButtons from './components/share-buttons';
 window.Alpine = Alpine;
 
 Alpine.plugin(forms);
+Alpine.plugin(dialogs);
 
 /** Format angka ke rupiah, dipakai di komponen Alpine. */
 window.rupiah = (value) => 'Rp' + new Intl.NumberFormat('id-ID').format(value || 0);

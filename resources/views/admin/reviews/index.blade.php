@@ -84,7 +84,7 @@
                             </form>
                         @endunless
                         <button type="button" @click="reply = !reply" class="btn btn-ghost btn-sm"><x-icon name="chat" class="size-4" /> Balas</button>
-                        <x-confirm-delete :action="route('admin.reviews.destroy', $review)" message="Hapus ulasan ini secara permanen?" />
+                        <x-confirm-delete :action="route('admin.reviews.destroy', $review)" title="Hapus ulasan?" message="Ulasan dari {{ $review->user?->name ?? 'pelanggan' }} akan dihapus permanen dan rating produk dihitung ulang." />
                     </div>
                 </div>
 
@@ -101,8 +101,6 @@
             <x-empty-state icon="star" title="Tidak ada ulasan" description="Ulasan dari pembeli akan muncul di sini untuk dimoderasi." />
         @endforelse
 
-        @if ($reviews->hasPages())
-            <div class="border-t border-stone-100 p-4">{{ $reviews->links() }}</div>
-        @endif
+        <x-admin.pagination :paginator="$reviews" label="ulasan" />
     </div>
 </x-layouts.admin>

@@ -233,7 +233,8 @@
 
     @if ($editing)
         <form id="delete-product-form" method="POST" action="{{ route('admin.products.destroy', $product) }}" class="hidden"
-              onsubmit="return confirm(@js('Hapus produk '.$product->name.' beserta semua foto dan variannya?'))">
+              data-confirm-title="Hapus produk?" data-confirm-ok="Ya, hapus"
+              data-confirm="{{ $product->name }} beserta foto, varian, ulasan, dan riwayat stoknya akan dihapus permanen. Pesanan lama tetap tersimpan.">
             @csrf
             @method('DELETE')
         </form>

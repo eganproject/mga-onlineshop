@@ -6,14 +6,19 @@
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
         <x-admin.stat-card label="Total unit di gudang" :value="number_format($summary['units'], 0, ',', '.')" icon="archive" />
-        <x-admin.stat-card label="Produk stok menipis" :value="$summary['low']" icon="warning" tone="violet" :hint="'Stok ≤ '.$threshold.' unit'" />
-        <x-admin.stat-card label="Produk stok habis" :value="$summary['out']" icon="x-circle" tone="sky" hint="Tidak bisa dibeli pelanggan" />
+        <a href="{{ route('admin.stock.index', ['status' => 'menipis']) }}" class="block rounded-3xl transition hover:-translate-y-0.5">
+            <x-admin.stat-card label="Produk stok menipis" :value="$summary['low']" icon="warning" tone="violet" :hint="'Produk/varian aktif dengan stok ≤ '.$threshold.' unit'" />
+        </a>
+        <a href="{{ route('admin.stock.index', ['status' => 'habis']) }}" class="block rounded-3xl transition hover:-translate-y-0.5">
+            <x-admin.stat-card label="Produk stok habis" :value="$summary['out']" icon="x-circle" tone="sky" hint="Ada produk/varian aktif yang stoknya 0" />
+        </a>
     </div>
 
     <div class="card overflow-hidden"
          x-data="{ open: false, item: {}, mode: 'add' }"
          @adjust-stock.window="item = $event.detail; mode = 'add'; open = true; $nextTick(() => document.getElementById('adjust-qty')?.focus())">
         <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
+            <x-admin.keep-query />
             <div class="relative flex-1 sm:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau SKU..." class="input pl-10">
@@ -30,7 +35,7 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Produk / varian</th><th>SKU</th><th>Stok</th><th class="text-right">Aksi</th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="nama">Produk / varian</x-admin.sort-link></th><th class="hidden sm:table-cell">SKU</th><th><x-admin.sort-link column="stok">Stok</x-admin.sort-link></th><th class="text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($products as $product)
                             @php
@@ -40,10 +45,14 @@
                             @endphp
                             <tr class="bg-white">
                                 <td @if ($product->has_variants) colspan="2" @endif>
-                                    <div class="flex min-w-56 items-center gap-3">
+                                    <div class="flex min-w-0 items-center gap-3 sm:min-w-56">
                                         <x-product-image :product="$product" class="size-10 shrink-0 rounded-lg" />
                                         <div class="min-w-0">
-                                            <a href="{{ route('admin.products.edit', $product) }}" class="block truncate font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</a>
+                                            @can('catalog.manage')
+                                                <a href="{{ route('admin.products.edit', $product) }}" class="block truncate font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</a>
+                                            @else
+                                                <p class="truncate font-semibold text-stone-900">{{ $product->name }}</p>
+                                            @endcan
                                             <p class="text-xs text-stone-500">
                                                 {{ $product->category?->name ?? 'Tanpa kategori' }}
                                                 @unless ($product->is_active) · <span class="text-stone-400">Nonaktif</span>@endunless
@@ -61,7 +70,7 @@
                             @if ($product->has_variants)
                                 @foreach ($rows as $row)
                                     <tr class="bg-stone-50/40">
-                                        <td class="pl-16">
+                                        <td class="pl-8 sm:pl-16">
                                             <span class="inline-flex items-center gap-2 text-stone-700">
                                                 <x-icon name="swatch" class="size-4 text-stone-400" /> {{ $row['name'] }}
                                                 @unless ($row['active'])<span class="badge bg-stone-100 text-stone-500 ring-stone-500/20">Nonaktif</span>@endunless
@@ -75,7 +84,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="border-t border-stone-100 p-4">{{ $products->links() }}</div>
+            <x-admin.pagination :paginator="$products" label="produk" />
         @endif
 
         {{-- Modal penyesuaian stok --}}

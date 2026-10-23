@@ -2,7 +2,10 @@
     <x-admin.page-header :title="$customer->name" :back="route('admin.customers.index')">
         @can('customers.manage')
         <form method="POST" action="{{ route('admin.customers.toggle', $customer) }}"
-              onsubmit="return confirm(@js($customer->is_active ? 'Blokir akun ini? Pelanggan tidak akan bisa login.' : 'Aktifkan kembali akun ini?'))">
+              data-confirm-title="{{ $customer->is_active ? 'Blokir '.$customer->name.'?' : 'Aktifkan kembali akun?' }}"
+              data-confirm="{{ $customer->is_active ? 'Pelanggan tidak akan bisa login sampai akunnya diaktifkan lagi. Pesanan yang sudah ada tidak berubah.' : $customer->name.' bisa login dan berbelanja lagi.' }}"
+              data-confirm-ok="{{ $customer->is_active ? 'Ya, blokir' : 'Ya, aktifkan' }}"
+              data-confirm-tone="{{ $customer->is_active ? 'danger' : 'primary' }}">
             @csrf
             @method('PATCH')
             <button @class(['btn', 'btn-secondary text-rose-600' => $customer->is_active, 'btn-primary' => ! $customer->is_active])>
@@ -60,7 +63,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="border-t border-stone-100 p-4">{{ $orders->links() }}</div>
+                <x-admin.pagination :paginator="$orders" label="pesanan" />
             @endif
         </div>
     </div>

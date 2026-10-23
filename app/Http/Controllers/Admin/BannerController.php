@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,10 +12,24 @@ use Illuminate\View\View;
 
 class BannerController extends Controller
 {
-    public function index(): View
+    public const STATES = ['running' => 'Tayang', 'scheduled' => 'Terjadwal', 'ended' => 'Berakhir', 'inactive' => 'Disembunyikan'];
+
+    public function index(Request $request): View
     {
+        $state = array_key_exists($request->query('status'), self::STATES) ? $request->query('status') : null;
+
+        $query = Banner::query()
+            ->when($request->filled('q'), fn ($q) => $q->where('title', 'like', '%'.$request->string('q')->trim().'%'))
+            ->when($state === 'running', fn ($q) => $q->visible())
+            ->when($state === 'scheduled', fn ($q) => $q->where('is_active', true)->where('starts_at', '>', now()))
+            ->when($state === 'ended', fn ($q) => $q->where('is_active', true)->where('ends_at', '<', now()))
+            ->when($state === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->orderBy('sort_order')
+            ->latest('id');
+
         return view('admin.banners.index', [
-            'banners' => Banner::orderBy('sort_order')->latest('id')->get(),
+            'banners' => AdminList::paginate($query, $request, 15),
+            'state' => $state,
         ]);
     }
 

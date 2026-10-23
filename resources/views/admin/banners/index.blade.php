@@ -3,11 +3,34 @@
         <a href="{{ route('admin.banners.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Tambah banner</a>
     </x-admin.page-header>
 
+    @php $filtered = request()->filled('q') || $state; @endphp
+    @if ($banners->isNotEmpty() || $filtered)
+        <form method="GET" class="card mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+            <div class="relative max-w-xs flex-1">
+                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari judul banner..." class="input pl-10" aria-label="Cari banner">
+            </div>
+            <div class="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1">
+                <a href="{{ route('admin.banners.index', array_filter(['q' => request('q')])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => ! $state, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state])>Semua</a>
+                @foreach (\App\Http\Controllers\Admin\BannerController::STATES as $key => $label)
+                    <a href="{{ route('admin.banners.index', array_filter(['q' => request('q'), 'status' => $key])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => $state === $key, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state !== $key])>{{ $label }}</a>
+                @endforeach
+            </div>
+            @if ($state)<input type="hidden" name="status" value="{{ $state }}">@endif
+        </form>
+    @endif
+
     @if ($banners->isEmpty())
         <div class="card">
-            <x-empty-state icon="megaphone" title="Belum ada banner" description="Unggah banner untuk promo, koleksi baru, atau kode voucher.">
-                <a href="{{ route('admin.banners.create') }}" class="btn btn-primary">Tambah banner</a>
-            </x-empty-state>
+            @if ($filtered)
+                <x-empty-state icon="megaphone" title="Banner tidak ditemukan" description="Coba kata kunci lain atau pilih status lain.">
+                    <a href="{{ route('admin.banners.index') }}" class="btn btn-secondary">Hapus filter</a>
+                </x-empty-state>
+            @else
+                <x-empty-state icon="megaphone" title="Belum ada banner" description="Unggah banner untuk promo, koleksi baru, atau kode voucher.">
+                    <a href="{{ route('admin.banners.create') }}" class="btn btn-primary">Tambah banner</a>
+                </x-empty-state>
+            @endif
         </div>
     @else
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -44,11 +67,12 @@
                         </p>
                         <div class="flex gap-1 border-t border-stone-100 pt-3">
                             <a href="{{ route('admin.banners.edit', $banner) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> Edit</a>
-                            <x-confirm-delete :action="route('admin.banners.destroy', $banner)" message="Hapus banner {{ $banner->title }}?" class="ml-auto" />
+                            <x-confirm-delete :action="route('admin.banners.destroy', $banner)" title="Hapus banner?" message="Banner “{{ $banner->title }}” dan gambarnya akan dihapus permanen." class="ml-auto" />
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
+        <x-admin.pagination :paginator="$banners" label="banner" class="card mt-4 !border-t-0" />
     @endif
 </x-layouts.admin>

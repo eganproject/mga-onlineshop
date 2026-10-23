@@ -6,8 +6,15 @@
     </x-admin.page-header>
 
     <div class="card overflow-hidden">
-        <form method="GET" class="flex flex-wrap gap-3 border-b border-stone-100 p-4" x-data @change="$el.submit()">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:flex-wrap" x-data @change="$el.submit()">
             @if ($product)<input type="hidden" name="produk" value="{{ $product->id }}">@endif
+            @unless ($product)
+                <div class="relative flex-1 sm:max-w-xs">
+                    <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Produk, SKU, varian, catatan..." class="input pl-10" aria-label="Cari riwayat">
+                </div>
+            @endunless
+            <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()" placeholder="Semua tanggal" wrapper-class="sm:w-64" aria-label="Rentang tanggal" />
             <select name="jenis" class="input sm:w-52" x-searchable aria-label="Filter jenis">
                 <option value="">Semua jenis</option>
                 @foreach (\App\Enums\StockMovementType::cases() as $case)
@@ -17,7 +24,13 @@
         </form>
 
         @if ($movements->isEmpty())
-            <x-empty-state icon="clock" title="Belum ada riwayat" description="Perubahan stok akan tercatat di sini." />
+            @if (request()->hasAny(['q', 'from', 'to', 'jenis']))
+                <x-empty-state icon="clock" title="Tidak ada riwayat yang cocok" description="Ubah kata kunci, tanggal, atau jenis pergerakan.">
+                    <a href="{{ route('admin.stock.history', array_filter(['produk' => $product?->id])) }}" class="btn btn-secondary">Hapus filter</a>
+                </x-empty-state>
+            @else
+                <x-empty-state icon="clock" title="Belum ada riwayat" description="Perubahan stok akan tercatat di sini." />
+            @endif
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
@@ -28,7 +41,9 @@
                                 <td class="whitespace-nowrap text-xs text-stone-500">{{ $movement->created_at->translatedFormat('d M Y H:i') }}</td>
                                 <td>
                                     @if ($movement->product)
-                                        <a href="{{ route('admin.stock.history', ['produk' => $movement->product_id] + request()->except('produk', 'page')) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $movement->product->name }}</a>
+                                        <a href="{{ route('admin.stock.history', ['produk' => $movement->product_id] + request()->except('produk', 'page', 'q')) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $movement->product->name }}</a>
+                                    @else
+                                        <span class="italic text-stone-400">Produk sudah dihapus</span>
                                     @endif
                                     @if ($movement->variant_name)<p class="text-xs text-stone-500">{{ $movement->variant_name }}</p>@endif
                                 </td>
@@ -49,7 +64,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="border-t border-stone-100 p-4">{{ $movements->links() }}</div>
+            <x-admin.pagination :paginator="$movements" label="riwayat" />
         @endif
     </div>
 </x-layouts.admin>

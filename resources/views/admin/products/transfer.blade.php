@@ -114,10 +114,10 @@
     </div>
 
     {{-- Riwayat --}}
-    <div class="card mt-6 overflow-hidden">
+    <div id="riwayat" class="card mt-6 scroll-mt-24 overflow-hidden">
         <div class="border-b border-stone-100 px-6 py-4">
             <h2 class="font-bold text-stone-900">Riwayat impor</h2>
-            <p class="text-sm text-stone-500">10 impor terakhir. Riwayat lebih dari 30 hari dihapus otomatis.</p>
+            <p class="text-sm text-stone-500">Terbaru di atas. Riwayat lebih dari 30 hari dihapus otomatis.</p>
         </div>
         @if ($imports->isEmpty())
             <x-empty-state icon="archive" title="Belum ada impor" description="File yang Anda unggah akan muncul di sini." />
@@ -142,6 +142,7 @@
                     </tbody>
                 </table>
             </div>
+            <x-admin.pagination :paginator="$imports" label="impor" />
         @endif
     </div>
 </x-layouts.admin>

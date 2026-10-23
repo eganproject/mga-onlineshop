@@ -24,8 +24,10 @@ class DashboardController extends Controller
         $range = $range && array_key_exists($range, self::RANGES) ? $range : '30d';
         $period = ReportPeriod::fromPreset($range, $range === '90d' ? 'week' : 'day');
 
-        $summary = $reports->summary($period);
-        $previous = $reports->summary($period->previous());
+        // Angka penjualan & stok hanya dihitung untuk jabatan yang boleh melihatnya.
+        $canReports = $request->user()->can('reports.view');
+        $canStock = $request->user()->can('stock.manage');
+        $summary = $canReports ? $reports->summary($period) : null;
 
         $open = Order::query()
             ->whereIn('status', [OrderStatus::PendingPayment, OrderStatus::Paid, OrderStatus::Processing, OrderStatus::Shipped])
@@ -38,10 +40,10 @@ class DashboardController extends Controller
             'range' => $range,
             'period' => $period,
             'summary' => $summary,
-            'changes' => $reports->compare($summary, $previous),
-            'series' => $reports->timeseries($period),
-            'topProducts' => $reports->byProduct($period, 5),
-            'categories' => $reports->byCategory($period)->take(5),
+            'changes' => $canReports ? $reports->compare($summary, $reports->summary($period->previous())) : null,
+            'series' => $canReports ? $reports->timeseries($period) : null,
+            'topProducts' => $canReports ? $reports->byProduct($period, 5) : collect(),
+            'categories' => $canReports ? $reports->byCategory($period)->take(5) : collect(),
             'pipeline' => collect([OrderStatus::PendingPayment, OrderStatus::Paid, OrderStatus::Processing, OrderStatus::Shipped])
                 ->map(fn (OrderStatus $s) => ['status' => $s, 'count' => (int) ($open[$s->value] ?? 0)]),
             'customers' => [
@@ -50,8 +52,8 @@ class DashboardController extends Controller
             ],
             'ordersToday' => Order::whereDate('created_at', today())->count(),
             'recentOrders' => Order::with('user:id,name')->latest()->take(6)->get(),
-            'lowStock' => $lowStock->items(6),
-            'lowStockCount' => $lowStock->count(),
+            'lowStock' => $canStock ? $lowStock->items(6) : collect(),
+            'lowStockCount' => $canStock ? $lowStock->count() : 0,
         ]);
     }
 }

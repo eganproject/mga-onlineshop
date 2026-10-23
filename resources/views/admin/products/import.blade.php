@@ -71,12 +71,16 @@
                     @endif
                 </div>
                 <div class="flex shrink-0 gap-2">
-                    <form method="POST" action="{{ route('admin.imports.destroy', $import) }}">
+                    <form method="POST" action="{{ route('admin.imports.destroy', $import) }}"
+                          data-confirm-title="Batalkan impor?" data-confirm-ok="Ya, batalkan"
+                          data-confirm="File ini tidak akan diimpor. Data katalog tidak berubah.">
                         @csrf @method('DELETE')
                         <button class="btn btn-secondary">Batalkan</button>
                     </form>
                     @if ($import->canCommit())
-                        <form method="POST" action="{{ route('admin.imports.commit', $import) }}" x-data="{ busy: false }" @submit="busy = true">
+                        <form method="POST" action="{{ route('admin.imports.commit', $import) }}" x-data="{ busy: false }" @submit="busy = true"
+                              data-confirm-title="Impor sekarang?" data-confirm-ok="Ya, impor" data-confirm-tone="primary"
+                              data-confirm="{{ number_format($import->total_rows - $import->error_rows, 0, ',', '.') }} baris akan diterapkan ke {{ $isStock ? 'stok' : 'katalog' }}. Langkah ini tidak bisa dibatalkan otomatis.">
                             @csrf
                             <button class="btn btn-primary" :disabled="busy"><x-icon name="check" class="size-4" /> <span x-text="busy ? 'Mengimpor...' : 'Impor sekarang'">Impor sekarang</span></button>
                         </form>
@@ -173,7 +177,8 @@
 
     @if (in_array($import->status, [ImportStatus::Completed, ImportStatus::Failed], true))
         <div class="mt-6 flex justify-end">
-            <form method="POST" action="{{ route('admin.imports.destroy', $import) }}">
+            <form method="POST" action="{{ route('admin.imports.destroy', $import) }}"
+                  data-confirm-title="Hapus riwayat impor?" data-confirm="Hanya catatan impor ini yang dihapus. Data produk/stok tidak berubah.">
                 @csrf @method('DELETE')
                 <button class="btn btn-ghost btn-sm text-stone-500"><x-icon name="trash" class="size-3.5" /> Hapus riwayat ini</button>
             </form>

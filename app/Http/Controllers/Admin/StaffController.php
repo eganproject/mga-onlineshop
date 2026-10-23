@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Activity\ActivityLogger;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -23,7 +24,7 @@ class StaffController extends Controller
     public function index(Request $request): View
     {
         return view('admin.staff.index', [
-            'staff' => User::staff()
+            'staff' => AdminList::paginate(User::staff()
                 ->when($request->filled('q'), function ($q) use ($request) {
                     $term = $request->string('q')->trim()->value();
                     $q->where(fn ($q) => $q->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%"));
@@ -32,9 +33,7 @@ class StaffController extends Controller
                     ? $q->where(fn ($q) => $q->where('staff_role', $role)->orWhereNull('staff_role'))
                     : $q->where('staff_role', $role))
                 ->orderByDesc('is_active')
-                ->orderBy('name')
-                ->paginate(20)
-                ->withQueryString(),
+                ->orderBy('name'), $request, 25),
             'roles' => StaffRole::cases(),
         ]);
     }

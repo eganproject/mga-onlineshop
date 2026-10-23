@@ -4,7 +4,7 @@
         <a href="{{ route('admin.articles.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Tulis artikel</a>
     </x-admin.page-header>
 
-    @php($filters = array_filter(request()->only(['q', 'kategori'])))
+    @php($filters = array_filter(request()->only(['q', 'kategori', 'sort'])))
     <div class="card overflow-hidden">
         <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:items-center">
             @if ($state) <input type="hidden" name="status" value="{{ $state }}"> @endif
@@ -15,6 +15,7 @@
             @if ($categories->isNotEmpty())
                 <x-form.select name="kategori" :options="$categories" :selected="request('kategori')" placeholder="Semua kategori" wrapper-class="lg:w-56" x-on:change="$el.form.submit()" />
             @endif
+            <x-admin.sort-select class="lg:w-48" :options="['-diubah' => 'Terakhir diubah', '-terbit' => 'Tanggal terbit', 'judul' => 'Judul A–Z']" />
             <div class="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 lg:ml-auto">
                 <a href="{{ route('admin.articles.index', $filters) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => ! $state, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state])>Semua</a>
                 @foreach ($states as $key => $label)
@@ -24,7 +25,7 @@
         </form>
 
         @if ($articles->isEmpty())
-            <x-empty-state icon="newspaper" :title="$filters || $state ? 'Artikel tidak ditemukan' : 'Belum ada artikel'" description="Tulis artikel pertama, misalnya tips merawat baterai HP atau panduan memilih charger.">
+            <x-empty-state icon="newspaper" :title="request()->hasAny(['q', 'kategori']) || $state ? 'Artikel tidak ditemukan' : 'Belum ada artikel'" description="Tulis artikel pertama, misalnya tips merawat baterai HP atau panduan memilih charger.">
                 <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">Tulis artikel</a>
             </x-empty-state>
         @else
@@ -59,14 +60,12 @@
                         <div class="flex shrink-0 items-center gap-1">
                             <a href="{{ route('articles.show', $article) }}" target="_blank" class="btn btn-ghost btn-sm" title="{{ $article->isVisible() ? 'Lihat di toko' : 'Pratinjau' }}"><x-icon name="eye" class="size-4" /></a>
                             <a href="{{ route('admin.articles.edit', $article) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                            <x-confirm-delete :action="route('admin.articles.destroy', $article)" message="Hapus artikel “{{ $article->title }}”? Gambar di dalamnya ikut terhapus." />
+                            <x-confirm-delete :action="route('admin.articles.destroy', $article)" title="Hapus artikel?" message="Artikel “{{ $article->title }}” beserta gambar di dalamnya akan dihapus permanen." />
                         </div>
                     </li>
                 @endforeach
             </ul>
-            @if ($articles->hasPages())
-                <div class="border-t border-stone-100 p-4">{{ $articles->links() }}</div>
-            @endif
+            <x-admin.pagination :paginator="$articles" label="artikel" />
         @endif
     </div>
 </x-layouts.admin>

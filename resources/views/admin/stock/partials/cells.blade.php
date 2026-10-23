@@ -1,4 +1,4 @@
-<td class="whitespace-nowrap text-xs text-stone-500">{{ $row['sku'] ?? '—' }}</td>
+<td class="hidden whitespace-nowrap text-xs text-stone-500 sm:table-cell">{{ $row['sku'] ?? '—' }}</td>
 <td>
     <span @class([
         'badge',
@@ -15,6 +15,6 @@
                 'label' => $row['variant'] ? $product->name.' — '.$row['name'] : $product->name,
                 'stock' => $row['stock'],
             ]))">
-        <x-icon name="pencil" class="size-4" /> Ubah
+        <x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Ubah</span>
     </button>
 </td>

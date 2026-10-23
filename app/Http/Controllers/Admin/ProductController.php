@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Catalog\ProductService;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class ProductController extends Controller
     {
         $threshold = config('shop.low_stock_threshold');
 
-        $products = Product::with('category')
+        $query = Product::with('category')
             ->withCount('variants')
             ->search($request->string('q')->trim()->value() ?: null)
             ->when($request->filled('kategori'), function ($q) use ($request) {
@@ -33,10 +34,16 @@ class ProductController extends Controller
             ->when($request->query('status') === 'stok-menipis', fn ($q) => $q->where(fn ($q) => $q
                 ->where('stock', '<=', $threshold)
                 ->orWhereHas('variants', fn ($v) => $v->where('is_active', true)->where('stock', '<=', $threshold))))
-            ->when($request->query('status') === 'stok-habis', fn ($q) => $q->where('stock', 0))
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+            ->when($request->query('status') === 'stok-habis', fn ($q) => $q->where('stock', 0));
+
+        AdminList::sort($query, $request, [
+            'nama' => 'name',
+            'harga' => 'price',
+            'stok' => 'stock',
+            'terbaru' => fn ($q, $dir) => $q->orderBy('created_at', $dir)->orderBy('id', $dir),
+        ], '-terbaru');
+
+        $products = AdminList::paginate($query, $request);
 
         return view('admin.products.index', [
             'products' => $products,

@@ -67,9 +67,16 @@ class IntegrationController extends Controller
 
     public function index(): View
     {
+        // Sekali baca untuk semua kolom (cache database = satu query per baca).
+        try {
+            $stored = $this->settings->stored();
+        } catch (\Throwable) {
+            $stored = [];
+        }
+
         $field = fn (string $key) => [
             'value' => config($key),
-            'stored' => $this->settings->isStored($key),
+            'stored' => array_key_exists($key, $stored),
             'default' => $this->settings->default($key),
         ];
 

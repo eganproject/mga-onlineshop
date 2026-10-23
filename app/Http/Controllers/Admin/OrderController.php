@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Orders\OrderService;
 use App\Services\Shipping\TrackingService;
+use App\Support\AdminList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,13 +23,17 @@ class OrderController extends Controller
     {
         $status = OrderStatus::tryFrom((string) $request->query('status'));
 
-        $orders = $this->filtered($request)
+        $query = $this->filtered($request)
             ->with('user')
             ->withCount('items')
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+            ->when($status, fn ($q) => $q->where('status', $status));
+
+        AdminList::sort($query, $request, [
+            'tanggal' => fn ($q, $dir) => $q->orderBy('created_at', $dir)->orderBy('id', $dir),
+            'total' => 'total',
+        ], '-tanggal');
+
+        $orders = AdminList::paginate($query, $request);
 
         // Jumlah per status mengikuti filter lain (pencarian, tanggal, kurir).
         $counts = $this->filtered($request)

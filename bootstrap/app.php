@@ -27,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Webhook dari payment gateway tidak membawa token CSRF.
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
+
+        // Preferensi tampilan sidebar admin (dibaca Blade, ditulis JS) tidak perlu dienkripsi.
+        $middleware->encryptCookies(except: ['admin_sidebar']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

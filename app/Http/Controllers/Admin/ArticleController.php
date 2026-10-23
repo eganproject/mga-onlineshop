@@ -9,6 +9,7 @@ use App\Models\ArticleCategory;
 use App\Models\Product;
 use App\Services\Content\ArticleSanitizer;
 use App\Services\Content\ArticleService;
+use App\Support\AdminList;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,16 +27,21 @@ class ArticleController extends Controller
     {
         $state = array_key_exists($request->query('status'), self::STATES) ? $request->query('status') : null;
 
-        $articles = Article::query()
+        $query = Article::query()
             ->with(['category:id,name', 'author:id,name'])
             ->search($request->string('q')->trim()->value() ?: null)
             ->when($request->filled('kategori'), fn ($q) => $q->where('article_category_id', $request->integer('kategori')))
             ->when($state === 'draft', fn ($q) => $q->where(fn ($q) => $q->where('status', ArticleStatus::Draft)->orWhereNull('published_at')))
             ->when($state === 'scheduled', fn ($q) => $q->where('status', ArticleStatus::Published)->where('published_at', '>', now()))
-            ->when($state === 'published', fn ($q) => $q->published())
-            ->latest('updated_at')
-            ->paginate(15)
-            ->withQueryString();
+            ->when($state === 'published', fn ($q) => $q->published());
+
+        AdminList::sort($query, $request, [
+            'judul' => 'title',
+            'terbit' => fn ($q, $dir) => $q->orderBy('published_at', $dir)->orderBy('id', $dir),
+            'diubah' => fn ($q, $dir) => $q->orderBy('updated_at', $dir)->orderBy('id', $dir),
+        ], '-diubah');
+
+        $articles = AdminList::paginate($query, $request);
 
         return view('admin.articles.index', [
             'articles' => $articles,

@@ -3,10 +3,13 @@
         'auth' => 'bg-stone-100 text-stone-600', 'orders' => 'bg-sky-50 text-sky-600', 'products' => 'bg-brand-50 text-brand-600',
         'categories' => 'bg-brand-50 text-brand-600', 'stock' => 'bg-amber-50 text-amber-600', 'vouchers' => 'bg-rose-50 text-rose-600', 'banners' => 'bg-rose-50 text-rose-600', 'reviews' => 'bg-violet-50 text-violet-600',
         'customers' => 'bg-emerald-50 text-emerald-600', 'settings' => 'bg-stone-900 text-white', 'staff' => 'bg-stone-900 text-white',
+        'articles' => 'bg-sky-50 text-sky-600', 'article-categories' => 'bg-sky-50 text-sky-600', 'storefront' => 'bg-rose-50 text-rose-600',
+        'imports' => 'bg-brand-50 text-brand-600', 'integrations' => 'bg-stone-900 text-white',
     ];
     $groupIcon = [
         'auth' => 'lock', 'orders' => 'receipt', 'products' => 'cube', 'categories' => 'tag', 'stock' => 'archive', 'vouchers' => 'ticket', 'banners' => 'megaphone',
         'reviews' => 'star', 'customers' => 'users', 'settings' => 'cog', 'staff' => 'shield', 'profile' => 'user',
+        'articles' => 'newspaper', 'article-categories' => 'list-bullet', 'storefront' => 'photo', 'imports' => 'download', 'integrations' => 'link',
     ];
     $format = function ($value) use (&$format) {
         if (is_array($value)) {
@@ -103,7 +106,7 @@
                     </li>
                 @endforeach
             </ul>
-            <div class="border-t border-stone-100 p-4">{{ $logs->links() }}</div>
+            <x-admin.pagination :paginator="$logs" label="aktivitas" />
         @endif
     </div>
 </x-layouts.admin>

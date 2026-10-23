@@ -19,6 +19,7 @@
 
     <div class="card overflow-hidden">
         <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:items-end">
+            <x-admin.keep-query />
             @if ($status)<input type="hidden" name="status" value="{{ $status->value }}">@endif
             <div class="relative flex-1 lg:max-w-sm">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -58,27 +59,33 @@
                 <table class="table-base">
                     <thead class="bg-stone-50/70"><tr>
                         <th class="w-10"><input type="checkbox" class="checkbox" aria-label="Pilih semua"
+                            :checked="selected.length && selected.length === $root.querySelectorAll('input[name=\'orders[]\']').length"
                             @change="selected = $event.target.checked ? [...$root.querySelectorAll('input[name=\'orders[]\']')].map(i => i.value) : []"></th>
-                        <th>Pesanan</th><th>Pelanggan</th><th>Item</th><th>Total</th><th>Pengiriman</th><th>Status</th><th></th>
+                        <th><x-admin.sort-link column="tanggal" desc>Pesanan</x-admin.sort-link></th><th class="hidden md:table-cell">Pelanggan</th><th class="hidden lg:table-cell">Item</th><th><x-admin.sort-link column="total" desc>Total</x-admin.sort-link></th><th class="hidden lg:table-cell">Pengiriman</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th>
                     </tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($orders as $order)
                             <tr class="hover:bg-stone-50/50">
                                 <td><input type="checkbox" name="orders[]" value="{{ $order->id }}" x-model="selected" class="checkbox" aria-label="Pilih {{ $order->code }}"></td>
-                                <td class="whitespace-nowrap"><p class="font-semibold text-stone-900">{{ $order->code }}</p><p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</p></td>
-                                <td><p class="font-medium text-stone-800">{{ $order->user->name }}</p><p class="text-xs text-stone-500">{{ $order->user->email }}</p></td>
-                                <td>{{ $order->items_count }}</td>
+                                <td class="whitespace-nowrap">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a>
+                                    <p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
+                                    <p class="mt-1 text-xs text-stone-600 md:hidden">{{ $order->user->name }}</p>
+                                    <div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div>
+                                </td>
+                                <td class="hidden md:table-cell"><p class="font-medium text-stone-800">{{ $order->user->name }}</p><p class="text-xs text-stone-500">{{ $order->user->email }}</p></td>
+                                <td class="hidden lg:table-cell">{{ $order->items_count }}</td>
                                 <td class="whitespace-nowrap font-semibold">@rupiah($order->total)</td>
-                                <td class="whitespace-nowrap text-xs">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>
-                                <td><x-order-status :status="$order->status" /></td>
-                                <td class="text-right"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-secondary btn-sm">Detail</a></td>
+                                <td class="hidden whitespace-nowrap text-xs lg:table-cell">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>
+                                <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>
+                                <td class="hidden text-right sm:table-cell"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-secondary btn-sm">Detail</a></td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
             </form>
-            <div class="border-t border-stone-100 p-4">{{ $orders->links() }}</div>
+            <x-admin.pagination :paginator="$orders" label="pesanan" />
         @endif
     </div>
 </x-layouts.admin>

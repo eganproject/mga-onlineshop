@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ArticleCategory;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,10 +13,10 @@ use Illuminate\View\View;
 
 class ArticleCategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         return view('admin.article-categories.index', [
-            'categories' => ArticleCategory::withCount('articles')->orderBy('sort_order')->orderBy('name')->get(),
+            'categories' => $this->list($request),
             'category' => new ArticleCategory(['sort_order' => 0]),
         ]);
     }
@@ -27,10 +28,10 @@ class ArticleCategoryController extends Controller
         return redirect()->route('admin.article-categories.index')->with('success', 'Kategori artikel ditambahkan.');
     }
 
-    public function edit(ArticleCategory $articleCategory): View
+    public function edit(Request $request, ArticleCategory $articleCategory): View
     {
         return view('admin.article-categories.index', [
-            'categories' => ArticleCategory::withCount('articles')->orderBy('sort_order')->orderBy('name')->get(),
+            'categories' => $this->list($request),
             'category' => $articleCategory,
         ]);
     }
@@ -64,5 +65,15 @@ class ArticleCategoryController extends Controller
         $data['sort_order'] ??= 0;
 
         return $data;
+    }
+
+    private function list(Request $request)
+    {
+        return AdminList::paginate(
+            ArticleCategory::withCount('articles')
+                ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q')->trim().'%'))
+                ->orderBy('sort_order')->orderBy('name'),
+            $request, 25, key: 'admin.article-categories',
+        );
     }
 }

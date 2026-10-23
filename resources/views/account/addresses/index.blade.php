@@ -24,7 +24,7 @@
                             <button class="btn btn-ghost btn-sm"><x-icon name="check" class="size-4" /> Jadikan utama</button>
                         </form>
                     @endunless
-                    <x-confirm-delete :action="route('account.addresses.destroy', $address)" message="Hapus alamat ini?" class="ml-auto" />
+                    <x-confirm-delete :action="route('account.addresses.destroy', $address)" title="Hapus alamat?" message="Alamat {{ $address->label ?? 'ini' }} akan dihapus dari buku alamat Anda." class="ml-auto" />
                 </div>
             </div>
         @empty

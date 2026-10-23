@@ -6,6 +6,7 @@ use App\Enums\ReviewStatus;
 use App\Http\Controllers\Controller;
 use App\Models\ProductReview;
 use App\Services\Reviews\ReviewService;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class ReviewController extends Controller
         $rating = $request->integer('rating');
 
         return view('admin.reviews.index', [
-            'reviews' => ProductReview::with(['product', 'user'])
+            'reviews' => AdminList::paginate(ProductReview::with(['product', 'user'])
                 ->when($status, fn ($q) => $q->where('status', $status))
                 ->when($rating >= 1 && $rating <= 5, fn ($q) => $q->where('rating', $rating))
                 ->when($request->filled('q'), function ($q) use ($request) {
@@ -29,9 +30,7 @@ class ReviewController extends Controller
                         ->orWhereHas('product', fn ($p) => $p->where('name', 'like', "%{$term}%"))
                         ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$term}%")));
                 })
-                ->latest()
-                ->paginate(15)
-                ->withQueryString(),
+                ->latest(), $request),
             'counts' => ProductReview::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status'),
             'activeStatus' => $status,
         ]);

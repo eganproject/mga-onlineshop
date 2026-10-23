@@ -62,7 +62,7 @@
                                 <td>
                                     <div class="flex justify-end gap-1">
                                         <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                                        <x-confirm-delete :action="route('admin.categories.destroy', $category)" message="Hapus kategori {{ $category->name }}? Produk & subkategorinya tidak ikut terhapus." />
+                                        <x-confirm-delete :action="route('admin.categories.destroy', $category)" title="Hapus kategori {{ $category->name }}?" message="Produk & subkategori di dalamnya tidak ikut terhapus, hanya jadi tanpa kategori induk." />
                                     </div>
                                 </td>
                             </tr>
@@ -70,6 +70,7 @@
                     </tbody>
                 </table>
             </div>
+            <x-admin.pagination :paginator="$paginator" :label="$search ? 'kategori' : 'kategori induk'" />
         @endif
     </div>
 </x-layouts.admin>

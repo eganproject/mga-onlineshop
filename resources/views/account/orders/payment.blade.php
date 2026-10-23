@@ -69,12 +69,15 @@
                 <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-stone-200 pt-5 text-sm">
                     @if ($payment && $canRegenerate)
                         <form method="POST" action="{{ route('account.orders.payment.regenerate', $order) }}"
-                              onsubmit="return confirm('Buat link pembayaran baru? Kode bayar / nomor VA sebelumnya tidak bisa dipakai lagi.')">
+                              data-confirm-title="Ganti metode pembayaran?" data-confirm-ok="Ya, buat baru"
+                              data-confirm="Link pembayaran baru akan dibuat. Kode bayar / nomor VA sebelumnya tidak bisa dipakai lagi.">
                             @csrf
                             <button class="link-underline font-semibold text-stone-600 hover:text-ink">Ganti metode pembayaran</button>
                         </form>
                     @endif
-                    <form method="POST" action="{{ route('account.orders.cancel', $order) }}" onsubmit="return confirm('Batalkan pesanan ini?')">
+                    <form method="POST" action="{{ route('account.orders.cancel', $order) }}"
+                          data-confirm-title="Batalkan pesanan?" data-confirm-ok="Ya, batalkan" data-confirm-tone="danger"
+                          data-confirm="Pesanan {{ $order->code }} akan dibatalkan dan tidak bisa dibayar lagi.">
                         @csrf
                         <button class="link-underline font-semibold text-stone-500 hover:text-rose-600">Batalkan pesanan</button>
                     </form>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Support\AdminList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -18,12 +19,17 @@ class ActivityLogController extends Controller
         'orders' => 'Pesanan',
         'products' => 'Produk',
         'categories' => 'Kategori',
+        'imports' => 'Impor / ekspor',
         'stock' => 'Stok',
         'vouchers' => 'Voucher',
         'banners' => 'Banner',
+        'storefront' => 'Tampilan beranda',
+        'articles' => 'Artikel',
+        'article-categories' => 'Kategori artikel',
         'reviews' => 'Ulasan',
         'customers' => 'Pelanggan',
         'settings' => 'Pengaturan',
+        'integrations' => 'Integrasi',
         'staff' => 'Staf',
         'profile' => 'Profil',
     ];
@@ -35,7 +41,7 @@ class ActivityLogController extends Controller
         $group = $request->query('grup');
 
         return view('admin.activity.index', [
-            'logs' => ActivityLog::query()
+            'logs' => AdminList::paginate(ActivityLog::query()
                 ->with('user:id,name,staff_role,role')
                 ->when($request->filled('staf'), fn ($q) => $q->where('user_id', $request->integer('staf')))
                 ->when(is_string($group) && array_key_exists($group, self::GROUPS), fn ($q) => $q->where('action', 'like', "{$group}.%"))
@@ -46,9 +52,7 @@ class ActivityLogController extends Controller
                 ->when($from, fn ($q) => $q->where('created_at', '>=', $from->startOfDay()))
                 ->when($to, fn ($q) => $q->where('created_at', '<=', $to->endOfDay()))
                 ->latest('created_at')
-                ->latest('id')
-                ->paginate(30)
-                ->withQueryString(),
+                ->latest('id'), $request, 25),
             'staff' => User::staff()->orderBy('name')->get(['id', 'name']),
             'groups' => self::GROUPS,
         ]);

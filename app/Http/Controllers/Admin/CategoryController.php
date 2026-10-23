@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,15 +19,18 @@ class CategoryController extends Controller
     {
         $search = $request->string('q')->trim()->value();
 
-        // Tampilkan sebagai pohon: kategori induk lalu subkategorinya.
-        $categories = $search
-            ? Category::withCount('products')->with('parent')->where('name', 'like', "%{$search}%")->orderBy('name')->get()
-            : Category::root()->withCount('products')
+        // Tampilkan sebagai pohon: kategori induk (dipaginasi) lalu subkategorinya.
+        $paginator = $search
+            ? AdminList::paginate(Category::withCount('products')->with('parent')->where('name', 'like', "%{$search}%")->orderBy('name'), $request)
+            : AdminList::paginate(Category::root()->withCount('products')
                 ->with(['children' => fn ($q) => $q->withCount('products')])
-                ->orderBy('sort_order')->orderBy('name')->get()
-                ->flatMap(fn (Category $c) => [$c, ...$c->children->each->setRelation('parent', $c)]);
+                ->orderBy('sort_order')->orderBy('name'), $request);
 
-        return view('admin.categories.index', ['categories' => $categories, 'search' => $search]);
+        $categories = $search
+            ? $paginator->getCollection()
+            : $paginator->getCollection()->flatMap(fn (Category $c) => [$c, ...$c->children->each->setRelation('parent', $c)]);
+
+        return view('admin.categories.index', ['categories' => $categories, 'paginator' => $paginator, 'search' => $search]);
     }
 
     public function create(): View

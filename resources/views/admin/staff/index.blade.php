@@ -54,7 +54,10 @@
                                         <a href="{{ route('admin.staff.edit', $member) }}" class="btn btn-secondary btn-sm">Ubah</a>
                                         @unless ($member->is(auth()->user()))
                                             <form method="POST" action="{{ route('admin.staff.toggle', $member) }}"
-                                                  onsubmit="return confirm(@js($member->is_active ? 'Nonaktifkan akun '.$member->name.'? Ia langsung keluar dan tidak bisa login.' : 'Aktifkan kembali akun '.$member->name.'?'))">
+                                                  data-confirm-title="{{ $member->is_active ? 'Nonaktifkan '.$member->name.'?' : 'Aktifkan kembali '.$member->name.'?' }}"
+                                                  data-confirm="{{ $member->is_active ? 'Ia langsung keluar dari panel admin dan tidak bisa login lagi.' : 'Ia bisa login lagi ke panel admin sesuai jabatannya.' }}"
+                                                  data-confirm-ok="{{ $member->is_active ? 'Ya, nonaktifkan' : 'Ya, aktifkan' }}"
+                                                  data-confirm-tone="{{ $member->is_active ? 'danger' : 'primary' }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button @class(['btn btn-sm', 'btn-ghost text-rose-600 hover:bg-rose-50' => $member->is_active, 'btn-secondary' => ! $member->is_active])>
@@ -69,7 +72,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="border-t border-stone-100 p-4">{{ $staff->links() }}</div>
+            <x-admin.pagination :paginator="$staff" label="staf" />
         @endif
     </div>
 

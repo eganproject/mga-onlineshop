@@ -2,19 +2,31 @@
     <x-admin.page-header title="Pelanggan" description="Daftar pelanggan yang terdaftar di toko." />
 
     <div class="card overflow-hidden">
-        <form method="GET" class="border-b border-stone-100 p-4">
-            <div class="relative max-w-sm">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
+            <x-admin.keep-query />
+            <div class="relative flex-1 sm:max-w-sm">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="Nama, email, atau no. HP..." class="input pl-10">
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Nama, email, atau no. HP..." class="input pl-10" aria-label="Cari pelanggan">
             </div>
+            <select name="status" class="input sm:w-44" x-searchable aria-label="Filter status">
+                <option value="">Semua status</option>
+                <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
+                <option value="diblokir" @selected(request('status') === 'diblokir')>Diblokir</option>
+            </select>
         </form>
 
         @if ($customers->isEmpty())
-            <x-empty-state icon="users" title="Belum ada pelanggan" description="Pelanggan yang mendaftar akan muncul di sini." />
+            @if (request()->hasAny(['q', 'status']))
+                <x-empty-state icon="search" title="Pelanggan tidak ditemukan" description="Coba kata kunci lain atau hapus filter.">
+                    <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary">Hapus filter</a>
+                </x-empty-state>
+            @else
+                <x-empty-state icon="users" title="Belum ada pelanggan" description="Pelanggan yang mendaftar akan muncul di sini." />
+            @endif
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Pelanggan</th><th>No. HP</th><th>Pesanan</th><th>Total belanja</th><th>Status</th><th></th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="nama">Pelanggan</x-admin.sort-link></th><th>No. HP</th><th><x-admin.sort-link column="pesanan" desc>Pesanan</x-admin.sort-link></th><th><x-admin.sort-link column="belanja" desc>Total belanja</x-admin.sort-link></th><th><x-admin.sort-link column="terdaftar" desc>Terdaftar</x-admin.sort-link></th><th>Status</th><th></th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($customers as $customer)
                             <tr class="hover:bg-stone-50/50">
@@ -27,6 +39,7 @@
                                 <td class="whitespace-nowrap">{{ $customer->phone ?? '—' }}</td>
                                 <td>{{ $customer->orders_count }}</td>
                                 <td class="whitespace-nowrap font-semibold">@rupiah($customer->total_spent)</td>
+                                <td class="whitespace-nowrap text-xs text-stone-500">{{ $customer->created_at->translatedFormat('d M Y') }}</td>
                                 <td>
                                     @if ($customer->is_active)
                                         <span class="badge bg-emerald-50 text-emerald-700 ring-emerald-600/20">Aktif</span>
@@ -40,7 +53,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="border-t border-stone-100 p-4">{{ $customers->links() }}</div>
+            <x-admin.pagination :paginator="$customers" label="pelanggan" />
         @endif
     </div>
 </x-layouts.admin>

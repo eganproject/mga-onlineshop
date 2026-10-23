@@ -17,11 +17,12 @@
                             </div>
                             <div class="flex shrink-0 gap-1">
                                 <a href="{{ route('admin.article-categories.edit', $item) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                                <x-confirm-delete :action="route('admin.article-categories.destroy', $item)" message="Hapus kategori {{ $item->name }}? Artikelnya tetap ada, hanya jadi tanpa kategori." />
+                                <x-confirm-delete :action="route('admin.article-categories.destroy', $item)" title="Hapus kategori {{ $item->name }}?" message="Artikelnya tetap ada, hanya jadi tanpa kategori." />
                             </div>
                         </li>
                     @endforeach
                 </ul>
+                <x-admin.pagination :paginator="$categories" label="kategori" />
             @endif
         </div>
 

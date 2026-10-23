@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\VoucherType;
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
+use App\Support\AdminList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -33,10 +34,16 @@ class VoucherController extends Controller
             ->when($state === 'running', fn ($q) => $q->running())
             ->when($state === 'scheduled', fn ($q) => $q->where('is_active', true)->where('starts_at', '>', now()))
             ->when($state === 'ended', fn ($q) => $q->where('ends_at', '<', now()))
-            ->when($state === 'inactive', fn ($q) => $q->where('is_active', false))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->when($state === 'inactive', fn ($q) => $q->where('is_active', false));
+
+        AdminList::sort($vouchers, $request, [
+            'kode' => 'code',
+            'pemakaian' => 'redemptions_count',
+            'berakhir' => fn ($q, $dir) => $q->orderByRaw('ends_at is null '.($dir === 'asc' ? 'asc' : 'desc'))->orderBy('ends_at', $dir),
+            'terbaru' => fn ($q, $dir) => $q->orderBy('created_at', $dir)->orderBy('id', $dir),
+        ], '-terbaru');
+
+        $vouchers = AdminList::paginate($vouchers, $request);
 
         return view('admin.vouchers.index', compact('vouchers', 'search', 'state'));
     }
