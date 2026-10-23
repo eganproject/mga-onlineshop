@@ -2,15 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Enums\StockMovementType;
 use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Catalog\StockService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
+    public function __construct(private readonly StockService $stock) {}
+
     public function run(): void
     {
         User::updateOrCreate(['email' => 'admin@mga.test'], [
@@ -91,19 +95,65 @@ class DatabaseSeeder extends Seeder
             ]);
 
             foreach ($products as [$name, $price, $compare, $weight, $featured]) {
-                Product::updateOrCreate(['slug' => Str::slug($name)], [
-                    'category_id' => $category->id,
+                $product = Product::updateOrCreate(['slug' => Str::slug($name)], [
+                    'category_id' => $this->subcategoryFor($category, $name)->id,
                     'name' => $name,
                     'sku' => 'MGA-'.Str::upper(Str::substr(md5($name), 0, 6)),
                     'description' => "{$name} berkualitas tinggi.\n\n• Produk original\n• Garansi toko 7 hari\n• Siap kirim hari ini",
                     'price' => $price,
                     'compare_at_price' => $compare,
-                    'stock' => random_int(0, 4) === 0 ? random_int(1, 4) : random_int(10, 80),
                     'weight' => $weight,
                     'is_active' => true,
                     'is_featured' => $featured,
                 ]);
+
+                if (! $product->wasRecentlyCreated) {
+                    continue;
+                }
+
+                if (isset(self::VARIANTS[$name])) {
+                    [$label, $variants] = self::VARIANTS[$name];
+                    $product->update(['variant_label' => $label]);
+
+                    foreach ($variants as $position => [$variantName, $variantPrice]) {
+                        $variant = $product->variants()->create([
+                            'name' => $variantName,
+                            'sku' => $product->sku.'-'.Str::upper(Str::slug($variantName, '')),
+                            'price' => $variantPrice ?? $price,
+                            'compare_at_price' => $compare ? $compare + (($variantPrice ?? $price) - $price) : null,
+                            'is_active' => true,
+                            'sort_order' => $position,
+                        ]);
+                        $this->stock->adjust($product, $variant, random_int(0, 5) === 0 ? 0 : random_int(5, 40), StockMovementType::Initial);
+                    }
+                } else {
+                    $this->stock->adjust($product, null, random_int(0, 4) === 0 ? random_int(1, 4) : random_int(10, 80), StockMovementType::Initial);
+                }
             }
         }
+    }
+
+    /** Contoh varian: nama produk => [judul pilihan, [[nama, harga|null]]]. */
+    private const VARIANTS = [
+        'Casing iPhone 15 Clear MagSafe' => ['Tipe HP', [['iPhone 15', null], ['iPhone 15 Plus', null], ['iPhone 15 Pro', 99000], ['iPhone 15 Pro Max', 99000]]],
+        'Casing Samsung A55 Shockproof' => ['Warna', [['Hitam', null], ['Biru Navy', null], ['Transparan', null]]],
+        'Kabel USB-C to USB-C 100W 1M' => ['Panjang', [['1 meter', null], ['2 meter', 79000]]],
+        'TWS Earbuds ANC Pro' => ['Warna', [['Hitam', null], ['Putih', null]]],
+    ];
+
+    /** Produk casing masuk ke subkategori per merek. */
+    private function subcategoryFor(Category $category, string $productName): Category
+    {
+        if ($category->slug !== 'casing-hp') {
+            return $category;
+        }
+
+        $brand = collect(['iPhone', 'Samsung', 'Xiaomi'])->first(fn ($b) => str_contains($productName, $b)) ?? 'Lainnya';
+
+        return Category::updateOrCreate(['slug' => 'casing-'.Str::slug($brand)], [
+            'parent_id' => $category->id,
+            'name' => "Casing {$brand}",
+            'is_active' => true,
+        ]);
     }
 }

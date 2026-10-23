@@ -5,11 +5,14 @@ namespace App\Services\Orders;
 use App\Contracts\PaymentGateway;
 use App\Data\ShippingRate;
 use App\Enums\OrderStatus;
+use App\Enums\StockMovementType;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\Cart\CartService;
+use App\Services\Catalog\StockService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -19,6 +22,7 @@ class CheckoutService
     public function __construct(
         private readonly CartService $cart,
         private readonly PaymentGateway $payments,
+        private readonly StockService $stock,
     ) {}
 
     /**
@@ -34,7 +38,9 @@ class CheckoutService
         }
 
         $order = DB::transaction(function () use ($user, $address, $rate, $notes, $lines) {
-            $products = Product::whereKey($lines->pluck('product.id'))->lockForUpdate()->get()->keyBy('id');
+            // Kunci baris produk & varian agar dua pembeli tidak mengambil stok yang sama.
+            $products = Product::whereKey($lines->pluck('product.id')->unique())->lockForUpdate()->get()->keyBy('id');
+            $variants = ProductVariant::whereKey($lines->pluck('variant.id')->filter())->lockForUpdate()->get()->keyBy('id');
 
             $subtotal = 0;
             $weight = 0;
@@ -42,27 +48,38 @@ class CheckoutService
 
             foreach ($lines as $line) {
                 $product = $products->get($line->product->id);
+                $variant = $line->variant ? $variants->get($line->variant->id) : null;
+                $available = $variant ? ($variant->is_active ? $variant->stock : 0) : $product?->stock;
 
-                if (! $product || ! $product->is_active || $product->stock < $line->quantity) {
+                if (! $product || ! $product->is_active || ($line->variant && ! $variant) || $available < $line->quantity) {
+                    $name = $line->variant ? "{$line->product->name} ({$line->variant->name})" : $line->product->name;
+
                     throw ValidationException::withMessages([
-                        'cart' => "Stok {$line->product->name} tidak mencukupi. Silakan perbarui keranjang.",
+                        'cart' => "Stok {$name} tidak mencukupi. Silakan perbarui keranjang.",
                     ]);
                 }
 
-                $product->decrement('stock', $line->quantity);
-
-                $lineSubtotal = $product->price * $line->quantity;
+                $price = $variant?->price ?? $product->price;
+                $unitWeight = $variant?->weight ?: $product->weight;
+                $lineSubtotal = $price * $line->quantity;
                 $subtotal += $lineSubtotal;
-                $weight += $product->weight * $line->quantity;
+                $weight += $unitWeight * $line->quantity;
 
                 $items[] = [
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'sku' => $product->sku,
-                    'price' => $product->price,
+                    'product' => $product,
+                    'variant' => $variant,
                     'quantity' => $line->quantity,
-                    'weight' => $product->weight,
-                    'subtotal' => $lineSubtotal,
+                    'attributes' => [
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variant?->id,
+                        'product_name' => $product->name,
+                        'variant_name' => $variant?->name,
+                        'sku' => $variant?->sku ?: $product->sku,
+                        'price' => $price,
+                        'quantity' => $line->quantity,
+                        'weight' => $unitWeight,
+                        'subtotal' => $lineSubtotal,
+                    ],
                 ];
             }
 
@@ -83,7 +100,14 @@ class CheckoutService
                 'notes' => $notes,
             ]);
 
-            $order->items()->createMany($items);
+            $order->items()->createMany(array_column($items, 'attributes'));
+
+            foreach ($items as $item) {
+                $this->stock->adjust(
+                    $item['product'], $item['variant'], -$item['quantity'],
+                    StockMovementType::Sale, order: $order,
+                );
+            }
 
             return $order;
         });

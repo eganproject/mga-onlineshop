@@ -1,4 +1,6 @@
 import Alpine from 'alpinejs';
+import productForm from './components/product-form';
+import productPage from './components/product-page';
 
 window.Alpine = Alpine;
 
@@ -39,5 +41,8 @@ Alpine.data('destinationSearch', (url, initialLabel = '') => ({
         this.$dispatch('destination-selected', item);
     },
 }));
+
+Alpine.data('productForm', productForm);
+Alpine.data('productPage', productPage);
 
 Alpine.start();

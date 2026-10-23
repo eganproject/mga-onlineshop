@@ -82,7 +82,8 @@
                                 <x-product-image :product="$line->product" class="size-12 shrink-0 rounded-lg" />
                                 <div class="min-w-0 flex-1 text-sm">
                                     <p class="truncate font-medium text-stone-800">{{ $line->product->name }}</p>
-                                    <p class="text-xs text-stone-500">{{ $line->quantity }} × @rupiah($line->product->price)</p>
+                                    @if ($line->variant)<p class="truncate text-xs text-stone-500">{{ $line->variant->name }}</p>@endif
+                                    <p class="text-xs text-stone-500">{{ $line->quantity }} × @rupiah($line->unitPrice())</p>
                                 </div>
                                 <p class="text-sm font-semibold">@rupiah($line->subtotal())</p>
                             </li>

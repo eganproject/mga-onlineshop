@@ -10,6 +10,7 @@
         'Katalog' => [
             ['Produk', 'admin.products.index', 'cube', 'admin.products.*', null],
             ['Kategori', 'admin.categories.index', 'tag', 'admin.categories.*', null],
+            ['Stok', 'admin.stock.index', 'archive', 'admin.stock.*', null],
         ],
         'Pelanggan' => [
             ['Pelanggan', 'admin.customers.index', 'users', 'admin.customers.*', null],

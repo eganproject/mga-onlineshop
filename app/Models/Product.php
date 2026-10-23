@@ -10,15 +10,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'category_id', 'name', 'slug', 'sku', 'description', 'price', 'compare_at_price',
-    'stock', 'weight', 'image_path', 'is_active', 'is_featured',
+    'weight', 'variant_label', 'is_active', 'is_featured',
 ])]
 class Product extends Model
 {
     use HasFactory;
+
+    // `stock` dan `has_variants` sengaja tidak mass-assignable. Stok diubah lewat
+    // StockService (tercatat di riwayat), ringkasan varian lewat syncVariantSummary().
+
+    /** Foto sampul selalu ikut dimuat karena dipakai di hampir semua tampilan produk. */
+    protected $with = ['coverImage'];
 
     protected function casts(): array
     {
@@ -29,6 +35,7 @@ class Product extends Model
             'weight' => 'integer',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'has_variants' => 'boolean',
         ];
     }
 
@@ -40,6 +47,31 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function coverImage(): HasOne
+    {
+        return $this->hasOne(ProductImage::class)->ofMany(['sort_order' => 'min', 'id' => 'min']);
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function activeVariants(): HasMany
+    {
+        return $this->variants()->where('is_active', true);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     public function orderItems(): HasMany
@@ -57,13 +89,39 @@ class Product extends Model
     protected function search(Builder $query, ?string $term): void
     {
         $query->when($term, fn (Builder $q) => $q->where(function (Builder $q) use ($term) {
-            $q->where('name', 'like', "%{$term}%")->orWhere('sku', 'like', "%{$term}%");
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhere('sku', 'like', "%{$term}%")
+                ->orWhereHas('variants', fn (Builder $v) => $v->where('sku', 'like', "%{$term}%"));
         }));
     }
 
     public function imageUrl(): ?string
     {
-        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+        return $this->coverImage?->url();
+    }
+
+    /**
+     * Samakan harga & stok produk dengan varian aktifnya: harga = varian termurah,
+     * stok = total stok varian. Dipanggil setiap kali varian atau stoknya berubah.
+     */
+    public function syncVariantSummary(): void
+    {
+        $variants = $this->variants()->get();
+        $active = $variants->where('is_active', true);
+
+        $this->has_variants = $variants->isNotEmpty();
+
+        if ($this->has_variants) {
+            $this->stock = (int) $active->sum('stock');
+
+            if ($cheapest = $active->sortBy('price')->first()) {
+                $this->price = $cheapest->price;
+                $this->compare_at_price = $cheapest->compare_at_price;
+            }
+        }
+
+        $this->save();
+        $this->unsetRelation('variants');
     }
 
     public function formattedPrice(): string

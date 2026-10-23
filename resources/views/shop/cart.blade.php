@@ -14,25 +14,35 @@
                     @foreach ($lines as $line)
                         <div class="flex gap-4 p-4 sm:p-5">
                             <a href="{{ route('products.show', $line->product) }}" class="shrink-0">
-                                <x-product-image :product="$line->product" class="size-20 rounded-xl sm:size-24" />
+                                @if ($line->variant?->image)
+                                    <img src="{{ $line->imageUrl() }}" alt="{{ $line->product->name }}" class="size-20 rounded-xl object-cover sm:size-24">
+                                @else
+                                    <x-product-image :product="$line->product" class="size-20 rounded-xl sm:size-24" />
+                                @endif
                             </a>
                             <div class="flex min-w-0 flex-1 flex-col">
                                 <div class="flex items-start justify-between gap-3">
                                     <a href="{{ route('products.show', $line->product) }}" class="font-semibold text-stone-900 line-clamp-2 hover:text-brand-700">{{ $line->product->name }}</a>
-                                    <form method="POST" action="{{ route('cart.destroy', $line->product) }}">
+                                    <form method="POST" action="{{ route('cart.destroy', $line->key()) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button class="text-stone-400 hover:text-rose-600" aria-label="Hapus"><x-icon name="trash" class="size-5" /></button>
                                     </form>
                                 </div>
-                                <p class="mt-1 text-sm text-stone-500">@rupiah($line->product->price)</p>
+                                @if ($line->variant)
+                                    <p class="mt-1 inline-flex w-fit rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">{{ $line->product->variant_label ?: 'Varian' }}: {{ $line->variant->name }}</p>
+                                @endif
+                                <p class="mt-1 text-sm text-stone-500">
+                                    @rupiah($line->unitPrice())
+                                    @if ($line->compareAtPrice() > $line->unitPrice())<span class="ml-1 text-xs text-stone-400 line-through">@rupiah($line->compareAtPrice())</span>@endif
+                                </p>
                                 <div class="mt-auto flex items-center justify-between pt-3">
-                                    <form method="POST" action="{{ route('cart.update', $line->product) }}" class="inline-flex items-center rounded-xl border border-stone-200 bg-white">
+                                    <form method="POST" action="{{ route('cart.update', $line->key()) }}" class="inline-flex items-center rounded-xl border border-stone-200 bg-white">
                                         @csrf
                                         @method('PATCH')
                                         <button name="quantity" value="{{ $line->quantity - 1 }}" class="p-2 text-stone-500 hover:text-stone-900" aria-label="Kurangi"><x-icon name="minus" class="size-4" /></button>
                                         <span class="w-10 text-center text-sm font-semibold">{{ $line->quantity }}</span>
-                                        <button name="quantity" value="{{ $line->quantity + 1 }}" class="p-2 text-stone-500 hover:text-stone-900 disabled:opacity-30" aria-label="Tambah" @disabled($line->quantity >= $line->product->stock)><x-icon name="plus" class="size-4" /></button>
+                                        <button name="quantity" value="{{ $line->quantity + 1 }}" class="p-2 text-stone-500 hover:text-stone-900 disabled:opacity-30" aria-label="Tambah" @disabled($line->quantity >= $line->availableStock())><x-icon name="plus" class="size-4" /></button>
                                     </form>
                                     <p class="font-bold text-stone-900">@rupiah($line->subtotal())</p>
                                 </div>

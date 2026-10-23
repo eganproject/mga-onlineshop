@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['name', 'slug', 'description', 'image_path', 'is_active', 'sort_order'])]
+#[Fillable(['parent_id', 'name', 'slug', 'description', 'image_path', 'is_active', 'sort_order'])]
 class Category extends Model
 {
     use HasFactory;
@@ -28,6 +29,16 @@ class Category extends Model
         return 'slug';
     }
 
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order')->orderBy('name');
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
@@ -37,6 +48,18 @@ class Category extends Model
     protected function active(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    #[Scope]
+    protected function root(Builder $query): void
+    {
+        $query->whereNull('parent_id');
+    }
+
+    /** ID kategori ini beserta subkategorinya, untuk filter produk. */
+    public function familyIds(): array
+    {
+        return [$this->id, ...$this->children()->pluck('id')->all()];
     }
 
     public function imageUrl(): ?string

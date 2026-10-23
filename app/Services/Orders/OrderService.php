@@ -4,9 +4,11 @@ namespace App\Services\Orders;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\StockMovementType;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
-use App\Models\Product;
+use App\Services\Catalog\StockService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
@@ -14,6 +16,8 @@ use InvalidArgumentException;
 /** Semua perubahan status pesanan lewat sini agar aturannya konsisten. */
 class OrderService
 {
+    public function __construct(private readonly StockService $stock) {}
+
     public function markPaid(Payment $payment, array $attributes = []): void
     {
         DB::transaction(function () use ($payment, $attributes) {
@@ -79,17 +83,33 @@ class OrderService
             ->update(['status' => PaymentStatus::Paid, 'payment_type' => 'manual', 'paid_at' => now()]);
     }
 
-    /** Batalkan pesanan dan kembalikan stok produk. */
+    /** Batalkan pesanan dan kembalikan stok produk/varian. */
     public function cancel(Order $order): void
     {
         DB::transaction(function () use ($order) {
-            foreach ($order->items as $item) {
-                if ($item->product_id) {
-                    Product::whereKey($item->product_id)->increment('stock', $item->quantity);
-                }
+            foreach ($order->items()->with('product', 'variant')->get() as $item) {
+                $this->restock($order, $item);
             }
 
             $order->update(['status' => OrderStatus::Cancelled, 'cancelled_at' => now()]);
         });
+    }
+
+    private function restock(Order $order, OrderItem $item): void
+    {
+        $product = $item->product;
+
+        if (! $product) {
+            return; // Produk sudah dihapus, tidak ada stok yang perlu dikembalikan.
+        }
+
+        if ($item->variant) {
+            $this->stock->adjust($product, $item->variant, $item->quantity, StockMovementType::Cancellation, order: $order);
+        } elseif (! $item->product_variant_id && ! $product->has_variants) {
+            $this->stock->adjust($product, null, $item->quantity, StockMovementType::Cancellation, order: $order);
+        } else {
+            // Varian sudah dihapus atau struktur varian berubah: admin perlu menyesuaikan manual.
+            Log::info('Stok tidak dikembalikan otomatis karena varian berubah', ['order' => $order->code, 'item' => $item->id]);
+        }
     }
 }

@@ -12,8 +12,12 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('shop.home', [
-            'categories' => Category::active()->withCount(['products' => fn ($q) => $q->active()])
-                ->orderBy('sort_order')->take(8)->get(),
+            'categories' => Category::active()->root()
+                ->withCount(['products' => fn ($q) => $q->active()])
+                ->with(['children' => fn ($q) => $q->active()->withCount(['products' => fn ($q) => $q->active()])])
+                ->orderBy('sort_order')->take(8)->get()
+                // Jumlah produk induk termasuk produk di subkategorinya.
+                ->each(fn (Category $c) => $c->products_count += $c->children->sum('products_count')),
             'featured' => Product::active()->where('is_featured', true)->latest()->take(8)->get(),
             'latest' => Product::active()->latest()->take(8)->get(),
         ]);

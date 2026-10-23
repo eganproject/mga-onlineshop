@@ -46,10 +46,10 @@ class ShopTest extends TestCase
         $this->get(route('cart.index'))->assertOk()->assertSee($product->name);
         $this->assertSame([$product->id => 3], session('cart'));
 
-        $this->patch(route('cart.update', $product), ['quantity' => 1]);
+        $this->patch(route('cart.update', (string) $product->id), ['quantity' => 1]);
         $this->assertSame([$product->id => 1], session('cart'));
 
-        $this->delete(route('cart.destroy', $product));
+        $this->delete(route('cart.destroy', (string) $product->id));
         $this->assertSame([], session('cart'));
     }
 
@@ -107,11 +107,11 @@ class ShopTest extends TestCase
         $product = Product::factory()->create(['stock' => 2]);
 
         $cart = app(CartService::class);
-        $cart->add($product, 2);
+        $cart->add($product, quantity: 2);
         $cart->lines(); // keranjang sudah terbaca dengan stok lama
 
         // Pembeli lain membeli lebih dulu.
-        $product->update(['stock' => 1]);
+        $product->forceFill(['stock' => 1])->save();
 
         try {
             app(CheckoutService::class)->placeOrder($customer, $address, new ShippingRate('jne', 'JNE', 'REG', 'Reguler', 10000));

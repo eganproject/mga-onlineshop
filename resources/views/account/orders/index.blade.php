@@ -22,7 +22,7 @@
                 </div>
                 <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
                     <div class="min-w-0 flex-1">
-                        <p class="font-semibold text-stone-900">{{ $order->items->first()?->product_name }}</p>
+                        <p class="font-semibold text-stone-900">{{ $order->items->first()?->product_name }}@if ($order->items->first()?->variant_name) <span class="font-normal text-stone-500">· {{ $order->items->first()->variant_name }}</span>@endif</p>
                         <p class="text-sm text-stone-500">
                             {{ $order->items->first()?->quantity }} barang
                             @if ($order->items->count() > 1) · +{{ $order->items->count() - 1 }} produk lainnya @endif

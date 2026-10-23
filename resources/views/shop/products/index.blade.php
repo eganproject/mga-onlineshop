@@ -2,6 +2,10 @@
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" x-data="{ filters: false }">
         <nav class="mb-4 flex items-center gap-1.5 text-xs text-stone-500">
             <a href="{{ route('home') }}" class="hover:text-stone-800">Beranda</a>
+            @if ($activeCategory?->parent)
+                <x-icon name="chevron-right" class="size-3" />
+                <a href="{{ route('products.index', ['kategori' => $activeCategory->parent->slug]) }}" class="hover:text-stone-800">{{ $activeCategory->parent->name }}</a>
+            @endif
             <x-icon name="chevron-right" class="size-3" />
             <span class="text-stone-800">{{ $activeCategory?->name ?? 'Semua produk' }}</span>
         </nav>
@@ -46,11 +50,27 @@
                         </a>
                     </li>
                     @foreach ($categories as $category)
+                        @php($open = $activeCategory && ($activeCategory->is($category) || (int) $activeCategory->parent_id === $category->id))
                         <li>
                             <a href="{{ route('products.index', ['kategori' => $category->slug] + request()->except('kategori', 'page')) }}"
                                @class(['flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition', 'bg-brand-50 text-brand-700' => $activeCategory?->is($category), 'text-stone-600 hover:bg-white' => ! $activeCategory?->is($category)])>
                                 {{ $category->name }}
+                                @if ($category->children->isNotEmpty())
+                                    <x-icon name="chevron-down" @class(['size-4 transition', 'rotate-180' => $open]) />
+                                @endif
                             </a>
+                            @if ($open && $category->children->isNotEmpty())
+                                <ul class="mt-1 ml-3 space-y-1 border-l border-stone-200 pl-2">
+                                    @foreach ($category->children as $child)
+                                        <li>
+                                            <a href="{{ route('products.index', ['kategori' => $child->slug] + request()->except('kategori', 'page')) }}"
+                                               @class(['block rounded-lg px-3 py-1.5 text-sm transition', 'bg-brand-50 font-semibold text-brand-700' => $activeCategory->is($child), 'text-stone-500 hover:bg-white hover:text-stone-800' => ! $activeCategory->is($child)])>
+                                                {{ $child->name }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </li>
                     @endforeach
                 </ul>

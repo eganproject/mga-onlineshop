@@ -20,8 +20,8 @@ Route::get('/produk/{product}', [Shop\ProductController::class, 'show'])->name('
 Route::controller(Shop\CartController::class)->prefix('keranjang')->name('cart.')->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/{product}', 'store')->name('store');
-    Route::patch('/{product}', 'update')->name('update');
-    Route::delete('/{product}', 'destroy')->name('destroy');
+    Route::patch('/item/{line}', 'update')->name('update')->where('line', '[0-9]+(-[0-9]+)?');
+    Route::delete('/item/{line}', 'destroy')->name('destroy')->where('line', '[0-9]+(-[0-9]+)?');
 });
 
 /*
@@ -86,8 +86,14 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
 
+    Route::patch('/categories/{category}/toggle', [Admin\CategoryController::class, 'toggle'])->name('categories.toggle');
     Route::resource('categories', Admin\CategoryController::class)->except('show');
+    Route::post('/products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
     Route::resource('products', Admin\ProductController::class)->except('show');
+
+    Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');
+    Route::get('/stock/history', [Admin\StockController::class, 'history'])->name('stock.history');
+    Route::post('/stock/adjust', [Admin\StockController::class, 'adjust'])->name('stock.adjust');
 
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');

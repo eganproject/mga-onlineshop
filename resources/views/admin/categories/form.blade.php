@@ -15,6 +15,17 @@
                 <x-input-error for="name" />
             </div>
             <div>
+                <label for="parent_id" class="label">Induk kategori</label>
+                <select id="parent_id" name="parent_id" class="input @error('parent_id') input-error @enderror">
+                    <option value="">Tidak ada (kategori utama)</option>
+                    @foreach ($parents as $parent)
+                        <option value="{{ $parent->id }}" @selected(old('parent_id', $category->parent_id) == $parent->id)>{{ $parent->name }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-1.5 text-xs text-stone-400">Pilih induk untuk menjadikannya subkategori, mis. Casing HP › Casing iPhone.</p>
+                <x-input-error for="parent_id" />
+            </div>
+            <div>
                 <label for="slug" class="label">Slug URL <span class="font-normal text-stone-400">(kosongkan untuk otomatis)</span></label>
                 <input id="slug" name="slug" value="{{ old('slug', $category->slug) }}" class="input @error('slug') input-error @enderror">
                 <x-input-error for="slug" />
@@ -40,6 +51,9 @@
                     <label for="image" class="label">Gambar</label>
                     @if ($category->imageUrl())
                         <img src="{{ $category->imageUrl() }}" alt="" class="mb-3 aspect-video w-full rounded-xl object-cover">
+                        <label class="mb-3 flex items-center gap-2 text-sm text-stone-600">
+                            <input type="checkbox" name="remove_image" value="1" class="checkbox"> Hapus gambar
+                        </label>
                     @endif
                     <input id="image" type="file" name="image" accept="image/*" class="block w-full text-sm text-stone-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100">
                     <x-input-error for="image" />

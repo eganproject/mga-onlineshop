@@ -17,6 +17,7 @@
                             @endif
                             <div class="min-w-0 flex-1">
                                 <p class="font-semibold text-stone-900">{{ $item->product_name }}</p>
+                                @if ($item->variant_name)<p class="text-xs font-medium text-brand-700">{{ $item->variant_name }}</p>@endif
                                 <p class="text-xs text-stone-500">{{ $item->sku ?? 'Tanpa SKU' }} · {{ $item->quantity }} × @rupiah($item->price)</p>
                             </div>
                             <p class="font-semibold text-stone-900">@rupiah($item->subtotal)</p>

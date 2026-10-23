@@ -8,3 +8,6 @@
 - Perubahan status pesanan lewat `App\Services\Orders\OrderService` (aturan transisi ada di `OrderStatus::nextStatuses()`).
 - Komponen Blade: `resources/views/components` (layout `x-layouts.shop|admin|account|auth`, `x-icon`, `x-product-card`, dll). Kelas utilitas `.btn`, `.input`, `.card`, `.badge` di `resources/css/app.css`.
 - Jalankan `php artisan test` sebelum commit.
+- Katalog: kategori maks 2 tingkat (`parent_id`), galeri `ProductImage` (sampul = `sort_order` terkecil, `Product::coverImage` selalu di-eager-load), varian `ProductVariant`. Produk bervarian (`has_variants`) menyimpan ringkasan harga termurah & total stok varian aktif lewat `Product::syncVariantSummary()`.
+- Stok (`products.stock`, `product_variants.stock`) tidak mass-assignable. Ubah selalu lewat `App\Services\Catalog\StockService` (adjust/set) supaya terkunci & tercatat di `stock_movements`.
+- Kunci keranjang di session: `"{product_id}"` atau `"{product_id}-{variant_id}"`.

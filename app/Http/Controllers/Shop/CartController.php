@@ -25,36 +25,62 @@ class CartController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        if (! $product->inStock()) {
+        $data = $request->validate([
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:999'],
+            'variant_id' => ['nullable', 'integer'],
+        ]);
+
+        $variant = null;
+
+        if ($product->has_variants) {
+            $variant = $product->activeVariants()->find($data['variant_id'] ?? 0);
+
+            if (! $variant) {
+                return back()->withInput()->with('error', "Pilih {$this->variantLabel($product)} terlebih dahulu.");
+            }
+        }
+
+        if (! ($variant ?? $product)->inStock()) {
             return back()->with('error', 'Maaf, stok produk ini sedang habis.');
         }
 
-        $data = $request->validate(['quantity' => ['nullable', 'integer', 'min:1', 'max:999']]);
-        $this->cart->add($product, (int) ($data['quantity'] ?? 1));
+        $this->cart->add($product, $variant, (int) ($data['quantity'] ?? 1));
 
         if ($request->boolean('buy_now')) {
             return redirect()->route('checkout.index');
         }
 
-        return back()->with('success', "{$product->name} ditambahkan ke keranjang.");
+        $name = $variant ? "{$product->name} ({$variant->name})" : $product->name;
+
+        return back()->with('success', "{$name} ditambahkan ke keranjang.");
     }
 
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(Request $request, string $line): RedirectResponse
     {
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:0', 'max:999']]);
-        $final = $this->cart->update($product, $data['quantity']);
+
+        $cartLine = $this->cart->find($line);
+        abort_unless($cartLine, 404);
+
+        $final = $this->cart->update($line, $data['quantity']);
 
         if ($final < $data['quantity']) {
-            return back()->with('error', "Stok {$product->name} hanya tersisa {$product->stock}.");
+            return back()->with('error', "Stok {$cartLine->product->name} hanya tersisa {$cartLine->availableStock()}.");
         }
 
         return back();
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(string $line): RedirectResponse
     {
-        $this->cart->remove($product);
+        $cartLine = $this->cart->find($line);
+        $this->cart->remove($line);
 
-        return back()->with('success', "{$product->name} dihapus dari keranjang.");
+        return back()->with('success', ($cartLine?->product->name ?? 'Produk').' dihapus dari keranjang.');
+    }
+
+    private function variantLabel(Product $product): string
+    {
+        return mb_strtolower($product->variant_label ?: 'varian');
     }
 }

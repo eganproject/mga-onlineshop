@@ -65,13 +65,16 @@ class AdminPanelTest extends TestCase
             'stock' => 10,
             'weight' => 100,
             'is_active' => 1,
-            'image' => UploadedFile::fake()->image('kabel.jpg'),
-        ])->assertRedirect(route('admin.products.index'));
+            'images' => [UploadedFile::fake()->image('kabel.jpg'), UploadedFile::fake()->image('kabel-2.jpg')],
+        ])->assertRedirect();
 
         $product = Product::firstWhere('name', 'Kabel Data Super');
         $this->assertSame(150000, $product->price);
+        $this->assertSame(10, $product->stock);
         $this->assertSame('kabel-data-super', $product->slug);
-        Storage::disk('public')->assertExists($product->image_path);
+        $this->assertCount(2, $product->images);
+        Storage::disk('public')->assertExists($product->images->first()->path);
+        $this->assertSame($product->images->first()->id, $product->coverImage->id);
     }
 
     public function test_admin_can_update_and_delete_product(): void
