@@ -40,6 +40,8 @@ class LogAdminActivity
         'admin.orders.status' => 'Mengubah status pesanan',
         'admin.orders.tracking-number' => 'Mengubah nomor resi',
         'admin.customers.toggle' => 'Memblokir / mengaktifkan pelanggan',
+        'admin.integrations.update' => 'Mengubah integrasi',
+        'admin.integrations.test' => 'Tes koneksi integrasi',
         'admin.profile.update' => 'Mengubah profil sendiri',
         'admin.profile.password' => 'Mengganti password sendiri',
     ];

@@ -46,7 +46,7 @@ class AdminPanelTest extends TestCase
             route('admin.orders.show', $order),
             route('admin.customers.index'),
             route('admin.customers.show', $order->user),
-            route('admin.settings'),
+            route('admin.integrations.index'),
             route('admin.profile.edit'),
         ] as $url) {
             $this->get($url)->assertOk();

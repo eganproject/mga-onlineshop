@@ -18,6 +18,7 @@ enum Permission: string
     case CustomersManage = 'customers.manage';
     case ReportsView = 'reports.view';
     case SettingsManage = 'settings.manage';
+    case IntegrationsManage = 'integrations.manage';
     case StaffManage = 'staff.manage';
     case ActivityView = 'activity.view';
 
@@ -33,7 +34,8 @@ enum Permission: string
             self::CustomersView => 'Lihat data pelanggan',
             self::CustomersManage => 'Blokir / aktifkan pelanggan',
             self::ReportsView => 'Lihat laporan & angka penjualan',
-            self::SettingsManage => 'Ubah pengaturan toko & integrasi',
+            self::SettingsManage => 'Ubah pengaturan toko',
+            self::IntegrationsManage => 'Atur integrasi & kunci API (Midtrans, RajaOngkir, Firebase)',
             self::StaffManage => 'Kelola akun staf',
             self::ActivityView => 'Lihat log aktivitas',
         };

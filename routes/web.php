@@ -186,7 +186,6 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
     });
 
     Route::middleware('can:settings.manage')->group(function () {
-        Route::get('/settings', Admin\SettingController::class)->name('settings');
         Route::get('/store-settings', [Admin\StoreSettingController::class, 'edit'])->name('store-settings.edit');
         Route::put('/store-settings', [Admin\StoreSettingController::class, 'update'])->name('store-settings.update');
 
@@ -196,6 +195,14 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
             Route::get('/provinces/{province}/cities', 'cities')->name('cities');
             Route::get('/cities/{city}/districts', 'districts')->name('districts');
         });
+    });
+
+    // Kunci API & driver integrasi: khusus superadmin (jabatan Owner).
+    Route::middleware('can:integrations.manage')->group(function () {
+        Route::redirect('/settings', '/admin/integrations');
+        Route::get('/integrations', [Admin\IntegrationController::class, 'index'])->name('integrations.index');
+        Route::put('/integrations/{integration}', [Admin\IntegrationController::class, 'update'])->name('integrations.update')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase']);
+        Route::post('/integrations/{integration}/test', [Admin\IntegrationController::class, 'test'])->name('integrations.test')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase'])->middleware('throttle:10,1');
     });
 
     Route::middleware('can:staff.manage')->group(function () {

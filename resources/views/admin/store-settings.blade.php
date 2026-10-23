@@ -123,7 +123,11 @@
 
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
                 <x-icon name="info" class="size-5 shrink-0" />
-                <p>Kunci API Midtrans & RajaOngkir tetap di file <code class="font-mono">.env</code> demi keamanan. Statusnya bisa dilihat di <a href="{{ route('admin.settings') }}" class="font-semibold underline">Integrasi</a>.</p>
+                @can('integrations.manage')
+                    <p>Driver & kunci API Midtrans, RajaOngkir, dan Firebase diatur di <a href="{{ route('admin.integrations.index') }}" class="font-semibold underline">Integrasi</a>.</p>
+                @else
+                    <p>Driver & kunci API Midtrans, RajaOngkir, dan Firebase hanya bisa diatur oleh Superadmin.</p>
+                @endcan
             </div>
 
             <div class="card sticky top-20 p-4">

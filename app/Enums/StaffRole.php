@@ -13,7 +13,7 @@ enum StaffRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Owner => 'Owner',
+            self::Owner => 'Superadmin',
             self::Admin => 'Admin',
             self::Warehouse => 'Staf Gudang',
             self::CustomerService => 'Customer Service',
@@ -23,8 +23,8 @@ enum StaffRole: string
     public function description(): string
     {
         return match ($this) {
-            self::Owner => 'Akses penuh, termasuk mengelola akun staf.',
-            self::Admin => 'Semua menu toko kecuali mengelola akun staf.',
+            self::Owner => 'Akses penuh, termasuk akun staf dan kunci API integrasi (Midtrans, RajaOngkir, Firebase).',
+            self::Admin => 'Semua menu toko kecuali akun staf dan integrasi.',
             self::Warehouse => 'Memproses & mengirim pesanan, input resi, dan mengelola stok.',
             self::CustomerService => 'Melihat pesanan & pelanggan, serta memoderasi ulasan.',
         };
@@ -35,7 +35,7 @@ enum StaffRole: string
     {
         return match ($this) {
             self::Owner => Permission::cases(),
-            self::Admin => array_values(array_filter(Permission::cases(), fn (Permission $p) => $p !== Permission::StaffManage)),
+            self::Admin => array_values(array_filter(Permission::cases(), fn (Permission $p) => ! in_array($p, [Permission::StaffManage, Permission::IntegrationsManage], true))),
             self::Warehouse => [Permission::OrdersView, Permission::OrdersManage, Permission::StockManage],
             self::CustomerService => [Permission::OrdersView, Permission::CustomersView, Permission::ReviewsManage],
         };

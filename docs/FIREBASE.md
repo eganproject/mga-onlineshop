@@ -33,7 +33,11 @@ error *unauthorized-domain*.
 
 1. **Project settings** (ikon ⚙️) → tab **General** → bagian **Your apps** →
    klik ikon **`</>`** (Web). Nama bebas, **tidak perlu** Firebase Hosting.
-2. Firebase menampilkan `firebaseConfig`. Salin ke `.env`:
+2. Firebase menampilkan `firebaseConfig`. Cara termudah: login sebagai
+   **Superadmin** → **Admin › Integrasi** → kartu *Login Google (Firebase)*,
+   isi API key, Project ID, Auth domain & App ID, **Simpan**, lalu klik
+   **Tes koneksi** (sekaligus mengecek domain toko sudah diizinkan).
+   Atau salin ke `.env` (dipakai bila isian di panel admin kosong):
 
 ```env
 FIREBASE_API_KEY=AIza...          # apiKey
@@ -46,8 +50,9 @@ Nilai ini memang tampil di browser (bukan rahasia), keamanannya dijaga oleh
 daftar *Authorized domains*. **Tidak perlu** service account / file JSON:
 server memverifikasi token memakai sertifikat publik Google.
 
-Lalu jalankan `php artisan config:clear` (atau `php artisan config:cache` di
-server produksi).
+Bila lewat `.env`, jalankan `php artisan config:clear` (atau
+`php artisan config:cache` di server produksi). Lewat panel admin langsung
+berlaku tanpa perintah apa pun.
 
 ## Cara kerja
 

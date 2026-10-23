@@ -3,8 +3,11 @@
 namespace App\Services\Settings;
 
 use App\Models\Setting;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -14,6 +17,9 @@ use Throwable;
  * kode lain tetap cukup membaca config('shop.whatsapp'). Saat aplikasi boot,
  * nilai dari tabel `settings` (di-cache) menimpa config; bila tidak ada isinya,
  * nilai dari .env/config/shop.php yang dipakai.
+ *
+ * Kunci bertipe "secret" (server key Midtrans, API key RajaOngkir) disimpan
+ * terenkripsi dengan APP_KEY, baik di database maupun di cache.
  */
 class StoreSettings
 {
@@ -49,6 +55,20 @@ class StoreSettings
         'shop.storefront.hero_secondary_url' => 'string',
         'shop.storefront.hero_text' => 'string',
         'shop.storefront.announcements' => 'array',
+
+        // Integrasi (Admin › Integrasi, khusus superadmin).
+        'shop.payment.driver' => 'string',
+        'services.midtrans.is_production' => 'bool',
+        'services.midtrans.merchant_id' => 'string',
+        'services.midtrans.client_key' => 'string',
+        'services.midtrans.server_key' => 'secret',
+        'shop.shipping.driver' => 'string',
+        'services.rajaongkir.api_key' => 'secret',
+        'services.firebase.login_enabled' => 'bool',
+        'services.firebase.api_key' => 'string',
+        'services.firebase.auth_domain' => 'string',
+        'services.firebase.project_id' => 'string',
+        'services.firebase.app_id' => 'string',
     ];
 
     /** Kode kurir RajaOngkir (Komerce) => nama tampilan. */
@@ -84,7 +104,20 @@ class StoreSettings
         }
 
         foreach (self::FIELDS as $key => $type) {
-            config([$key => array_key_exists($key, $stored) ? $this->cast($stored[$key], $type) : ($this->defaults[$key] ?? null)]);
+            $value = array_key_exists($key, $stored) ? $this->fromStorage($stored[$key], $type) : null;
+            config([$key => $value ?? ($this->defaults[$key] ?? null)]);
+        }
+
+        $this->applyDerived($stored);
+    }
+
+    /** Apakah nilai yang berlaku untuk kunci ini berasal dari database (bukan .env). */
+    public function isStored(string $key): bool
+    {
+        try {
+            return array_key_exists($key, $this->stored());
+        } catch (Throwable) {
+            return false;
         }
     }
 
@@ -134,7 +167,7 @@ class StoreSettings
             if ($value === null || $value == $default) {
                 Setting::whereKey($key)->delete();
             } else {
-                Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+                Setting::updateOrCreate(['key' => $key], ['value' => $type === 'secret' ? Crypt::encryptString($value) : $value]);
             }
 
             if ($before != $after) {
@@ -163,6 +196,36 @@ class StoreSettings
             $this->defaults[$key] = config($key);
         }
         $this->captured = true;
+    }
+
+    /** Nilai turunan yang di config dihitung dari kunci lain. */
+    private function applyDerived(array $stored): void
+    {
+        // Project ID diganti dari admin tanpa auth domain: pakai domain bawaan Firebase.
+        if (! array_key_exists('services.firebase.auth_domain', $stored)
+            && array_key_exists('services.firebase.project_id', $stored)) {
+            config(['services.firebase.auth_domain' => config('services.firebase.project_id').'.firebaseapp.com']);
+        }
+
+        config(['services.firebase.enabled' => (bool) config('services.firebase.login_enabled')
+            && filled(config('services.firebase.api_key'))
+            && filled(config('services.firebase.project_id'))]);
+    }
+
+    private function fromStorage(mixed $value, string $type): mixed
+    {
+        if ($type !== 'secret') {
+            return $this->cast($value, $type);
+        }
+
+        try {
+            return Crypt::decryptString((string) $value);
+        } catch (DecryptException) {
+            // APP_KEY berganti: kunci lama tidak terbaca, kembali ke .env.
+            Log::warning('Pengaturan rahasia tidak bisa didekripsi (APP_KEY berubah?). Isi ulang di Admin › Integrasi.');
+
+            return null;
+        }
     }
 
     private function cast(mixed $value, string $type): mixed

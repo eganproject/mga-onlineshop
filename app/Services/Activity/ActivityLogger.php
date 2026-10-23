@@ -66,7 +66,7 @@ class ActivityLogger
         $clean = [];
 
         foreach (Arr::except($data, self::SECRET_KEYS) as $key => $value) {
-            if (is_string($key) && Str::contains(Str::lower($key), ['password', 'secret', 'token'])) {
+            if (is_string($key) && Str::contains(Str::lower($key), ['password', 'secret', 'token', 'server_key', 'api_key'])) {
                 continue;
             }
 

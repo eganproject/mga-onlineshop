@@ -25,7 +25,7 @@
         ],
         'Sistem' => [
             ['Pengaturan Toko', 'admin.store-settings.edit', 'storefront', 'admin.store-settings.*', null],
-            ['Integrasi', 'admin.settings', 'cog', 'admin.settings', null],
+            ['Integrasi', 'admin.integrations.index', 'cog', 'admin.integrations.*', null],
             ['Staf', 'admin.staff.index', 'shield', 'admin.staff.*', null],
             ['Log Aktivitas', 'admin.activity.index', 'clock', 'admin.activity.*', null],
         ],
