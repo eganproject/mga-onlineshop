@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Contracts\PaymentGateway;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
@@ -46,6 +47,22 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame(PaymentStatus::Expired, $order->latestPayment->status);
     }
 
+    public function test_order_page_shows_snap_pay_button(): void
+    {
+        config(['services.midtrans.client_key' => 'SB-Mid-client-test']);
+        $order = $this->orderWithPayment(withPayment: false);
+        $order->payments()->create([
+            'gateway' => 'midtrans', 'status' => PaymentStatus::Pending, 'amount' => 30000,
+            'snap_token' => 'snap-abc', 'redirect_url' => 'https://pay.test',
+        ]);
+
+        $this->actingAs($order->user)->get(route('account.orders.show', $order))
+            ->assertOk()
+            ->assertSee('Bayar sekarang')
+            ->assertSee('snap.js', false)
+            ->assertSee('SB-Mid-client-test', false);
+    }
+
     public function test_invalid_signature_is_rejected(): void
     {
         $order = $this->orderWithPayment();
@@ -61,7 +78,7 @@ class MidtransWebhookTest extends TestCase
         Http::fake(['app.sandbox.midtrans.com/*' => Http::response(['token' => 'snap-123', 'redirect_url' => 'https://pay.test'])]);
 
         $order = $this->orderWithPayment(withPayment: false);
-        $payment = app(\App\Contracts\PaymentGateway::class)->createPayment($order);
+        $payment = app(PaymentGateway::class)->createPayment($order);
 
         $this->assertSame('snap-123', $payment->snap_token);
         Http::assertSent(fn ($request) => $request['transaction_details']['gross_amount'] === 30000

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 /** Semua perubahan status pesanan lewat sini agar aturannya konsisten. */
@@ -22,6 +23,9 @@ class OrderService
 
             if ($order->status === OrderStatus::PendingPayment) {
                 $order->update(['status' => OrderStatus::Paid, 'paid_at' => now()]);
+            } elseif ($order->status === OrderStatus::Cancelled) {
+                // Dana masuk untuk pesanan yang sudah batal: perlu refund manual oleh admin.
+                Log::warning('Pembayaran diterima untuk pesanan yang sudah dibatalkan', ['order' => $order->code]);
             }
         });
     }
@@ -56,13 +60,23 @@ class OrderService
         $order->fill(['status' => $status]);
 
         match ($status) {
-            OrderStatus::Paid => $order->paid_at = now(),
+            // Konfirmasi manual oleh admin (mis. transfer langsung): tutup juga tagihan yang masih pending.
+            OrderStatus::Paid => $this->settleManually($order),
             OrderStatus::Shipped => $order->fill(['shipped_at' => now(), 'tracking_number' => $trackingNumber]),
             OrderStatus::Completed => $order->completed_at = now(),
             default => null,
         };
 
         $order->save();
+    }
+
+    private function settleManually(Order $order): void
+    {
+        $order->paid_at = now();
+
+        $order->payments()
+            ->where('status', PaymentStatus::Pending)
+            ->update(['status' => PaymentStatus::Paid, 'payment_type' => 'manual', 'paid_at' => now()]);
     }
 
     /** Batalkan pesanan dan kembalikan stok produk. */

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Address;
 use App\Models\Category;
 use App\Models\Order;
@@ -142,6 +143,17 @@ class AdminPanelTest extends TestCase
 
         $this->assertSame(OrderStatus::Cancelled, $order->refresh()->status);
         $this->assertSame($stockBefore + $item->quantity, $item->product->refresh()->stock);
+    }
+
+    public function test_manual_paid_confirmation_settles_pending_payment(): void
+    {
+        $order = $this->makeOrder(OrderStatus::PendingPayment);
+        $payment = $order->payments()->create(['gateway' => 'fake', 'status' => PaymentStatus::Pending, 'amount' => 30000]);
+
+        $this->actingAs($this->admin)->patch(route('admin.orders.status', $order), ['status' => 'paid']);
+
+        $this->assertSame(OrderStatus::Paid, $order->refresh()->status);
+        $this->assertSame(PaymentStatus::Paid, $payment->refresh()->status);
     }
 
     public function test_admin_can_block_customer(): void
