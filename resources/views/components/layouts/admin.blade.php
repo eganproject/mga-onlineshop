@@ -6,6 +6,7 @@
         'Utama' => [
             ['Dashboard', 'admin.dashboard', 'dashboard', 'admin.dashboard', null],
             ['Pesanan', 'admin.orders.index', 'receipt', 'admin.orders.*', $pendingOrders ?: null],
+            ['Laporan', 'admin.reports.index', 'chart', 'admin.reports.*', null],
         ],
         'Katalog' => [
             ['Produk', 'admin.products.index', 'cube', 'admin.products.*', null],

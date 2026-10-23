@@ -108,6 +108,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/customers/{customer}', [Admin\CustomerController::class, 'show'])->name('customers.show');
     Route::patch('/customers/{customer}/toggle', [Admin\CustomerController::class, 'toggleActive'])->name('customers.toggle');
 
+    Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/{type}', [Admin\ReportController::class, 'export'])->name('reports.export')->whereIn('type', ['penjualan', 'produk', 'kategori', 'pesanan']);
+
     Route::get('/settings', Admin\SettingController::class)->name('settings');
 
     Route::get('/profile', [Account\ProfileController::class, 'edit'])->name('profile.edit');

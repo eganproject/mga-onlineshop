@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->seedCatalog();
+        $this->call(DemoOrderSeeder::class);
     }
 
     private function seedCatalog(): void
