@@ -1,0 +1,62 @@
+<?php
+
+// Pesan validasi Bahasa Indonesia. Aturan yang tidak ada di sini
+// otomatis memakai bahasa cadangan (en).
+return [
+    'accepted' => ':attribute harus disetujui.',
+    'alpha_dash' => ':attribute hanya boleh berisi huruf, angka, strip, dan garis bawah.',
+    'array' => ':attribute harus berupa daftar.',
+    'boolean' => ':attribute harus bernilai benar atau salah.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'current_password' => 'Password saat ini salah.',
+    'date' => ':attribute bukan tanggal yang valid.',
+    'email' => ':attribute harus berupa alamat email yang valid.',
+    'enum' => ':attribute yang dipilih tidak valid.',
+    'exists' => ':attribute yang dipilih tidak valid.',
+    'file' => ':attribute harus berupa file.',
+    'image' => ':attribute harus berupa gambar.',
+    'in' => ':attribute yang dipilih tidak valid.',
+    'integer' => ':attribute harus berupa angka bulat.',
+    'lowercase' => ':attribute harus huruf kecil.',
+    'max' => [
+        'array' => ':attribute maksimal berisi :max item.',
+        'file' => ':attribute maksimal :max kilobyte.',
+        'numeric' => ':attribute maksimal :max.',
+        'string' => ':attribute maksimal :max karakter.',
+    ],
+    'min' => [
+        'array' => ':attribute minimal berisi :min item.',
+        'file' => ':attribute minimal :min kilobyte.',
+        'numeric' => ':attribute minimal :min.',
+        'string' => ':attribute minimal :min karakter.',
+    ],
+    'numeric' => ':attribute harus berupa angka.',
+    'password' => [
+        'letters' => ':attribute harus mengandung minimal satu huruf.',
+        'mixed' => ':attribute harus mengandung huruf besar dan huruf kecil.',
+        'numbers' => ':attribute harus mengandung minimal satu angka.',
+        'symbols' => ':attribute harus mengandung minimal satu simbol.',
+        'uncompromised' => ':attribute ini pernah bocor di internet. Gunakan password lain.',
+    ],
+    'regex' => 'Format :attribute tidak valid.',
+    'required' => ':attribute wajib diisi.',
+    'required_if' => ':attribute wajib diisi.',
+    'string' => ':attribute harus berupa teks.',
+    'unique' => ':attribute sudah digunakan.',
+    'uploaded' => ':attribute gagal diunggah.',
+    'url' => ':attribute harus berupa URL yang valid.',
+
+    'attributes' => [
+        'name' => 'nama',
+        'email' => 'email',
+        'phone' => 'nomor HP',
+        'password' => 'password',
+        'current_password' => 'password saat ini',
+        'quantity' => 'jumlah',
+        'notes' => 'catatan',
+        'status' => 'status',
+        'slug' => 'slug',
+        'sku' => 'SKU',
+        'description' => 'deskripsi',
+    ],
+];

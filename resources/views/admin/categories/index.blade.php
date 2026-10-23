@@ -1,0 +1,63 @@
+<x-layouts.admin title="Kategori">
+    <x-admin.page-header title="Kategori" description="Kelompokkan produk agar mudah dicari pelanggan.">
+        <a href="{{ route('admin.categories.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Tambah kategori</a>
+    </x-admin.page-header>
+
+    <div class="card overflow-hidden">
+        <form method="GET" class="border-b border-stone-100 p-4">
+            <div class="relative max-w-xs">
+                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari kategori..." class="input pl-10">
+            </div>
+        </form>
+
+        @if ($categories->isEmpty())
+            <x-empty-state icon="tag" title="Belum ada kategori" description="Buat kategori pertama, misalnya Casing HP atau Charger.">
+                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">Tambah kategori</a>
+            </x-empty-state>
+        @else
+            <div class="relative overflow-x-auto">
+                <table class="table-base">
+                    <thead class="bg-stone-50/70"><tr><th>Kategori</th><th>Produk</th><th>Urutan</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-stone-100">
+                        @foreach ($categories as $category)
+                            <tr class="hover:bg-stone-50/50">
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-50 text-brand-500">
+                                            @if ($category->imageUrl())
+                                                <img src="{{ $category->imageUrl() }}" alt="" class="size-full object-cover">
+                                            @else
+                                                <x-icon name="tag" class="size-5" />
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-stone-900">{{ $category->name }}</p>
+                                            <p class="text-xs text-stone-500">/{{ $category->slug }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ $category->products_count }}</td>
+                                <td>{{ $category->sort_order }}</td>
+                                <td>
+                                    @if ($category->is_active)
+                                        <span class="badge bg-emerald-50 text-emerald-700 ring-emerald-600/20">Aktif</span>
+                                    @else
+                                        <span class="badge bg-stone-100 text-stone-600 ring-stone-500/20">Nonaktif</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="flex justify-end gap-1">
+                                        <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
+                                        <x-confirm-delete :action="route('admin.categories.destroy', $category)" message="Hapus kategori {{ $category->name }}? Produk di dalamnya tidak ikut terhapus." />
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="border-t border-stone-100 p-4">{{ $categories->links() }}</div>
+        @endif
+    </div>
+</x-layouts.admin>

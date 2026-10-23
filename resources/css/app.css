@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+@source '../../app';
+
+/*
+ * Warna brand MGA ada di satu tempat ini. Ganti nilai --color-brand-*
+ * untuk rebranding tanpa menyentuh view.
+ */
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+    --color-brand-50: #fff7ed;
+    --color-brand-100: #ffedd5;
+    --color-brand-200: #fed7aa;
+    --color-brand-300: #fdba74;
+    --color-brand-400: #fb923c;
+    --color-brand-500: #f97316;
+    --color-brand-600: #ea580c;
+    --color-brand-700: #c2410c;
+    --color-brand-800: #9a3412;
+    --color-brand-900: #7c2d12;
+
+    --color-cream: #fbf8f4;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    }
+    .btn-sm {
+        @apply rounded-lg px-3 py-1.5 text-xs;
+    }
+    .btn-primary {
+        @apply bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700 focus-visible:outline-brand-600;
+    }
+    .btn-secondary {
+        @apply bg-white text-stone-700 ring-1 ring-stone-200 ring-inset hover:bg-stone-50 focus-visible:outline-stone-400;
+    }
+    .btn-dark {
+        @apply bg-stone-900 text-white hover:bg-stone-800 focus-visible:outline-stone-900;
+    }
+    .btn-ghost {
+        @apply text-stone-600 hover:bg-stone-100 hover:text-stone-900;
+    }
+    .btn-danger {
+        @apply bg-rose-600 text-white hover:bg-rose-700 focus-visible:outline-rose-600;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-stone-700;
+    }
+    .input {
+        @apply block w-full rounded-xl border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-900 shadow-xs placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15;
+    }
+    .input-error {
+        @apply border-rose-300 focus:border-rose-500 focus:ring-rose-500/15;
+    }
+    .checkbox {
+        @apply size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500/30;
+    }
+
+    .card {
+        @apply rounded-2xl border border-stone-200/70 bg-white shadow-xs;
+    }
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+    }
+
+    .table-base {
+        @apply min-w-full divide-y divide-stone-100 text-sm;
+    }
+    .table-base th {
+        @apply px-4 py-3 text-left text-xs font-semibold tracking-wide text-stone-500 uppercase;
+    }
+    .table-base td {
+        @apply px-4 py-3.5 text-stone-700;
+    }
+}
