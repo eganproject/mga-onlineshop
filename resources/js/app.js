@@ -7,6 +7,8 @@ import bannerCarousel from './components/banner-carousel';
 import checkout from './components/checkout';
 import wishlistButton from './components/wishlist-button';
 import firebaseLogin from './components/firebase-login';
+import articleEditor from './components/article-editor';
+import shareButtons from './components/share-buttons';
 
 window.Alpine = Alpine;
 
@@ -22,5 +24,7 @@ Alpine.data('checkout', checkout);
 Alpine.data('bannerCarousel', bannerCarousel);
 Alpine.data('wishlistButton', wishlistButton);
 Alpine.data('firebaseLogin', firebaseLogin);
+Alpine.data('articleEditor', articleEditor);
+Alpine.data('shareButtons', shareButtons);
 
 Alpine.start();

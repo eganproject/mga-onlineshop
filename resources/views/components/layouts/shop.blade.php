@@ -7,6 +7,7 @@
         ['label' => 'Terbaru', 'url' => route('products.index', ['urut' => 'terbaru']), 'active' => request('urut') === 'terbaru'],
     ];
     $promoNav = ['label' => 'Promo', 'url' => route('products.index', ['promo' => 1]), 'active' => request()->boolean('promo')];
+    $articleNav = ['label' => 'Artikel', 'url' => route('articles.index'), 'active' => request()->routeIs('articles.*')];
     $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
 <x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" body-class="bg-white text-ink">
@@ -127,6 +128,10 @@
                         'relative flex items-center gap-1.5 py-7 text-sm font-semibold text-accent-600 transition hover:text-accent-700',
                         'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent-500' => $promoNav['active'],
                     ])><span class="size-1.5 rounded-full bg-accent-500"></span>{{ $promoNav['label'] }}</a>
+                    <a href="{{ $articleNav['url'] }}" @class([
+                        'relative py-7 text-sm font-medium transition hover:text-brand-600',
+                        'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-brand-500' => $articleNav['active'],
+                    ])>{{ $articleNav['label'] }}</a>
                 </nav>
 
                 {{-- Kanan --}}
@@ -249,7 +254,7 @@
                 </div>
                 <nav class="flex-1 px-4 py-4">
                     <ul class="divide-y divide-stone-100">
-                        @foreach ([...$nav, $promoNav] as $item)
+                        @foreach ([...$nav, $promoNav, $articleNav] as $item)
                             <li>
                                 <a href="{{ $item['url'] }}" class="flex items-center justify-between py-4 font-display text-xl font-extrabold tracking-tight uppercase">
                                     {{ $item['label'] }} <x-icon name="chevron-right" class="size-5 text-stone-400" />
@@ -330,6 +335,7 @@
                                 <li><a href="{{ auth()->check() ? route('account.orders.index') : route('login') }}" class="hover:text-white hover:underline hover:underline-offset-4">Lacak pesanan</a></li>
                                 <li><a href="{{ $accountUrl }}" class="hover:text-white hover:underline hover:underline-offset-4">Akun saya</a></li>
                                 <li><a href="{{ route('cart.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Keranjang</a></li>
+                                <li><a href="{{ route('articles.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Artikel &amp; tips</a></li>
                                 @if (config('shop.whatsapp'))
                                     <li><a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="hover:text-white hover:underline hover:underline-offset-4">WhatsApp</a></li>
                                 @endif

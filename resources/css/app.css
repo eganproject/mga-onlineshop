@@ -349,3 +349,109 @@
         @apply cursor-pointer;
     }
 }
+
+/* ---------- Tom Select pilihan ganda (tag, produk terkait) ---------- */
+@layer components {
+    .ts-wrapper.multi.input {
+        @apply h-auto min-h-[42px] py-1.5 pr-3 pl-1.5;
+    }
+    .ts-wrapper.multi .ts-control {
+        @apply flex-wrap gap-1.5;
+    }
+    .ts-wrapper.multi .ts-control > .item {
+        @apply m-0 inline-flex items-center gap-1 rounded-lg border-0 bg-brand-50 py-1 pr-1 pl-2.5 text-xs font-medium text-brand-800;
+    }
+    .ts-wrapper.multi .ts-control > .item.active {
+        @apply bg-brand-600 text-white;
+    }
+    .ts-wrapper.plugin-remove_button .item .remove {
+        @apply ml-0.5 rounded-md border-0 px-1.5 text-sm leading-none text-current opacity-60 hover:bg-black/10 hover:opacity-100;
+    }
+    .ts-wrapper.multi .ts-control > input {
+        @apply min-w-24 flex-1 py-1 pl-2;
+    }
+    .ts-dropdown .create {
+        @apply px-3.5 py-2 text-brand-700;
+    }
+}
+
+/*
+ * ---------- Isi artikel ----------
+ * Dipakai di halaman artikel dan di editor admin, jadi tampilannya sama.
+ */
+@layer components {
+    .article-prose {
+        @apply text-[16px] leading-[1.8] text-stone-700 sm:text-[17px];
+        overflow-wrap: break-word;
+    }
+    .article-prose > * + * {
+        @apply mt-5;
+    }
+    .article-prose h2 {
+        @apply mt-10 text-2xl leading-tight font-bold tracking-tight text-ink sm:text-[1.7rem];
+    }
+    .article-prose h3 {
+        @apply mt-8 text-xl leading-snug font-semibold text-ink;
+    }
+    .article-prose h4 {
+        @apply mt-6 text-lg font-semibold text-ink;
+    }
+    .article-prose h2 + *,
+    .article-prose h3 + *,
+    .article-prose h4 + * {
+        @apply mt-3;
+    }
+    .article-prose a {
+        @apply font-medium text-brand-700 underline decoration-brand-300 decoration-2 underline-offset-[3px] transition hover:decoration-brand-600;
+    }
+    .article-prose strong,
+    .article-prose b {
+        @apply font-semibold text-ink;
+    }
+    .article-prose ul,
+    .article-prose ol {
+        @apply space-y-2 pl-6;
+    }
+    .article-prose ul {
+        @apply list-disc marker:text-brand-500;
+    }
+    .article-prose ol {
+        @apply list-decimal marker:font-semibold marker:text-brand-600;
+    }
+    .article-prose li > p {
+        @apply m-0;
+    }
+    .article-prose blockquote {
+        @apply border-l-4 border-accent-400 bg-sand-50 py-3 pr-4 pl-5 text-lg leading-relaxed font-medium text-ink italic;
+    }
+    .article-prose blockquote > * + * {
+        @apply mt-3;
+    }
+    .article-prose hr {
+        @apply my-10 border-stone-200;
+    }
+    .article-prose img {
+        @apply mx-auto h-auto max-w-full rounded-xl;
+    }
+    .article-prose figcaption {
+        @apply mt-2 text-center text-sm text-stone-500;
+    }
+    .article-prose code {
+        @apply rounded bg-stone-100 px-1.5 py-0.5 text-[0.9em] text-ink;
+    }
+    .article-prose pre {
+        @apply overflow-x-auto rounded-xl bg-ink p-4 text-sm text-white;
+    }
+    .article-prose pre code {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
+    /* Editor (Tiptap) */
+    .article-prose.ProseMirror p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        @apply pointer-events-none float-left h-0 text-stone-400;
+    }
+    .article-prose.ProseMirror img.ProseMirror-selectednode {
+        @apply ring-4 ring-brand-500/40;
+    }
+}

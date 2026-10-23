@@ -19,6 +19,25 @@
         <priority>0.7</priority>
     </url>
 @endforeach
+@if ($articles->isNotEmpty())
+    <url>
+        <loc>{{ route('articles.index') }}</loc>
+        <lastmod>{{ $articles->max('updated_at')->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+@endif
+@foreach ($articles as $article)
+    <url>
+        <loc>{{ route('articles.show', $article) }}</loc>
+        <lastmod>{{ $article->updated_at->toAtomString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+@if ($article->coverUrl())
+        <image:image><image:loc>{{ $article->coverUrl() }}</image:loc><image:title>{{ $article->title }}</image:title></image:image>
+@endif
+    </url>
+@endforeach
 @foreach ($products as $product)
     <url>
         <loc>{{ route('products.show', $product) }}</loc>

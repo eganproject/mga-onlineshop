@@ -17,6 +17,9 @@ Route::get('/', Shop\HomeController::class)->name('home');
 Route::get('/produk', [Shop\ProductController::class, 'index'])->name('products.index');
 Route::get('/produk/{product}', [Shop\ProductController::class, 'show'])->name('products.show');
 
+Route::get('/artikel', [Shop\ArticleController::class, 'index'])->name('articles.index');
+Route::get('/artikel/{article}', [Shop\ArticleController::class, 'show'])->name('articles.show');
+
 Route::get('/sitemap.xml', Shop\SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', Shop\RobotsController::class)->name('robots');
 
@@ -160,6 +163,12 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::resource('banners', Admin\BannerController::class)->except('show');
         Route::get('/storefront', [Admin\StorefrontController::class, 'edit'])->name('storefront.edit');
         Route::put('/storefront', [Admin\StorefrontController::class, 'update'])->name('storefront.update');
+    });
+
+    Route::middleware('can:articles.manage')->group(function () {
+        Route::post('/articles/images', [Admin\ArticleController::class, 'uploadImage'])->name('articles.images')->middleware('throttle:60,1');
+        Route::resource('articles', Admin\ArticleController::class)->except('show');
+        Route::resource('article-categories', Admin\ArticleCategoryController::class)->except(['show', 'create']);
     });
 
     Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->middleware('can:orders.view')->group(function () {

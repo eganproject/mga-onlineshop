@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
         Order::withoutEvents(fn () => $this->call(DemoOrderSeeder::class));
         $this->seedReviews();
         $this->seedVouchers();
+        $this->call(ArticleSeeder::class);
     }
 
     /** Voucher contoh (banner perlu gambar, jadi diunggah sendiri lewat admin). */

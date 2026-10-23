@@ -20,6 +20,10 @@
             ['Banner', 'admin.banners.index', 'megaphone', 'admin.banners.*', null],
             ['Tampilan Beranda', 'admin.storefront.edit', 'photo', 'admin.storefront.*', null],
         ],
+        'Konten' => [
+            ['Artikel', 'admin.articles.index', 'newspaper', 'admin.articles.*', null],
+            ['Kategori Artikel', 'admin.article-categories.index', 'tag', 'admin.article-categories.*', null],
+        ],
         'Pelanggan' => [
             ['Pelanggan', 'admin.customers.index', 'users', 'admin.customers.*', null],
         ],

@@ -176,6 +176,8 @@
         </section>
     @endif
 
+    @include('shop.partials.latest-articles')
+
     {{-- Janji layanan --}}
     <section class="shop-container mt-16 lg:mt-24">
         <div class="grid gap-px overflow-hidden border border-stone-200 bg-stone-200 sm:grid-cols-3">

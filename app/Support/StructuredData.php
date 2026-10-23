@@ -2,8 +2,10 @@
 
 namespace App\Support;
 
+use App\Models\Article;
 use App\Models\Product;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /** Data terstruktur schema.org (JSON-LD) untuk rich result di mesin pencari. */
 class StructuredData
@@ -65,6 +67,35 @@ class StructuredData
         }
 
         return self::clean($data);
+    }
+
+    public static function article(Article $article): array
+    {
+        $url = route('articles.show', $article);
+
+        return self::clean([
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
+            'headline' => Str::limit($article->title, 110),
+            'description' => $article->metaDescription(),
+            'image' => $article->coverUrl() ? [$article->coverUrl()] : null,
+            'datePublished' => $article->published_at?->toAtomString(),
+            'dateModified' => $article->updated_at?->toAtomString(),
+            'author' => $article->author
+                ? ['@type' => 'Person', 'name' => $article->author->name]
+                : ['@type' => 'Organization', 'name' => config('shop.full_name')],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => config('shop.full_name'),
+                'logo' => ['@type' => 'ImageObject', 'url' => asset('images/brand/icon-512.png')],
+            ],
+            'articleSection' => $article->category?->name,
+            'keywords' => $article->tagList() ? implode(', ', $article->tagList()) : null,
+            'wordCount' => str_word_count(strip_tags($article->body)),
+            'inLanguage' => 'id-ID',
+            'url' => $url,
+        ]);
     }
 
     /** @param  array<int, array{0: string, 1: string}>  $items  [nama, url] */

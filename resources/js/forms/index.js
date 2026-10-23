@@ -22,8 +22,12 @@ let flatpickr;
 
 const loadTomSelect = () =>
     (tomSelect ??= import('tom-select/base').then(async ({ default: TomSelect }) => {
-        const { default: dropdownInput } = await import('tom-select/plugins/dropdown_input/plugin.js');
+        const [{ default: dropdownInput }, { default: removeButton }] = await Promise.all([
+            import('tom-select/plugins/dropdown_input/plugin.js'),
+            import('tom-select/plugins/remove_button/plugin.js'),
+        ]);
         TomSelect.define('dropdown_input', dropdownInput);
+        TomSelect.define('remove_button', removeButton);
         return TomSelect;
     }));
 
@@ -48,13 +52,17 @@ export async function createSearchable(el, options = {}) {
     const TomSelect = await loadTomSelect();
     if (el.tomselect) return el.tomselect;
     const count = el.querySelectorAll('option').length;
-    const search = options.search ?? count > SEARCH_THRESHOLD;
+    const multiple = el.multiple;
+    const search = multiple || (options.search ?? count > SEARCH_THRESHOLD);
 
     return new TomSelect(el, {
         allowEmptyOption: true,
         maxOptions: null,
-        controlInput: search ? undefined : null,
-        plugins: search ? ['dropdown_input'] : [],
+        // Pilihan ganda memakai kotak ketik bawaan Tom Select (di dalam kontrol).
+        ...(multiple ? {} : { controlInput: search ? undefined : null }),
+        // Pilihan ganda (<select multiple>): ketik langsung di kotak, tiap item bisa dihapus.
+        plugins: multiple ? ['remove_button'] : search ? ['dropdown_input'] : [],
+        hidePlaceholder: multiple,
         placeholder: options.placeholder ?? el.dataset.placeholder,
         render: {
             no_results: () => '<div class="no-results">Tidak ditemukan</div>',
@@ -62,7 +70,7 @@ export async function createSearchable(el, options = {}) {
         },
         onInitialize() {
             this.wrapper.classList.toggle('ts-searchable', search);
-            if (search) this.control_input.placeholder = 'Ketik untuk mencari...';
+            if (search && !multiple) this.control_input.placeholder = 'Ketik untuk mencari...';
             // Kotak pencarian jangan memicu @change milik form (mis. filter auto-submit).
             this.control_input.addEventListener('change', (event) => event.stopPropagation());
         },

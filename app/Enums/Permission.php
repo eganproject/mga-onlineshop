@@ -13,6 +13,7 @@ enum Permission: string
     case CatalogManage = 'catalog.manage';
     case StockManage = 'stock.manage';
     case PromosManage = 'promos.manage';
+    case ArticlesManage = 'articles.manage';
     case ReviewsManage = 'reviews.manage';
     case CustomersView = 'customers.view';
     case CustomersManage = 'customers.manage';
@@ -30,6 +31,7 @@ enum Permission: string
             self::CatalogManage => 'Kelola produk & kategori',
             self::StockManage => 'Kelola stok',
             self::PromosManage => 'Kelola promo, voucher & banner',
+            self::ArticlesManage => 'Tulis & terbitkan artikel blog',
             self::ReviewsManage => 'Moderasi ulasan',
             self::CustomersView => 'Lihat data pelanggan',
             self::CustomersManage => 'Blokir / aktifkan pelanggan',
