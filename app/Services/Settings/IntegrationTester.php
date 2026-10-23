@@ -147,7 +147,8 @@ class IntegrationTester
         $notes = [];
         $remoteProject = (string) $response->json('projectId');
 
-        if ($remoteProject !== '' && $remoteProject !== $projectId) {
+        // Endpoint ini mengembalikan nomor project (angka), bukan Project ID; hanya bandingkan bila berupa ID.
+        if ($remoteProject !== '' && ! ctype_digit($remoteProject) && $remoteProject !== $projectId) {
             return $this->result(false, "API key ini milik project \"{$remoteProject}\", bukan \"{$projectId}\".");
         }
 

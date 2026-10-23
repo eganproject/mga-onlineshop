@@ -192,6 +192,18 @@ class IntegrationSettingsTest extends TestCase
         $this->assertStringContainsString('Authentication belum diaktifkan', session('integration_test.firebase.message'));
     }
 
+    public function test_firebase_test_accepts_numeric_project_number(): void
+    {
+        config(['services.firebase.api_key' => 'AIzaTest', 'services.firebase.project_id' => 'mga-shop', 'app.url' => 'https://mga.test']);
+
+        Http::fake([
+            'identitytoolkit.googleapis.com/*' => Http::response(['projectId' => '547048298727', 'authorizedDomains' => ['mga.test']]),
+        ]);
+
+        $this->actingAs($this->superadmin)->post(route('admin.integrations.test', 'firebase'))
+            ->assertSessionHas('integration_test.firebase.ok', true);
+    }
+
     public function test_undecryptable_secret_falls_back_to_env(): void
     {
         config(['services.rajaongkir.api_key' => 'env-key']);
