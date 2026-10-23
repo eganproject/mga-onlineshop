@@ -54,6 +54,12 @@ class Product extends Model
     }
 
     #[Scope]
+    protected function onSale(Builder $query): void
+    {
+        $query->whereNotNull('compare_at_price')->whereColumn('compare_at_price', '>', 'price');
+    }
+
+    #[Scope]
     protected function search(Builder $query, ?string $term): void
     {
         $query->when($term, fn (Builder $q) => $q->where(function (Builder $q) use ($term) {

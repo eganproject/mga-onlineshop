@@ -25,6 +25,24 @@
     --color-brand-900: #7c2d12;
 
     --color-cream: #fbf8f4;
+
+    /*
+     * Storefront: netral hangat + tinta hitam (terinspirasi tampilan
+     * editorial yang bersih). Warna brand dipakai sebagai aksen saja.
+     */
+    --font-display: 'Archivo', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-ink: #141414;
+    --color-sand-50: #faf9f6;
+    --color-sand-100: #f4f2ed;
+    --color-sand-200: #e9e5dc;
+    --color-sand-300: #d8d2c4;
+
+    --animate-marquee: marquee 30s linear infinite;
+
+    @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
 }
 
 [x-cloak] {
@@ -72,6 +90,44 @@
     }
     .badge {
         @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+    }
+
+    /* ---------- Storefront ---------- */
+    .shop-container {
+        @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
+    }
+    .display {
+        @apply font-display font-extrabold tracking-tight uppercase;
+    }
+    .eyebrow {
+        @apply text-[11px] font-semibold tracking-[0.18em] uppercase;
+    }
+    .btn-pill {
+        @apply rounded-full px-6 py-3;
+    }
+    .btn-ink {
+        @apply bg-ink text-white hover:bg-stone-700 focus-visible:outline-ink;
+    }
+    .btn-outline {
+        @apply bg-transparent text-ink ring-1 ring-ink ring-inset hover:bg-ink hover:text-white focus-visible:outline-ink;
+    }
+    .btn-light {
+        @apply bg-white text-ink hover:bg-sand-100 focus-visible:outline-white;
+    }
+    .link-underline {
+        @apply underline decoration-1 underline-offset-4 transition hover:decoration-2;
+    }
+    .chip {
+        @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-ink;
+    }
+    .chip-active {
+        @apply border-ink bg-ink text-white hover:border-ink;
+    }
+    .no-scrollbar {
+        scrollbar-width: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
     }
 
     .table-base {

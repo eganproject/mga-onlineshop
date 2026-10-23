@@ -14,8 +14,9 @@ class HomeController extends Controller
         return view('shop.home', [
             'categories' => Category::active()->withCount(['products' => fn ($q) => $q->active()])
                 ->orderBy('sort_order')->take(8)->get(),
-            'featured' => Product::active()->where('is_featured', true)->latest()->take(8)->get(),
-            'latest' => Product::active()->latest()->take(8)->get(),
+            'featured' => Product::active()->with('category')->where('is_featured', true)->latest()->take(8)->get(),
+            'latest' => Product::active()->with('category')->latest()->take(8)->get(),
+            'onSale' => Product::active()->with('category')->onSale()->latest()->take(4)->get(),
         ]);
     }
 }

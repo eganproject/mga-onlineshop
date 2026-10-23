@@ -1,151 +1,297 @@
 @props(['title' => null])
 @php
     $user = auth()->user();
+    $announcements = config('shop.storefront.announcements', []);
     $nav = [
-        ['label' => 'Beranda', 'route' => 'home', 'icon' => 'home', 'active' => request()->routeIs('home')],
-        ['label' => 'Produk', 'route' => 'products.index', 'icon' => 'storefront', 'active' => request()->routeIs('products.*')],
+        ['label' => 'Semua Produk', 'url' => route('products.index'), 'active' => request()->routeIs('products.index') && ! request()->hasAny(['kategori', 'promo', 'urut'])],
+        ['label' => 'Terbaru', 'url' => route('products.index', ['urut' => 'terbaru']), 'active' => request('urut') === 'terbaru'],
+        ['label' => 'Promo', 'url' => route('products.index', ['promo' => 1]), 'active' => request()->boolean('promo')],
     ];
+    $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
-<x-layouts.base :title="$title">
+<x-layouts.base :title="$title" body-class="bg-white text-ink">
     @isset($scripts)
         <x-slot:scripts>{{ $scripts }}</x-slot:scripts>
     @endisset
-    {{-- Bar promo --}}
-    <div class="bg-stone-900 text-center text-xs font-medium text-stone-200">
-        <p class="mx-auto max-w-7xl px-4 py-2">
-            <x-icon name="truck" class="mr-1 inline size-4 text-brand-400" />
-            Kirim ke seluruh Indonesia · Produk original bergaransi
-        </p>
-    </div>
 
-    <header x-data="{ mobileSearch: false }" class="sticky top-0 z-40 border-b border-stone-200/70 bg-white/85 backdrop-blur-lg">
-        <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="shrink-0"><x-logo /></a>
+    <div x-data="{ menu: false, search: false, cats: false }"
+         x-effect="document.documentElement.classList.toggle('overflow-hidden', menu || search)"
+         @keydown.escape.window="menu = false; search = false"
+         class="flex min-h-screen flex-col">
 
-            <nav class="ml-6 hidden items-center gap-1 md:flex">
-                @foreach ($nav as $item)
-                    <a href="{{ route($item['route']) }}"
-                       @class(['rounded-lg px-3 py-2 text-sm font-semibold transition', 'text-brand-700 bg-brand-50' => $item['active'], 'text-stone-600 hover:text-stone-900' => ! $item['active']])>
-                        {{ $item['label'] }}
-                    </a>
-                @endforeach
-            </nav>
+        {{-- Bar pengumuman (bergulir) --}}
+        @if (count($announcements))
+            <div class="overflow-hidden bg-ink text-white">
+                <div class="flex w-max animate-marquee motion-reduce:animate-none">
+                    @foreach (range(1, 2) as $copy)
+                        <ul class="flex shrink-0 items-center" @if ($copy === 2) aria-hidden="true" @endif>
+                            @foreach (array_merge($announcements, $announcements) as $text)
+                                <li class="flex items-center gap-10 px-5 py-2 text-[11px] font-semibold tracking-[0.14em] uppercase">
+                                    {{ $text }} <span class="text-brand-400">&#10022;</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
-            <form action="{{ route('products.index') }}" method="GET" class="relative ml-auto hidden w-full max-w-sm lg:block">
-                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari casing, charger, earphone..."
-                       class="input rounded-full bg-stone-50 pl-10">
-            </form>
+        {{-- Header --}}
+        <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
+            <div class="shop-container grid h-16 grid-cols-[1fr_auto_1fr] items-center lg:h-[72px]">
+                {{-- Kiri --}}
+                <div class="flex items-center gap-1">
+                    <button type="button" @click="menu = true" class="-ml-2 grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:hidden" aria-label="Buka menu">
+                        <x-icon name="menu" />
+                    </button>
+                    <button type="button" @click="search = true" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:hidden" aria-label="Cari">
+                        <x-icon name="search" />
+                    </button>
 
-            <div class="ml-auto flex items-center gap-1 lg:ml-2">
-                <button type="button" @click="mobileSearch = !mobileSearch" class="btn btn-ghost p-2.5 lg:hidden" aria-label="Cari">
-                    <x-icon name="search" />
-                </button>
+                    <nav class="hidden items-center gap-7 lg:flex" aria-label="Navigasi utama">
+                        @foreach ($nav as $item)
+                            <a href="{{ $item['url'] }}" @class(['relative py-6 text-[13px] font-semibold tracking-wide uppercase transition hover:text-stone-500', 'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-ink' => $item['active']])>
+                                {{ $item['label'] }}
+                            </a>
+                        @endforeach
+                        @if ($navCategories->isNotEmpty())
+                            <div class="relative" @mouseenter="cats = true" @mouseleave="cats = false">
+                                <button type="button" @click="cats = !cats" :aria-expanded="cats"
+                                        @class(['flex items-center gap-1 py-6 text-[13px] font-semibold tracking-wide uppercase transition hover:text-stone-500', 'relative after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-ink' => request()->filled('kategori')])>
+                                    Kategori <x-icon name="chevron-down" class="size-3.5" />
+                                </button>
+                                <div x-show="cats" x-cloak x-transition.opacity
+                                     class="absolute left-0 top-full w-[min(560px,80vw)] border border-stone-200 bg-white p-6 shadow-2xl shadow-stone-900/10">
+                                    <p class="eyebrow text-stone-400">Belanja per kategori</p>
+                                    <ul class="mt-4 grid grid-cols-2 gap-x-8 gap-y-1">
+                                        @foreach ($navCategories as $category)
+                                            <li>
+                                                <a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="group flex items-center justify-between py-2 text-sm font-medium">
+                                                    <span class="group-hover:underline group-hover:underline-offset-4">{{ $category->name }}</span>
+                                                    <x-icon name="arrow-right" class="size-4 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+                    </nav>
+                </div>
 
-                <a href="{{ route('cart.index') }}" class="btn btn-ghost relative p-2.5" aria-label="Keranjang">
-                    <x-icon name="cart" />
-                    @if ($cartCount > 0)
-                        <span class="absolute right-0.5 top-0.5 grid min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white ring-2 ring-white">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
-                        </span>
-                    @endif
+                {{-- Tengah: logo --}}
+                <a href="{{ route('home') }}" class="justify-self-center" aria-label="{{ config('shop.full_name') }}">
+                    <x-wordmark />
                 </a>
 
-                @auth
-                    <div x-data="{ open: false }" class="relative hidden md:block">
-                        <button type="button" @click="open = !open" @click.outside="open = false"
-                                class="flex items-center gap-2 rounded-full p-1 pr-3 transition hover:bg-stone-100">
-                            <span class="grid size-8 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">{{ $user->initials() }}</span>
-                            <span class="max-w-28 truncate text-sm font-semibold text-stone-700">{{ \Illuminate\Support\Str::words($user->name, 1, '') }}</span>
-                            <x-icon name="chevron-down" class="size-4 text-stone-400" />
-                        </button>
-                        <div x-show="open" x-cloak x-transition.origin.top.right
-                             class="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-stone-200 bg-white p-1.5 shadow-xl shadow-stone-900/10">
-                            <div class="px-3 py-2">
-                                <p class="truncate text-sm font-semibold text-stone-900">{{ $user->name }}</p>
-                                <p class="truncate text-xs text-stone-500">{{ $user->email }}</p>
+                {{-- Kanan --}}
+                <div class="flex items-center justify-end gap-1">
+                    <button type="button" @click="search = true" class="hidden h-10 items-center gap-2 rounded-full px-3 text-[13px] font-semibold tracking-wide uppercase hover:bg-sand-100 lg:flex">
+                        <x-icon name="search" class="size-5" /> Cari
+                    </button>
+
+                    @auth
+                        <div x-data="{ open: false }" class="relative hidden lg:block">
+                            <button type="button" @click="open = !open" @click.outside="open = false" :aria-expanded="open"
+                                    class="flex h-10 items-center gap-2 rounded-full px-3 text-[13px] font-semibold tracking-wide uppercase hover:bg-sand-100">
+                                <x-icon name="user" class="size-5" /> {{ \Illuminate\Support\Str::words($user->name, 1, '') }}
+                            </button>
+                            <div x-show="open" x-cloak x-transition.origin.top.right
+                                 class="absolute right-0 mt-2 w-60 border border-stone-200 bg-white p-2 shadow-2xl shadow-stone-900/10">
+                                <div class="px-3 py-2">
+                                    <p class="truncate text-sm font-semibold">{{ $user->name }}</p>
+                                    <p class="truncate text-xs text-stone-500">{{ $user->email }}</p>
+                                </div>
+                                <div class="my-1 h-px bg-stone-100"></div>
+                                @if ($user->isAdmin())
+                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="dashboard" class="size-4" /> Admin Panel</a>
+                                @else
+                                    <a href="{{ route('account.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="user" class="size-4" /> Akun Saya</a>
+                                    <a href="{{ route('account.orders.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="receipt" class="size-4" /> Pesanan Saya</a>
+                                @endif
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"><x-icon name="logout" class="size-4" /> Keluar</button>
+                                </form>
                             </div>
-                            <div class="my-1 h-px bg-stone-100"></div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="hidden h-10 items-center gap-2 rounded-full px-3 text-[13px] font-semibold tracking-wide uppercase hover:bg-sand-100 lg:flex">
+                            <x-icon name="user" class="size-5" /> Masuk
+                        </a>
+                    @endauth
+
+                    <a href="{{ $accountUrl }}" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:hidden" aria-label="Akun">
+                        <x-icon name="user" />
+                    </a>
+
+                    <a href="{{ route('cart.index') }}" class="relative -mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
+                        <x-icon name="bag" />
+                        @if ($cartCount > 0)
+                            <span class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-brand-600 px-1 text-[10px] leading-[18px] font-bold text-white">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        {{-- Panel pencarian --}}
+        <div x-show="search" x-cloak class="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Cari produk">
+            <div x-show="search" x-transition.opacity @click="search = false" class="absolute inset-0 bg-ink/40"></div>
+            <div x-show="search"
+                 x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="-translate-y-full" x-transition:enter-end="translate-y-0"
+                 x-transition:leave="transition duration-200 ease-in" x-transition:leave-start="translate-y-0" x-transition:leave-end="-translate-y-full"
+                 class="relative bg-white">
+                <div class="shop-container py-6 sm:py-10">
+                    <div class="flex items-center justify-between">
+                        <p class="eyebrow text-stone-500">Cari produk</p>
+                        <button type="button" @click="search = false" class="-mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100" aria-label="Tutup pencarian">
+                            <x-icon name="x" />
+                        </button>
+                    </div>
+                    <form action="{{ route('products.index') }}" method="GET" class="mt-3 flex items-center gap-3 border-b-2 border-ink pb-3">
+                        <x-icon name="search" class="size-6 shrink-0 text-stone-400" />
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Casing, charger, earphone..."
+                               x-effect="if (search) $nextTick(() => $el.focus())"
+                               class="w-full border-0 bg-transparent p-0 font-display text-2xl font-bold tracking-tight placeholder:text-stone-300 focus:ring-0 sm:text-4xl">
+                        <button class="btn btn-ink btn-pill hidden shrink-0 sm:inline-flex">Cari</button>
+                    </form>
+                    @if ($navCategories->isNotEmpty())
+                        <p class="eyebrow mt-6 text-stone-400">Kategori populer</p>
+                        <div class="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+                            @foreach ($navCategories->take(8) as $category)
+                                <a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="chip">{{ $category->name }}</a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Menu mobile --}}
+        <div x-show="menu" x-cloak class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+            <div x-show="menu" x-transition.opacity @click="menu = false" class="absolute inset-0 bg-ink/40"></div>
+            <div x-show="menu"
+                 x-transition:enter="transition duration-300 ease-out" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition duration-200 ease-in" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+                 class="relative flex h-full w-[86%] max-w-sm flex-col overflow-y-auto bg-white">
+                <div class="flex h-16 items-center justify-between border-b border-stone-200 px-4">
+                    <x-wordmark />
+                    <button type="button" @click="menu = false" class="-mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100" aria-label="Tutup menu">
+                        <x-icon name="x" />
+                    </button>
+                </div>
+                <nav class="flex-1 px-4 py-4">
+                    <ul class="divide-y divide-stone-100">
+                        @foreach ($nav as $item)
+                            <li>
+                                <a href="{{ $item['url'] }}" class="flex items-center justify-between py-4 font-display text-xl font-extrabold tracking-tight uppercase">
+                                    {{ $item['label'] }} <x-icon name="chevron-right" class="size-5 text-stone-400" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @if ($navCategories->isNotEmpty())
+                        <p class="eyebrow mt-6 text-stone-400">Kategori</p>
+                        <ul class="mt-2">
+                            @foreach ($navCategories as $category)
+                                <li><a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="block py-2.5 text-[15px] font-medium">{{ $category->name }}</a></li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </nav>
+                <div class="border-t border-stone-200 bg-sand-50 p-4">
+                    @auth
+                        <p class="text-sm font-semibold">{{ $user->name }}</p>
+                        <p class="text-xs text-stone-500">{{ $user->email }}</p>
+                        <div class="mt-4 grid grid-cols-2 gap-2">
                             @if ($user->isAdmin())
-                                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-stone-700 hover:bg-stone-50"><x-icon name="dashboard" class="size-4" /> Admin Panel</a>
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-ink btn-pill col-span-2 py-2.5">Admin Panel</a>
                             @else
-                                <a href="{{ route('account.dashboard') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-stone-700 hover:bg-stone-50"><x-icon name="user" class="size-4" /> Akun Saya</a>
-                                <a href="{{ route('account.orders.index') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-stone-700 hover:bg-stone-50"><x-icon name="receipt" class="size-4" /> Pesanan Saya</a>
+                                <a href="{{ route('account.dashboard') }}" class="btn btn-ink btn-pill py-2.5">Akun saya</a>
+                                <a href="{{ route('account.orders.index') }}" class="btn btn-outline btn-pill py-2.5">Pesanan</a>
                             @endif
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"><x-icon name="logout" class="size-4" /> Keluar</button>
-                            </form>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}" class="mt-3">
+                            @csrf
+                            <button class="text-sm font-semibold text-rose-600">Keluar</button>
+                        </form>
+                    @else
+                        <p class="text-sm text-stone-600">Masuk untuk checkout dan melacak pesananmu.</p>
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            <a href="{{ route('login') }}" class="btn btn-ink btn-pill py-2.5">Masuk</a>
+                            <a href="{{ route('register') }}" class="btn btn-outline btn-pill py-2.5">Daftar</a>
+                        </div>
+                    @endauth
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-1">
+            {{ $slot }}
+        </main>
+
+        {{-- Footer --}}
+        <footer class="mt-20 bg-ink text-white">
+            <div class="shop-container py-14 lg:py-20">
+                <div class="grid gap-12 lg:grid-cols-12">
+                    <div class="lg:col-span-5">
+                        <h2 class="display text-3xl leading-[0.95] sm:text-4xl">Butuh bantuan memilih?</h2>
+                        <p class="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{{ config('shop.tagline') }}. Tim kami siap membantu dari pemilihan produk sampai pesanan tiba.</p>
+                        @if (config('shop.whatsapp'))
+                            <a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="btn btn-light btn-pill mt-6">
+                                <x-icon name="chat" class="size-4" /> Chat WhatsApp
+                            </a>
+                        @else
+                            <a href="{{ route('products.index') }}" class="btn btn-light btn-pill mt-6">Mulai belanja <x-icon name="arrow-right" class="size-4" /></a>
+                        @endif
+                    </div>
+                    <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
+                        <div>
+                            <h3 class="eyebrow text-white/40">Belanja</h3>
+                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
+                                <li><a href="{{ route('products.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Semua produk</a></li>
+                                @foreach ($navCategories->take(5) as $category)
+                                    <li><a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="hover:text-white hover:underline hover:underline-offset-4">{{ $category->name }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="eyebrow text-white/40">Bantuan</h3>
+                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
+                                <li><a href="{{ auth()->check() ? route('account.orders.index') : route('login') }}" class="hover:text-white hover:underline hover:underline-offset-4">Lacak pesanan</a></li>
+                                <li><a href="{{ $accountUrl }}" class="hover:text-white hover:underline hover:underline-offset-4">Akun saya</a></li>
+                                <li><a href="{{ route('cart.index') }}" class="hover:text-white hover:underline hover:underline-offset-4">Keranjang</a></li>
+                                @if (config('shop.whatsapp'))
+                                    <li><a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="hover:text-white hover:underline hover:underline-offset-4">WhatsApp</a></li>
+                                @endif
+                            </ul>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <h3 class="eyebrow text-white/40">Kenapa MGA</h3>
+                            <ul class="mt-4 space-y-2.5 text-sm text-white/80">
+                                <li class="flex items-center gap-2"><x-icon name="shield" class="size-4 text-white/50" /> Original & bergaransi</li>
+                                <li class="flex items-center gap-2"><x-icon name="truck" class="size-4 text-white/50" /> Kirim se-Indonesia</li>
+                                <li class="flex items-center gap-2"><x-icon name="lock" class="size-4 text-white/50" /> Pembayaran aman</li>
+                            </ul>
+                            @if (config('shop.instagram'))
+                                <a href="https://instagram.com/{{ ltrim(config('shop.instagram'), '@') }}" target="_blank" rel="noopener" class="mt-5 inline-block text-sm text-white/80 hover:text-white hover:underline hover:underline-offset-4">Instagram &#64;{{ ltrim(config('shop.instagram'), '@') }}</a>
+                            @endif
                         </div>
                     </div>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost hidden md:inline-flex">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn btn-primary hidden md:inline-flex">Daftar</a>
-                @endauth
+                </div>
             </div>
-        </div>
-
-        <div x-show="mobileSearch" x-cloak x-transition class="border-t border-stone-100 px-4 py-3 lg:hidden">
-            <form action="{{ route('products.index') }}" method="GET" class="relative">
-                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari produk..." class="input rounded-full bg-stone-50 pl-10">
-            </form>
-        </div>
-    </header>
-
-    <main class="pb-24 md:pb-0">
-        {{ $slot }}
-    </main>
-
-    <footer class="mt-16 border-t border-stone-200/70 bg-white">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4 lg:px-8">
-            <div class="md:col-span-2">
-                <x-logo />
-                <p class="mt-4 max-w-sm text-sm leading-relaxed text-stone-500">{{ config('shop.tagline') }}. Belanja aman, pembayaran mudah, pengiriman cepat ke seluruh Indonesia.</p>
+            <div class="overflow-hidden border-t border-white/10">
+                <p class="shop-container select-none font-display text-[26vw] leading-[0.78] font-black tracking-[-0.06em] text-white/[0.06] uppercase lg:text-[20vw]" aria-hidden="true">{{ config('shop.name') }}</p>
             </div>
-            <div>
-                <h4 class="text-sm font-bold text-stone-900">Belanja</h4>
-                <ul class="mt-3 space-y-2 text-sm text-stone-500">
-                    <li><a href="{{ route('products.index') }}" class="hover:text-brand-600">Semua Produk</a></li>
-                    <li><a href="{{ route('products.index', ['urut' => 'terbaru']) }}" class="hover:text-brand-600">Produk Terbaru</a></li>
-                    <li><a href="{{ route('cart.index') }}" class="hover:text-brand-600">Keranjang</a></li>
-                </ul>
+            <div class="border-t border-white/10">
+                <div class="shop-container flex flex-col gap-2 py-5 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+                    <p>&copy; {{ date('Y') }} {{ config('shop.full_name') }}. Semua hak dilindungi.</p>
+                    <p>Transfer bank · E-wallet · QRIS · Kartu kredit</p>
+                </div>
             </div>
-            <div>
-                <h4 class="text-sm font-bold text-stone-900">Bantuan</h4>
-                <ul class="mt-3 space-y-2 text-sm text-stone-500">
-                    <li><a href="{{ auth()->check() ? route('account.orders.index') : route('login') }}" class="hover:text-brand-600">Lacak Pesanan</a></li>
-                    @if (config('shop.whatsapp'))
-                        <li><a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="hover:text-brand-600">Chat WhatsApp</a></li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-        <div class="border-t border-stone-100 py-5 text-center text-xs text-stone-400">
-            &copy; {{ date('Y') }} {{ config('shop.full_name') }}. Semua hak dilindungi.
-        </div>
-    </footer>
-
-    {{-- Navigasi bawah untuk mobile --}}
-    <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        <div class="grid grid-cols-4">
-            @php
-                $mobileNav = [
-                    ['Beranda', route('home'), 'home', request()->routeIs('home')],
-                    ['Produk', route('products.index'), 'storefront', request()->routeIs('products.*')],
-                    ['Keranjang', route('cart.index'), 'cart', request()->routeIs('cart.*', 'checkout.*')],
-                    ['Akun', $user ? $user->homeRoute() : route('login'), 'user', request()->routeIs('account.*', 'login', 'register')],
-                ];
-            @endphp
-            @foreach ($mobileNav as [$label, $url, $icon, $active])
-                <a href="{{ $url }}" @class(['relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold', 'text-brand-600' => $active, 'text-stone-500' => ! $active])>
-                    <x-icon :name="$icon" class="size-6" />
-                    {{ $label }}
-                    @if ($icon === 'cart' && $cartCount > 0)
-                        <span class="absolute left-1/2 top-1.5 ml-2 grid min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[9px] font-bold text-white">{{ $cartCount }}</span>
-                    @endif
-                </a>
-            @endforeach
-        </div>
-    </nav>
+        </footer>
+    </div>
 </x-layouts.base>

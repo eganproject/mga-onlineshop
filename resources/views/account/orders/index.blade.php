@@ -39,7 +39,7 @@
         @empty
             <div class="card">
                 <x-empty-state icon="receipt" title="Belum ada pesanan" description="Pesanan dengan status ini belum ada.">
-                    <a href="{{ route('products.index') }}" class="btn btn-primary">Mulai belanja</a>
+                    <a href="{{ route('products.index') }}" class="btn btn-ink rounded-full">Mulai belanja</a>
                 </x-empty-state>
             </div>
         @endforelse

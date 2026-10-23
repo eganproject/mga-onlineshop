@@ -16,6 +16,6 @@
             <label for="password_confirmation" class="label">Ulangi password baru</label>
             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="input">
         </div>
-        <button class="btn btn-primary w-full py-3">Simpan password</button>
+        <button class="btn btn-ink rounded-full w-full py-3">Simpan password</button>
     </form>
 </x-layouts.auth>
