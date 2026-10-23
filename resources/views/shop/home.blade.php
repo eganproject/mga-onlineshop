@@ -20,7 +20,7 @@
             @if ($hero['mobile_image'])
                 <source media="(max-width: 767px)" srcset="{{ $hero['mobile_image'] }}">
             @endif
-            <img src="{{ $hero['image'] }}" alt="" fetchpriority="high" decoding="async" class="size-full object-cover">
+            <img src="{{ $hero['image'] }}" alt="" fetchpriority="high" decoding="async" class="size-full object-cover object-top md:object-center">
         </picture>
         @if ($hero['light'])
             <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/25 to-transparent md:bg-gradient-to-r md:from-black/55 md:via-black/15"></div>
@@ -28,17 +28,18 @@
             <div class="absolute inset-0 -z-10 bg-gradient-to-t from-white/80 via-white/30 to-transparent md:bg-gradient-to-r md:from-white/70 md:via-white/20"></div>
         @endif
 
-        <div class="shop-container flex min-h-[calc(100svh-100px)] max-h-[780px] items-end pt-24 pb-10 sm:pb-14 md:min-h-[min(calc(100vh-112px),760px)] md:items-center md:py-20">
-            <div class="w-full max-w-xl">
+        {{-- Tinggi dibatasi supaya tab Best Seller/Kategori di bawahnya langsung terlihat saat halaman dibuka. --}}
+        <div class="shop-container flex min-h-[clamp(460px,calc(100svh-290px),600px)] items-end pt-16 pb-8 sm:pb-12 md:min-h-[clamp(400px,calc(100svh-330px),620px)] md:items-center md:py-10">
+            <div class="w-full max-w-xl lg:max-w-2xl">
                 @if ($hero['eyebrow'])
                     <p @class(['text-xs font-semibold tracking-[0.2em] uppercase sm:text-[13px]', 'text-white/85' => $hero['light'], 'text-brand-700' => ! $hero['light']])>{{ $hero['eyebrow'] }}</p>
                 @endif
-                <h1 class="mt-3 text-[2.4rem] leading-[1.02] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">{{ $hero['title'] }}</h1>
+                <h1 class="mt-2 text-[2.15rem] leading-[1.03] font-bold tracking-tight text-balance sm:mt-3 sm:text-5xl lg:text-6xl">{{ $hero['title'] }}</h1>
                 @if ($hero['subtitle'])
-                    <p @class(['mt-4 max-w-md text-[15px] leading-relaxed sm:text-lg', 'text-white/85' => $hero['light'], 'text-stone-700' => ! $hero['light']])>{{ $hero['subtitle'] }}</p>
+                    <p @class(['mt-3 max-w-md text-sm leading-relaxed sm:mt-4 sm:text-lg', 'text-white/85' => $hero['light'], 'text-stone-700' => ! $hero['light']])>{{ $hero['subtitle'] }}</p>
                 @endif
                 @if ($hero['primary'] || $hero['secondary'])
-                    <div class="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:flex sm:flex-wrap">
+                    <div class="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:flex sm:flex-wrap">
                         @foreach (array_filter([$hero['primary'], $hero['secondary']]) as $cta)
                             <a href="{{ $cta['url'] }}" @class([
                                 'inline-flex min-h-12 items-center justify-center rounded-md px-3 text-center text-[11px] font-bold tracking-[0.1em] whitespace-nowrap uppercase transition sm:min-w-48 sm:px-8 sm:text-[13px] sm:tracking-[0.14em]',
@@ -55,7 +56,7 @@
 
     {{-- Best Seller / Kategori --}}
     @if ($bestSellers->isNotEmpty() || $categories->isNotEmpty())
-        <section class="shop-container mt-8 sm:mt-12 lg:mt-16"
+        <section class="shop-container mt-4 sm:mt-6"
                  x-data="{ tab: '{{ $bestSellers->isNotEmpty() ? 'best' : 'categories' }}', sort: 'terlaris' }">
             <div class="grid grid-cols-2 border-b-2 border-stone-200" role="tablist" aria-label="Produk pilihan">
                 @foreach (['best' => 'Best Seller', 'categories' => 'Kategori'] as $key => $label)

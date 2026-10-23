@@ -81,8 +81,8 @@
 </defs>
 <rect width="900" height="1600" fill="url(#bg)"/>
 <rect width="900" height="1600" fill="url(#dots)"/>
-<circle cx="450" cy="420" r="520" fill="url(#glow)"/>
+<circle cx="450" cy="330" r="460" fill="url(#glow)"/>
 
-<use href="#scene" transform="translate(162 130) scale(0.95)"/>
-<use href="#spark" transform="translate(150 170) scale(1.2)" fill="#f68e55"/><use href="#spark" transform="translate(790 140) scale(0.9)" fill="#ffffff"/><use href="#spark" transform="translate(820 700) scale(1.0)" fill="#fbb48a"/>
+<use href="#scene" transform="translate(240 50) scale(0.7)"/>
+<use href="#spark" transform="translate(130 120) scale(1.2)" fill="#f68e55"/><use href="#spark" transform="translate(800 90) scale(0.9)" fill="#ffffff"/><use href="#spark" transform="translate(800 560) scale(1.0)" fill="#fbb48a"/>
 </svg>
