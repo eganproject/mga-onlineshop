@@ -1,145 +1,142 @@
 @php
-    $heroImage = config('shop.storefront.hero_image');
-    if ($heroImage && ! str_starts_with($heroImage, 'http')) {
-        $heroImage = asset($heroImage);
-    }
-    $heroProducts = $featured->isNotEmpty() ? $featured : $latest;
+    $hero = \App\Support\Storefront::hero();
+    $sorts = ['terlaris' => 'Terlaris', 'terbaru' => 'Terbaru', 'termurah' => 'Harga terendah', 'termahal' => 'Harga tertinggi'];
+    // Peringkat tiap produk untuk setiap urutan (diurutkan di browser tanpa muat ulang).
+    $byPrice = $bestSellers->sortBy('price')->pluck('id')->flip();
+    $last = $bestSellers->count() - 1;
 @endphp
 <x-layouts.shop>
     <x-slot:head>
         {!! \App\Support\StructuredData::script(\App\Support\StructuredData::website()) !!}
+        <link rel="preload" as="image" href="{{ $hero['image'] }}" @if ($hero['mobile_image']) media="(min-width: 768px)" @endif>
+        @if ($hero['mobile_image'])
+            <link rel="preload" as="image" href="{{ $hero['mobile_image'] }}" media="(max-width: 767px)">
+        @endif
     </x-slot:head>
-    {{-- Hero --}}
-    @if ($heroImage)
-        <section class="relative isolate flex min-h-[78vh] items-end overflow-hidden bg-ink text-white">
-            <img src="{{ $heroImage }}" alt="" class="absolute inset-0 -z-10 size-full object-cover" fetchpriority="high">
-            <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            <div class="shop-container pb-12 sm:pb-16 lg:pb-20">
-                <p class="eyebrow text-white/80">Koleksi terbaru</p>
-                <h1 class="display mt-3 max-w-4xl text-5xl leading-[0.9] sm:text-7xl lg:text-8xl">Aksesoris original, harga gudang.</h1>
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('products.index') }}" class="btn btn-light btn-pill">Belanja sekarang</a>
-                    <a href="{{ route('products.index', ['urut' => 'terbaru']) }}" class="btn btn-pill bg-transparent text-white ring-1 ring-white ring-inset hover:bg-white hover:text-ink">Lihat yang baru</a>
-                </div>
-            </div>
-        </section>
-    @else
-        <section class="bg-sand-100">
-            <div class="shop-container grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-12 lg:gap-12 lg:py-0">
-                <div class="lg:col-span-6 lg:py-24 xl:col-span-5">
-                    <p class="eyebrow text-stone-500">{{ config('shop.full_name') }}</p>
-                    <h1 class="display mt-4 text-[13vw] leading-[0.88] sm:text-7xl lg:text-[5.5rem] xl:text-8xl">
-                        Aksesoris original, <span class="text-brand-600">harga gudang.</span>
-                    </h1>
-                    <p class="mt-6 max-w-md text-base leading-relaxed text-stone-600 sm:text-lg">{{ config('shop.tagline') }}. Casing, charger, kabel, dan audio yang awet dipakai setiap hari.</p>
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <a href="{{ route('products.index') }}" class="btn btn-ink btn-pill">Belanja sekarang <x-icon name="arrow-right" class="size-4" /></a>
-                        @guest
-                            <a href="{{ route('register') }}" class="btn btn-outline btn-pill">Daftar gratis</a>
-                        @else
-                            <a href="{{ route('products.index', ['promo' => 1]) }}" class="btn btn-outline btn-pill">Lihat promo</a>
-                        @endguest
-                    </div>
-                </div>
 
-                @if ($heroProducts->isNotEmpty())
-                    <div class="lg:col-span-6 xl:col-span-7">
-                        <div class="grid grid-cols-5 gap-3 sm:gap-4 lg:py-10">
-                            @foreach ($heroProducts->take(2) as $i => $product)
-                                <a href="{{ route('products.show', $product) }}" @class(['group relative block', 'col-span-3' => $i === 0, 'col-span-2 self-end' => $i === 1])>
-                                    <x-product-image :product="$product" :eager="true" bg="bg-white" :class="$i === 0 ? 'aspect-[4/5]' : 'aspect-[3/4]'" />
-                                    <div class="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 bg-white/90 px-3 py-2 backdrop-blur sm:inset-x-4 sm:bottom-4">
-                                        <p class="truncate text-xs font-semibold sm:text-sm">{{ $product->name }}</p>
-                                        <p @class(['shrink-0 text-xs text-stone-600 sm:text-sm', 'max-sm:hidden' => $i === 1])>@rupiah($product->price)</p>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
+    {{-- Hero: foto besar selebar layar dengan judul & tombol (diatur di Admin › Tampilan Beranda) --}}
+    <section @class(['relative isolate flex overflow-hidden bg-brand-950', 'text-white' => $hero['light'], 'text-ink' => ! $hero['light']])>
+        <picture class="absolute inset-0 -z-20">
+            @if ($hero['mobile_image'])
+                <source media="(max-width: 767px)" srcset="{{ $hero['mobile_image'] }}">
+            @endif
+            <img src="{{ $hero['image'] }}" alt="" fetchpriority="high" decoding="async" class="size-full object-cover">
+        </picture>
+        @if ($hero['light'])
+            <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/25 to-transparent md:bg-gradient-to-r md:from-black/55 md:via-black/15"></div>
+        @else
+            <div class="absolute inset-0 -z-10 bg-gradient-to-t from-white/80 via-white/30 to-transparent md:bg-gradient-to-r md:from-white/70 md:via-white/20"></div>
+        @endif
+
+        <div class="shop-container flex min-h-[calc(100svh-100px)] max-h-[780px] items-end pt-24 pb-10 sm:pb-14 md:min-h-[min(calc(100vh-112px),760px)] md:items-center md:py-20">
+            <div class="w-full max-w-xl">
+                @if ($hero['eyebrow'])
+                    <p @class(['text-xs font-semibold tracking-[0.2em] uppercase sm:text-[13px]', 'text-white/85' => $hero['light'], 'text-brand-700' => ! $hero['light']])>{{ $hero['eyebrow'] }}</p>
                 @endif
-            </div>
-        </section>
-    @endif
-
-    {{-- Keunggulan --}}
-    <section class="border-b border-stone-200">
-        <div class="shop-container no-scrollbar flex gap-8 overflow-x-auto py-5 sm:justify-between">
-            @foreach ([['shield', 'Original & bergaransi'], ['truck', 'Kirim ke seluruh Indonesia'], ['credit-card', 'Transfer, e-wallet & QRIS'], ['chat', 'CS siap bantu tiap hari']] as [$icon, $label])
-                <p class="flex shrink-0 items-center gap-2.5 text-[13px] font-medium text-stone-700">
-                    <x-icon :name="$icon" class="size-5 text-ink" /> {{ $label }}
-                </p>
-            @endforeach
-        </div>
-    </section>
-
-    @if ($banners->isNotEmpty())
-        @include('shop.partials.banners')
-    @endif
-
-    {{-- Kategori --}}
-    @if ($categories->isNotEmpty())
-        <section class="shop-container mt-16 lg:mt-24">
-            <div class="flex items-end justify-between gap-4">
-                <h2 class="display text-3xl leading-none sm:text-5xl">Belanja per kategori</h2>
-                <a href="{{ route('products.index') }}" class="link-underline hidden shrink-0 text-sm font-semibold sm:inline">Semua produk</a>
-            </div>
-            <div class="no-scrollbar -mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-4">
-                @foreach ($categories as $category)
-                    <a href="{{ route('products.index', ['kategori' => $category->slug]) }}"
-                       class="group relative block w-[62%] shrink-0 snap-start overflow-hidden bg-sand-100 sm:w-auto">
-                        <div class="aspect-[3/4]">
-                            @if ($category->imageUrl())
-                                <img src="{{ $category->imageUrl() }}" alt="" loading="lazy" class="size-full object-cover transition duration-700 group-hover:scale-[1.04]">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent"></div>
-                            @else
-                                <span class="absolute left-4 top-3 font-display text-6xl leading-none font-black tracking-[-0.05em] text-sand-300 sm:text-7xl">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                            @endif
-                        </div>
-                        <div @class(['absolute inset-x-4 bottom-4', 'text-white' => $category->imageUrl(), 'text-ink' => ! $category->imageUrl()])>
-                            <p class="font-display text-xl font-extrabold tracking-tight uppercase sm:text-2xl">{{ $category->name }}</p>
-                            <p @class(['mt-1 flex items-center gap-1.5 text-xs font-semibold', 'text-white/80' => $category->imageUrl(), 'text-stone-500' => ! $category->imageUrl()])>
-                                {{ $category->products_count }} produk
-                                <x-icon name="arrow-right" class="size-3.5 transition group-hover:translate-x-1" />
-                            </p>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
-        </section>
-    @endif
-
-    {{-- Unggulan / Baru masuk --}}
-    @if ($featured->isNotEmpty() || $latest->isNotEmpty())
-        <section class="shop-container mt-16 lg:mt-24" x-data="{ tab: '{{ $featured->isNotEmpty() ? 'featured' : 'latest' }}' }">
-            <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div class="flex items-center gap-4 sm:gap-6" role="tablist">
-                    @foreach (array_filter(['featured' => $featured->isNotEmpty() ? 'Terlaris' : null, 'latest' => $latest->isNotEmpty() ? 'Baru masuk' : null]) as $key => $label)
-                        <button type="button" role="tab" @click="tab = '{{ $key }}'" :aria-selected="tab === '{{ $key }}'"
-                                :class="tab === '{{ $key }}' ? 'text-ink' : 'text-stone-300 hover:text-stone-500'"
-                                class="display text-[26px] leading-none whitespace-nowrap transition sm:text-5xl">{{ $label }}</button>
-                    @endforeach
-                </div>
-                <a href="{{ route('products.index') }}" class="link-underline shrink-0 text-sm font-semibold">Lihat semua</a>
-            </div>
-
-            @foreach (['featured' => $featured, 'latest' => $latest] as $key => $items)
-                @if ($items->isNotEmpty())
-                    <div x-show="tab === '{{ $key }}'" @if ($key !== 'featured' && $featured->isNotEmpty()) x-cloak @endif role="tabpanel"
-                         class="no-scrollbar -mx-4 mt-8 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-x-5 sm:gap-y-10 sm:overflow-visible sm:px-0 lg:grid-cols-4">
-                        @foreach ($items as $product)
-                            <x-product-card :product="$product" class="w-[46%] shrink-0 snap-start sm:w-auto" />
+                <h1 class="mt-3 text-[2.4rem] leading-[1.02] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">{{ $hero['title'] }}</h1>
+                @if ($hero['subtitle'])
+                    <p @class(['mt-4 max-w-md text-[15px] leading-relaxed sm:text-lg', 'text-white/85' => $hero['light'], 'text-stone-700' => ! $hero['light']])>{{ $hero['subtitle'] }}</p>
+                @endif
+                @if ($hero['primary'] || $hero['secondary'])
+                    <div class="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:flex sm:flex-wrap">
+                        @foreach (array_filter([$hero['primary'], $hero['secondary']]) as $cta)
+                            <a href="{{ $cta['url'] }}" @class([
+                                'inline-flex min-h-12 items-center justify-center rounded-md px-3 text-center text-[11px] font-bold tracking-[0.1em] whitespace-nowrap uppercase transition sm:min-w-48 sm:px-8 sm:text-[13px] sm:tracking-[0.14em]',
+                                'bg-white text-ink hover:bg-brand-50' => $hero['light'],
+                                'bg-ink text-white hover:bg-brand-900' => ! $hero['light'],
+                                'col-span-2' => ! ($hero['primary'] && $hero['secondary']),
+                            ])>{{ $cta['label'] }}</a>
                         @endforeach
                     </div>
                 @endif
-            @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- Best Seller / Kategori --}}
+    @if ($bestSellers->isNotEmpty() || $categories->isNotEmpty())
+        <section class="shop-container mt-8 sm:mt-12 lg:mt-16"
+                 x-data="{ tab: '{{ $bestSellers->isNotEmpty() ? 'best' : 'categories' }}', sort: 'terlaris' }">
+            <div class="grid grid-cols-2 border-b-2 border-stone-200" role="tablist" aria-label="Produk pilihan">
+                @foreach (['best' => 'Best Seller', 'categories' => 'Kategori'] as $key => $label)
+                    <button type="button" role="tab" id="tab-{{ $key }}" aria-controls="panel-{{ $key }}"
+                            @click="tab = '{{ $key }}'" :aria-selected="(tab === '{{ $key }}').toString()"
+                            :class="tab === '{{ $key }}' ? 'border-ink text-ink' : 'border-transparent text-stone-500 hover:text-ink'"
+                            class="-mb-[2px] border-b-2 py-3 text-sm font-medium transition sm:text-base">{{ $label }}</button>
+                @endforeach
+            </div>
+
+            <div class="mt-4 flex min-h-10 items-center justify-between gap-3">
+                <p class="text-xs text-stone-500 sm:text-sm">
+                    <span x-show="tab === 'best'">{{ $bestSellers->count() }} produk<span class="max-sm:hidden"> paling diminati</span></span>
+                    <span x-show="tab === 'categories'" x-cloak>{{ $categories->count() }} kategori</span>
+                </p>
+                <label x-show="tab === 'best'" class="flex h-10 items-center gap-1 rounded-md border border-stone-200 bg-white pl-3 text-xs sm:text-sm">
+                    <span class="font-semibold">Urutkan:</span>
+                    <select x-model="sort" class="h-full border-0 bg-transparent py-0 pr-8 pl-1 text-xs focus:ring-0 sm:text-sm">
+                        @foreach ($sorts as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            </div>
+
+            <div id="panel-best" role="tabpanel" aria-labelledby="tab-best" x-show="tab === 'best'" @if ($bestSellers->isEmpty()) x-cloak @endif>
+                @if ($bestSellers->isNotEmpty())
+                    <div class="mt-4 grid grid-cols-2 gap-x-2 gap-y-3 sm:gap-x-4 sm:gap-y-5 md:grid-cols-3 xl:grid-cols-4">
+                        @foreach ($bestSellers as $product)
+                            @php($ranks = ['terlaris' => $product->rank_best, 'terbaru' => $product->rank_new, 'termurah' => $byPrice[$product->id], 'termahal' => $last - $byPrice[$product->id]])
+                            <x-product-tile :product="$product" :eager="$loop->index < 4" x-bind:style="'order: ' + {{ json_encode($ranks) }}[sort]" />
+                        @endforeach
+                    </div>
+                    <div class="mt-8 text-center">
+                        <a href="{{ route('products.index') }}" x-bind:href="@js(route('products.index')) + (sort === 'terlaris' ? '' : '?urut=' + sort)"
+                           class="btn btn-outline btn-pill">Lihat semua produk <x-icon name="arrow-right" class="size-4" /></a>
+                    </div>
+                @else
+                    <x-empty-state title="Belum ada produk" />
+                @endif
+            </div>
+
+            <div id="panel-categories" role="tabpanel" aria-labelledby="tab-categories" x-show="tab === 'categories'" @if ($bestSellers->isNotEmpty()) x-cloak @endif>
+                <div class="mt-4 grid grid-cols-2 gap-x-2 gap-y-3 sm:gap-x-4 sm:gap-y-5 md:grid-cols-3 xl:grid-cols-4">
+                    @foreach ($categories as $category)
+                        <a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="group flex flex-col rounded-lg transition-colors hover:bg-stone-100">
+                            <div class="relative aspect-square overflow-hidden rounded-lg bg-stone-200/70">
+                                @if ($category->imageUrl())
+                                    <img src="{{ $category->imageUrl() }}" alt="" loading="lazy" class="size-full object-cover transition duration-700 group-hover:scale-[1.04]">
+                                @else
+                                    <div class="grid size-full place-items-center">
+                                        <div class="flex flex-col items-center gap-3 text-center">
+                                            <x-logo variant="mark" class="h-9 opacity-25 grayscale" aria-hidden="true" />
+                                            <span class="px-4 text-lg font-bold tracking-tight text-stone-400/80 sm:text-2xl lg:text-3xl">{{ $category->name }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="flex items-center justify-between gap-2 px-2 pt-2.5 pb-3">
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-[13px] font-medium text-ink sm:text-sm">{{ $category->name }}</h3>
+                                    <p class="mt-0.5 text-xs text-brand-700 sm:text-[13px]">{{ $category->products_count }} produk</p>
+                                </div>
+                                <x-icon name="arrow-right" class="size-4 shrink-0 text-stone-400 transition group-hover:translate-x-1 group-hover:text-ink" />
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
         </section>
+    @endif
+
+    @if ($banners->isNotEmpty())
+        @include('shop.partials.banners')
     @endif
 
     {{-- Banner editorial --}}
     <section class="shop-container mt-16 lg:mt-24">
         <div class="grid overflow-hidden bg-ink text-white lg:grid-cols-2">
             <div class="relative min-h-64 overflow-hidden bg-stone-800 lg:min-h-[520px]">
-                @if ($image = $latest->first(fn ($p) => $p->imageUrl())?->imageUrl())
+                @if ($image = $bestSellers->first(fn ($p) => $p->imageUrl())?->imageUrl())
                     <img src="{{ $image }}" alt="" loading="lazy" class="absolute inset-0 size-full object-cover opacity-90">
                 @else
                     <div class="absolute inset-0 grid place-items-center">

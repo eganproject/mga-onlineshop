@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMid slice">
+<title>Media Gudang Acc</title>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0.35">
+    <stop offset="0" stop-color="#0b2c31"/><stop offset="0.5" stop-color="#17454c"/><stop offset="1" stop-color="#1a7f8a"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#5fc3cc" stop-opacity="0.55"/><stop offset="1" stop-color="#5fc3cc" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="sun" x1="0.2" y1="0" x2="0.8" y2="1">
+    <stop offset="0" stop-color="#fbb48a"/><stop offset="0.55" stop-color="#f68e55"/><stop offset="1" stop-color="#e2713b"/>
+  </linearGradient>
+  <linearGradient id="ped" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#d8d2c4"/><stop offset="0.35" stop-color="#f4f2ed"/><stop offset="0.7" stop-color="#e9e5dc"/><stop offset="1" stop-color="#c9c1b0"/>
+  </linearGradient>
+  <linearGradient id="case" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2aa7b3"/><stop offset="0.55" stop-color="#1a7f8a"/><stop offset="1" stop-color="#145f68"/>
+  </linearGradient>
+  <linearGradient id="white" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6e2d9"/>
+  </linearGradient>
+  <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2b3f42"/><stop offset="1" stop-color="#050f11"/>
+  </linearGradient>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+  <filter id="softer" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" fill="#ffffff" fill-opacity="0.09"/></pattern>
+  <g id="spark"><path d="M0 -14 C2 -4 4 -2 14 0 C4 2 2 4 0 14 C-2 4 -4 2 -14 0 C-4 -2 -2 -4 0 -14Z"/></g>
+  <g id="scene">
+    <circle cx="300" cy="250" r="262" fill="url(#sun)"/>
+    <circle cx="300" cy="250" r="262" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="2 10"/>
+    <ellipse cx="300" cy="640" rx="290" ry="34" fill="#000" opacity="0.32" filter="url(#soft)"/>
+    <path d="M60 470 V610 A240 40 0 0 0 540 610 V470Z" fill="url(#ped)"/>
+    <ellipse cx="300" cy="470" rx="240" ry="40" fill="#faf9f6"/>
+    <ellipse cx="300" cy="470" rx="240" ry="40" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <!-- kabel -->
+    <path d="M150 452 C170 500, 80 505, 66 548 C50 600, 140 640, 250 652 C330 660, 420 690, 470 742" fill="none" stroke="#0b2c31" stroke-opacity="0.25" stroke-width="12" stroke-linecap="round" transform="translate(4 8)" filter="url(#softer)"/>
+    <path d="M150 452 C170 500, 80 505, 66 548 C50 600, 140 640, 250 652 C330 660, 420 690, 470 742" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+    <!-- charger -->
+    <g transform="translate(92 352)">
+      <ellipse cx="58" cy="112" rx="62" ry="12" fill="#000" opacity="0.25" filter="url(#softer)"/>
+      <rect x="0" y="0" width="116" height="112" rx="22" fill="url(#white)"/>
+      <rect x="0" y="0" width="116" height="112" rx="22" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <rect x="42" y="30" width="32" height="10" rx="5" fill="#10292d"/>
+      <rect x="42" y="50" width="32" height="10" rx="5" fill="#10292d"/>
+      <rect x="38" y="72" width="40" height="14" rx="3" fill="#10292d"/>
+      <rect x="44" y="76" width="28" height="4" rx="1" fill="#3d7a80"/>
+      <circle cx="98" cy="18" r="4" fill="#21939f"/>
+    </g>
+    <!-- ponsel -->
+    <g transform="translate(232 44) rotate(-6)">
+      <rect x="10" y="22" width="214" height="446" rx="40" fill="#000" opacity="0.35" filter="url(#soft)"/>
+      <rect x="0" y="0" width="214" height="446" rx="40" fill="url(#case)"/>
+      <rect x="5" y="5" width="204" height="436" rx="36" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2"/>
+      <rect x="18" y="18" width="104" height="108" rx="28" fill="#0f5a62"/>
+      <rect x="18" y="18" width="104" height="108" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2"/>
+      <g fill="url(#lens)" stroke="#3d7a80" stroke-width="5">
+        <circle cx="48" cy="48" r="19"/><circle cx="48" cy="96" r="19"/><circle cx="94" cy="72" r="19"/>
+      </g>
+      <g fill="#ffffff" fill-opacity="0.55"><circle cx="42" cy="42" r="4"/><circle cx="42" cy="90" r="4"/><circle cx="88" cy="66" r="4"/></g>
+      <circle cx="96" cy="36" r="6" fill="#faf9f6"/>
+      <circle cx="107" cy="282" r="30" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="4"/>
+      <circle cx="107" cy="282" r="12" fill="#ffffff" fill-opacity="0.35"/>
+      <path d="M190 40 V400" stroke="#ffffff" stroke-opacity="0.12" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <!-- earbuds -->
+    <g transform="translate(372 392)">
+      <ellipse cx="72" cy="100" rx="76" ry="12" fill="#000" opacity="0.25" filter="url(#softer)"/>
+      <rect x="0" y="0" width="144" height="102" rx="46" fill="url(#white)"/>
+      <rect x="0" y="0" width="144" height="102" rx="46" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <path d="M4 36 H140" stroke="#cfc8b8" stroke-width="2"/>
+      <circle cx="72" cy="62" r="3.5" fill="#21939f"/>
+    </g>
+    <g transform="translate(470 470) rotate(18)">
+      <ellipse cx="6" cy="44" rx="20" ry="6" fill="#000" opacity="0.2" filter="url(#softer)"/>
+      <rect x="-2" y="2" width="15" height="42" rx="7.5" fill="url(#white)"/>
+      <circle cx="10" cy="0" r="17" fill="url(#white)"/>
+      <circle cx="16" cy="-3" r="7" fill="#10292d" opacity="0.85"/>
+    </g>
+  </g>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<rect width="1600" height="900" fill="url(#dots)"/>
+<circle cx="1215" cy="430" r="620" fill="url(#glow)"/>
+
+<use href="#scene" transform="translate(880 150) scale(1.12)"/>
+<use href="#spark" transform="translate(840 210) scale(1.3)" fill="#f68e55"/><use href="#spark" transform="translate(1530 160) scale(0.9)" fill="#ffffff"/><use href="#spark" transform="translate(1500 700) scale(1.1)" fill="#fbb48a"/>
+</svg>

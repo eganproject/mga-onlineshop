@@ -158,6 +158,8 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::resource('vouchers', Admin\VoucherController::class)->except('show');
         Route::patch('/banners/{banner}/toggle', [Admin\BannerController::class, 'toggle'])->name('banners.toggle');
         Route::resource('banners', Admin\BannerController::class)->except('show');
+        Route::get('/storefront', [Admin\StorefrontController::class, 'edit'])->name('storefront.edit');
+        Route::put('/storefront', [Admin\StorefrontController::class, 'update'])->name('storefront.update');
     });
 
     Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->middleware('can:orders.view')->group(function () {

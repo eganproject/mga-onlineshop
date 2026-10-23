@@ -1,6 +1,6 @@
 {{-- Slider banner promo (dikelola di Admin › Banner). --}}
 @php($count = $banners->count())
-<section class="shop-container mt-6 sm:mt-10" aria-roledescription="carousel" aria-label="Promo"
+<section class="shop-container mt-10 lg:mt-16" aria-roledescription="carousel" aria-label="Promo"
          x-data="bannerCarousel({ count: {{ $count }} })"
          @mouseenter="stop()" @mouseleave="play()" @focusin="stop()" @focusout="play()" @touchstart.passive="stop()">
     <div class="relative">

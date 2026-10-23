@@ -38,6 +38,17 @@ class StoreSettings
         'shop.shipping.tracking_sync' => 'bool',
         'shop.payment.expiry_hours' => 'int',
         'shop.orders.auto_complete_days' => 'int',
+        'shop.storefront.hero_image' => 'string',
+        'shop.storefront.hero_image_mobile' => 'string',
+        'shop.storefront.hero_eyebrow' => 'string',
+        'shop.storefront.hero_title' => 'string',
+        'shop.storefront.hero_subtitle' => 'string',
+        'shop.storefront.hero_primary_label' => 'string',
+        'shop.storefront.hero_primary_url' => 'string',
+        'shop.storefront.hero_secondary_label' => 'string',
+        'shop.storefront.hero_secondary_url' => 'string',
+        'shop.storefront.hero_text' => 'string',
+        'shop.storefront.announcements' => 'array',
     ];
 
     /** Kode kurir RajaOngkir (Komerce) => nama tampilan. */

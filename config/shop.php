@@ -30,14 +30,26 @@ return [
     | Tampilan Toko
     |--------------------------------------------------------------------------
     |
-    | hero_image: path/URL gambar besar di beranda (opsional). Jika kosong,
-    | beranda memakai tampilan tipografi + foto produk unggulan.
-    | announcements: teks yang bergulir di bar paling atas.
+    | Semua nilai di sini bisa diubah dari Admin › Tampilan Beranda; isi di
+    | sini/.env hanya nilai bawaan.
+    | hero_image / hero_image_mobile: path di disk public, path di folder
+    | public/, atau URL. Kosong = ilustrasi bawaan MGA.
+    | hero_text: "light" (teks putih, untuk foto gelap) atau "dark".
+    | announcements: teks yang bergantian di bar paling atas.
     |
     */
 
     'storefront' => [
         'hero_image' => env('SHOP_HERO_IMAGE'),
+        'hero_image_mobile' => env('SHOP_HERO_IMAGE_MOBILE'),
+        'hero_eyebrow' => 'Koleksi terbaru MGA',
+        'hero_title' => 'Aksesoris original, harga gudang.',
+        'hero_subtitle' => 'Casing, charger, kabel, dan audio yang awet dipakai setiap hari.',
+        'hero_primary_label' => 'Belanja sekarang',
+        'hero_primary_url' => '/produk',
+        'hero_secondary_label' => 'Lihat promo',
+        'hero_secondary_url' => '/produk?promo=1',
+        'hero_text' => 'light',
         'announcements' => [
             'Kirim ke seluruh Indonesia',
             'Produk 100% original & bergaransi',

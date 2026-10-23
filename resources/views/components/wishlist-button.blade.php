@@ -1,15 +1,18 @@
 @props(['product', 'variant' => 'icon'])
 {{--
-    Tombol simpan ke wishlist. variant="icon" (bulat, untuk kartu produk) atau
+    Tombol simpan ke wishlist. variant="icon" (bulat, untuk kartu produk),
+    "plain" (ikon hati tanpa latar, untuk kartu abu-abu di beranda) atau
     "button" (tombol penuh di halaman produk). Tamu diarahkan ke halaman masuk.
 --}}
 @php
     $user = auth()->user();
     $on = $user?->isCustomer() && app(\App\Services\Customer\WishlistService::class)->has($product);
     $iconClasses = $variant === 'icon' ? 'size-[18px]' : 'size-5';
-    $buttonClasses = $variant === 'icon'
-        ? 'grid size-9 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:scale-105 hover:bg-white'
-        : 'btn btn-outline btn-pill w-full py-4 text-[15px]';
+    $buttonClasses = match ($variant) {
+        'icon' => 'grid size-9 place-items-center rounded-full bg-white/90 text-ink shadow-sm transition hover:scale-105 hover:bg-white',
+        'plain' => 'grid size-9 place-items-center rounded-full text-stone-500 transition hover:scale-110 hover:text-ink',
+        default => 'btn btn-outline btn-pill w-full py-4 text-[15px]',
+    };
 @endphp
 @if ($user?->isAdmin())
     {{-- Admin tidak punya wishlist. --}}

@@ -18,6 +18,7 @@
         'Promosi' => [
             ['Voucher', 'admin.vouchers.index', 'ticket', 'admin.vouchers.*', null],
             ['Banner', 'admin.banners.index', 'megaphone', 'admin.banners.*', null],
+            ['Tampilan Beranda', 'admin.storefront.edit', 'photo', 'admin.storefront.*', null],
         ],
         'Pelanggan' => [
             ['Pelanggan', 'admin.customers.index', 'users', 'admin.customers.*', null],
