@@ -15,6 +15,15 @@ return [
     // Alamat gudang/pengirim, dicetak di invoice dan packing slip.
     'address' => env('SHOP_ADDRESS'),
     'instagram' => env('SHOP_INSTAGRAM'),
+    'tiktok' => env('SHOP_TIKTOK'),
+    'facebook' => env('SHOP_FACEBOOK'),
+    'email' => env('SHOP_EMAIL'),
+
+    // Nilai identitas, kontak, pengiriman & pembayaran di file ini bisa ditimpa
+    // dari Admin → Pengaturan Toko (disimpan di tabel `settings`).
+
+    // Lama log aktivitas admin disimpan (hari) sebelum dibersihkan `model:prune`.
+    'activity_log_days' => (int) env('ACTIVITY_LOG_DAYS', 365),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,6 +61,8 @@ return [
         'driver' => env('SHIPPING_DRIVER', 'fake'),
         // SHOP_ORIGIN_CITY_ID tetap dibaca untuk kompatibilitas .env lama.
         'origin_district_id' => env('SHOP_ORIGIN_DISTRICT_ID', env('SHOP_ORIGIN_CITY_ID')),
+        // Nama wilayah asal (diisi otomatis saat dipilih di Pengaturan Toko).
+        'origin_label' => env('SHOP_ORIGIN_LABEL'),
         'couriers' => array_values(array_filter(explode(':', env('RAJAONGKIR_COURIERS', 'jne:sicepat:jnt:pos:tiki')))),
         'cache_minutes' => (int) env('SHIPPING_CACHE_MINUTES', 360),
         // Lacak resi: lama hasil disimpan, dan apakah dicek otomatis terjadwal.

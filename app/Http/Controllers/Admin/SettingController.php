@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\View\View;
 
-/** Ringkasan status integrasi (read-only). Nilai diatur lewat file .env. */
+/** Ringkasan status integrasi (read-only). Kunci API diatur lewat file .env. */
 class SettingController extends Controller
 {
     public function __invoke(): View
@@ -29,7 +29,7 @@ class SettingController extends Controller
                     'active' => config('shop.shipping.driver') === 'rajaongkir',
                     'configured' => filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_district_id')),
                     'mode' => implode(', ', array_map('strtoupper', config('shop.shipping.couriers'))),
-                    'env' => ['SHIPPING_DRIVER=rajaongkir', 'RAJAONGKIR_API_KEY', 'SHOP_ORIGIN_DISTRICT_ID', 'RAJAONGKIR_COURIERS'],
+                    'env' => ['SHIPPING_DRIVER=rajaongkir', 'RAJAONGKIR_API_KEY'],
                     'webhook' => null,
                 ],
             ],

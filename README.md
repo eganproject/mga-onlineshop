@@ -31,8 +31,20 @@ Akun contoh dari seeder (password: `password`):
 
 | Peran | Email |
 |---|---|
-| Admin | `admin@mga.test` |
+| Owner (akses penuh) | `admin@mga.test` |
+| Staf Gudang | `gudang@mga.test` |
+| Customer Service | `cs@mga.test` |
 | Pelanggan | `pelanggan@mga.test` |
+
+Panel admin punya jabatan staf (Owner, Admin, Staf Gudang, Customer Service).
+Hak akses tiap jabatan ada di `App\Enums\StaffRole::permissions()`; route admin
+dijaga middleware `can:<izin>` dan menu sidebar ikut menyembunyikan yang tidak
+boleh dibuka. Owner mengelola akun di **Admin → Staf**; semua perubahan staf
+tercatat di **Admin → Log Aktivitas**.
+
+Identitas toko, kontak, media sosial, kecamatan asal, kurir, batas bayar, dan
+cek resi otomatis diatur di **Admin → Pengaturan Toko** (disimpan di tabel
+`settings`, menimpa nilai `.env`). Kunci API tetap di `.env`.
 
 Jalankan test: `php artisan test`
 

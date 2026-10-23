@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\ReviewStatus;
+use App\Enums\StaffRole;
 use App\Enums\StockMovementType;
 use App\Enums\UserRole;
 use App\Enums\VoucherType;
@@ -28,8 +29,23 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
             'phone' => '081200000000',
             'role' => UserRole::Admin,
+            'staff_role' => StaffRole::Owner,
             'email_verified_at' => now(),
         ]);
+
+        // Contoh staf dengan akses terbatas.
+        foreach ([
+            ['gudang@mga.test', 'Rudi Hartono', StaffRole::Warehouse],
+            ['cs@mga.test', 'Sari Wulandari', StaffRole::CustomerService],
+        ] as [$email, $name, $staffRole]) {
+            User::updateOrCreate(['email' => $email], [
+                'name' => $name,
+                'password' => 'password',
+                'role' => UserRole::Admin,
+                'staff_role' => $staffRole,
+                'email_verified_at' => now(),
+            ]);
+        }
 
         $customer = User::updateOrCreate(['email' => 'pelanggan@mga.test'], [
             'name' => 'Budi Santoso',

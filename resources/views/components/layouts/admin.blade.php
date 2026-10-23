@@ -23,9 +23,14 @@
             ['Pelanggan', 'admin.customers.index', 'users', 'admin.customers.*', null],
         ],
         'Sistem' => [
+            ['Pengaturan Toko', 'admin.store-settings.edit', 'storefront', 'admin.store-settings.*', null],
             ['Integrasi', 'admin.settings', 'cog', 'admin.settings', null],
+            ['Staf', 'admin.staff.index', 'shield', 'admin.staff.*', null],
+            ['Log Aktivitas', 'admin.activity.index', 'clock', 'admin.activity.*', null],
         ],
     ];
+    // Sembunyikan menu yang tidak boleh dibuka jabatan staf ini (dibaca dari middleware `can:` route).
+    $menu = array_filter(array_map(fn (array $items) => array_values(array_filter($items, fn (array $item) => \App\Support\AdminAccess::canVisit($item[1]))), $menu));
 @endphp
 <x-layouts.base :title="$title ? $title.' · Admin' : 'Admin'" body-class="bg-cream text-stone-800">
     <div x-data="{ sidebar: false }" @keydown.escape.window="sidebar = false">
@@ -84,24 +89,28 @@
             <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-stone-200/70 bg-cream/85 px-4 backdrop-blur-lg sm:px-6 lg:px-8">
                 <button @click="sidebar = true" class="btn btn-ghost -ml-2 p-2 lg:hidden" aria-label="Buka menu"><x-icon name="menu" /></button>
 
+                @can('orders.view')
                 <form action="{{ route('admin.orders.index') }}" method="GET" class="relative hidden max-w-xs flex-1 sm:block">
                     <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                     <input type="search" name="q" placeholder="Cari kode pesanan / pelanggan..." class="input rounded-full border-transparent bg-white pl-10 shadow-none">
                 </form>
+                @endcan
 
                 <div class="ml-auto flex items-center gap-2">
+                    @can('orders.view')
                     <a href="{{ route('admin.orders.index', ['status' => 'paid']) }}" class="btn btn-ghost relative p-2.5" aria-label="Pesanan baru">
                         <x-icon name="bell" />
                         @if ($pendingOrders)
                             <span class="absolute right-2 top-2 size-2 rounded-full bg-brand-600 ring-2 ring-cream"></span>
                         @endif
                     </a>
+                    @endcan
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" @click.outside="open = false" class="flex items-center gap-2.5 rounded-full p-1 pr-2 transition hover:bg-white sm:pr-3">
                             <span class="grid size-9 place-items-center rounded-full bg-stone-900 text-xs font-bold text-white">{{ $user->initials() }}</span>
                             <span class="hidden text-left sm:block">
                                 <span class="block text-sm font-semibold leading-tight text-stone-800">{{ $user->name }}</span>
-                                <span class="block text-xs text-stone-500">{{ $user->role->label() }}</span>
+                                <span class="block text-xs text-stone-500">{{ $user->staffRole()?->label() ?? $user->role->label() }}</span>
                             </span>
                             <x-icon name="chevron-down" class="size-4 text-stone-400" />
                         </button>

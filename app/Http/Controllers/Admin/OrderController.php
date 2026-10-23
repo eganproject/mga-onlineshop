@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -127,6 +128,8 @@ class OrderController extends Controller
         if ($data['action'] === 'packing-slips') {
             return view('orders.packing-slip', ['orders' => $selected]);
         }
+
+        Gate::authorize('orders.manage');
 
         $processed = 0;
 

@@ -84,7 +84,7 @@ sudo chown -R $USER:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
-> Bila memakai seeder, **segera ganti** password akun `admin@mga.test` atau buat admin baru lalu hapus akun contoh.
+> Bila memakai seeder, **segera ganti** password akun `admin@mga.test` dan nonaktifkan akun contoh `gudang@mga.test` / `cs@mga.test` di **Admin → Staf** (atau buat Owner baru lalu nonaktifkan akun contoh).
 
 ### 4. Nginx + SSL
 

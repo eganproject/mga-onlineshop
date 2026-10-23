@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\StaffRole;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -47,9 +48,14 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function admin(): static
+    public function admin(StaffRole $staffRole = StaffRole::Owner): static
     {
-        return $this->state(fn (array $attributes) => ['role' => UserRole::Admin]);
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Admin, 'staff_role' => $staffRole]);
+    }
+
+    public function staff(StaffRole $staffRole): static
+    {
+        return $this->admin($staffRole);
     }
 
     public function inactive(): static

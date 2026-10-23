@@ -1,5 +1,6 @@
 <x-layouts.admin :title="$customer->name">
     <x-admin.page-header :title="$customer->name" :back="route('admin.customers.index')">
+        @can('customers.manage')
         <form method="POST" action="{{ route('admin.customers.toggle', $customer) }}"
               onsubmit="return confirm(@js($customer->is_active ? 'Blokir akun ini? Pelanggan tidak akan bisa login.' : 'Aktifkan kembali akun ini?'))">
             @csrf
@@ -8,6 +9,7 @@
                 {{ $customer->is_active ? 'Blokir akun' : 'Aktifkan akun' }}
             </button>
         </form>
+        @endcan
     </x-admin.page-header>
 
     <div class="grid gap-6 lg:grid-cols-3">

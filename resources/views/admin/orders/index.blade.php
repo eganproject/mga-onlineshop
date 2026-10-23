@@ -49,7 +49,9 @@
                 @csrf
                 <div x-show="selected.length" x-cloak class="flex flex-wrap items-center gap-2 border-b border-stone-100 bg-brand-50/60 px-4 py-3 text-sm">
                     <span class="font-semibold text-stone-800"><span x-text="selected.length"></span> dipilih</span>
-                    <button name="action" value="process" class="btn btn-secondary btn-sm"><x-icon name="cube" class="size-4" /> Tandai diproses</button>
+                    @can('orders.manage')
+                        <button name="action" value="process" class="btn btn-secondary btn-sm"><x-icon name="cube" class="size-4" /> Tandai diproses</button>
+                    @endcan
                     <button name="action" value="packing-slips" formtarget="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Cetak packing slip</button>
                 </div>
             <div class="relative overflow-x-auto">
