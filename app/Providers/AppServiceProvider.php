@@ -6,6 +6,7 @@ use App\Contracts\PaymentGateway;
 use App\Contracts\ShippingProvider;
 use App\Models\Category;
 use App\Services\Cart\CartService;
+use App\Services\Customer\WishlistService;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\FakePaymentGateway;
 use App\Services\Payment\MidtransPaymentGateway;
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(CartService::class);
+        $this->app->scoped(WishlistService::class);
 
         // Driver dipilih lewat .env (PAYMENT_DRIVER / SHIPPING_DRIVER), jadi
         // kode lain cukup bergantung pada interface-nya.
@@ -51,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('components.layouts.shop', function ($view) {
             $view->with([
                 'cartCount' => app(CartService::class)->count(),
+                'wishlistCount' => app(WishlistService::class)->count(),
                 'navCategories' => Category::active()->root()->orderBy('sort_order')->get(['id', 'name', 'slug']),
             ]);
         });

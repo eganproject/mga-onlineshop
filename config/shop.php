@@ -71,4 +71,34 @@ return [
 
     'low_stock_threshold' => 5,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Ulasan Produk
+    |--------------------------------------------------------------------------
+    |
+    | Ulasan hanya bisa ditulis pembeli yang pesanannya sudah selesai.
+    | auto_approve=false: ulasan baru menunggu moderasi admin dulu.
+    |
+    */
+
+    'reviews' => [
+        'auto_approve' => (bool) env('REVIEWS_AUTO_APPROVE', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEO
+    |--------------------------------------------------------------------------
+    |
+    | indexing=false (mis. di server staging) membuat robots.txt menolak semua
+    | crawler dan setiap halaman diberi meta noindex.
+    |
+    */
+
+    'seo' => [
+        'indexing' => (bool) env('SEO_INDEXING', true),
+        'description' => env('SEO_DESCRIPTION', 'Belanja aksesoris HP & gadget original: casing, charger, kabel data, earphone, powerbank. Harga terjangkau, kirim ke seluruh Indonesia.'),
+        'default_image' => env('SEO_DEFAULT_IMAGE'),
+    ],
+
 ];

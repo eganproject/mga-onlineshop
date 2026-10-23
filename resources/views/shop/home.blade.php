@@ -6,6 +6,9 @@
     $heroProducts = $featured->isNotEmpty() ? $featured : $latest;
 @endphp
 <x-layouts.shop>
+    <x-slot:head>
+        {!! \App\Support\StructuredData::script(\App\Support\StructuredData::website()) !!}
+    </x-slot:head>
     {{-- Hero --}}
     @if ($heroImage)
         <section class="relative isolate flex min-h-[78vh] items-end overflow-hidden bg-ink text-white">

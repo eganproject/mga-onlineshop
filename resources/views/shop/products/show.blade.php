@@ -1,4 +1,19 @@
-<x-layouts.shop :title="$product->name">
+<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product">
+    <x-slot:head>
+        <meta property="product:price:amount" content="{{ $product->price }}">
+        <meta property="product:price:currency" content="IDR">
+        <meta property="product:availability" content="{{ $product->inStock() ? 'in stock' : 'out of stock' }}">
+        {!! \App\Support\StructuredData::script(
+            \App\Support\StructuredData::product($product, $reviews->getCollection()),
+            \App\Support\StructuredData::breadcrumbs(array_values(array_filter([
+                ['Beranda', route('home')],
+                ['Produk', route('products.index')],
+                $product->category?->parent ? [$product->category->parent->name, route('products.index', ['kategori' => $product->category->parent->slug])] : null,
+                $product->category ? [$product->category->name, route('products.index', ['kategori' => $product->category->slug])] : null,
+                [$product->name, route('products.show', $product)],
+            ]))),
+        ) !!}
+    </x-slot:head>
     <div class="shop-container pb-28 pt-6 lg:pb-0 lg:pt-8">
         <nav class="flex flex-wrap items-center gap-1.5 text-xs text-stone-500" aria-label="Breadcrumb">
             <a href="{{ route('home') }}" class="hover:text-ink">Beranda</a>
@@ -77,6 +92,13 @@
                         <a href="{{ route('products.index', ['kategori' => $product->category->slug]) }}" class="eyebrow text-stone-500 hover:text-ink">{{ $product->category->name }}</a>
                     @endif
                     <h1 class="mt-2 font-display text-3xl leading-[1.05] font-extrabold tracking-tight sm:text-4xl">{{ $product->name }}</h1>
+                    @if ($product->hasReviews())
+                        <a href="#ulasan" class="mt-3 inline-flex items-center gap-2 text-sm">
+                            <x-star-rating :rating="$product->rating_avg" />
+                            <span class="font-semibold">{{ number_format($product->rating_avg, 1, ',', '.') }}</span>
+                            <span class="text-stone-500 underline underline-offset-4">{{ $product->review_count }} ulasan</span>
+                        </a>
+                    @endif
 
                     <div class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                         <p class="text-2xl font-semibold" :class="compareAt && 'text-brand-700'">
@@ -146,6 +168,8 @@
                         </div>
                     @endif
 
+                    <x-wishlist-button :product="$product" variant="button" class="mt-3" />
+
                     <ul class="mt-8 grid grid-cols-3 gap-2 border-y border-stone-200 py-5 text-center text-xs font-medium text-stone-600">
                         @foreach ([['shield', 'Original'], ['truck', 'Kirim se-Indonesia'], ['refresh', 'Garansi tukar']] as [$icon, $label])
                             <li class="flex flex-col items-center gap-2"><x-icon :name="$icon" class="size-6 text-ink" /> {{ $label }}</li>
@@ -188,6 +212,8 @@
                 </div>
             </div>
         </div>
+
+        @include('shop.products.partials.reviews')
 
         @if ($related->isNotEmpty())
             <section class="mt-20 lg:mt-28">

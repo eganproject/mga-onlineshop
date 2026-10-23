@@ -12,6 +12,10 @@
             @endunless
         </div>
 
+        <div class="absolute right-2.5 top-2.5 z-10 sm:right-3 sm:top-3">
+            <x-wishlist-button :product="$product" />
+        </div>
+
         @if ($quickAdd && $product->inStock())
             <form method="POST" action="{{ route('cart.store', $product) }}"
                   class="absolute inset-x-3 bottom-3 z-10 hidden translate-y-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 lg:block">
@@ -29,6 +33,13 @@
         </h3>
         @if ($product->relationLoaded('category') && $product->category)
             <p class="mt-0.5 text-xs text-stone-500">{{ $product->category->name }}</p>
+        @endif
+        @if ($product->review_count > 0)
+            <p class="mt-1 flex items-center gap-1 text-xs text-stone-500">
+                <x-icon name="star" class="size-3.5 fill-amber-400 text-amber-400" />
+                <span class="font-semibold text-ink">{{ number_format($product->rating_avg, 1, ',', '.') }}</span>
+                <span>({{ $product->review_count }})</span>
+            </p>
         @endif
         <div class="mt-1.5 flex flex-wrap items-baseline gap-x-2">
             <p @class(['text-sm font-semibold', 'text-brand-700' => $product->isOnSale()])>@rupiah($product->price)</p>

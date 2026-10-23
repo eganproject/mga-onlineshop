@@ -1,4 +1,4 @@
-<x-layouts.base title="Akses ditolak">
+<x-layouts.base :noindex="true" title="Akses ditolak">
     <div class="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <a href="{{ route('home') }}"><x-wordmark /></a>
         <p class="mt-10 text-7xl font-extrabold tracking-tight text-ink font-display">403</p>

@@ -17,6 +17,9 @@ Route::get('/', Shop\HomeController::class)->name('home');
 Route::get('/produk', [Shop\ProductController::class, 'index'])->name('products.index');
 Route::get('/produk/{product}', [Shop\ProductController::class, 'show'])->name('products.show');
 
+Route::get('/sitemap.xml', Shop\SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', Shop\RobotsController::class)->name('robots');
+
 Route::controller(Shop\CartController::class)->prefix('keranjang')->name('cart.')->group(function () {
     Route::get('/', 'index')->name('index');
     Route::post('/{product}', 'store')->name('store');
@@ -46,6 +49,12 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/keluar', [Auth\AuthenticatedSessionController::class, 'destroy'])->middleware('auth')->name('logout');
 
+Route::middleware('auth')->prefix('email')->name('verification.')->group(function () {
+    Route::get('/verifikasi', [Auth\EmailVerificationController::class, 'notice'])->name('notice');
+    Route::get('/verifikasi/{id}/{hash}', [Auth\EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verify');
+    Route::post('/verifikasi/kirim-ulang', [Auth\EmailVerificationController::class, 'send'])->middleware('throttle:6,1')->name('send');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Area pelanggan
@@ -53,6 +62,9 @@ Route::post('/keluar', [Auth\AuthenticatedSessionController::class, 'destroy'])-
 */
 
 Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::post('/wishlist/{product}', [Shop\WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::post('/produk/{product}/ulasan', [Shop\ReviewController::class, 'store'])->middleware('throttle:10,1')->name('reviews.store');
+
     Route::get('/checkout', [Shop\CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [Shop\CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/ongkir', [Shop\CheckoutController::class, 'rates'])->name('checkout.rates')->middleware('throttle:60,1');
@@ -70,6 +82,9 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
             Route::get('/provinsi/{province}/kota', 'cities')->name('cities');
             Route::get('/kota/{city}/kecamatan', 'districts')->name('districts');
         });
+
+        Route::get('/wishlist', [Account\WishlistController::class, 'index'])->name('wishlist');
+        Route::get('/ulasan', [Account\ReviewController::class, 'index'])->name('reviews.index');
         Route::patch('/alamat/{address}/utama', [Account\AddressController::class, 'makeDefault'])->name('addresses.default');
         Route::resource('alamat', Account\AddressController::class)
             ->except('show')
@@ -99,6 +114,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/history', [Admin\StockController::class, 'history'])->name('stock.history');
     Route::post('/stock/adjust', [Admin\StockController::class, 'adjust'])->name('stock.adjust');
+
+    Route::get('/reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
+    Route::patch('/reviews/{review}', [Admin\ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');

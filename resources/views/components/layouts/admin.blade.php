@@ -2,6 +2,7 @@
 @php
     $user = auth()->user();
     $pendingOrders = \App\Models\Order::where('status', \App\Enums\OrderStatus::Paid)->count();
+    $pendingReviews = \App\Models\ProductReview::where('status', \App\Enums\ReviewStatus::Pending)->count();
     $menu = [
         'Utama' => [
             ['Dashboard', 'admin.dashboard', 'dashboard', 'admin.dashboard', null],
@@ -12,6 +13,7 @@
             ['Produk', 'admin.products.index', 'cube', 'admin.products.*', null],
             ['Kategori', 'admin.categories.index', 'tag', 'admin.categories.*', null],
             ['Stok', 'admin.stock.index', 'archive', 'admin.stock.*', null],
+            ['Ulasan', 'admin.reviews.index', 'star', 'admin.reviews.*', $pendingReviews ?: null],
         ],
         'Pelanggan' => [
             ['Pelanggan', 'admin.customers.index', 'users', 'admin.customers.*', null],

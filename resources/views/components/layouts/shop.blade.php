@@ -1,4 +1,4 @@
-@props(['title' => null])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false])
 @php
     $user = auth()->user();
     $announcements = config('shop.storefront.announcements', []);
@@ -9,7 +9,10 @@
     ];
     $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
-<x-layouts.base :title="$title" body-class="bg-white text-ink">
+<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" body-class="bg-white text-ink">
+    @isset($head)
+        <x-slot:head>{{ $head }}</x-slot:head>
+    @endisset
     @isset($scripts)
         <x-slot:scripts>{{ $scripts }}</x-slot:scripts>
     @endisset
@@ -108,6 +111,8 @@
                                 @else
                                     <a href="{{ route('account.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="user" class="size-4" /> Akun Saya</a>
                                     <a href="{{ route('account.orders.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="receipt" class="size-4" /> Pesanan Saya</a>
+                                    <a href="{{ route('account.wishlist') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="heart" class="size-4" /> Wishlist</a>
+                                    <a href="{{ route('account.reviews.index') }}" class="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-sand-100"><x-icon name="star" class="size-4" /> Ulasan Saya</a>
                                 @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -124,6 +129,15 @@
                     <a href="{{ $accountUrl }}" class="grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:hidden" aria-label="Akun">
                         <x-icon name="user" />
                     </a>
+
+                    @unless ($user?->isAdmin())
+                        <a href="{{ $user ? route('account.wishlist') : route('login') }}" class="relative hidden size-10 place-items-center rounded-full hover:bg-sand-100 lg:grid"
+                           x-data="{ count: {{ $wishlistCount }} }" @wishlist-updated.window="count = $event.detail.count" aria-label="Wishlist">
+                            <x-icon name="heart" />
+                            <span x-show="count > 0" x-text="count > 99 ? '99+' : count" @if (! $wishlistCount) x-cloak @endif
+                                  class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-ink px-1 text-[10px] leading-[18px] font-bold text-white">{{ $wishlistCount }}</span>
+                        </a>
+                    @endunless
 
                     <a href="{{ route('cart.index') }}" class="relative -mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
                         <x-icon name="bag" />
@@ -212,6 +226,7 @@
                             @else
                                 <a href="{{ route('account.dashboard') }}" class="btn btn-ink btn-pill py-2.5">Akun saya</a>
                                 <a href="{{ route('account.orders.index') }}" class="btn btn-outline btn-pill py-2.5">Pesanan</a>
+                                <a href="{{ route('account.wishlist') }}" class="btn btn-outline btn-pill col-span-2 py-2.5"><x-icon name="heart" class="size-4" /> Wishlist ({{ $wishlistCount }})</a>
                             @endif
                         </div>
                         <form method="POST" action="{{ route('logout') }}" class="mt-3">

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'category_id', 'name', 'slug', 'sku', 'description', 'price', 'compare_at_price',
@@ -20,8 +21,9 @@ class Product extends Model
 {
     use HasFactory;
 
-    // `stock` dan `has_variants` sengaja tidak mass-assignable. Stok diubah lewat
-    // StockService (tercatat di riwayat), ringkasan varian lewat syncVariantSummary().
+    // `stock`, `has_variants`, `rating_avg`, `review_count` sengaja tidak mass-assignable. Stok diubah lewat
+    // StockService (tercatat di riwayat), ringkasan varian lewat syncVariantSummary(),
+    // ringkasan rating lewat ReviewService::syncSummary().
 
     /** Foto sampul selalu ikut dimuat karena dipakai di hampir semua tampilan produk. */
     protected $with = ['coverImage'];
@@ -36,6 +38,8 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'has_variants' => 'boolean',
+            'rating_avg' => 'float',
+            'review_count' => 'integer',
         ];
     }
 
@@ -72,6 +76,11 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     public function orderItems(): HasMany
@@ -150,6 +159,19 @@ class Product extends Model
     public function inStock(): bool
     {
         return $this->stock > 0;
+    }
+
+    public function hasReviews(): bool
+    {
+        return $this->review_count > 0;
+    }
+
+    /** Ringkasan singkat untuk meta description / Open Graph. */
+    public function metaDescription(): string
+    {
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags((string) $this->description)));
+
+        return Str::limit($text ?: $this->name.' original di '.config('shop.full_name').'. '.config('shop.tagline').'.', 155);
     }
 
     public function isLowStock(): bool

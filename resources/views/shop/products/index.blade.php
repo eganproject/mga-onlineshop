@@ -19,7 +19,12 @@
     ]);
     $filterCount = count(array_diff_key($activeFilters, ['q' => true]));
 @endphp
-<x-layouts.shop :title="$activeCategory?->name ?? 'Semua Produk'">
+@php
+    $metaDescription = $activeCategory
+        ? ($activeCategory->description ?: 'Belanja '.$activeCategory->name.' original di '.config('shop.full_name').'. Harga terjangkau, kirim ke seluruh Indonesia.')
+        : null;
+@endphp
+<x-layouts.shop :title="$activeCategory?->name ?? 'Semua Produk'" :description="$metaDescription">
     <div x-data="{ filters: false }">
         {{-- Judul --}}
         <section class="border-b border-stone-200 bg-sand-50">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\Reviews\ReviewService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -56,9 +57,11 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Product $product): View
+    public function show(Request $request, Product $product, ReviewService $reviewService): View
     {
         abort_unless($product->is_active, 404);
+
+        $user = $request->user();
 
         return view('shop.products.show', [
             'product' => $product->load(['category.parent', 'images', 'activeVariants.image']),
@@ -69,6 +72,13 @@ class ProductController extends Controller
                 ->inRandomOrder()
                 ->take(4)
                 ->get(),
+            'reviews' => $product->reviews()->approved()->with('user:id,name')
+                ->latest('approved_at')->latest('id')
+                ->paginate(5, pageName: 'ulasan')
+                ->fragment('ulasan'),
+            'ratingDistribution' => $product->review_count > 0 ? $reviewService->distribution($product) : [],
+            'myReview' => $user?->isCustomer() ? $user->reviews()->where('product_id', $product->id)->first() : null,
+            'canReview' => $user?->isCustomer() && $reviewService->canReview($user, $product),
         ]);
     }
 }

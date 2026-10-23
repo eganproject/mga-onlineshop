@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -30,7 +32,9 @@ class RegisteredUserController extends Controller
         // Pendaftaran publik selalu menjadi pelanggan (role default).
         $user = User::create($data);
 
+        // Registered juga memicu email verifikasi (User implements MustVerifyEmail).
         event(new Registered($user));
+        Mail::to($user)->queue(new WelcomeMail($user));
 
         Auth::login($user);
         $request->session()->regenerate();

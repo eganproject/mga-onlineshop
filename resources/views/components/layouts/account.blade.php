@@ -3,6 +3,8 @@
     $links = [
         ['Ringkasan', 'account.dashboard', 'dashboard', 'account.dashboard'],
         ['Pesanan saya', 'account.orders.index', 'receipt', 'account.orders.*'],
+        ['Wishlist', 'account.wishlist', 'heart', 'account.wishlist'],
+        ['Ulasan', 'account.reviews.index', 'star', 'account.reviews.*'],
         ['Alamat', 'account.addresses.index', 'map-pin', 'account.addresses.*'],
         ['Profil & keamanan', 'account.profile.edit', 'user', 'account.profile.*'],
     ];
@@ -34,6 +36,18 @@
         </div>
     </section>
     <div class="shop-container py-8 lg:py-10">
+        @if (! auth()->user()->hasVerifiedEmail())
+            <div class="mb-6 flex flex-col gap-3 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+                <p class="flex items-start gap-2.5">
+                    <x-icon name="envelope" class="mt-0.5 size-5 shrink-0" />
+                    <span>Email <strong>{{ auth()->user()->email }}</strong> belum diverifikasi. Verifikasi supaya info pesanan & promo selalu sampai.</span>
+                </p>
+                <form method="POST" action="{{ route('verification.send') }}" class="shrink-0">
+                    @csrf
+                    <button class="btn btn-ink btn-pill btn-sm">Kirim ulang tautan</button>
+                </form>
+            </div>
+        @endif
         <section class="min-w-0">
             @if ($heading)
                 <h2 class="mb-6 font-display text-2xl font-extrabold tracking-tight uppercase">{{ $heading }}</h2>
