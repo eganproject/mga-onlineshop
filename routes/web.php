@@ -122,6 +122,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/categories/{category}/toggle', [Admin\CategoryController::class, 'toggle'])->name('categories.toggle');
     Route::resource('categories', Admin\CategoryController::class)->except('show');
     Route::post('/products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
+    Route::controller(Admin\ProductTransferController::class)->group(function () {
+        Route::get('/products/import-export', 'index')->name('products.transfer');
+        Route::get('/products/export', 'exportProducts')->name('products.export');
+        Route::get('/products/import-template', 'template')->name('products.template');
+        Route::get('/stock/export', 'exportStock')->name('stock.export');
+        Route::post('/imports', 'store')->name('imports.store')->middleware('throttle:20,1');
+        Route::get('/imports/{import}', 'show')->name('imports.show');
+        Route::post('/imports/{import}/commit', 'commit')->name('imports.commit');
+        Route::delete('/imports/{import}', 'destroy')->name('imports.destroy');
+    });
     Route::resource('products', Admin\ProductController::class)->except('show');
 
     Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');

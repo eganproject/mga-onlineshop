@@ -157,7 +157,7 @@ class ProductService
         $this->stock->set($product, null, $stock, $type, $type === StockMovementType::Adjustment ? self::FORM_NOTE : null);
     }
 
-    private function uniqueSlug(string $name, Product $ignore): string
+    public function uniqueSlug(string $name, Product $ignore): string
     {
         $base = Str::slug($name) ?: 'produk';
         $slug = $base;

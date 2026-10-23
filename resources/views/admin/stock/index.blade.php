@@ -1,6 +1,7 @@
 <x-layouts.admin title="Stok">
     <x-admin.page-header title="Manajemen stok" description="Pantau stok per produk & varian, catat barang masuk, dan lakukan stock opname.">
         <a href="{{ route('admin.stock.history') }}" class="btn btn-secondary"><x-icon name="clock" class="size-4" /> Riwayat stok</a>
+        <a href="{{ route('admin.products.transfer') }}#stok" class="btn btn-secondary"><x-icon name="download" class="size-4 rotate-180" /> Update via file</a>
     </x-admin.page-header>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
