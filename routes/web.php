@@ -68,6 +68,8 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/checkout', [Shop\CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [Shop\CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/ongkir', [Shop\CheckoutController::class, 'rates'])->name('checkout.rates')->middleware('throttle:60,1');
+    Route::post('/checkout/voucher', [Shop\CheckoutController::class, 'applyVoucher'])->name('checkout.voucher.apply')->middleware('throttle:20,1');
+    Route::delete('/checkout/voucher', [Shop\CheckoutController::class, 'removeVoucher'])->name('checkout.voucher.remove');
 
     Route::prefix('akun')->name('account.')->group(function () {
         Route::get('/', Account\DashboardController::class)->name('dashboard');
@@ -129,6 +131,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
     Route::patch('/reviews/{review}', [Admin\ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    Route::patch('/vouchers/{voucher}/toggle', [Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
+    Route::resource('vouchers', Admin\VoucherController::class)->except('show');
+    Route::patch('/banners/{banner}/toggle', [Admin\BannerController::class, 'toggle'])->name('banners.toggle');
+    Route::resource('banners', Admin\BannerController::class)->except('show');
 
     Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->group(function () {
         Route::get('/', 'index')->name('index');

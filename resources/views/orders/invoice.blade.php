@@ -65,6 +65,7 @@
         <dl class="ml-auto mt-4 max-w-xs space-y-2 border-t border-stone-200 pt-4 text-sm">
             <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd>@rupiah($order->subtotal)</dd></div>
             <div class="flex justify-between"><dt class="text-stone-500">Ongkir ({{ number_format($order->total_weight / 1000, 2, ',', '.') }} kg)</dt><dd>@rupiah($order->shipping_cost)</dd></div>
+            <x-order-discounts :order="$order" />
             <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-extrabold"><dt>Total</dt><dd>@rupiah($order->total)</dd></div>
         </dl>
 

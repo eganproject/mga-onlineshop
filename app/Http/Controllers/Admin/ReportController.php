@@ -35,6 +35,7 @@ class ReportController extends Controller
             'changes' => $this->reports->compare($summary, $this->reports->summary($period->previous())),
             'series' => $tab === 'penjualan' ? $this->reports->timeseries($period) : collect(),
             'statuses' => $tab === 'penjualan' ? $this->reports->statusBreakdown($period) : collect(),
+            'vouchers' => $tab === 'penjualan' ? $this->reports->byVoucher($period) : collect(),
             'products' => $tab === 'produk' ? $this->reports->byProduct($period) : collect(),
             'categories' => $tab === 'kategori' ? $this->reports->byCategory($period) : collect(),
         ]);
@@ -87,7 +88,7 @@ class ReportController extends Controller
                 break;
 
             case 'pesanan':
-                yield ['Kode pesanan', 'Tanggal bayar', 'Status', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Total (Rp)', 'Kurir'];
+                yield ['Kode pesanan', 'Tanggal bayar', 'Status', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Voucher', 'Diskon (Rp)', 'Total (Rp)', 'Kurir'];
                 foreach ($this->reports->orders($period)->lazy(500) as $order) {
                     /** @var Order $order */
                     yield [
@@ -99,6 +100,8 @@ class ReportController extends Controller
                         (int) $order->items_quantity,
                         $order->subtotal,
                         $order->shipping_cost,
+                        $order->voucher_code,
+                        $order->discountTotal(),
                         $order->total,
                         $order->courierLabel(),
                     ];

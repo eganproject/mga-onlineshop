@@ -8,15 +8,26 @@
             <div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ $message }}</div>
         @enderror
 
-        <form method="POST" action="{{ route('checkout.store') }}" class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12"
-              x-data="checkout({
+        @php
+            $voucherNotice = $voucherError ?: ($errors->first('voucher') ?: $errors->first('code'));
+        @endphp
+        <div x-data="checkout({
                   ratesUrl: @js(route('checkout.rates')),
+                  voucherUrl: @js(route('checkout.voucher.apply')),
                   addressId: @js($address?->id),
                   rates: @js($quote['rates']),
                   error: @js($quote['error']),
                   subtotal: {{ $subtotal }},
                   selected: @js(old('shipping')),
-              })"
+                  voucher: @js($voucher),
+                  voucherError: @js($voucherNotice),
+                  code: @js(old('code', '')),
+              })">
+        {{-- Form voucher terpisah (tidak boleh bersarang di form checkout); input-nya memakai atribut form. --}}
+        <form id="voucher-form" method="POST" action="{{ route('checkout.voucher.apply') }}" @submit.prevent="applyVoucher()">@csrf</form>
+        <form id="voucher-remove-form" method="POST" action="{{ route('checkout.voucher.remove') }}" @submit.prevent="removeVoucher()">@csrf @method('DELETE')</form>
+
+        <form method="POST" action="{{ route('checkout.store') }}" class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12"
               @submit="submitting = true">
             @csrf
             <div class="min-w-0 space-y-6 lg:col-span-2">
@@ -139,7 +150,13 @@
             </div>
 
             {{-- Ringkasan --}}
-            @php($initialShipping = $quote['rates'][0]->cost ?? 0)
+            @php
+                $initialShipping = $quote['rates'][0]->cost ?? 0;
+                $initialDiscount = $voucher['discount'] ?? 0;
+                $initialShippingDiscount = ($voucher['type'] ?? null) === 'free_shipping'
+                    ? min($voucher['shipping_cap'] ?? $initialShipping, $initialShipping) : 0;
+                $initialTotal = max(\App\Services\Promo\VoucherService::MIN_PAYABLE, $subtotal - $initialDiscount + $initialShipping - $initialShippingDiscount);
+            @endphp
             <div class="min-w-0 lg:sticky lg:top-24 lg:self-start">
                 <div class="border border-stone-200 p-5 sm:p-6">
                     <h2 class="font-display text-lg font-extrabold tracking-tight uppercase">Ringkasan pesanan</h2>
@@ -160,13 +177,62 @@
                             </li>
                         @endforeach
                     </ul>
+                    {{-- Voucher --}}
+                    <div class="mt-4 border-t border-stone-100 pt-4" aria-live="polite">
+                        <p class="flex items-center gap-2 text-sm font-semibold text-stone-900"><x-icon name="ticket" class="size-4" /> Voucher</p>
+
+                        <div x-show="voucher" @if (! $voucher) x-cloak @endif class="mt-3 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/70 p-3">
+                            <x-icon name="check-circle" class="size-5 shrink-0 text-emerald-600" />
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-mono text-sm font-bold tracking-wide text-stone-900" x-text="voucher?.code">{{ $voucher['code'] ?? '' }}</p>
+                                <p class="truncate text-xs text-emerald-800" x-text="voucher?.benefit">{{ $voucher['benefit'] ?? '' }}</p>
+                            </div>
+                            <button form="voucher-remove-form" class="shrink-0 text-xs font-semibold text-stone-500 underline-offset-4 hover:text-rose-600 hover:underline" :disabled="voucherLoading">Lepas</button>
+                        </div>
+
+                        <div x-show="!voucher" @if ($voucher) x-cloak @endif class="mt-3 flex gap-2">
+                            <label for="voucher-code" class="sr-only">Kode voucher</label>
+                            <input id="voucher-code" name="code" form="voucher-form" x-model="voucherCode" value="{{ old('code') }}" maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                                   placeholder="Masukkan kode voucher" class="input min-w-0 flex-1 uppercase placeholder:normal-case">
+                            <button form="voucher-form" class="btn btn-outline shrink-0" :disabled="voucherLoading || !voucherCode.trim()">
+                                <span x-text="voucherLoading ? '...' : 'Pakai'">Pakai</span>
+                            </button>
+                        </div>
+
+                        <p x-show="voucherError" @unless ($voucherNotice) x-cloak @endunless class="mt-2 text-xs font-medium text-rose-600" x-text="voucherError">{{ $voucherNotice }}</p>
+                        <p x-show="voucherMessage" x-cloak class="mt-2 text-xs font-medium text-emerald-700" x-text="voucherMessage"></p>
+
+                        @if ($suggestions->isNotEmpty())
+                            <div x-show="!voucher" @if ($voucher) x-cloak @endif class="mt-3 space-y-2">
+                                <p class="text-xs text-stone-500">Voucher tersedia</p>
+                                @foreach ($suggestions as ['voucher' => $item, 'error' => $itemError])
+                                    <button type="button" @click="applyVoucher(@js($item->code))" :disabled="voucherLoading" @disabled($itemError)
+                                            @class(['flex w-full items-center gap-3 border p-3 text-left transition', 'border-stone-200 hover:border-ink' => ! $itemError, 'cursor-not-allowed border-stone-100 opacity-60' => $itemError])>
+                                        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600"><x-icon :name="$item->type === \App\Enums\VoucherType::FreeShipping ? 'truck' : 'ticket'" class="size-4" /></span>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block text-sm font-semibold text-stone-900">{{ $item->benefitLabel() }}</span>
+                                            <span class="block text-xs text-stone-500">{{ $itemError ?: $item->termsLabel() }}</span>
+                                        </span>
+                                        <span class="shrink-0 font-mono text-[11px] font-bold text-stone-600">{{ $item->code }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
                     <dl class="mt-4 space-y-2 border-t border-stone-100 pt-4 text-sm">
                         <div class="flex justify-between"><dt class="text-stone-500">Subtotal ({{ $lines->sum('quantity') }} item)</dt><dd>@rupiah($subtotal)</dd></div>
                         <div class="flex justify-between gap-3">
                             <dt class="text-stone-500">Ongkir <span x-show="rate" x-cloak class="text-xs" x-text="rate ? `(${rate.courier_name} ${rate.service})` : ''"></span></dt>
                             <dd x-text="rate ? rupiah(shipping) : '—'">@rupiah($initialShipping)</dd>
                         </div>
-                        <div class="flex justify-between border-t border-stone-100 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd x-text="rupiah(total)">@rupiah($subtotal + $initialShipping)</dd></div>
+                        <div x-show="discount > 0" @unless ($initialDiscount) x-cloak @endunless class="flex justify-between text-emerald-700">
+                            <dt>Diskon voucher</dt><dd x-text="'−' + rupiah(discount)">−@rupiah($initialDiscount)</dd>
+                        </div>
+                        <div x-show="shippingDiscount > 0" @unless ($initialShippingDiscount) x-cloak @endunless class="flex justify-between text-emerald-700">
+                            <dt>Potongan ongkir</dt><dd x-text="'−' + rupiah(shippingDiscount)">−@rupiah($initialShippingDiscount)</dd>
+                        </div>
+                        <div class="flex justify-between border-t border-stone-100 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd x-text="rupiah(total)">@rupiah($initialTotal)</dd></div>
                     </dl>
                     <button class="btn btn-ink btn-pill mt-6 w-full py-4 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canSubmit" @disabled(! $address || empty($quote['rates']))>
                         <x-icon name="lock" class="size-4" />
@@ -176,5 +242,6 @@
                 </div>
             </div>
         </form>
+        </div>
     </div>
 </x-layouts.shop>

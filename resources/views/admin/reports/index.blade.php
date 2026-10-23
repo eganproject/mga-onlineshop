@@ -66,10 +66,11 @@
         <x-admin.stat-card label="Rata-rata per pesanan" :value="Money::rupiah($summary['average'])" icon="trending-up" tone="violet" :change="$changes['average']" />
         <x-admin.stat-card label="Produk terjual" :value="$fmt($summary['items']).' pcs'" icon="cube" tone="emerald" :change="$changes['items']" />
     </div>
-    <dl class="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+    <dl class="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 xl:grid-cols-5">
         @foreach ([
             ['Penjualan produk', Money::rupiah($summary['product_sales'])],
             ['Ongkos kirim', Money::rupiah($summary['shipping'])],
+            ['Diskon voucher', $summary['discount'] ? '−'.Money::rupiah($summary['discount']) : Money::rupiah(0)],
             ['Pembeli unik', $fmt($summary['customers']).' orang'],
             ['Pesanan dibatalkan', $fmt($summary['cancelled'])],
         ] as [$label, $value])
@@ -118,6 +119,30 @@
                     </ul>
                 </div>
             </div>
+
+            @if ($vouchers->isNotEmpty())
+                <div class="card mt-6 overflow-hidden">
+                    <div class="p-5">
+                        <h2 class="font-bold text-stone-900">Pemakaian voucher</h2>
+                        <p class="text-xs text-stone-500">Pesanan terjual yang memakai voucher di periode ini</p>
+                    </div>
+                    <div class="relative overflow-x-auto">
+                        <table class="table-base">
+                            <thead class="bg-stone-50/70"><tr><th>Kode voucher</th><th class="text-right">Pesanan</th><th class="text-right">Total diskon</th><th class="text-right">Pendapatan</th></tr></thead>
+                            <tbody class="divide-y divide-stone-100">
+                                @foreach ($vouchers as $row)
+                                    <tr>
+                                        <td class="font-mono text-sm font-semibold text-stone-900">{{ $row->voucher_code }}</td>
+                                        <td class="text-right tabular-nums">{{ $fmt($row->orders) }}</td>
+                                        <td class="text-right tabular-nums text-emerald-700">−@rupiah($row->discount)</td>
+                                        <td class="text-right font-semibold tabular-nums">@rupiah($row->revenue)</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
 
             <div class="card mt-6 overflow-hidden">
                 <div class="p-5"><h2 class="font-bold text-stone-900">Rincian {{ strtolower(ReportPeriod::GROUPS[$period->group]) }}</h2></div>

@@ -57,6 +57,16 @@ class MidtransPaymentGateway implements PaymentGateway
             ];
         }
 
+        // Potongan voucher sebagai item bernilai negatif agar jumlah item = gross_amount.
+        if ($order->discountTotal() > 0) {
+            $items[] = [
+                'id' => 'VOUCHER',
+                'price' => -$order->discountTotal(),
+                'quantity' => 1,
+                'name' => mb_substr('Voucher '.$order->voucher_code, 0, 50),
+            ];
+        }
+
         // Tanpa start_time, Midtrans menghitung kedaluwarsa sejak pelanggan memilih
         // metode bayar, sehingga bisa melewati batas bayar pesanan.
         $start = now()->timezone('Asia/Jakarta');

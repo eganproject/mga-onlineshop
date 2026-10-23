@@ -72,6 +72,10 @@
         </div>
     </section>
 
+    @if ($banners->isNotEmpty())
+        @include('shop.partials.banners')
+    @endif
+
     {{-- Kategori --}}
     @if ($categories->isNotEmpty())
         <section class="shop-container mt-16 lg:mt-24">

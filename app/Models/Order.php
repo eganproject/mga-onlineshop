@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'code', 'user_id', 'status', 'subtotal', 'shipping_cost', 'total', 'total_weight',
+    'code', 'user_id', 'status', 'subtotal', 'shipping_cost', 'discount', 'shipping_discount', 'total', 'total_weight',
+    'voucher_id', 'voucher_code',
     'recipient_name', 'recipient_phone', 'shipping_address', 'destination_id',
     'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes', 'payment_due_at',
     'paid_at', 'shipped_at', 'delivered_at', 'completed_at', 'cancelled_at', 'cancellation_reason',
@@ -108,6 +109,8 @@ class Order extends Model
             'status' => OrderStatus::class,
             'subtotal' => 'integer',
             'shipping_cost' => 'integer',
+            'discount' => 'integer',
+            'shipping_discount' => 'integer',
             'total' => 'integer',
             'total_weight' => 'integer',
             'payment_due_at' => 'datetime',
@@ -136,6 +139,17 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function voucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class);
+    }
+
+    /** Total potongan voucher (barang + ongkir). */
+    public function discountTotal(): int
+    {
+        return (int) $this->discount + (int) $this->shipping_discount;
     }
 
     public function items(): HasMany

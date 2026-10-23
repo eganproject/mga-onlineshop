@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import productForm from './components/product-form';
 import productPage from './components/product-page';
 import regionPicker from './components/region-picker';
+import bannerCarousel from './components/banner-carousel';
 import checkout from './components/checkout';
 import wishlistButton from './components/wishlist-button';
 
@@ -14,6 +15,7 @@ Alpine.data('productForm', productForm);
 Alpine.data('productPage', productPage);
 Alpine.data('regionPicker', regionPicker);
 Alpine.data('checkout', checkout);
+Alpine.data('bannerCarousel', bannerCarousel);
 Alpine.data('wishlistButton', wishlistButton);
 
 Alpine.start();

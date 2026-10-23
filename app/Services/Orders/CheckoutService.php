@@ -5,14 +5,17 @@ namespace App\Services\Orders;
 use App\Data\ShippingRate;
 use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
+use App\Exceptions\VoucherException;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
+use App\Models\Voucher;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\StockService;
 use App\Services\Payment\PaymentService;
+use App\Services\Promo\VoucherService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -23,13 +26,16 @@ class CheckoutService
         private readonly CartService $cart,
         private readonly PaymentService $payments,
         private readonly StockService $stock,
+        private readonly VoucherService $vouchers,
     ) {}
 
     /**
      * Buat pesanan dari isi keranjang. Stok dikunci dan dikurangi dalam satu
-     * transaksi agar tidak terjadi overselling.
+     * transaksi agar tidak terjadi overselling. Voucher (bila ada) diperiksa
+     * ulang di dalam transaksi yang sama dengan baris voucher dikunci, jadi
+     * kuota tidak bisa terlampaui oleh checkout bersamaan.
      */
-    public function placeOrder(User $user, Address $address, ShippingRate $rate, ?string $notes = null): Order
+    public function placeOrder(User $user, Address $address, ShippingRate $rate, ?string $notes = null, ?string $voucherCode = null): Order
     {
         $lines = $this->cart->lines();
 
@@ -37,7 +43,7 @@ class CheckoutService
             throw ValidationException::withMessages(['cart' => 'Keranjang belanja masih kosong.']);
         }
 
-        $order = DB::transaction(function () use ($user, $address, $rate, $notes, $lines) {
+        $order = DB::transaction(function () use ($user, $address, $rate, $notes, $lines, $voucherCode) {
             // Kunci baris produk & varian agar dua pembeli tidak mengambil stok yang sama.
             $products = Product::whereKey($lines->pluck('product.id')->unique())->lockForUpdate()->get()->keyBy('id');
             $variants = ProductVariant::whereKey($lines->pluck('variant.id')->filter())->lockForUpdate()->get()->keyBy('id');
@@ -83,12 +89,18 @@ class CheckoutService
                 ];
             }
 
+            [$voucher, $discounts] = $this->applyVoucher($voucherCode, $user, $subtotal, $rate->cost);
+
             $order = $user->orders()->create([
                 'code' => Order::generateCode(),
                 'status' => OrderStatus::PendingPayment,
                 'subtotal' => $subtotal,
                 'shipping_cost' => $rate->cost,
-                'total' => $subtotal + $rate->cost,
+                'discount' => $discounts['discount'],
+                'shipping_discount' => $discounts['shipping_discount'],
+                'total' => $subtotal - $discounts['discount'] + $rate->cost - $discounts['shipping_discount'],
+                'voucher_id' => $voucher?->id,
+                'voucher_code' => $voucher?->code,
                 'total_weight' => $weight,
                 'recipient_name' => $address->recipient_name,
                 'recipient_phone' => $address->phone,
@@ -114,6 +126,7 @@ class CheckoutService
         });
 
         $this->cart->clear();
+        $this->vouchers->forget();
 
         try {
             $this->payments->createFor($order);
@@ -123,5 +136,27 @@ class CheckoutService
         }
 
         return $order;
+    }
+
+    /** @return array{0: ?Voucher, 1: array{discount: int, shipping_discount: int}} */
+    private function applyVoucher(?string $code, User $user, int $subtotal, int $shipping): array
+    {
+        if (Voucher::normalizeCode($code) === '') {
+            return [null, ['discount' => 0, 'shipping_discount' => 0]];
+        }
+
+        $voucher = Voucher::where('code', Voucher::normalizeCode($code))->lockForUpdate()->first();
+
+        try {
+            if (! $voucher) {
+                throw new VoucherException('Kode voucher tidak ditemukan.');
+            }
+
+            $this->vouchers->check($voucher, $user, $subtotal);
+        } catch (VoucherException $e) {
+            throw ValidationException::withMessages(['voucher' => $e->getMessage()]);
+        }
+
+        return [$voucher, $this->vouchers->calculate($voucher, $subtotal, $shipping)];
     }
 }

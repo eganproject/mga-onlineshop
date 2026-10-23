@@ -143,6 +143,7 @@
             <dl class="space-y-2 border-t border-stone-100 bg-stone-50/50 p-5 text-sm">
                 <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd>@rupiah($order->subtotal)</dd></div>
                 <div class="flex justify-between"><dt class="text-stone-500">Ongkir</dt><dd>@rupiah($order->shipping_cost)</dd></div>
+                <x-order-discounts :order="$order" />
                 <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd>@rupiah($order->total)</dd></div>
             </dl>
         </div>

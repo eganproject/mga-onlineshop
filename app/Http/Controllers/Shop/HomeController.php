@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\View\View;
@@ -12,6 +13,7 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('shop.home', [
+            'banners' => Banner::visible()->take(8)->get(),
             'categories' => Category::active()->root()
                 ->withCount(['products' => fn ($q) => $q->active()])
                 ->with(['children' => fn ($q) => $q->active()->withCount(['products' => fn ($q) => $q->active()])])

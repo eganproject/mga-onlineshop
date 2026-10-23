@@ -1,9 +1,24 @@
 /**
  * Halaman checkout: ganti alamat → ongkir dimuat ulang tanpa reload halaman,
- * pilih kurir, dan total dihitung langsung. Harga final tetap dihitung ulang
- * di server saat pesanan dibuat.
+ * pilih kurir, pasang voucher, dan total dihitung langsung. Harga final tetap
+ * dihitung ulang di server saat pesanan dibuat.
  */
-export default ({ ratesUrl, addressId = '', rates = [], error = '', subtotal = 0, selected = '' }) => ({
+const MIN_PAYABLE = 1;
+
+const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+export default ({
+    ratesUrl,
+    voucherUrl,
+    addressId = '',
+    rates = [],
+    error = '',
+    subtotal = 0,
+    selected = '',
+    voucher = null,
+    voucherError = '',
+    code = '',
+}) => ({
     addressId: addressId ? String(addressId) : '',
     rates,
     error: error || '',
@@ -13,6 +28,11 @@ export default ({ ratesUrl, addressId = '', rates = [], error = '', subtotal = 0
     loading: false,
     submitting: false,
     requestId: 0,
+    voucher,
+    voucherCode: code || '',
+    voucherError: voucherError || '',
+    voucherMessage: '',
+    voucherLoading: false,
 
     get rate() {
         return this.rates.find((r) => r.key === this.selected) || null;
@@ -22,8 +42,77 @@ export default ({ ratesUrl, addressId = '', rates = [], error = '', subtotal = 0
         return this.rate?.cost || 0;
     },
 
+    get discount() {
+        return this.voucher?.discount || 0;
+    },
+
+    get shippingDiscount() {
+        if (this.voucher?.type !== 'free_shipping') return 0;
+        const cap = this.voucher.shipping_cap;
+        return cap === null || cap === undefined ? this.shipping : Math.min(cap, this.shipping);
+    },
+
     get total() {
-        return this.subtotal + this.shipping;
+        // Sama dengan server: total bayar tidak pernah di bawah MIN_PAYABLE.
+        return Math.max(MIN_PAYABLE, this.subtotal - this.discount + this.shipping - this.shippingDiscount);
+    },
+
+    async applyVoucher(code = null) {
+        if (code !== null) this.voucherCode = code;
+        if (!this.voucherCode.trim() || this.voucherLoading) return;
+
+        this.voucherLoading = true;
+        this.voucherError = '';
+        this.voucherMessage = '';
+
+        try {
+            const body = new FormData();
+            body.append('code', this.voucherCode.trim());
+            const res = await fetch(voucherUrl, {
+                method: 'POST',
+                headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+                body,
+            });
+            const json = await res.json().catch(() => ({}));
+
+            if (res.ok) {
+                this.voucher = json.voucher;
+                this.voucherMessage = json.message || '';
+                this.voucherCode = '';
+            } else if (res.status === 429) {
+                this.voucherError = 'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.';
+            } else if (res.status === 419) {
+                this.voucherError = 'Sesi berakhir. Muat ulang halaman lalu coba lagi.';
+            } else {
+                this.voucherError = json.errors?.code?.[0] || json.message || 'Voucher tidak bisa dipakai.';
+            }
+        } catch (e) {
+            this.voucherError = 'Voucher gagal diperiksa. Periksa koneksi internet lalu coba lagi.';
+        } finally {
+            this.voucherLoading = false;
+        }
+    },
+
+    async removeVoucher() {
+        this.voucherLoading = true;
+        this.voucherError = '';
+
+        try {
+            const res = await fetch(voucherUrl, {
+                method: 'DELETE',
+                headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+            });
+            if (res.ok) {
+                this.voucher = null;
+                this.voucherMessage = '';
+            } else {
+                this.voucherError = 'Voucher gagal dilepas. Muat ulang halaman lalu coba lagi.';
+            }
+        } catch (e) {
+            this.voucherError = 'Voucher gagal dilepas. Periksa koneksi internet lalu coba lagi.';
+        } finally {
+            this.voucherLoading = false;
+        }
     },
 
     get couriers() {

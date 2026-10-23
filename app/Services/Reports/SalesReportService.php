@@ -14,8 +14,9 @@ use Illuminate\Support\Facades\DB;
  * Angka penjualan untuk dashboard & laporan admin.
  *
  * Penjualan dihitung dari pesanan yang sudah dibayar dan tidak dibatalkan,
- * berdasarkan tanggal bayar (`paid_at`). Pendapatan kotor = total pesanan
- * (termasuk ongkir); penjualan produk = subtotal barang.
+ * berdasarkan tanggal bayar (`paid_at`). Pendapatan kotor = total yang dibayar
+ * pelanggan (termasuk ongkir, setelah potongan voucher); penjualan produk =
+ * subtotal barang sebelum voucher; diskon = potongan voucher barang + ongkir.
  */
 class SalesReportService
 {
@@ -36,13 +37,13 @@ class SalesReportService
     /**
      * Ringkasan angka utama periode.
      *
-     * @return array{revenue:int, product_sales:int, shipping:int, orders:int, items:int, average:int, customers:int, cancelled:int}
+     * @return array{revenue:int, product_sales:int, shipping:int, discount:int, orders:int, items:int, average:int, customers:int, cancelled:int}
      */
     public function summary(ReportPeriod $period): array
     {
         $totals = $this->paidOrders($period)
             ->toBase()
-            ->selectRaw('COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue, COALESCE(SUM(subtotal), 0) as product_sales, COALESCE(SUM(shipping_cost), 0) as shipping, COUNT(DISTINCT user_id) as customers')
+            ->selectRaw('COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue, COALESCE(SUM(subtotal), 0) as product_sales, COALESCE(SUM(shipping_cost), 0) as shipping, COALESCE(SUM(discount + shipping_discount), 0) as discount, COUNT(DISTINCT user_id) as customers')
             ->first();
 
         $items = (int) DB::table('order_items')
@@ -56,6 +57,7 @@ class SalesReportService
             'revenue' => $revenue,
             'product_sales' => (int) $totals->product_sales,
             'shipping' => (int) $totals->shipping,
+            'discount' => (int) $totals->discount,
             'orders' => $orders,
             'items' => $items,
             'average' => $orders > 0 ? intdiv($revenue, $orders) : 0,
@@ -212,6 +214,30 @@ class SalesReportService
         return collect(OrderStatus::cases())->mapWithKeys(fn (OrderStatus $status) => [
             $status->value => ['status' => $status, 'count' => (int) ($counts[$status->value] ?? 0)],
         ]);
+    }
+
+    /**
+     * Pemakaian voucher pada pesanan terjual dalam periode.
+     *
+     * @return Collection<int, object{voucher_code:string, orders:int, discount:int, revenue:int}>
+     */
+    public function byVoucher(ReportPeriod $period, int $limit = 10): Collection
+    {
+        return $this->paidOrders($period)
+            ->whereNotNull('voucher_code')
+            ->toBase()
+            ->groupBy('voucher_code')
+            ->selectRaw('voucher_code, COUNT(*) as orders, SUM(discount + shipping_discount) as discount, SUM(total) as revenue')
+            ->orderByDesc('orders')
+            ->orderByDesc('discount')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($row) => (object) [
+                'voucher_code' => $row->voucher_code,
+                'orders' => (int) $row->orders,
+                'discount' => (int) $row->discount,
+                'revenue' => (int) $row->revenue,
+            ]);
     }
 
     /** Pesanan terjual dalam periode, untuk ekspor detail. */

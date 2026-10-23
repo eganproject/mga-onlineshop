@@ -5,11 +5,13 @@ namespace Database\Seeders;
 use App\Enums\ReviewStatus;
 use App\Enums\StockMovementType;
 use App\Enums\UserRole;
+use App\Enums\VoucherType;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
+use App\Models\Voucher;
 use App\Services\Catalog\StockService;
 use App\Services\Reviews\ReviewService;
 use Illuminate\Database\Seeder;
@@ -58,6 +60,21 @@ class DatabaseSeeder extends Seeder
         // Tanpa event model supaya ratusan pesanan contoh tidak mengantrekan email.
         Order::withoutEvents(fn () => $this->call(DemoOrderSeeder::class));
         $this->seedReviews();
+        $this->seedVouchers();
+    }
+
+    /** Voucher contoh (banner perlu gambar, jadi diunggah sendiri lewat admin). */
+    private function seedVouchers(): void
+    {
+        $vouchers = [
+            ['code' => 'HEMAT10', 'name' => 'Diskon 10% semua produk', 'type' => VoucherType::Percent, 'value' => 10, 'max_discount' => 25000, 'min_spend' => 100000, 'per_user_limit' => 1],
+            ['code' => 'ONGKIRGRATIS', 'name' => 'Gratis ongkir s.d. Rp20.000', 'type' => VoucherType::FreeShipping, 'value' => 20000, 'min_spend' => 75000, 'per_user_limit' => 3],
+            ['code' => 'MGA50K', 'name' => 'Potongan Rp50.000', 'type' => VoucherType::Fixed, 'value' => 50000, 'min_spend' => 500000, 'quota' => 100, 'per_user_limit' => 1],
+        ];
+
+        foreach ($vouchers as $voucher) {
+            Voucher::updateOrCreate(['code' => $voucher['code']], $voucher + ['is_active' => true, 'is_public' => true]);
+        }
     }
 
     /** Contoh ulasan yang sudah tayang supaya tampilan rating terlihat saat demo. */
