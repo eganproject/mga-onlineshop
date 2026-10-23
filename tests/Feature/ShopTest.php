@@ -31,6 +31,25 @@ class ShopTest extends TestCase
         $this->get(route('products.show', $product))->assertOk()->assertSee($product->formattedPrice());
     }
 
+    public function test_catalog_can_filter_by_promo_and_price(): void
+    {
+        $cheap = Product::factory()->create(['name' => 'Kabel Murah', 'price' => 20000]);
+        $sale = Product::factory()->create(['name' => 'Charger Diskon', 'price' => 80000, 'compare_at_price' => 100000]);
+        $pricey = Product::factory()->create(['name' => 'Earphone Premium', 'price' => 400000]);
+
+        $this->get(route('products.index', ['promo' => 1]))
+            ->assertOk()->assertSee($sale->name)->assertDontSee($cheap->name)->assertDontSee($pricey->name);
+
+        $this->get(route('products.index', ['harga_min' => 50000, 'harga_max' => 250000]))
+            ->assertOk()->assertSee($sale->name)->assertDontSee($cheap->name)->assertDontSee($pricey->name);
+
+        $this->get(route('products.index', ['harga_min' => 250000]))
+            ->assertOk()->assertSee($pricey->name)->assertDontSee($sale->name);
+
+        // Beranda menampilkan bagian promo bila ada produk diskon.
+        $this->get(route('home'))->assertOk()->assertSee('Lagi diskon');
+    }
+
     public function test_inactive_product_page_returns_404(): void
     {
         $product = Product::factory()->inactive()->create();

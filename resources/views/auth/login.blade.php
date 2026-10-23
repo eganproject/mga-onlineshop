@@ -10,7 +10,7 @@
         <div>
             <div class="flex items-center justify-between">
                 <label for="password" class="label">Password</label>
-                <a href="{{ route('password.request') }}" class="mb-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700">Lupa password?</a>
+                <a href="{{ route('password.request') }}" class="mb-1.5 text-xs font-semibold text-ink underline underline-offset-4">Lupa password?</a>
             </div>
             <div class="relative">
                 <input id="password" :type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password"
@@ -24,9 +24,9 @@
         <label class="flex items-center gap-2 text-sm text-stone-600">
             <input type="checkbox" name="remember" class="checkbox"> Ingat saya
         </label>
-        <button class="btn btn-primary w-full py-3">Masuk</button>
+        <button class="btn btn-ink rounded-full w-full py-3">Masuk</button>
     </form>
     <p class="mt-8 text-center text-sm text-stone-500">
-        Belum punya akun? <a href="{{ route('register') }}" class="font-semibold text-brand-600 hover:text-brand-700">Daftar gratis</a>
+        Belum punya akun? <a href="{{ route('register') }}" class="font-semibold text-ink underline underline-offset-4">Daftar gratis</a>
     </p>
 </x-layouts.auth>

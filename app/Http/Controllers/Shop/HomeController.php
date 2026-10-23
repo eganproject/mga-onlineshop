@@ -18,8 +18,9 @@ class HomeController extends Controller
                 ->orderBy('sort_order')->take(8)->get()
                 // Jumlah produk induk termasuk produk di subkategorinya.
                 ->each(fn (Category $c) => $c->products_count += $c->children->sum('products_count')),
-            'featured' => Product::active()->where('is_featured', true)->latest()->take(8)->get(),
-            'latest' => Product::active()->latest()->take(8)->get(),
+            'featured' => Product::active()->with('category')->where('is_featured', true)->latest()->take(8)->get(),
+            'latest' => Product::active()->with('category')->latest()->take(8)->get(),
+            'onSale' => Product::active()->with('category')->onSale()->latest()->take(4)->get(),
         ]);
     }
 }

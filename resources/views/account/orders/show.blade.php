@@ -36,13 +36,13 @@
                 </div>
                 <div class="flex flex-wrap gap-2">
                     @if ($payment->gateway === 'midtrans' && $payment->snap_token)
-                        <button type="button" class="btn btn-primary" onclick="window.snap ? window.snap.pay(@js($payment->snap_token)) : window.location.href = @js($payment->redirect_url)">
+                        <button type="button" class="btn btn-ink rounded-full" onclick="window.snap ? window.snap.pay(@js($payment->snap_token)) : window.location.href = @js($payment->redirect_url)">
                             <x-icon name="credit-card" class="size-4" /> Bayar sekarang
                         </button>
                     @elseif ($payment->gateway === 'fake' && ! app()->isProduction())
                         <form method="POST" action="{{ route('account.orders.simulate-payment', $order) }}">
                             @csrf
-                            <button class="btn btn-primary"><x-icon name="credit-card" class="size-4" /> Simulasikan bayar (dev)</button>
+                            <button class="btn btn-ink rounded-full"><x-icon name="credit-card" class="size-4" /> Simulasikan bayar (dev)</button>
                         </form>
                     @endif
                     <form method="POST" action="{{ route('account.orders.cancel', $order) }}" onsubmit="return confirm('Batalkan pesanan ini?')">

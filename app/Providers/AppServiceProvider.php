@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Contracts\ShippingProvider;
+use App\Models\Category;
 use App\Services\Cart\CartService;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\FakePaymentGateway;
@@ -48,7 +49,10 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('rupiah', fn (string $expression) => '<?php echo e('.Money::class."::rupiah({$expression})); ?>");
 
         View::composer('components.layouts.shop', function ($view) {
-            $view->with('cartCount', app(CartService::class)->count());
+            $view->with([
+                'cartCount' => app(CartService::class)->count(),
+                'navCategories' => Category::active()->root()->orderBy('sort_order')->get(['id', 'name', 'slug']),
+            ]);
         });
     }
 }

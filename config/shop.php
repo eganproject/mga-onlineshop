@@ -12,6 +12,27 @@ return [
     'full_name' => 'Media Gudang Acc',
     'tagline' => 'Gudangnya aksesoris gadget original & terjangkau',
     'whatsapp' => env('SHOP_WHATSAPP'),
+    'instagram' => env('SHOP_INSTAGRAM'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tampilan Toko
+    |--------------------------------------------------------------------------
+    |
+    | hero_image: path/URL gambar besar di beranda (opsional). Jika kosong,
+    | beranda memakai tampilan tipografi + foto produk unggulan.
+    | announcements: teks yang bergulir di bar paling atas.
+    |
+    */
+
+    'storefront' => [
+        'hero_image' => env('SHOP_HERO_IMAGE'),
+        'announcements' => [
+            'Kirim ke seluruh Indonesia',
+            'Produk 100% original & bergaransi',
+            'Bayar mudah: transfer bank, e-wallet & QRIS',
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------

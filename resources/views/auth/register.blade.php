@@ -28,9 +28,9 @@
             <label for="password_confirmation" class="label">Ulangi password</label>
             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="input">
         </div>
-        <button class="btn btn-primary w-full py-3">Daftar sekarang</button>
+        <button class="btn btn-ink rounded-full w-full py-3">Daftar sekarang</button>
     </form>
     <p class="mt-8 text-center text-sm text-stone-500">
-        Sudah punya akun? <a href="{{ route('login') }}" class="font-semibold text-brand-600 hover:text-brand-700">Masuk</a>
+        Sudah punya akun? <a href="{{ route('login') }}" class="font-semibold text-ink underline underline-offset-4">Masuk</a>
     </p>
 </x-layouts.auth>

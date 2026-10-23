@@ -86,7 +86,7 @@
             <input type="checkbox" name="is_default" value="1" class="checkbox" @checked(old('is_default', $address->is_default))> Jadikan alamat utama
         </label>
         <div class="flex gap-2 border-t border-stone-100 pt-5">
-            <button class="btn btn-primary">{{ $editing ? 'Simpan perubahan' : 'Simpan alamat' }}</button>
+            <button class="btn btn-ink rounded-full">{{ $editing ? 'Simpan perubahan' : 'Simpan alamat' }}</button>
             <a href="{{ request('redirect_to') === 'checkout' ? route('checkout.index') : route('account.addresses.index') }}" class="btn btn-ghost">Batal</a>
         </div>
     </form>

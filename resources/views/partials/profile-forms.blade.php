@@ -20,7 +20,7 @@
         <input id="phone" type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="input @error('phone') input-error @enderror">
         <x-input-error for="phone" />
     </div>
-    <button class="btn btn-primary">Simpan perubahan</button>
+    <button class="btn btn-ink rounded-full">Simpan perubahan</button>
 </form>
 
 <form method="POST" action="{{ $passwordRoute }}" class="card space-y-5 p-6">

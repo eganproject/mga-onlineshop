@@ -1,6 +1,6 @@
 <x-layouts.account title="Alamat" heading="Alamat pengiriman">
     <div class="mb-4 flex justify-end">
-        <a href="{{ route('account.addresses.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Tambah alamat</a>
+        <a href="{{ route('account.addresses.create') }}" class="btn btn-ink rounded-full"><x-icon name="plus" class="size-4" /> Tambah alamat</a>
     </div>
     <div class="grid gap-4 md:grid-cols-2">
         @forelse ($addresses as $address)
@@ -27,7 +27,7 @@
         @empty
             <div class="card md:col-span-2">
                 <x-empty-state icon="map-pin" title="Belum ada alamat" description="Tambahkan alamat agar checkout lebih cepat.">
-                    <a href="{{ route('account.addresses.create') }}" class="btn btn-primary">Tambah alamat</a>
+                    <a href="{{ route('account.addresses.create') }}" class="btn btn-ink rounded-full">Tambah alamat</a>
                 </x-empty-state>
             </div>
         @endforelse
