@@ -1,5 +1,5 @@
 <x-layouts.admin title="Integrasi">
-    <x-admin.page-header title="Integrasi" description="Status koneksi payment gateway dan ongkos kirim. Nilai diatur lewat file .env di server." />
+    <x-admin.page-header title="Integrasi" description="Status koneksi payment gateway dan ongkos kirim. Kunci API diatur lewat file .env di server; kecamatan asal & kurir di Pengaturan Toko." />
 
     <div class="grid gap-6 lg:grid-cols-2">
         @foreach ($integrations as $integration)

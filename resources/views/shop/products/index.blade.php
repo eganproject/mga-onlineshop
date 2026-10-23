@@ -104,7 +104,7 @@
                 </div>
 
                 <form method="GET" action="{{ route('products.index') }}" class="flex flex-1 flex-col overflow-y-auto lg:overflow-visible"
-                      x-data="{ min: '{{ $minPrice }}', max: '{{ $maxPrice }}' }">
+                      x-data="{ min: @js(\App\Support\FormField::thousands($minPrice)), max: @js(\App\Support\FormField::thousands($maxPrice)) }">
                     @foreach (\Illuminate\Support\Arr::only($baseQuery, ['q', 'kategori', 'urut']) as $key => $value)
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endforeach
@@ -128,17 +128,17 @@
                             <h3 id="f-price" class="eyebrow text-stone-500">Harga</h3>
                             <div class="mt-4 flex flex-wrap gap-2">
                                 @foreach ($pricePresets as [$label, $from, $to])
-                                    <button type="button" @click="min = '{{ $from }}'; max = '{{ $to }}'"
-                                            :class="min == '{{ $from }}' && max == '{{ $to }}' ? 'chip-active' : ''"
+                                    <button type="button" @click="min = @js(\App\Support\FormField::thousands($from)); max = @js(\App\Support\FormField::thousands($to))"
+                                            :class="min == @js(\App\Support\FormField::thousands($from)) && max == @js(\App\Support\FormField::thousands($to)) ? 'chip-active' : ''"
                                             class="chip px-3 py-1.5 text-xs">{{ $label }}</button>
                                 @endforeach
                             </div>
                             <div class="mt-4 grid grid-cols-2 gap-2">
                                 <label class="sr-only" for="harga_min">Harga minimum</label>
-                                <input id="harga_min" type="number" name="harga_min" x-model="min" min="0" step="1000" placeholder="Min" inputmode="numeric"
+                                <input id="harga_min" type="text" name="harga_min" x-model="min" x-money placeholder="Min Rp"
                                        class="w-full border-stone-300 px-3 py-2 text-sm focus:border-ink focus:ring-ink/10">
                                 <label class="sr-only" for="harga_max">Harga maksimum</label>
-                                <input id="harga_max" type="number" name="harga_max" x-model="max" min="0" step="1000" placeholder="Maks" inputmode="numeric"
+                                <input id="harga_max" type="text" name="harga_max" x-model="max" x-money placeholder="Maks Rp"
                                        class="w-full border-stone-300 px-3 py-2 text-sm focus:border-ink focus:ring-ink/10">
                             </div>
                         </div>

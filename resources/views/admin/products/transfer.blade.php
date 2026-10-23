@@ -12,27 +12,10 @@
                 </div>
             </div>
 
+            @if ($canProducts)
             <form method="GET" action="{{ route('admin.products.export') }}" class="mt-5 space-y-3">
-                <label class="block">
-                    <span class="label">Kategori</span>
-                    <select name="kategori" class="input">
-                        <option value="">Semua kategori</option>
-                        @foreach ($categories->whereNull('parent_id') as $parent)
-                            <option value="{{ $parent->id }}">{{ $parent->name }}</option>
-                            @foreach ($categories->where('parent_id', $parent->id) as $child)
-                                <option value="{{ $child->id }}">— {{ $child->name }}</option>
-                            @endforeach
-                        @endforeach
-                    </select>
-                </label>
-                <label class="block">
-                    <span class="label">Status</span>
-                    <select name="status" class="input">
-                        <option value="">Semua produk</option>
-                        <option value="aktif">Hanya aktif</option>
-                        <option value="nonaktif">Hanya nonaktif</option>
-                    </select>
-                </label>
+                <x-form.category-select name="kategori" label="Kategori" :categories="$categories" placeholder="Semua kategori" />
+                <x-form.select name="status" label="Status" :options="['aktif' => 'Hanya aktif', 'nonaktif' => 'Hanya nonaktif']" placeholder="Semua produk" />
                 <fieldset>
                     <legend class="label">Format</legend>
                     <div class="grid grid-cols-2 gap-2">
@@ -45,16 +28,20 @@
                 </fieldset>
                 <button class="btn btn-primary w-full"><x-icon name="download" class="size-4" /> Ekspor produk</button>
             </form>
+            @endif
 
-            <div class="mt-4 border-t border-stone-100 pt-4">
+            @if ($canStock)
+            <div @class(['mt-4 border-t border-stone-100 pt-4' => $canProducts, 'mt-5' => ! $canProducts])>
                 <a :href="@js(route('admin.stock.export')) + '?format=' + format" href="{{ route('admin.stock.export') }}" class="btn btn-secondary w-full">
                     <x-icon name="archive" class="size-4" /> Ekspor daftar stok
                 </a>
                 <p class="mt-2 text-xs text-stone-500">File stok bisa langsung diisi ulang lalu diunggah di "Update stok massal".</p>
             </div>
+            @endif
         </div>
 
         {{-- Impor produk --}}
+        @if ($canProducts)
         <div class="card min-w-0 p-6">
             <div class="flex items-center gap-3">
                 <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><x-icon name="cube" class="size-5" /></span>
@@ -78,20 +65,17 @@
             <form method="POST" action="{{ route('admin.imports.store') }}" enctype="multipart/form-data" class="mt-5 space-y-3" x-data="{ busy: false }" @submit="busy = true">
                 @csrf
                 <input type="hidden" name="type" value="products">
-                <label class="block">
-                    <span class="label">File (.xlsx / .csv, maks {{ $maxUploadMb }} MB)</span>
-                    <input type="file" name="file" accept=".xlsx,.csv" required class="input file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1 file:text-sm file:font-semibold">
-                </label>
-                @if (old('type', 'products') === 'products')
-                    <x-input-error for="file" />
-                @endif
+                <x-form.file name="file" label="File produk" :extensions="['xlsx', 'csv']" :max-kb="$maxUploadKb" :bag="old('type', 'products') === 'products' ? 'default' : 'none'" required />
                 <button class="btn btn-primary w-full" :disabled="busy">
                     <x-icon name="download" class="size-4 rotate-180" /> <span x-text="busy ? 'Memeriksa file...' : 'Unggah & periksa'">Unggah & periksa</span>
                 </button>
             </form>
         </div>
 
+        @endif
+
         {{-- Update stok massal --}}
+        @if ($canStock)
         <div class="card min-w-0 p-6" id="stok">
             <div class="flex items-center gap-3">
                 <span class="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-700"><x-icon name="archive" class="size-5" /></span>
@@ -120,18 +104,13 @@
                         @endforeach
                     </div>
                 </fieldset>
-                <label class="block">
-                    <span class="label">File (.xlsx / .csv)</span>
-                    <input type="file" name="file" accept=".xlsx,.csv" required class="input file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1 file:text-sm file:font-semibold">
-                </label>
-                @if (old('type') === 'stock')
-                    <x-input-error for="file" />
-                @endif
+                <x-form.file name="file" id="stock-file" label="File stok" :extensions="['xlsx', 'csv']" :max-kb="$maxUploadKb" :bag="old('type') === 'stock' ? 'default' : 'none'" required />
                 <button class="btn btn-primary w-full" :disabled="busy">
                     <x-icon name="download" class="size-4 rotate-180" /> <span x-text="busy ? 'Memeriksa file...' : 'Unggah & periksa'">Unggah & periksa</span>
                 </button>
             </form>
         </div>
+        @endif
     </div>
 
     {{-- Riwayat --}}

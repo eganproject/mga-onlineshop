@@ -28,26 +28,20 @@
         <input type="hidden" name="tab" value="{{ $tab }}">
         <label class="block sm:w-48">
             <span class="mb-1 block text-xs font-semibold text-stone-500">Periode</span>
-            <select name="preset" x-model="preset" class="input">
+            <select name="preset" x-model="preset" class="input" x-searchable>
                 @foreach (ReportPeriod::PRESETS as $key => $label)
                     <option value="{{ $key }}" @selected($period->preset === $key)>{{ $label }}</option>
                 @endforeach
             </select>
         </label>
-        <div x-show="preset === 'custom'" @if ($period->preset !== 'custom') x-cloak @endif class="grid grid-cols-2 gap-3 sm:flex">
-            <label class="block">
-                <span class="mb-1 block text-xs font-semibold text-stone-500">Dari</span>
-                <input type="date" name="from" value="{{ $period->from->toDateString() }}" max="{{ today()->toDateString() }}" class="input" :disabled="preset !== 'custom'">
-            </label>
-            <label class="block">
-                <span class="mb-1 block text-xs font-semibold text-stone-500">Sampai</span>
-                <input type="date" name="to" value="{{ $period->to->toDateString() }}" max="{{ today()->toDateString() }}" class="input" :disabled="preset !== 'custom'">
-            </label>
+        <div x-show="preset === 'custom'" @if ($period->preset !== 'custom') x-cloak @endif class="sm:w-72">
+            <span class="mb-1 block text-xs font-semibold text-stone-500">Rentang tanggal</span>
+            <x-form.date-range from="from" to="to" :from-value="$period->from" :to-value="$period->to" :max="today()" :clearable="false" aria-label="Rentang tanggal" />
         </div>
         @if ($tab === 'penjualan')
             <label class="block sm:w-40">
                 <span class="mb-1 block text-xs font-semibold text-stone-500">Kelompokkan</span>
-                <select name="group" class="input">
+                <select name="group" class="input" x-searchable>
                     @foreach (ReportPeriod::GROUPS as $key => $label)
                         <option value="{{ $key }}" @selected($period->group === $key)>{{ $label }}</option>
                     @endforeach

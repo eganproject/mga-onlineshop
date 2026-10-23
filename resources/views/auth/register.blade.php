@@ -12,11 +12,7 @@
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" @class(['input', 'input-error' => $errors->has('email')])>
                 <x-input-error for="email" />
             </div>
-            <div>
-                <label for="phone" class="label">No. HP <span class="font-normal text-stone-400">(opsional)</span></label>
-                <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" placeholder="08xx" @class(['input', 'input-error' => $errors->has('phone')])>
-                <x-input-error for="phone" />
-            </div>
+            <x-form.phone name="phone" label="No. HP" optional />
         </div>
         <div>
             <label for="password" class="label">Password</label>

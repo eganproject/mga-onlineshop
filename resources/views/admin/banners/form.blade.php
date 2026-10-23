@@ -1,7 +1,5 @@
 @php
     $editing = $banner->exists;
-    $dt = fn ($field) => old($field, $banner->{$field}?->format('Y-m-d\TH:i'));
-    $file = 'block w-full text-sm text-stone-500 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100';
 @endphp
 <x-layouts.admin :title="$editing ? 'Edit Banner' : 'Tambah Banner'">
     <x-admin.page-header :title="$editing ? 'Edit banner' : 'Tambah banner'" :back="route('admin.banners.index')" />
@@ -14,27 +12,12 @@
 
         <div class="space-y-6 lg:col-span-2">
             <div class="card space-y-5 p-6">
-                <div>
-                    <label for="image" class="label">Gambar banner</label>
-                    @if ($editing)
-                        <img src="{{ $banner->imageUrl() }}" alt="" class="mb-3 aspect-[21/9] w-full rounded-xl object-cover">
-                    @endif
-                    <input id="image" type="file" name="image" accept="image/jpeg,image/png,image/webp" @required(! $editing) class="{{ $file }}">
-                    <p class="mt-1.5 text-xs text-stone-400">Disarankan 1920×820 px (rasio ±21:9), JPG/PNG/WebP maks. 4 MB.{{ $editing ? ' Kosongkan bila tidak diganti.' : '' }}</p>
-                    <x-input-error for="image" />
-                </div>
-                <div>
-                    <label for="mobile_image" class="label">Gambar versi HP <span class="font-normal text-stone-400">(opsional)</span></label>
-                    @if ($banner->mobileImageUrl())
-                        <img src="{{ $banner->mobileImageUrl() }}" alt="" class="mb-3 aspect-[4/5] w-40 rounded-xl object-cover">
-                        <label class="mb-3 flex items-center gap-2 text-sm text-stone-600">
-                            <input type="checkbox" name="remove_mobile_image" value="1" class="checkbox"> Hapus gambar HP
-                        </label>
-                    @endif
-                    <input id="mobile_image" type="file" name="mobile_image" accept="image/jpeg,image/png,image/webp" class="{{ $file }}">
-                    <p class="mt-1.5 text-xs text-stone-400">Rasio 4:5 (mis. 1080×1350 px). Tanpa ini, gambar utama dipotong otomatis di HP.</p>
-                    <x-input-error for="mobile_image" />
-                </div>
+                <x-form.image-upload name="image" label="Gambar banner" :current="$editing ? $banner->imageUrl() : null"
+                    aspect="aspect-[21/9]" :max-kb="4096" :required="! $editing"
+                    :hint="'Disarankan 1920×820 px (rasio ±21:9), JPG/PNG/WebP maks. 4 MB.'.($editing ? ' Kosongkan bila tidak diganti.' : '')" />
+                <x-form.image-upload name="mobile_image" label="Gambar versi HP" optional :current="$banner->mobileImageUrl()"
+                    remove-name="remove_mobile_image" aspect="aspect-[4/5]" wrapper-class="max-w-56" :max-kb="4096"
+                    hint="Rasio 4:5 (mis. 1080×1350 px). Tanpa ini, gambar utama dipotong otomatis di HP." />
             </div>
 
             <div class="card space-y-5 p-6">
@@ -74,21 +57,9 @@
                     <span><span class="block text-sm font-semibold text-stone-800">Tampilkan teks di atas gambar</span><span class="text-xs text-stone-500">Matikan bila tulisan sudah ada di gambar</span></span>
                     <input type="checkbox" name="show_text" value="1" class="checkbox size-5" @checked(old('show_text', $banner->show_text))>
                 </label>
-                <div>
-                    <label for="sort_order" class="label">Urutan tampil</label>
-                    <input id="sort_order" type="number" min="0" name="sort_order" value="{{ old('sort_order', $banner->sort_order ?? 0) }}" class="input">
-                    <x-input-error for="sort_order" />
-                </div>
-                <div>
-                    <label for="starts_at" class="label">Mulai tayang <span class="font-normal text-stone-400">(opsional)</span></label>
-                    <input id="starts_at" type="datetime-local" name="starts_at" value="{{ $dt('starts_at') }}" class="input @error('starts_at') input-error @enderror">
-                    <x-input-error for="starts_at" />
-                </div>
-                <div>
-                    <label for="ends_at" class="label">Berakhir <span class="font-normal text-stone-400">(opsional)</span></label>
-                    <input id="ends_at" type="datetime-local" name="ends_at" value="{{ $dt('ends_at') }}" class="input @error('ends_at') input-error @enderror">
-                    <x-input-error for="ends_at" />
-                </div>
+                <x-form.number name="sort_order" label="Urutan tampil" :value="$banner->sort_order ?? 0" min="0" />
+                <x-form.date name="starts_at" label="Mulai tayang" optional time :value="$banner->starts_at" />
+                <x-form.date name="ends_at" label="Berakhir" optional time :value="$banner->ends_at" />
             </div>
             <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan banner' }}</button>
         </div>

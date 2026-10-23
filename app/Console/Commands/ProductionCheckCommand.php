@@ -43,7 +43,7 @@ class ProductionCheckCommand extends Command
         }
 
         if (config('shop.shipping.driver') === 'rajaongkir') {
-            $this->check('RajaOngkir siap', filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_city_id')), 'Isi RAJAONGKIR_API_KEY & SHOP_ORIGIN_CITY_ID');
+            $this->check('RajaOngkir siap', filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_district_id')), 'Isi RAJAONGKIR_API_KEY & kecamatan asal (Admin → Pengaturan Toko)');
         }
 
         $this->table(['Status', 'Pemeriksaan', 'Saran'], $this->rows);

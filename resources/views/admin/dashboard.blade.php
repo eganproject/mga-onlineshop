@@ -16,10 +16,14 @@
                        @class(['rounded-lg px-3 py-1.5 transition', 'bg-stone-900 text-white' => $range === $key, 'text-stone-500 hover:text-stone-900' => $range !== $key])>{{ $label }}</a>
                 @endforeach
             </nav>
-            <a href="{{ route('admin.reports.index', $reportQuery) }}" class="btn btn-secondary"><x-icon name="chart" class="size-4" /> Laporan</a>
+            @can('reports.view')
+                <a href="{{ route('admin.reports.index', $reportQuery) }}" class="btn btn-secondary"><x-icon name="chart" class="size-4" /> Laporan</a>
+            @endcan
         </div>
     </div>
 
+    {{-- Angka penjualan hanya untuk jabatan yang boleh melihat laporan. --}}
+    @can('reports.view')
     {{-- KPI --}}
     <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <x-admin.stat-card label="Pendapatan" :value="Money::rupiah($summary['revenue'])" icon="banknotes" :change="$changes['revenue']" />
@@ -28,9 +32,12 @@
         <x-admin.stat-card label="Produk terjual" :value="$fmt($summary['items']).' pcs'" icon="cube" tone="emerald" :change="$changes['items']" />
     </div>
     <p class="mt-2 text-xs text-stone-400">Periode {{ $period->label() }}, dibandingkan {{ $period->days() }} hari sebelumnya. Dihitung dari pesanan yang sudah dibayar.</p>
+    @endcan
 
-    <div class="mt-6 grid gap-6 xl:grid-cols-3">
+    {{-- Tanpa akses laporan: pesanan berjalan & stok menipis tampil berdampingan dalam satu grid. --}}
+    <div @class(['mt-6 grid gap-6', 'xl:grid-cols-3' => auth()->user()->can('reports.view'), 'lg:grid-cols-2' => auth()->user()->cannot('reports.view')])>
         {{-- Grafik penjualan --}}
+        @can('reports.view')
         <div class="card min-w-0 p-5 xl:col-span-2">
             <x-admin.sales-chart :series="$series">
                 <x-slot:title>
@@ -39,6 +46,7 @@
                 </x-slot:title>
             </x-admin.sales-chart>
         </div>
+        @endcan
 
         {{-- Pesanan berjalan --}}
         <div class="card min-w-0 p-5">
@@ -72,6 +80,7 @@
                 </div>
             </div>
         </div>
+    @can('reports.view')
     </div>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
@@ -128,8 +137,11 @@
             @endif
         </div>
 
+        @endcan
+
         {{-- Stok menipis --}}
-        <div class="card min-w-0 p-5 lg:col-span-2 xl:col-span-1">
+        @can('stock.manage')
+        <div @class(['card min-w-0 p-5', 'lg:col-span-2 xl:col-span-1' => auth()->user()->can('reports.view')])>
             <div class="flex items-center justify-between">
                 <h2 class="font-bold text-stone-900">Stok menipis @if ($lowStockCount) <span class="ml-1 badge bg-rose-50 text-rose-700 ring-rose-600/20">{{ $lowStockCount }}</span> @endif</h2>
                 <a href="{{ route('admin.stock.index', ['status' => 'menipis']) }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Kelola stok</a>
@@ -139,7 +151,7 @@
                     <li class="flex items-center gap-3">
                         <x-product-image :product="$item->product" class="size-11 shrink-0 rounded-xl" />
                         <div class="min-w-0 flex-1">
-                            <a href="{{ route('admin.products.edit', $item->product) }}" class="block truncate text-sm font-semibold text-stone-800 hover:text-brand-700">{{ $item->name }}</a>
+                            <a href="{{ auth()->user()->can('catalog.manage') ? route('admin.products.edit', $item->product) : route('admin.stock.index', ['q' => $item->sku ?? $item->name]) }}" class="block truncate text-sm font-semibold text-stone-800 hover:text-brand-700">{{ $item->name }}</a>
                             <p class="truncate text-xs text-stone-500">{{ $item->variant ? $item->variant->name.' · ' : '' }}{{ $item->sku ?? 'Tanpa SKU' }}</p>
                         </div>
                         <span @class(['badge shrink-0', 'bg-rose-50 text-rose-700 ring-rose-600/20' => $item->stock === 0, 'bg-amber-50 text-amber-700 ring-amber-600/20' => $item->stock > 0])>
@@ -151,6 +163,7 @@
                 @endforelse
             </ul>
         </div>
+        @endcan
     </div>
 
     {{-- Pesanan terbaru --}}

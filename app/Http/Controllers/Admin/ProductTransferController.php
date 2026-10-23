@@ -30,13 +30,18 @@ class ProductTransferController extends Controller
 
     public function __construct(private readonly ProductExporter $exporter) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $types = $this->allowedTypes($request);
+        abort_if($types === [], 403);
+
         return view('admin.products.transfer', [
-            'imports' => ProductImport::with('user')->latest('id')->limit(10)->get(),
+            'canProducts' => in_array(ImportType::Products, $types, true),
+            'canStock' => in_array(ImportType::Stock, $types, true),
+            'imports' => ProductImport::with('user')->whereIn('type', $types)->latest('id')->limit(10)->get(),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'parent_id']),
             'modes' => StockImporter::MODES,
-            'maxUploadMb' => self::MAX_UPLOAD_KB / 1024,
+            'maxUploadKb' => self::MAX_UPLOAD_KB,
         ]);
     }
 
@@ -77,6 +82,7 @@ class ProductTransferController extends Controller
         ], ['file' => 'file', 'mode' => 'mode update stok']);
 
         $type = ImportType::from($data['type']);
+        abort_unless(in_array($type, $this->allowedTypes($request), true), 403);
         $file = $request->file('file');
         $extension = strtolower($file->getClientOriginalExtension());
 
@@ -95,8 +101,10 @@ class ProductTransferController extends Controller
         return redirect()->route('admin.imports.show', $import);
     }
 
-    public function show(ProductImport $import): View
+    public function show(Request $request, ProductImport $import): View
     {
+        $this->authorizeImport($request, $import);
+
         if ($import->isStale()) {
             ProcessProductImport::importer($import)->fail($import, 'Proses impor terlalu lama dan dihentikan. Silakan unggah ulang.');
         }
@@ -107,8 +115,10 @@ class ProductTransferController extends Controller
         ]);
     }
 
-    public function commit(ProductImport $import): RedirectResponse
+    public function commit(Request $request, ProductImport $import): RedirectResponse
     {
+        $this->authorizeImport($request, $import);
+
         // Ubah status secara atomik supaya klik ganda tidak mengimpor dua kali.
         $claimed = ProductImport::whereKey($import->id)
             ->where('status', ImportStatus::Ready)
@@ -125,8 +135,10 @@ class ProductTransferController extends Controller
         return redirect()->route('admin.imports.show', $import);
     }
 
-    public function destroy(ProductImport $import): RedirectResponse
+    public function destroy(Request $request, ProductImport $import): RedirectResponse
     {
+        $this->authorizeImport($request, $import);
+
         if ($import->status->isRunning() && ! $import->isStale()) {
             return back()->with('error', 'Impor masih diproses. Tunggu sampai selesai.');
         }
@@ -134,6 +146,20 @@ class ProductTransferController extends Controller
         $import->delete();
 
         return redirect()->route('admin.products.transfer')->with('success', 'Riwayat impor dihapus.');
+    }
+
+    /** Impor produk butuh hak kelola katalog, update stok butuh hak kelola stok. */
+    private function allowedTypes(Request $request): array
+    {
+        return array_values(array_filter([
+            $request->user()->can('catalog.manage') ? ImportType::Products : null,
+            $request->user()->can('stock.manage') ? ImportType::Stock : null,
+        ]));
+    }
+
+    private function authorizeImport(Request $request, ProductImport $import): void
+    {
+        abort_unless(in_array($import->type, $this->allowedTypes($request), true), 403);
     }
 
     private function process(ProductImport $import, bool $commit): void

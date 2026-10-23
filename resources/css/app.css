@@ -11,6 +11,10 @@
 @import '@fontsource/poppins/latin-800.css';
 @plugin '@tailwindcss/forms';
 
+/* Library form (di-host sendiri lewat npm), ditimpa gaya brand di bawah. */
+@import 'tom-select/dist/css/tom-select.css' layer(components);
+@import 'flatpickr/dist/flatpickr.css' layer(components);
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views';
@@ -105,6 +109,24 @@
     .input-error {
         @apply border-rose-300 focus:border-rose-500 focus:ring-rose-500/15;
     }
+    .input-addon {
+        @apply pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-sm font-semibold text-stone-400;
+    }
+    .hint {
+        @apply mt-1.5 text-xs text-stone-400;
+    }
+    .field-error {
+        @apply mt-1.5 flex items-start gap-1 text-xs font-medium text-rose-600;
+    }
+    /* Sembunyikan panah bawaan input number (dipakai stepper). */
+    .no-spinner {
+        appearance: textfield;
+    }
+    .no-spinner::-webkit-inner-spin-button,
+    .no-spinner::-webkit-outer-spin-button {
+        appearance: none;
+        margin: 0;
+    }
     .checkbox {
         @apply size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500/30;
     }
@@ -162,5 +184,168 @@
     }
     .table-base td {
         @apply px-4 py-3.5 text-stone-700;
+    }
+}
+
+/* ---------- Tom Select (x-searchable) ---------- */
+@layer components {
+    .ts-wrapper.input {
+        @apply relative flex cursor-pointer items-center border pr-9;
+    }
+    .ts-wrapper.single::after {
+        content: '';
+        @apply pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 bg-stone-400 transition;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='black'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .ts-wrapper.single.dropdown-active::after {
+        @apply rotate-180;
+    }
+    .ts-wrapper.focus {
+        @apply border-brand-500 ring-4 ring-brand-500/15;
+    }
+    .ts-wrapper.input-error.focus {
+        @apply border-rose-500 ring-rose-500/15;
+    }
+    .ts-wrapper.disabled {
+        @apply cursor-not-allowed bg-stone-50 text-stone-400;
+    }
+    .ts-wrapper .ts-control,
+    .ts-wrapper.single.input-active .ts-control,
+    .full .ts-control {
+        @apply min-w-0 flex-nowrap cursor-pointer rounded-none border-0 bg-transparent p-0 text-sm leading-5 text-inherit shadow-none;
+    }
+    .disabled .ts-control,
+    .plugin-dropdown_input.focus.dropdown-active .ts-control {
+        @apply border-0 bg-transparent opacity-100 shadow-none;
+    }
+    /* Cincin fokus sudah ada di pembungkus. */
+    .ts-wrapper .ts-control:focus,
+    .ts-wrapper .ts-control input:focus {
+        outline: none;
+    }
+    .ts-wrapper .ts-control > .item {
+        @apply truncate;
+    }
+    .ts-wrapper .ts-control > input {
+        @apply text-sm leading-5;
+    }
+    .ts-wrapper .ts-control > input::placeholder {
+        @apply text-stone-400;
+    }
+    .ts-dropdown {
+        @apply z-50 mt-2 overflow-hidden rounded-xl border border-stone-200 bg-white text-sm text-stone-700 shadow-xl shadow-stone-900/10;
+    }
+    .ts-dropdown .ts-dropdown-content {
+        @apply max-h-64 py-1.5;
+    }
+    .ts-dropdown .option,
+    .ts-dropdown .no-results,
+    .ts-dropdown .optgroup-header {
+        @apply px-3.5 py-2;
+    }
+    .ts-dropdown .no-results {
+        @apply text-stone-400;
+    }
+    .ts-dropdown .optgroup-header {
+        @apply text-xs font-semibold tracking-wide text-stone-400 uppercase;
+    }
+    .ts-dropdown .active {
+        @apply bg-brand-50 text-brand-800;
+    }
+    .ts-dropdown .selected {
+        @apply font-semibold text-brand-700;
+    }
+    .ts-dropdown .highlight {
+        @apply rounded-sm bg-accent-100 text-inherit;
+    }
+    .ts-dropdown .dropdown-input-wrap {
+        @apply border-b border-stone-100 p-2;
+    }
+    .ts-dropdown .dropdown-input {
+        @apply block w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15 focus:outline-none;
+    }
+
+    /* ---------- flatpickr (x-datepicker / x-daterange) ---------- */
+    .flatpickr-calendar {
+        @apply rounded-2xl border border-stone-200 font-sans shadow-xl shadow-stone-900/10;
+    }
+    .flatpickr-calendar.arrowTop::before,
+    .flatpickr-calendar.arrowTop::after,
+    .flatpickr-calendar.arrowBottom::before,
+    .flatpickr-calendar.arrowBottom::after {
+        @apply hidden;
+    }
+    .flatpickr-months .flatpickr-month,
+    .flatpickr-current-month .flatpickr-monthDropdown-months,
+    span.flatpickr-weekday {
+        @apply text-stone-800;
+    }
+    .flatpickr-current-month {
+        @apply text-sm font-semibold;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        @apply rounded-md font-semibold;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: var(--color-brand-600);
+    }
+    span.flatpickr-weekday {
+        @apply text-xs font-semibold text-stone-400;
+    }
+    .flatpickr-day {
+        @apply rounded-lg text-stone-700;
+    }
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
+        @apply border-brand-50 bg-brand-50;
+    }
+    .flatpickr-day.today {
+        @apply border-brand-300;
+    }
+    .flatpickr-day.today:hover {
+        @apply border-brand-300 bg-brand-50 text-stone-900;
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover,
+    .flatpickr-day.selected.inRange,
+    .flatpickr-day.startRange.inRange,
+    .flatpickr-day.endRange.inRange {
+        @apply border-brand-600 bg-brand-600 text-white;
+    }
+    .flatpickr-day.inRange {
+        @apply border-brand-50 bg-brand-50;
+        box-shadow: -5px 0 0 var(--color-brand-50), 5px 0 0 var(--color-brand-50);
+    }
+    .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
+    .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
+    .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
+        box-shadow: -10px 0 0 var(--color-brand-600);
+    }
+    .flatpickr-day.flatpickr-disabled,
+    .flatpickr-day.flatpickr-disabled:hover,
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        @apply text-stone-300;
+    }
+    .flatpickr-time {
+        @apply border-stone-100;
+    }
+    .flatpickr-time input,
+    .flatpickr-time .flatpickr-am-pm {
+        @apply text-sm font-semibold text-stone-800;
+    }
+    .flatpickr-time input:hover,
+    .flatpickr-time input:focus {
+        @apply bg-brand-50;
+    }
+    /* Input tampilan flatpickr dibuat readonly; tetap terlihat bisa diklik. */
+    input.input.flatpickr-input[readonly],
+    input.input.form-control[readonly] {
+        @apply cursor-pointer;
     }
 }

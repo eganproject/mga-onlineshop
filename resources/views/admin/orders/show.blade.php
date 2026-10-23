@@ -65,7 +65,7 @@
 
         <div class="space-y-6">
             {{-- Update status --}}
-            @if ($next = $order->status->nextStatuses())
+            @if (auth()->user()->can('orders.manage') && ($next = $order->status->nextStatuses()))
                 <div class="card p-5" x-data="{ status: @js(old('status', $next[0]->value)) }">
                     <h2 class="font-bold text-stone-900">Perbarui status</h2>
                     <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="mt-4 space-y-4">
@@ -86,10 +86,9 @@
                         </div>
                         <div>
                             <label for="note" class="label" x-text="status === 'cancelled' ? 'Alasan pembatalan' : 'Catatan (opsional)'">Catatan (opsional)</label>
-                            <textarea id="note" name="note" rows="2" maxlength="250" class="input @error('note') input-error @enderror"
-                                      :required="status === 'cancelled'"
-                                      :placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'">{{ old('note') }}</textarea>
-                            <x-input-error for="note" />
+                            <x-form.textarea name="note" rows="2" maxlength="250"
+                                             x-bind:required="status === 'cancelled'"
+                                             x-bind:placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'" />
                         </div>
                         <button class="btn btn-primary w-full" :class="status === 'cancelled' && '!bg-rose-600 hover:!bg-rose-700'"
                                 onclick="return this.form.status.value !== 'cancelled' || confirm(@js($order->paid_at ? 'Batalkan pesanan ini? Stok dikembalikan dan dana pelanggan perlu dikembalikan manual.' : 'Batalkan pesanan ini? Stok akan dikembalikan.'))">
@@ -106,7 +105,9 @@
                             <h2 class="font-bold text-stone-900">Nomor resi</h2>
                             <p class="mt-1 font-mono text-sm font-semibold text-stone-800">{{ $order->tracking_number ?? '—' }}</p>
                         </div>
-                        <button type="button" class="btn btn-ghost btn-sm" @click="edit = !edit" x-text="edit ? 'Batal' : 'Ubah'">Ubah</button>
+                        @can('orders.manage')
+                            <button type="button" class="btn btn-ghost btn-sm" @click="edit = !edit" x-text="edit ? 'Batal' : 'Ubah'">Ubah</button>
+                        @endcan
                     </div>
                     <form x-show="edit" x-cloak method="POST" action="{{ route('admin.orders.tracking-number', $order) }}" class="mt-4 space-y-3">
                         @csrf

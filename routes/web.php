@@ -116,56 +116,91 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Akses per menu memakai Gate dari App\Enums\Permission (lihat StaffRole::permissions()).
+// Menu sidebar ikut menyembunyikan route yang middleware `can:`-nya ditolak.
+Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
 
-    Route::patch('/categories/{category}/toggle', [Admin\CategoryController::class, 'toggle'])->name('categories.toggle');
-    Route::resource('categories', Admin\CategoryController::class)->except('show');
-    Route::post('/products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
+    Route::middleware('can:catalog.manage')->group(function () {
+        Route::patch('/categories/{category}/toggle', [Admin\CategoryController::class, 'toggle'])->name('categories.toggle');
+        Route::resource('categories', Admin\CategoryController::class)->except('show');
+        Route::post('/products/bulk', [Admin\ProductController::class, 'bulk'])->name('products.bulk');
+        Route::get('/products/export', [Admin\ProductTransferController::class, 'exportProducts'])->name('products.export');
+        Route::get('/products/import-template', [Admin\ProductTransferController::class, 'template'])->name('products.template');
+        Route::resource('products', Admin\ProductController::class)->except('show');
+    });
+
+    // Impor/ekspor: produk butuh catalog.manage, stok butuh stock.manage (dicek di controller per jenis impor).
     Route::controller(Admin\ProductTransferController::class)->group(function () {
         Route::get('/products/import-export', 'index')->name('products.transfer');
-        Route::get('/products/export', 'exportProducts')->name('products.export');
-        Route::get('/products/import-template', 'template')->name('products.template');
-        Route::get('/stock/export', 'exportStock')->name('stock.export');
+        Route::get('/stock/export', 'exportStock')->name('stock.export')->middleware('can:stock.manage');
         Route::post('/imports', 'store')->name('imports.store')->middleware('throttle:20,1');
         Route::get('/imports/{import}', 'show')->name('imports.show');
         Route::post('/imports/{import}/commit', 'commit')->name('imports.commit');
         Route::delete('/imports/{import}', 'destroy')->name('imports.destroy');
     });
-    Route::resource('products', Admin\ProductController::class)->except('show');
 
-    Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');
-    Route::get('/stock/history', [Admin\StockController::class, 'history'])->name('stock.history');
-    Route::post('/stock/adjust', [Admin\StockController::class, 'adjust'])->name('stock.adjust');
+    Route::middleware('can:stock.manage')->group(function () {
+        Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');
+        Route::get('/stock/history', [Admin\StockController::class, 'history'])->name('stock.history');
+        Route::post('/stock/adjust', [Admin\StockController::class, 'adjust'])->name('stock.adjust');
+    });
 
-    Route::get('/reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
-    Route::patch('/reviews/{review}', [Admin\ReviewController::class, 'update'])->name('reviews.update');
-    Route::delete('/reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::middleware('can:reviews.manage')->group(function () {
+        Route::get('/reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('/reviews/{review}', [Admin\ReviewController::class, 'update'])->name('reviews.update');
+        Route::delete('/reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+    });
 
-    Route::patch('/vouchers/{voucher}/toggle', [Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
-    Route::resource('vouchers', Admin\VoucherController::class)->except('show');
-    Route::patch('/banners/{banner}/toggle', [Admin\BannerController::class, 'toggle'])->name('banners.toggle');
-    Route::resource('banners', Admin\BannerController::class)->except('show');
+    Route::middleware('can:promos.manage')->group(function () {
+        Route::patch('/vouchers/{voucher}/toggle', [Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
+        Route::resource('vouchers', Admin\VoucherController::class)->except('show');
+        Route::patch('/banners/{banner}/toggle', [Admin\BannerController::class, 'toggle'])->name('banners.toggle');
+        Route::resource('banners', Admin\BannerController::class)->except('show');
+    });
 
-    Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->group(function () {
+    Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->middleware('can:orders.view')->group(function () {
         Route::get('/', 'index')->name('index');
+        // Cetak packing slip cukup orders.view; aksi "proses" dicek lagi di controller.
         Route::post('/bulk', 'bulk')->name('bulk');
         Route::get('/{order}', 'show')->name('show');
-        Route::patch('/{order}/status', 'updateStatus')->name('status');
-        Route::patch('/{order}/tracking-number', 'updateTracking')->name('tracking-number');
+        Route::patch('/{order}/status', 'updateStatus')->name('status')->middleware('can:orders.manage');
+        Route::patch('/{order}/tracking-number', 'updateTracking')->name('tracking-number')->middleware('can:orders.manage');
         Route::get('/{order}/tracking', 'tracking')->name('tracking')->middleware('throttle:30,1');
         Route::get('/{order}/invoice', 'invoice')->name('invoice');
         Route::get('/{order}/packing-slip', 'packingSlip')->name('packing-slip');
     });
 
-    Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
-    Route::get('/customers/{customer}', [Admin\CustomerController::class, 'show'])->name('customers.show');
-    Route::patch('/customers/{customer}/toggle', [Admin\CustomerController::class, 'toggleActive'])->name('customers.toggle');
+    Route::middleware('can:customers.view')->group(function () {
+        Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [Admin\CustomerController::class, 'show'])->name('customers.show');
+        Route::patch('/customers/{customer}/toggle', [Admin\CustomerController::class, 'toggleActive'])->name('customers.toggle')->middleware('can:customers.manage');
+    });
 
-    Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/{type}', [Admin\ReportController::class, 'export'])->name('reports.export')->whereIn('type', ['penjualan', 'produk', 'kategori', 'pesanan']);
+    Route::middleware('can:reports.view')->group(function () {
+        Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export/{type}', [Admin\ReportController::class, 'export'])->name('reports.export')->whereIn('type', ['penjualan', 'produk', 'kategori', 'pesanan']);
+    });
 
-    Route::get('/settings', Admin\SettingController::class)->name('settings');
+    Route::middleware('can:settings.manage')->group(function () {
+        Route::get('/settings', Admin\SettingController::class)->name('settings');
+        Route::get('/store-settings', [Admin\StoreSettingController::class, 'edit'])->name('store-settings.edit');
+        Route::put('/store-settings', [Admin\StoreSettingController::class, 'update'])->name('store-settings.update');
+
+        // Data wilayah untuk memilih kecamatan asal pengiriman.
+        Route::controller(Account\RegionController::class)->prefix('regions')->name('regions.')->middleware('throttle:120,1')->group(function () {
+            Route::get('/provinces', 'provinces')->name('provinces');
+            Route::get('/provinces/{province}/cities', 'cities')->name('cities');
+            Route::get('/cities/{city}/districts', 'districts')->name('districts');
+        });
+    });
+
+    Route::middleware('can:staff.manage')->group(function () {
+        Route::patch('/staff/{staff}/toggle', [Admin\StaffController::class, 'toggle'])->name('staff.toggle');
+        Route::resource('staff', Admin\StaffController::class)->except(['show', 'destroy'])->parameters(['staff' => 'staff']);
+    });
+
+    Route::get('/activity', [Admin\ActivityLogController::class, 'index'])->name('activity.index')->middleware('can:activity.view');
 
     Route::get('/profile', [Account\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [Account\ProfileController::class, 'update'])->name('profile.update');

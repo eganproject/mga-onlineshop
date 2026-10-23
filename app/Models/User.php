@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\Permission;
+use App\Enums\StaffRole;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,8 +37,41 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'staff_role' => StaffRole::class,
             'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    /** Akun staf panel admin (semua jabatan). */
+    public function scopeStaff(Builder $query): void
+    {
+        $query->where('role', UserRole::Admin);
+    }
+
+    /**
+     * Jabatan staf. Admin lama/tanpa jabatan dianggap Owner (hanya bisa dibuat
+     * lewat seeder/tinker; form staf selalu mengisi jabatan).
+     */
+    public function staffRole(): ?StaffRole
+    {
+        if (! $this->isAdmin()) {
+            return null;
+        }
+
+        return $this->staff_role ?? StaffRole::Owner;
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->staffRole() === StaffRole::Owner;
+    }
+
+    public function hasPermission(Permission|string $permission): bool
+    {
+        $permission = $permission instanceof Permission ? $permission : Permission::tryFrom($permission);
+
+        return $permission !== null && $this->is_active && (bool) $this->staffRole()?->allows($permission);
     }
 
     public function isAdmin(): bool
@@ -62,6 +98,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function defaultAddress(): HasOne
     {
         return $this->hasOne(Address::class)->where('is_default', true);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 
     public function orders(): HasMany

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ImportStatus;
+use App\Enums\StaffRole;
 use App\Enums\StockMovementType;
 use App\Jobs\ProcessProductImport;
 use App\Models\Category;
@@ -86,6 +87,34 @@ class ProductTransferTest extends TestCase
         $this->actingAs($customer)->get(route('admin.products.transfer'))->assertForbidden();
         $this->actingAs($customer)->get(route('admin.products.export'))->assertForbidden();
         $this->actingAs($this->admin)->get(route('admin.products.transfer'))->assertOk()->assertSee('Impor produk');
+    }
+
+    public function test_warehouse_staff_can_only_use_stock_import(): void
+    {
+        $warehouse = User::factory()->staff(StaffRole::Warehouse)->create();
+        $product = Product::factory()->create(['sku' => 'GDG-1', 'stock' => 2]);
+
+        $this->actingAs($warehouse)->get(route('admin.products.transfer'))
+            ->assertOk()->assertSee('Update stok massal')->assertDontSee('Template Excel');
+        $this->actingAs($warehouse)->get(route('admin.products.export'))->assertForbidden();
+        $this->actingAs($warehouse)->get(route('admin.stock.export'))->assertOk();
+
+        $this->actingAs($warehouse)->post(route('admin.imports.store'), [
+            'type' => 'products',
+            'file' => UploadedFile::fake()->createWithContent('p.csv', $this->csv([['nama_produk', 'harga'], ['X', '1']])),
+        ])->assertForbidden();
+
+        $this->actingAs($warehouse)->post(route('admin.imports.store'), [
+            'type' => 'stock', 'mode' => 'add',
+            'file' => UploadedFile::fake()->createWithContent('s.csv', $this->csv([['sku', 'stok'], ['GDG-1', '3']])),
+        ])->assertRedirect();
+        $import = ProductImport::latest('id')->first();
+        $this->actingAs($warehouse)->post(route('admin.imports.commit', $import))->assertRedirect();
+        $this->assertSame(5, $product->refresh()->stock);
+
+        // Impor produk milik admin lain tidak bisa dibuka staf gudang.
+        $productImport = $this->upload([['nama_produk', 'harga'], ['Rahasia', '1000']]);
+        $this->actingAs($warehouse)->get(route('admin.imports.show', $productImport))->assertForbidden();
     }
 
     public function test_templates_can_be_downloaded_and_read_back(): void

@@ -94,7 +94,11 @@ class StructuredData
                     'alternateName' => config('shop.name'),
                     'url' => route('home'),
                     'logo' => asset('images/brand/icon-512.png'),
-                    'sameAs' => config('shop.instagram') ? ['https://instagram.com/'.ltrim(config('shop.instagram'), '@')] : null,
+                    'sameAs' => array_values(array_filter([
+                        config('shop.instagram') ? 'https://instagram.com/'.ltrim(config('shop.instagram'), '@') : null,
+                        config('shop.tiktok') ? 'https://www.tiktok.com/@'.ltrim(config('shop.tiktok'), '@') : null,
+                        config('shop.facebook') ?: null,
+                    ])) ?: null,
                 ]),
                 [
                     '@type' => 'WebSite',

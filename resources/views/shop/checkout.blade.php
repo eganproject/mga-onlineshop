@@ -144,8 +144,7 @@
                 </section>
 
                 <section class="border border-stone-200 p-5 sm:p-6">
-                    <label for="notes" class="label">Catatan untuk penjual <span class="font-normal text-stone-400">(opsional)</span></label>
-                    <textarea id="notes" name="notes" rows="2" maxlength="500" placeholder="Contoh: warna cadangan hitam" class="input">{{ old('notes') }}</textarea>
+                    <x-form.textarea name="notes" label="Catatan untuk penjual" optional rows="2" maxlength="500" placeholder="Contoh: warna cadangan hitam" />
                 </section>
             </div>
 
