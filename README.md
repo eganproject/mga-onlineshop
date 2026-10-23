@@ -7,7 +7,10 @@ Toko online **Media Gudang Acc (MGA)** berbasis Laravel 13, MySQL, Tailwind CSS 
 - **Toko**: beranda, katalog (cari, filter kategori, urutkan), detail produk, keranjang (bisa tanpa login), checkout.
 - **Akun pelanggan**: ringkasan, riwayat & detail pesanan (progres status, bayar, batal), buku alamat, profil & password.
 - **Admin panel** (`/admin`): dashboard (pendapatan, grafik 7 hari, stok menipis), produk, kategori, pesanan (ubah status + nomor resi), pelanggan (blokir/aktifkan), status integrasi.
-- **Auth**: login, daftar, lupa/reset password. Dua peran: `admin` dan `customer` (pendaftaran publik selalu `customer`).
+- **Wishlist & ulasan**: pelanggan menyimpan produk ke wishlist; pembeli dengan pesanan selesai bisa memberi rating & ulasan, tayang setelah dimoderasi admin (`/admin/reviews`).
+- **Email** (lewat antrean): selamat datang, verifikasi email, reset password, pesanan diterima, dan perubahan status pesanan (dibayar, dikirim + resi, selesai, dibatalkan).
+- **SEO**: meta description, canonical, Open Graph/Twitter card, JSON-LD (Product, BreadcrumbList, WebSite), `/sitemap.xml` dan `/robots.txt` dinamis. Halaman akun, keranjang, admin, dan hasil filter otomatis `noindex`.
+- **Auth**: login, daftar (dengan verifikasi email), lupa/reset password. Dua peran: `admin` dan `customer` (pendaftaran publik selalu `customer`).
 - **Siap integrasi**: Midtrans (pembayaran) dan RajaOngkir (ongkir) lewat interface + driver yang dipilih di `.env`.
 
 ## Instalasi
@@ -59,6 +62,9 @@ app/
 - Alamat memakai wilayah bertingkat provinsi → kota → kecamatan; nama wilayah diambil dari penyedia ongkir, bukan dari form.
 - Ongkir dihitung per kecamatan, disimpan di cache (`SHIPPING_CACHE_MINUTES`, default 360) dan selalu dihitung ulang di server saat pesanan dibuat.
 - Warna brand diatur di `resources/css/app.css` (`--color-brand-*`).
+- Email memakai Mailable/Notification `ShouldQueue`, jadi butuh worker antrean (`php artisan queue:work`). Email status pesanan dikirim dari `App\Observers\OrderObserver`. Tampilan email: `resources/views/mail` dan tema di `resources/views/vendor/mail`.
+- Ulasan diubah lewat `App\Services\Reviews\ReviewService` agar `products.rating_avg` & `review_count` selalu sinkron. `REVIEWS_AUTO_APPROVE=true` untuk melewati moderasi.
+- `SEO_INDEXING=false` (mis. di server staging) membuat seluruh situs `noindex` dan robots.txt menolak crawler.
 
 ## Integrasi Midtrans & RajaOngkir
 

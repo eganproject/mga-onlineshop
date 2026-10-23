@@ -238,7 +238,7 @@
             <div class="flex items-center gap-3 px-4 py-3">
                 <div class="min-w-0 flex-1">
                     <p class="truncate text-xs text-stone-500">{{ $product->name }}</p>
-                    <p class="text-sm font-semibold">@if ($priceRange)Mulai @endif@rupiah($product->price)</p>
+                    <p class="text-sm font-semibold">{{ $priceRange ? 'Mulai ' : '' }}@rupiah($product->price)</p>
                 </div>
                 <button form="add-to-cart" class="btn btn-ink rounded-full px-6 py-3">Tambah ke keranjang</button>
             </div>

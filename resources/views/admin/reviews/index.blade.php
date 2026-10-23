@@ -22,7 +22,7 @@
             </nav>
             <form method="GET" class="flex gap-2">
                 @if ($activeStatus)<input type="hidden" name="status" value="{{ $activeStatus->value }}">@endif
-                <select name="rating" class="input w-auto" onchange="this.form.submit()" aria-label="Filter rating">
+                <select name="rating" class="input w-auto pr-9" onchange="this.form.submit()" aria-label="Filter rating">
                     <option value="">Semua rating</option>
                     @for ($i = 5; $i >= 1; $i--)
                         <option value="{{ $i }}" @selected(request('rating') == $i)>{{ $i }} bintang</option>

@@ -85,6 +85,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 
         Route::get('/wishlist', [Account\WishlistController::class, 'index'])->name('wishlist');
         Route::get('/ulasan', [Account\ReviewController::class, 'index'])->name('reviews.index');
+
         Route::patch('/alamat/{address}/utama', [Account\AddressController::class, 'makeDefault'])->name('addresses.default');
         Route::resource('alamat', Account\AddressController::class)
             ->except('show')

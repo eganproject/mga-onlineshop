@@ -1,4 +1,4 @@
-<x-layouts.base title="Sedang perawatan">
+<x-layouts.base :noindex="true" title="Sedang perawatan">
     <div class="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <x-wordmark />
         <p class="mt-10 text-7xl font-extrabold tracking-tight text-ink font-display">503</p>
