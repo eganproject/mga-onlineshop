@@ -1,5 +1,6 @@
 @php
     $val = fn (string $field) => old($field, $values[$field] ?? null);
+    // Nilai bawaan .env sebagai petunjuk (hanya teks biasa).
     $envHint = fn (string $field) => filled($defaults[$field] ?? null) && ! is_array($defaults[$field]) && ! is_bool($defaults[$field])
         ? 'Kosongkan untuk memakai nilai .env: '.$defaults[$field]
         : null;
@@ -20,28 +21,13 @@
                     <div><h2 class="font-bold text-stone-900">Identitas toko</h2><p class="text-xs text-stone-500">Tampil di judul halaman, email, invoice, dan footer.</p></div>
                 </div>
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label for="name" class="label">Nama singkat</label>
-                        <input id="name" name="name" value="{{ $val('name') }}" required maxlength="30" class="input @error('name') input-error @enderror">
-                        <x-input-error for="name" />
-                    </div>
-                    <div>
-                        <label for="full_name" class="label">Nama lengkap</label>
-                        <input id="full_name" name="full_name" value="{{ $val('full_name') }}" required maxlength="80" class="input @error('full_name') input-error @enderror">
-                        <x-input-error for="full_name" />
-                    </div>
+                    <x-form.input name="name" label="Nama singkat" :value="$values['name']" required maxlength="30" />
+                    <x-form.input name="full_name" label="Nama lengkap" :value="$values['full_name']" required maxlength="80" />
                 </div>
-                <div>
-                    <label for="tagline" class="label">Tagline</label>
-                    <input id="tagline" name="tagline" value="{{ $val('tagline') }}" maxlength="160" class="input @error('tagline') input-error @enderror">
-                    <x-input-error for="tagline" />
-                </div>
-                <div>
-                    <label for="address" class="label">Alamat gudang / pengirim</label>
-                    <textarea id="address" name="address" rows="3" maxlength="500" class="input @error('address') input-error @enderror" placeholder="Jl. ..., Kecamatan, Kota, Kode pos">{{ $val('address') }}</textarea>
-                    <p class="mt-1.5 text-xs text-stone-400">Dicetak di invoice dan packing slip. {{ $envHint('address') }}</p>
-                    <x-input-error for="address" />
-                </div>
+                <x-form.input name="tagline" label="Tagline" :value="$values['tagline']" maxlength="160" optional />
+                <x-form.textarea name="address" label="Alamat gudang / pengirim" :value="$values['address']" rows="3" maxlength="500" optional
+                                 placeholder="Jl. ..., Kecamatan, Kota, Kode pos"
+                                 :hint="trim('Dicetak di invoice dan packing slip. '.$envHint('address'))" />
             </section>
 
             {{-- Kontak & sosial --}}
@@ -51,38 +37,11 @@
                     <div><h2 class="font-bold text-stone-900">Kontak & media sosial</h2><p class="text-xs text-stone-500">Dipakai untuk tombol WhatsApp dan tautan profil toko.</p></div>
                 </div>
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label for="whatsapp" class="label">No. WhatsApp</label>
-                        <input id="whatsapp" name="whatsapp" type="tel" value="{{ $val('whatsapp') }}" placeholder="081234567890" class="input @error('whatsapp') input-error @enderror">
-                        <p class="mt-1.5 text-xs text-stone-400">Disimpan dalam format 62xxx.</p>
-                        <x-input-error for="whatsapp" />
-                    </div>
-                    <div>
-                        <label for="email" class="label">Email kontak</label>
-                        <input id="email" name="email" type="email" value="{{ $val('email') }}" placeholder="halo@tokoanda.com" class="input @error('email') input-error @enderror">
-                        <x-input-error for="email" />
-                    </div>
-                    <div>
-                        <label for="instagram" class="label">Instagram</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400">@</span>
-                            <input id="instagram" name="instagram" value="{{ $val('instagram') }}" placeholder="username" class="input pl-8 @error('instagram') input-error @enderror">
-                        </div>
-                        <x-input-error for="instagram" />
-                    </div>
-                    <div>
-                        <label for="tiktok" class="label">TikTok</label>
-                        <div class="relative">
-                            <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400">@</span>
-                            <input id="tiktok" name="tiktok" value="{{ $val('tiktok') }}" placeholder="username" class="input pl-8 @error('tiktok') input-error @enderror">
-                        </div>
-                        <x-input-error for="tiktok" />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="facebook" class="label">Halaman Facebook</label>
-                        <input id="facebook" name="facebook" type="url" value="{{ $val('facebook') }}" placeholder="https://facebook.com/namatoko" class="input @error('facebook') input-error @enderror">
-                        <x-input-error for="facebook" />
-                    </div>
+                    <x-form.phone name="whatsapp" label="No. WhatsApp" :value="$values['whatsapp']" placeholder="0812-3456-7890" hint="Disimpan dalam format 62xxx." optional />
+                    <x-form.input type="email" name="email" label="Email kontak" icon="envelope" :value="$values['email']" placeholder="halo@tokoanda.com" optional />
+                    <x-form.input name="instagram" label="Instagram" prefix="@" :value="$values['instagram']" placeholder="username" optional />
+                    <x-form.input name="tiktok" label="TikTok" prefix="@" :value="$values['tiktok']" placeholder="username" optional />
+                    <x-form.input type="url" name="facebook" label="Halaman Facebook" icon="external" :value="$values['facebook']" placeholder="https://facebook.com/namatoko" optional wrapper-class="sm:col-span-2" />
                 </div>
             </section>
 
@@ -109,36 +68,18 @@
                 </div>
 
                 <div class="grid gap-5 sm:grid-cols-3">
-                    <div>
-                        <label for="province_id" class="label">Provinsi</label>
-                        <select id="province_id" name="province_id" x-model="provinceId" @change="changeProvince()" :disabled="loading.provinces" class="input @error('province_id') input-error @enderror">
-                            <option value="" x-text="loading.provinces ? 'Memuat...' : 'Pilih provinsi'">Pilih provinsi</option>
-                            <template x-for="item in provinces" :key="item.id">
-                                <option :value="item.id" x-text="item.name" :selected="item.id === provinceId"></option>
-                            </template>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="city_id" class="label">Kota / Kabupaten</label>
-                        <select id="city_id" name="city_id" x-model="cityId" @change="changeCity()" :disabled="!provinceId || loading.cities" class="input disabled:bg-stone-50 disabled:text-stone-400">
-                            <option value="" x-text="loading.cities ? 'Memuat...' : 'Pilih kota'">Pilih kota</option>
-                            <template x-for="item in cities" :key="item.id">
-                                <option :value="item.id" x-text="item.name" :selected="item.id === cityId"></option>
-                            </template>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="district_id" class="label">Kecamatan</label>
-                        <select id="district_id" name="district_id" x-model="districtId" :disabled="!cityId || loading.districts" class="input disabled:bg-stone-50 disabled:text-stone-400 @error('district_id') input-error @enderror">
-                            <option value="" x-text="loading.districts ? 'Memuat...' : 'Pilih kecamatan'">Pilih kecamatan</option>
-                            <template x-for="item in districts" :key="item.id">
-                                <option :value="item.id" x-text="item.name" :selected="item.id === districtId"></option>
-                            </template>
-                        </select>
-                    </div>
+                    @foreach ([
+                        ['province', 'province_id', 'Provinsi'],
+                        ['city', 'city_id', 'Kota / Kabupaten'],
+                        ['district', 'district_id', 'Kecamatan'],
+                    ] as [$ref, $field, $text])
+                        <x-form.field :label="$text" :for="$field" :name="$field">
+                            <select id="{{ $field }}" name="{{ $field }}" x-ref="{{ $ref }}" @class(['input', 'input-error' => $errors->has($field)])></select>
+                        </x-form.field>
+                    @endforeach
                 </div>
-                <p x-show="error" x-cloak x-text="error" class="text-xs text-rose-600"></p>
-                <x-input-error for="district_id" />
+                <p x-show="error" x-cloak x-text="error" class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"></p>
+                <p class="hint">Biarkan seperti semula bila kecamatan asal tidak berubah.</p>
 
                 <div>
                     <p class="label">Kurir yang ditawarkan di checkout</p>
@@ -174,24 +115,10 @@
                     <span class="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-600"><x-icon name="clock" /></span>
                     <div><h2 class="font-bold text-stone-900">Pesanan & pembayaran</h2></div>
                 </div>
-                <div>
-                    <label for="payment_expiry_hours" class="label">Batas waktu bayar</label>
-                    <div class="flex items-center gap-2">
-                        <input id="payment_expiry_hours" name="payment_expiry_hours" type="number" min="1" max="168" required value="{{ $val('payment_expiry_hours') }}" class="input @error('payment_expiry_hours') input-error @enderror">
-                        <span class="text-sm text-stone-500">jam</span>
-                    </div>
-                    <p class="mt-1.5 text-xs text-stone-400">Lewat dari ini pesanan dibatalkan otomatis dan stok kembali. Berlaku untuk pesanan baru.</p>
-                    <x-input-error for="payment_expiry_hours" />
-                </div>
-                <div>
-                    <label for="auto_complete_days" class="label">Selesai otomatis setelah sampai</label>
-                    <div class="flex items-center gap-2">
-                        <input id="auto_complete_days" name="auto_complete_days" type="number" min="1" max="30" required value="{{ $val('auto_complete_days') }}" class="input @error('auto_complete_days') input-error @enderror">
-                        <span class="text-sm text-stone-500">hari</span>
-                    </div>
-                    <p class="mt-1.5 text-xs text-stone-400">Bila pelanggan tidak menekan "Pesanan diterima".</p>
-                    <x-input-error for="auto_complete_days" />
-                </div>
+                <x-form.number name="payment_expiry_hours" label="Batas waktu bayar" :value="$values['payment_expiry_hours']" min="1" max="168" required suffix="jam"
+                               hint="Lewat dari ini pesanan dibatalkan otomatis dan stok kembali. Berlaku untuk pesanan baru." />
+                <x-form.number name="auto_complete_days" label="Selesai otomatis setelah sampai" :value="$values['auto_complete_days']" min="1" max="30" required suffix="hari"
+                               hint='Bila pelanggan tidak menekan "Pesanan diterima".' />
             </section>
 
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">

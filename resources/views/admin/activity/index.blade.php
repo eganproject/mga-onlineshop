@@ -27,20 +27,19 @@
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari aksi / data..." class="input pl-10">
             </div>
-            <select name="staf" class="input" aria-label="Filter staf">
+            <select name="staf" class="input" x-data x-searchable aria-label="Filter staf">
                 <option value="">Semua staf</option>
                 @foreach ($staff as $member)
                     <option value="{{ $member->id }}" @selected(request('staf') == $member->id)>{{ $member->name }}</option>
                 @endforeach
             </select>
-            <select name="grup" class="input" aria-label="Filter jenis">
+            <select name="grup" class="input" x-data x-searchable aria-label="Filter jenis">
                 <option value="">Semua jenis</option>
                 @foreach ($groups as $key => $label)
                     <option value="{{ $key }}" @selected(request('grup') === $key)>{{ $label }}</option>
                 @endforeach
             </select>
-            <input type="date" name="from" value="{{ request('from') }}" class="input" aria-label="Dari tanggal">
-            <input type="date" name="to" value="{{ request('to') }}" class="input" aria-label="Sampai tanggal">
+            <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()" aria-label="Rentang tanggal" wrapper-class="sm:col-span-2" />
         </form>
 
         @if ($logs->isEmpty())

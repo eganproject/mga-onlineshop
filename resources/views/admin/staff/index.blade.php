@@ -13,7 +13,7 @@
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Nama atau email..." class="input pl-10">
             </div>
-            <select name="jabatan" class="input sm:w-52" aria-label="Filter jabatan">
+            <select name="jabatan" class="input sm:w-52" x-data x-searchable aria-label="Filter jabatan">
                 <option value="">Semua jabatan</option>
                 @foreach ($roles as $role)
                     <option value="{{ $role->value }}" @selected(request('jabatan') === $role->value)>{{ $role->label() }}</option>
