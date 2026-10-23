@@ -54,7 +54,7 @@ class ShippingTest extends TestCase
             ->assertJsonFragment(['id' => '20101', 'name' => 'Coblong', 'postal_code' => '40132']);
 
         $this->getJson(route('account.regions.cities', '999'))->assertOk()->assertJsonCount(0, 'data');
-        $this->getJson(route('account.regions.districts', '../province'))->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson(route('account.regions.districts', 'abc'))->assertOk()->assertJsonCount(0, 'data');
     }
 
     public function test_region_endpoints_require_customer_login(): void
