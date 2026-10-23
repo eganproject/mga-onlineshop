@@ -3,11 +3,11 @@
     <div class="grid min-h-screen lg:grid-cols-2">
         {{-- Panel brand --}}
         <div class="relative hidden overflow-hidden bg-ink lg:block">
-            <span class="pointer-events-none absolute -bottom-10 -left-4 select-none font-display text-[22rem] leading-none font-black tracking-[-0.06em] text-white/[0.05] uppercase" aria-hidden="true">{{ config('shop.name') }}</span>
+            <x-logo variant="mark" mono class="pointer-events-none absolute -bottom-8 -left-10 h-80 text-white/[0.05]" aria-hidden="true" />
             <div class="relative flex h-full flex-col justify-between p-12 text-white">
-                <a href="{{ route('home') }}" class="self-start"><x-wordmark dark /></a>
+                <a href="{{ route('home') }}" class="self-start"><x-wordmark dark size="lg" /></a>
                 <div class="max-w-md">
-                    <p class="eyebrow text-brand-400">{{ config('shop.full_name') }}</p>
+                    <p class="eyebrow text-accent-400">{{ config('shop.full_name') }}</p>
                     <h2 class="display mt-4 text-5xl leading-[0.92]">Aksesoris gadget favoritmu, semua di satu gudang.</h2>
                     <p class="mt-5 text-base text-white/60">Casing, charger, kabel data, earphone, dan banyak lagi. Original, bergaransi, dan harga bersahabat.</p>
                     <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">

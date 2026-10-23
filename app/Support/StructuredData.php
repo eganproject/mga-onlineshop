@@ -93,7 +93,7 @@ class StructuredData
                     'name' => config('shop.full_name'),
                     'alternateName' => config('shop.name'),
                     'url' => route('home'),
-                    'logo' => asset('favicon.svg'),
+                    'logo' => asset('images/brand/icon-512.png'),
                     'sameAs' => config('shop.instagram') ? ['https://instagram.com/'.ltrim(config('shop.instagram'), '@')] : null,
                 ]),
                 [

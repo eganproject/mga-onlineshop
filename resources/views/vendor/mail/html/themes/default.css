@@ -103,26 +103,19 @@ img {
 }
 
 .header a {
-    color: #18181b;
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.04em;
+    color: #21939f;
+    font-size: 22px;
+    font-weight: 800;
     text-decoration: none;
-    text-transform: uppercase;
-}
-
-.header .brand-dot {
-    color: #ea580c;
 }
 
 /* Logo */
 
 .logo {
-    height: 75px;
-    margin-top: 15px;
-    margin-bottom: 10px;
-    max-height: 75px;
-    width: 75px;
+    border: 0;
+    height: auto;
+    max-width: 160px;
+    width: 160px;
 }
 
 /* Body */
@@ -245,11 +238,11 @@ img {
 
 .button-blue,
 .button-primary {
-    background-color: #18181b;
-    border-bottom: 8px solid #18181b;
-    border-left: 18px solid #18181b;
-    border-right: 18px solid #18181b;
-    border-top: 8px solid #18181b;
+    background-color: #1a7f8a;
+    border-bottom: 8px solid #1a7f8a;
+    border-left: 18px solid #1a7f8a;
+    border-right: 18px solid #1a7f8a;
+    border-top: 8px solid #1a7f8a;
 }
 
 .button-green,

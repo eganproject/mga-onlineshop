@@ -1,4 +1,14 @@
 @import 'tailwindcss';
+
+/*
+ * Font Poppins (sama dengan tulisan di logo), di-host sendiri lewat
+ * @fontsource supaya tidak bergantung pada CDN font.
+ */
+@import '@fontsource/poppins/latin-400.css';
+@import '@fontsource/poppins/latin-500.css';
+@import '@fontsource/poppins/latin-600.css';
+@import '@fontsource/poppins/latin-700.css';
+@import '@fontsource/poppins/latin-800.css';
 @plugin '@tailwindcss/forms';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -7,31 +17,45 @@
 @source '../../app';
 
 /*
- * Warna brand MGA ada di satu tempat ini. Ganti nilai --color-brand-*
- * untuk rebranding tanpa menyentuh view.
+ * Warna brand MGA ada di satu tempat ini (diambil dari logo):
+ *   brand  = teal  #21939F (brand-500) -> warna utama: tombol, link, fokus
+ *   accent = oranye #F68E55 (accent-400) -> aksen: promo, diskon, badge
+ * Ganti nilai di sini untuk rebranding tanpa menyentuh view.
  */
 @theme {
-    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 
-    --color-brand-50: #fff7ed;
-    --color-brand-100: #ffedd5;
-    --color-brand-200: #fed7aa;
-    --color-brand-300: #fdba74;
-    --color-brand-400: #fb923c;
-    --color-brand-500: #f97316;
-    --color-brand-600: #ea580c;
-    --color-brand-700: #c2410c;
-    --color-brand-800: #9a3412;
-    --color-brand-900: #7c2d12;
+    --color-brand-50: #effafb;
+    --color-brand-100: #d6f2f4;
+    --color-brand-200: #b0e4e8;
+    --color-brand-300: #7dcfd6;
+    --color-brand-400: #45b0ba;
+    --color-brand-500: #21939f;
+    --color-brand-600: #1a7f8a;
+    --color-brand-700: #18666f;
+    --color-brand-800: #18535a;
+    --color-brand-900: #17454c;
+    --color-brand-950: #0b2c31;
+
+    --color-accent-50: #fff5ef;
+    --color-accent-100: #ffe8db;
+    --color-accent-200: #fdcdb3;
+    --color-accent-300: #fbae85;
+    --color-accent-400: #f68e55;
+    --color-accent-500: #f2733a;
+    --color-accent-600: #e05a22;
+    --color-accent-700: #ba461b;
+    --color-accent-800: #94391c;
+    --color-accent-900: #77321b;
 
     --color-cream: #fbf8f4;
 
     /*
-     * Storefront: netral hangat + tinta hitam (terinspirasi tampilan
-     * editorial yang bersih). Warna brand dipakai sebagai aksen saja.
+     * Storefront: netral hangat + tinta gelap kehijauan (turunan teal
+     * brand) untuk tampilan editorial yang bersih ala bro.do/Allbirds.
      */
-    --font-display: 'Archivo', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-    --color-ink: #141414;
+    --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --color-ink: #10292d;
     --color-sand-50: #faf9f6;
     --color-sand-100: #f4f2ed;
     --color-sand-200: #e9e5dc;

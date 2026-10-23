@@ -130,7 +130,7 @@ return [
     'seo' => [
         'indexing' => (bool) env('SEO_INDEXING', true),
         'description' => env('SEO_DESCRIPTION', 'Belanja aksesoris HP & gadget original: casing, charger, kabel data, earphone, powerbank. Harga terjangkau, kirim ke seluruh Indonesia.'),
-        'default_image' => env('SEO_DEFAULT_IMAGE'),
+        'default_image' => env('SEO_DEFAULT_IMAGE') ?: 'images/brand/og-default.png',
     ],
 
 ];

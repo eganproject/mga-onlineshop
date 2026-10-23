@@ -6,6 +6,7 @@
 - Kolom `role` dan `is_active` sengaja tidak mass-assignable; ubah dengan `forceFill`.
 - Pembayaran & ongkir lewat interface `App\Contracts\PaymentGateway` dan `App\Contracts\ShippingProvider`; driver dipilih di `AppServiceProvider` dari `config/shop.php`.
 - Perubahan status pesanan lewat `App\Services\Orders\OrderService` (aturan transisi ada di `OrderStatus::nextStatuses()`).
+- Brand: logo resmi = `<x-logo>` (SVG inline; `variant="mark"`, `dark`, `mono`), aset di `public/images/brand`. Warna di `resources/css/app.css`: `brand-*` teal (utama, logo `brand-500` #21939F), `accent-*` oranye (promo/diskon, logo `accent-400` #F68E55). Font Poppins self-hosted via `@fontsource/poppins`.
 - Komponen Blade: `resources/views/components` (layout `x-layouts.shop|admin|account|auth`, `x-icon`, `x-product-card`, dll). Kelas utilitas `.btn`, `.input`, `.card`, `.badge` di `resources/css/app.css`.
 - Jalankan `php artisan test` sebelum commit.
 - Katalog: kategori maks 2 tingkat (`parent_id`), galeri `ProductImage` (sampul = `sort_order` terkecil, `Product::coverImage` selalu di-eager-load), varian `ProductVariant`. Produk bervarian (`has_variants`) menyimpan ringkasan harga termurah & total stok varian aktif lewat `Product::syncVariantSummary()`.

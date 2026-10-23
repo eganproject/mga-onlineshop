@@ -12,7 +12,7 @@
     $metaDescription = \Illuminate\Support\Str::limit($description ?: config('shop.seo.description'), 160);
     $canonicalUrl = $canonical ?: \App\Support\Seo::canonical(request());
     $index = ! $noindex && \App\Support\Seo::shouldIndex(request());
-    $ogImage = $image ?: (config('shop.seo.default_image') ? asset(config('shop.seo.default_image')) : null);
+    $ogImage = $image ?: asset(config('shop.seo.default_image'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
@@ -20,7 +20,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#ea580c">
+    <meta name="theme-color" content="#21939f">
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $metaDescription }}">
     <meta name="robots" content="{{ $index ? 'index, follow, max-image-preview:large' : 'noindex, follow' }}">
@@ -44,8 +44,10 @@
         <meta name="twitter:image" content="{{ $ogImage }}">
     @endif
 
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="48x48">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
-    @fonts
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{ $head ?? '' }}
 </head>

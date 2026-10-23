@@ -3,7 +3,7 @@
     <article class="print-sheet rounded-2xl bg-white p-6 shadow-sm sm:p-10">
         <header class="flex flex-wrap items-start justify-between gap-6 border-b border-stone-200 pb-6">
             <div>
-                <x-logo />
+                <x-logo class="h-12" />
                 @if (config('shop.address'))<p class="mt-3 max-w-xs text-xs text-stone-500">{{ config('shop.address') }}</p>@endif
                 @if (config('shop.whatsapp'))<p class="text-xs text-stone-500">WA {{ config('shop.whatsapp') }}</p>@endif
             </div>

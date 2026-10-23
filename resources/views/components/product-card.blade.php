@@ -5,7 +5,7 @@
 
         <div class="pointer-events-none absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 sm:left-3 sm:top-3">
             @if ($product->isOnSale())
-                <span class="bg-brand-600 px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase">-{{ $product->discountPercent() }}%</span>
+                <span class="bg-accent-500 px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase">-{{ $product->discountPercent() }}%</span>
             @endif
             @unless ($product->inStock())
                 <span class="bg-white px-2 py-1 text-[10px] font-bold tracking-wider text-ink uppercase">Stok habis</span>
@@ -42,7 +42,7 @@
             </p>
         @endif
         <div class="mt-1.5 flex flex-wrap items-baseline gap-x-2">
-            <p @class(['text-sm font-semibold', 'text-brand-700' => $product->isOnSale()])>@rupiah($product->price)</p>
+            <p @class(['text-sm font-semibold', 'text-accent-700' => $product->isOnSale()])>@rupiah($product->price)</p>
             @if ($product->isOnSale())
                 <p class="text-xs text-stone-400 line-through">@rupiah($product->compare_at_price)</p>
             @endif

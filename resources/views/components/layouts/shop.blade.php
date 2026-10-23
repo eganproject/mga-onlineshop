@@ -30,7 +30,7 @@
                         <ul class="flex shrink-0 items-center" @if ($copy === 2) aria-hidden="true" @endif>
                             @foreach (array_merge($announcements, $announcements) as $text)
                                 <li class="flex items-center gap-10 px-5 py-2 text-[11px] font-semibold tracking-[0.14em] uppercase">
-                                    {{ $text }} <span class="text-brand-400">&#10022;</span>
+                                    {{ $text }} <span class="text-accent-400">&#10022;</span>
                                 </li>
                             @endforeach
                         </ul>
@@ -142,7 +142,7 @@
                     <a href="{{ route('cart.index') }}" class="relative -mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
                         <x-icon name="bag" />
                         @if ($cartCount > 0)
-                            <span class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-brand-600 px-1 text-[10px] leading-[18px] font-bold text-white">
+                            <span class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-accent-500 px-1 text-[10px] leading-[18px] font-bold text-white">
                                 {{ $cartCount > 99 ? '99+' : $cartCount }}
                             </span>
                         @endif
@@ -253,6 +253,7 @@
             <div class="shop-container py-14 lg:py-20">
                 <div class="grid gap-12 lg:grid-cols-12">
                     <div class="lg:col-span-5">
+                        <a href="{{ route('home') }}" class="mb-8 inline-block" aria-label="{{ config('shop.full_name') }}"><x-logo dark class="h-14" /></a>
                         <h2 class="display text-3xl leading-[0.95] sm:text-4xl">Butuh bantuan memilih?</h2>
                         <p class="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{{ config('shop.tagline') }}. Tim kami siap membantu dari pemilihan produk sampai pesanan tiba.</p>
                         @if (config('shop.whatsapp'))
@@ -299,7 +300,9 @@
                 </div>
             </div>
             <div class="overflow-hidden border-t border-white/10">
-                <p class="shop-container select-none font-display text-[26vw] leading-[0.78] font-black tracking-[-0.06em] text-white/[0.06] uppercase lg:text-[20vw]" aria-hidden="true">{{ config('shop.name') }}</p>
+                <div class="shop-container pt-10" aria-hidden="true">
+                    <x-logo variant="mark" mono class="h-auto w-[78%] text-white/[0.06] lg:w-[60%]" />
+                </div>
             </div>
             <div class="border-t border-white/10">
                 <div class="shop-container flex flex-col gap-2 py-5 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">

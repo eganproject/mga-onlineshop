@@ -32,7 +32,10 @@
         <aside :class="sidebar ? 'translate-x-0' : '-translate-x-full'"
                class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-stone-200/70 bg-white transition-transform duration-300 lg:translate-x-0">
             <div class="flex h-16 items-center justify-between px-6">
-                <a href="{{ route('admin.dashboard') }}"><x-logo /></a>
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3" aria-label="Dashboard admin">
+                    <x-logo class="h-9" />
+                    <span class="rounded-md bg-brand-50 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-brand-700 uppercase">Admin</span>
+                </a>
                 <button @click="sidebar = false" class="btn btn-ghost p-2 lg:hidden" aria-label="Tutup menu"><x-icon name="x" /></button>
             </div>
 
