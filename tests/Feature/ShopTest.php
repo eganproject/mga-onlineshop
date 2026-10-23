@@ -125,7 +125,7 @@ class ShopTest extends TestCase
         ]);
 
         $order = Order::first();
-        $response->assertRedirect(route('account.orders.show', $order));
+        $response->assertRedirect(route('account.orders.payment', $order));
 
         $this->assertSame(OrderStatus::PendingPayment, $order->status);
         $this->assertSame(100000, $order->subtotal);
@@ -135,7 +135,8 @@ class ShopTest extends TestCase
         $this->assertNull(session('cart'));
         $this->assertSame(PaymentStatus::Pending, $order->latestPayment->status);
 
-        $this->get(route('account.orders.show', $order))->assertOk()->assertSee('Simulasikan bayar');
+        $this->get(route('account.orders.show', $order))->assertOk()->assertSee('Bayar sekarang');
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Simulasikan bayar');
 
         $this->post(route('account.orders.simulate-payment', $order))->assertRedirect();
         $this->assertSame(OrderStatus::Paid, $order->refresh()->status);

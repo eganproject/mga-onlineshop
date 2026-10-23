@@ -194,7 +194,7 @@ class ShippingTest extends TestCase
 
         $this->get(route('checkout.index'))->assertOk()->assertSee('JNE'); // ongkir masuk cache
         $this->post(route('checkout.store'), ['address_id' => $address->id, 'shipping' => 'jne|REG'])
-            ->assertRedirect(route('account.orders.show', Order::firstOrFail()));
+            ->assertRedirect(route('account.orders.payment', Order::firstOrFail()));
 
         $this->assertSame(11000, Order::firstOrFail()->shipping_cost);
     }

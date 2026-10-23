@@ -82,7 +82,7 @@ class CheckoutController extends Controller
 
         $order = $checkout->placeOrder($request->user(), $address, $rate, $data['notes'] ?? null);
 
-        return redirect()->route('account.orders.show', $order)
+        return redirect()->route('account.orders.payment', $order)
             ->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
     }
 

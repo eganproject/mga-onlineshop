@@ -7,9 +7,11 @@ use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Orders\OrderService;
+use App\Services\Payment\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -37,7 +39,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, Order $order, OrderService $orders): RedirectResponse
+    public function cancel(Request $request, Order $order, PaymentService $payments): RedirectResponse
     {
         $this->authorizeOwner($request, $order);
 
@@ -45,10 +47,17 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini sudah tidak bisa dibatalkan.');
         }
 
-        $orders->cancel($order);
-        $order->latestPayment?->update(['status' => PaymentStatus::Failed]);
+        try {
+            $cancelled = $payments->cancelByCustomer($order);
+        } catch (Throwable $e) {
+            report($e);
 
-        return back()->with('success', 'Pesanan dibatalkan.');
+            return back()->with('error', 'Status pembayaran belum bisa dicek, pesanan belum dibatalkan. Silakan coba lagi.');
+        }
+
+        return redirect()->route('account.orders.show', $order)->with(...$cancelled
+            ? ['success', 'Pesanan dibatalkan.']
+            : ['error', 'Pesanan tidak dibatalkan karena pembayarannya sudah kami terima.']);
     }
 
     /** Khusus development: tandai pembayaran driver "fake" sebagai berhasil. */
@@ -63,7 +72,7 @@ class OrderController extends Controller
 
         $orders->markPaid($payment, ['payment_type' => 'simulasi']);
 
-        return back()->with('success', 'Pembayaran berhasil (simulasi).');
+        return redirect()->route('account.orders.show', $order)->with('success', 'Pembayaran berhasil (simulasi).');
     }
 
     private function authorizeOwner(Request $request, Order $order): void

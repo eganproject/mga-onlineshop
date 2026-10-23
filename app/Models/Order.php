@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Observers\OrderObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 #[Fillable([
     'code', 'user_id', 'status', 'subtotal', 'shipping_cost', 'total', 'total_weight',
     'recipient_name', 'recipient_phone', 'shipping_address', 'destination_id',
-    'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes',
+    'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes', 'payment_due_at',
     'paid_at', 'shipped_at', 'completed_at', 'cancelled_at',
 ])]
 #[ObservedBy(OrderObserver::class)]
@@ -32,6 +33,7 @@ class Order extends Model
             'shipping_cost' => 'integer',
             'total' => 'integer',
             'total_weight' => 'integer',
+            'payment_due_at' => 'datetime',
             'paid_at' => 'datetime',
             'shipped_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -71,6 +73,13 @@ class Order extends Model
     public function latestPayment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    /** Batas bayar; pesanan lama tanpa payment_due_at memakai waktu pesan + masa berlaku. */
+    public function paymentDeadline(): CarbonInterface
+    {
+        return $this->payment_due_at
+            ?? $this->created_at->copy()->addHours((int) config('shop.payment.expiry_hours'));
     }
 
     public function courierLabel(): ?string

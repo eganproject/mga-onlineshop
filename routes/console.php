@@ -25,6 +25,13 @@ Schedule::command('shop:backup')
     ->withoutOverlapping()
     ->onOneServer();
 
+// Pesanan yang lewat batas bayar dibatalkan & stoknya dikembalikan. Status
+// dicek dulu ke Midtrans agar pembayaran yang webhook-nya terlambat tidak hilang.
+Schedule::command('shop:expire-payments')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();
+
 // Bersihkan data kedaluwarsa.
 Schedule::command('auth:clear-resets')->everyFifteenMinutes();
 Schedule::command('queue:prune-failed --hours=336')->daily();

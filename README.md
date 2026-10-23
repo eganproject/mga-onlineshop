@@ -93,9 +93,19 @@ php artisan ongkir:wilayah --kota=ID       # daftar kecamatan (salin ID-nya)
 
 Data wilayah RajaOngkir disimpan di cache 30 hari agar hemat kuota.
 
-URL notifikasi Midtrans: `https://domain-anda/webhooks/midtrans` (juga tampil di Admin › Integrasi).
+URL notifikasi Midtrans: `https://domain-anda/webhooks/midtrans` (juga tampil di Admin › Integrasi). Di dashboard Midtrans isi juga *Finish Redirect URL* bebas; aplikasi sudah mengirim URL kembali per transaksi.
 
-> Kode Midtrans (Snap + verifikasi signature webhook) dan RajaOngkir (API Komerce) sudah ditulis tetapi belum diuji dengan API key asli.
+### Alur pembayaran
+
+- Setelah checkout pelanggan diarahkan ke halaman **Pembayaran** (`/akun/pesanan/{kode}/bayar`) yang membuka Midtrans Snap.
+- Batas bayar pesanan = `PAYMENT_EXPIRY_HOURS` (default 24 jam) sejak checkout; tagihan Snap diberi kedaluwarsa yang sama.
+- Webhook diverifikasi dengan `signature_key` (SHA-512) dan nominalnya dicocokkan. Notifikasi ganda/tidak berurutan diabaikan, jadi aman di-retry Midtrans.
+- Pembayaran gagal/ditolak tidak membatalkan pesanan: pelanggan bisa **Bayar ulang** / **Ganti metode pembayaran** (link baru dibuat, link lama dibatalkan di Midtrans).
+- Pesanan yang lewat batas bayar dibatalkan oleh `php artisan shop:expire-payments` (terjadwal tiap 5 menit, butuh cron scheduler) dan stoknya dikembalikan. Status dicek dulu ke Midtrans agar pembayaran yang webhook-nya terlambat tidak ikut batal.
+- Saat pesanan dibatalkan (pelanggan, admin, atau kedaluwarsa) tagihan yang masih pending ikut dibatalkan di Midtrans.
+- Tombol **Cek status** di halaman pembayaran menanyakan status langsung ke Midtrans, berguna di lokal karena webhook tidak bisa menjangkau `localhost`.
+
+> RajaOngkir (API Komerce) dan Midtrans sudah diuji dengan respons tiruan di test; uji sekali lagi dengan key sandbox sebelum produksi.
 
 ## Deploy ke produksi
 

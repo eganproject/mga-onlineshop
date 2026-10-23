@@ -2,7 +2,6 @@
 
 namespace App\Services\Orders;
 
-use App\Contracts\PaymentGateway;
 use App\Data\ShippingRate;
 use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
@@ -13,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\StockService;
+use App\Services\Payment\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -21,7 +21,7 @@ class CheckoutService
 {
     public function __construct(
         private readonly CartService $cart,
-        private readonly PaymentGateway $payments,
+        private readonly PaymentService $payments,
         private readonly StockService $stock,
     ) {}
 
@@ -98,6 +98,7 @@ class CheckoutService
                 'courier_service' => $rate->service,
                 'shipping_etd' => $rate->etd,
                 'notes' => $notes,
+                'payment_due_at' => now()->addHours((int) config('shop.payment.expiry_hours')),
             ]);
 
             $order->items()->createMany(array_column($items, 'attributes'));
@@ -115,9 +116,9 @@ class CheckoutService
         $this->cart->clear();
 
         try {
-            $this->payments->createPayment($order);
+            $this->payments->createFor($order);
         } catch (Throwable $e) {
-            // Pesanan tetap tersimpan; pembayaran bisa dibuat ulang nanti.
+            // Pesanan tetap tersimpan; tagihan dibuat ulang saat halaman bayar dibuka.
             report($e);
         }
 

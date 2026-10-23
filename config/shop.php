@@ -59,14 +59,16 @@ return [
     | Pembayaran
     |--------------------------------------------------------------------------
     |
-    | Driver "fake" menandai pembayaran langsung berhasil (khusus lokal).
+    | Driver "fake" membuat tagihan yang bisa disimulasikan lunas (khusus lokal).
     | Driver "midtrans" memakai Midtrans Snap.
+    | expiry_hours: batas bayar sejak checkout; lewat dari itu pesanan dibatalkan
+    | otomatis oleh `shop:expire-payments` dan stok dikembalikan.
     |
     */
 
     'payment' => [
         'driver' => env('PAYMENT_DRIVER', 'fake'),
-        'expiry_hours' => 24,
+        'expiry_hours' => (int) env('PAYMENT_EXPIRY_HOURS', 24),
     ],
 
     'low_stock_threshold' => 5,

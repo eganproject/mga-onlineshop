@@ -18,31 +18,24 @@ class OrderService
 {
     public function __construct(private readonly StockService $stock) {}
 
+    /**
+     * Tandai tagihan lunas dan pesanan Dibayar. Idempoten: notifikasi ganda
+     * tidak menggeser paid_at. Dipanggil dari PaymentService.
+     */
     public function markPaid(Payment $payment, array $attributes = []): void
     {
         DB::transaction(function () use ($payment, $attributes) {
-            $payment->fill($attributes + ['status' => PaymentStatus::Paid, 'paid_at' => now()])->save();
+            $payment->fill($attributes + ['status' => PaymentStatus::Paid]);
+            $payment->paid_at ??= now();
+            $payment->save();
 
             $order = $payment->order()->lockForUpdate()->first();
 
             if ($order->status === OrderStatus::PendingPayment) {
-                $order->update(['status' => OrderStatus::Paid, 'paid_at' => now()]);
+                $order->update(['status' => OrderStatus::Paid, 'paid_at' => $payment->paid_at]);
             } elseif ($order->status === OrderStatus::Cancelled) {
                 // Dana masuk untuk pesanan yang sudah batal: perlu refund manual oleh admin.
                 Log::warning('Pembayaran diterima untuk pesanan yang sudah dibatalkan', ['order' => $order->code]);
-            }
-        });
-    }
-
-    public function markPaymentFailed(Payment $payment, PaymentStatus $status, array $attributes = []): void
-    {
-        DB::transaction(function () use ($payment, $status, $attributes) {
-            $payment->fill($attributes + ['status' => $status])->save();
-
-            $order = $payment->order()->lockForUpdate()->first();
-
-            if ($order->status === OrderStatus::PendingPayment) {
-                $this->cancel($order);
             }
         });
     }

@@ -1,9 +1,7 @@
 @php
     use App\Enums\OrderStatus;
-    use App\Enums\PaymentStatus;
 
     $payment = $order->latestPayment;
-    $awaitingPayment = $order->status === OrderStatus::PendingPayment && $payment?->status === PaymentStatus::Pending;
     $steps = [
         [OrderStatus::PendingPayment, 'Dipesan', 'receipt'],
         [OrderStatus::Paid, 'Dibayar', 'credit-card'],
@@ -24,44 +22,30 @@
     </div>
 
     {{-- Pembayaran --}}
-    @if ($awaitingPayment)
+    @if ($order->status === OrderStatus::PendingPayment)
+        @php($previousFailed = $payment && $payment->status->isUnpaidFinal())
         <div class="mb-6 rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-brand-50 p-5 sm:p-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="flex items-center gap-2 font-bold text-stone-900"><x-icon name="clock" class="size-5 text-amber-600" /> Selesaikan pembayaran</p>
                     <p class="mt-1 text-sm text-stone-600">
                         Total <span class="font-bold">@rupiah($order->total)</span>
-                        @if ($payment->expires_at) · bayar sebelum {{ $payment->expires_at->translatedFormat('d M Y, H:i') }} @endif
+                        · bayar sebelum {{ $order->paymentDeadline()->timezone(config('app.timezone'))->translatedFormat('d M Y, H:i') }}
                     </p>
+                    @if ($previousFailed)
+                        <p class="mt-1 text-sm text-rose-700">Pembayaran sebelumnya {{ str($payment->status->label())->lower() }}. Silakan bayar ulang dengan link baru.</p>
+                    @endif
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    @if ($payment->gateway === 'midtrans' && $payment->snap_token)
-                        <button type="button" class="btn btn-ink rounded-full" onclick="window.snap ? window.snap.pay(@js($payment->snap_token)) : window.location.href = @js($payment->redirect_url)">
-                            <x-icon name="credit-card" class="size-4" /> Bayar sekarang
-                        </button>
-                    @elseif ($payment->gateway === 'fake' && ! app()->isProduction())
-                        <form method="POST" action="{{ route('account.orders.simulate-payment', $order) }}">
-                            @csrf
-                            <button class="btn btn-ink rounded-full"><x-icon name="credit-card" class="size-4" /> Simulasikan bayar (dev)</button>
-                        </form>
-                    @endif
+                    <a href="{{ route('account.orders.payment', $order) }}" class="btn btn-ink rounded-full">
+                        <x-icon name="credit-card" class="size-4" /> {{ $previousFailed ? 'Bayar ulang' : 'Bayar sekarang' }}
+                    </a>
                     <form method="POST" action="{{ route('account.orders.cancel', $order) }}" onsubmit="return confirm('Batalkan pesanan ini?')">
                         @csrf
                         <button class="btn btn-secondary">Batalkan</button>
                     </form>
                 </div>
             </div>
-        </div>
-        @if ($payment->gateway === 'midtrans' && $payment->snap_token)
-            <x-slot:scripts>
-                <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-            </x-slot:scripts>
-        @endif
-    @endif
-
-    @if ($order->status === OrderStatus::PendingPayment && ! $payment)
-        <div class="mb-6 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            <x-icon name="warning" class="size-5 shrink-0" /> Link pembayaran belum tersedia. Silakan hubungi admin untuk melanjutkan pembayaran.
         </div>
     @endif
 

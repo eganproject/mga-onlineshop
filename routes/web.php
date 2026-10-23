@@ -77,6 +77,13 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::post('/pesanan/{order}/batal', [Account\OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/pesanan/{order}/simulasi-bayar', [Account\OrderController::class, 'simulatePayment'])->name('orders.simulate-payment');
 
+        Route::controller(Account\PaymentController::class)->prefix('pesanan/{order}/bayar')->name('orders.payment')->group(function () {
+            Route::get('/', 'show')->name('');
+            Route::get('/selesai', 'finish')->name('.finish')->middleware('throttle:20,1');
+            Route::post('/cek', 'check')->name('.check')->middleware('throttle:10,1');
+            Route::post('/baru', 'regenerate')->name('.regenerate')->middleware('throttle:5,1');
+        });
+
         Route::controller(Account\RegionController::class)->prefix('wilayah')->name('regions.')->middleware('throttle:120,1')->group(function () {
             Route::get('/provinsi', 'provinces')->name('provinces');
             Route::get('/provinsi/{province}/kota', 'cities')->name('cities');
@@ -144,4 +151,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 |--------------------------------------------------------------------------
 */
 
-Route::post('/webhooks/midtrans', Webhooks\MidtransController::class)->name('webhooks.midtrans');
+Route::post('/webhooks/midtrans', Webhooks\MidtransController::class)->name('webhooks.midtrans')->middleware('throttle:120,1');
