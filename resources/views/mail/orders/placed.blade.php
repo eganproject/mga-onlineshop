@@ -9,7 +9,7 @@ Tanggal: {{ $order->created_at->translatedFormat('d F Y, H:i') }} WIB
 @if ($order->status === \App\Enums\OrderStatus::PendingPayment)
 Segera selesaikan pembayaran dalam **{{ config('shop.payment.expiry_hours') }} jam**. Lewat dari itu, pesanan akan dibatalkan otomatis.
 
-<x-mail::button :url="route('account.orders.show', $order)">
+<x-mail::button :url="route('account.orders.payment', $order)">
 Bayar sekarang
 </x-mail::button>
 @else
