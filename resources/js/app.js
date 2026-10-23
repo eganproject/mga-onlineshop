@@ -10,6 +10,7 @@ import wishlistButton from './components/wishlist-button';
 import firebaseLogin from './components/firebase-login';
 import articleEditor from './components/article-editor';
 import shareButtons from './components/share-buttons';
+import bestSellerPicker from './components/best-seller-picker';
 
 window.Alpine = Alpine;
 
@@ -28,5 +29,6 @@ Alpine.data('wishlistButton', wishlistButton);
 Alpine.data('firebaseLogin', firebaseLogin);
 Alpine.data('articleEditor', articleEditor);
 Alpine.data('shareButtons', shareButtons);
+Alpine.data('bestSellerPicker', bestSellerPicker);
 
 Alpine.start();

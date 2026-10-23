@@ -163,6 +163,8 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::resource('banners', Admin\BannerController::class)->except('show');
         Route::get('/storefront', [Admin\StorefrontController::class, 'edit'])->name('storefront.edit');
         Route::put('/storefront', [Admin\StorefrontController::class, 'update'])->name('storefront.update');
+        Route::put('/storefront/best-sellers', [Admin\StorefrontController::class, 'updateBestSellers'])->name('storefront.best-sellers');
+        Route::get('/storefront/products', [Admin\StorefrontController::class, 'searchProducts'])->name('storefront.products');
     });
 
     Route::middleware('can:articles.manage')->group(function () {

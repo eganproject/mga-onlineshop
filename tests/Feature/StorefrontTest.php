@@ -108,4 +108,69 @@ class StorefrontTest extends TestCase
         $this->actingAs(User::factory()->staff(StaffRole::Warehouse)->create())
             ->get(route('admin.storefront.edit'))->assertForbidden();
     }
+
+    public function test_admin_picks_and_orders_best_sellers_manually(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $first = Product::factory()->create(['name' => 'Pilihan Pertama']);
+        $second = Product::factory()->create(['name' => 'Pilihan Kedua']);
+        $inactive = Product::factory()->inactive()->create(['name' => 'Pilihan Nonaktif']);
+        $empty = Product::factory()->outOfStock()->create(['name' => 'Pilihan Habis']);
+        $topSeller = Product::factory()->create(['name' => 'Laris Otomatis']);
+        $this->sell($topSeller, 30);
+        Cache::flush();
+
+        $this->actingAs($admin)->put(route('admin.storefront.best-sellers'), [
+            'best_seller_mode' => 'manual', 'best_seller_fill' => '0', 'best_seller_products' => [],
+        ])->assertSessionHasErrors('best_seller_products');
+
+        $this->put(route('admin.storefront.best-sellers'), [
+            'best_seller_mode' => 'manual',
+            'best_seller_fill' => '0',
+            'best_seller_products' => [$second->id, $inactive->id, $empty->id, $first->id],
+        ])->assertRedirect(route('admin.storefront.edit').'#best-seller')->assertSessionHasNoErrors();
+
+        $this->assertSame([$second->id, $inactive->id, $empty->id, $first->id], config('shop.storefront.best_seller_products'));
+
+        // Halaman admin menampilkan pilihan beserta statusnya.
+        $this->get(route('admin.storefront.edit'))->assertOk()
+            ->assertSee('Pilihan Kedua')->assertSee('Pilihan Nonaktif');
+
+        auth()->logout();
+        $this->get(route('home'))->assertOk()
+            ->assertSeeInOrder(['Pilihan Kedua', 'Pilihan Pertama'])
+            ->assertDontSee('Pilihan Nonaktif')
+            ->assertDontSee('Pilihan Habis')
+            ->assertDontSee('Laris Otomatis');
+
+        // Lengkapi otomatis: pilihan manual dulu, lalu terlaris.
+        $this->actingAs($admin)->put(route('admin.storefront.best-sellers'), [
+            'best_seller_mode' => 'manual', 'best_seller_fill' => '1', 'best_seller_products' => [$first->id, $second->id],
+        ])->assertSessionHasNoErrors();
+        auth()->logout();
+        $this->get(route('home'))->assertOk()->assertSeeInOrder(['Pilihan Pertama', 'Pilihan Kedua', 'Laris Otomatis']);
+
+        // Kembali ke otomatis: daftar manual tetap tersimpan, beranda mengikuti penjualan.
+        $this->actingAs($admin)->put(route('admin.storefront.best-sellers'), [
+            'best_seller_mode' => 'auto', 'best_seller_fill' => '1', 'best_seller_products' => [$first->id, $second->id],
+        ])->assertSessionHasNoErrors();
+        $this->assertSame([$first->id, $second->id], config('shop.storefront.best_seller_products'));
+        auth()->logout();
+        $this->get(route('home'))->assertOk()->assertSeeInOrder(['Laris Otomatis', 'Pilihan']);
+    }
+
+    public function test_best_seller_product_search_returns_json(): void
+    {
+        Product::factory()->create(['name' => 'Casing Bening', 'sku' => 'CS-01']);
+        Product::factory()->create(['name' => 'Kabel Type-C']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->getJson(route('admin.storefront.products', ['q' => 'casing']))
+            ->assertOk()->assertJsonCount(1)
+            ->assertJsonPath('0.name', 'Casing Bening')
+            ->assertJsonStructure([['id', 'name', 'sku', 'image', 'price', 'stock', 'active']]);
+
+        $this->actingAs(User::factory()->staff(StaffRole::Warehouse)->create())
+            ->getJson(route('admin.storefront.products'))->assertForbidden();
+    }
 }

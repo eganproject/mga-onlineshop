@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Services\Settings\StoreSettings;
+use App\Services\Storefront\BestSellers;
 use App\Support\Storefront;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/** Admin → Tampilan Beranda: foto & teks hero, serta pengumuman di topbar. */
+/** Admin → Tampilan Beranda: foto & teks hero, pengumuman di topbar, dan isi tab Best Seller. */
 class StorefrontController extends Controller
 {
     /** Nama kolom form => kunci config (teks). */
@@ -43,7 +47,74 @@ class StorefrontController extends Controller
                 + ['announcements' => implode("\n", Storefront::announcements())],
             'defaults' => collect(self::TEXT)->map(fn (string $key) => $this->settings->default($key))->all(),
             'images' => collect(self::IMAGES)->map(fn (string $key) => Storefront::url(config($key)))->all(),
+            'bestSeller' => [
+                'mode' => BestSellers::isManual() ? 'manual' : 'auto',
+                'fill' => (bool) config('shop.storefront.best_seller_fill', true),
+                'products' => $this->pickedProducts(BestSellers::pickedIds()),
+            ],
         ]);
+    }
+
+    /** Simpan mode & urutan produk Best Seller (form terpisah dari hero). */
+    public function updateBestSellers(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'best_seller_mode' => ['required', 'in:auto,manual'],
+            'best_seller_fill' => ['boolean'],
+            'best_seller_products' => ['nullable', 'required_if:best_seller_mode,manual', 'array', 'max:'.BestSellers::MAX_PICKS],
+            'best_seller_products.*' => ['integer', 'distinct', Rule::exists('products', 'id')],
+        ], [
+            'best_seller_products.max' => 'Pilih maksimal '.BestSellers::MAX_PICKS.' produk.',
+            'best_seller_products.required_if' => 'Pilih minimal 1 produk untuk mode manual.',
+        ], [
+            'best_seller_products' => 'produk best seller',
+        ]);
+
+        $ids = array_map('intval', $data['best_seller_products'] ?? []);
+
+        $changes = $this->settings->save([
+            'shop.storefront.best_seller_mode' => $data['best_seller_mode'],
+            'shop.storefront.best_seller_fill' => $request->boolean('best_seller_fill'),
+            'shop.storefront.best_seller_products' => $ids,
+        ]);
+
+        return redirect()->to(route('admin.storefront.edit').'#best-seller')
+            ->with('success', $changes ? 'Best Seller disimpan.' : 'Tidak ada perubahan.');
+    }
+
+    /** Pencarian produk untuk pemilih Best Seller (JSON). */
+    public function searchProducts(Request $request): JsonResponse
+    {
+        $term = Str::limit(trim((string) $request->query('q')), 100, '');
+
+        $products = Product::query()
+            ->search($term)
+            ->orderByDesc('is_active')->orderBy('name')
+            ->take(20)->get();
+
+        return response()->json($products->map(fn (Product $p) => $this->productPayload($p))->all());
+    }
+
+    /** @param  list<int>  $ids */
+    private function pickedProducts(array $ids): array
+    {
+        $products = Product::whereIn('id', $ids)->get()->keyBy('id');
+
+        return collect($ids)->map(fn (int $id) => $products->get($id))->filter()
+            ->map(fn (Product $p) => $this->productPayload($p))->values()->all();
+    }
+
+    private function productPayload(Product $product): array
+    {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'sku' => $product->sku,
+            'image' => $product->imageUrl(),
+            'price' => $product->formattedPrice(),
+            'stock' => $product->stock,
+            'active' => $product->is_active,
+        ];
     }
 
     public function update(Request $request): RedirectResponse

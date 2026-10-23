@@ -55,6 +55,10 @@ return [
             'Produk 100% original & bergaransi',
             'Bayar mudah: transfer bank, e-wallet & QRIS',
         ],
+        // Tab Best Seller: "auto" (terlaris 90 hari) atau "manual" (pilihan admin, berurutan).
+        'best_seller_mode' => 'auto',
+        'best_seller_products' => [],
+        'best_seller_fill' => true,
     ],
 
     /*

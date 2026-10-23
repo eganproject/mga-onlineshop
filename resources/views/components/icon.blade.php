@@ -73,6 +73,7 @@
         'quote' => 'M4.5 10.5h4.5v4.5c0 2.25-1.5 3.75-3.75 4.5M4.5 10.5c0-3 1.5-5.25 4.5-6M15 10.5h4.5v4.5c0 2.25-1.5 3.75-3.75 4.5M15 10.5c0-3 1.5-5.25 4.5-6',
         'undo' => 'M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3',
         'redo' => 'm15 15 6-6m0 0-6-6m6 6H9a6 6 0 0 0 0 12h3',
+        'grip' => 'M9 6h.008v.008H9V6Zm0 6h.008v.008H9V12Zm0 6h.008v.008H9V18Zm6-12h.008v.008H15V6Zm0 6h.008v.008H15V12Zm0 6h.008v.008H15V18Z',
     ];
 @endphp
 <svg {{ $attributes->merge(['class' => $class]) }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">

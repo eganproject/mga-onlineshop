@@ -66,4 +66,126 @@
             </div>
         </div>
     </form>
+
+    {{-- Best Seller: form terpisah supaya tidak ikut mengunggah foto hero. --}}
+    <form id="best-seller" method="POST" action="{{ route('admin.storefront.best-sellers') }}" class="mt-6 scroll-mt-24"
+          x-data="bestSellerPicker(@js([
+              'mode' => old('best_seller_mode', $bestSeller['mode']),
+              'items' => $bestSeller['products'],
+              'max' => \App\Services\Storefront\BestSellers::MAX_PICKS,
+              'shown' => \App\Services\Storefront\BestSellers::LIMIT,
+              'searchUrl' => route('admin.storefront.products'),
+          ]))">
+        @csrf
+        @method('PUT')
+
+        <section class="card space-y-5 p-6">
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600"><x-icon name="trending-up" /></span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="font-bold text-stone-900">Best Seller</h2>
+                    <p class="text-xs text-stone-500">Produk di tab "Best Seller" beranda (tampil maks. {{ \App\Services\Storefront\BestSellers::LIMIT }}).</p>
+                </div>
+                <button class="btn btn-primary max-sm:w-full">Simpan Best Seller</button>
+            </div>
+
+            <fieldset class="grid gap-3 sm:grid-cols-2">
+                <legend class="sr-only">Cara memilih produk</legend>
+                <label class="flex cursor-pointer gap-3 rounded-xl border p-4 transition" :class="mode === 'auto' ? 'border-brand-500 bg-brand-50/60 ring-1 ring-brand-500' : 'border-stone-200 hover:border-stone-300'">
+                    <input type="radio" name="best_seller_mode" value="auto" x-model="mode" class="mt-0.5 text-brand-600 focus:ring-brand-500">
+                    <span><span class="block text-sm font-semibold text-stone-900">Otomatis</span>
+                        <span class="block text-xs text-stone-500">Terlaris 90 hari terakhir, dilengkapi produk unggulan lalu produk terbaru.</span></span>
+                </label>
+                <label class="flex cursor-pointer gap-3 rounded-xl border p-4 transition" :class="mode === 'manual' ? 'border-brand-500 bg-brand-50/60 ring-1 ring-brand-500' : 'border-stone-200 hover:border-stone-300'">
+                    <input type="radio" name="best_seller_mode" value="manual" x-model="mode" class="mt-0.5 text-brand-600 focus:ring-brand-500">
+                    <span><span class="block text-sm font-semibold text-stone-900">Manual</span>
+                        <span class="block text-xs text-stone-500">Pilih & urutkan sendiri produknya.</span></span>
+                </label>
+            </fieldset>
+
+            <div x-show="mode === 'manual'" x-cloak class="space-y-5">
+                <label class="flex items-start gap-3 text-sm text-stone-700">
+                    <input type="hidden" name="best_seller_fill" value="0">
+                    <input type="checkbox" name="best_seller_fill" value="1" @checked(old('best_seller_fill', $bestSeller['fill'])) class="mt-0.5 rounded text-brand-600 focus:ring-brand-500">
+                    <span>Lengkapi otomatis bila pilihan kurang dari {{ \App\Services\Storefront\BestSellers::LIMIT }}
+                        <span class="block text-xs text-stone-500">Sisa tempat diisi produk terlaris (otomatis) setelah pilihan Anda.</span></span>
+                </label>
+
+                {{-- Pencarian produk --}}
+                <div class="relative" @click.outside="open = false" @keydown.escape.window="open = false">
+                    <label for="best-seller-search" class="label">Tambah produk</label>
+                    <div class="relative">
+                        <x-icon name="search" class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+                        <input id="best-seller-search" type="search" x-model="query" autocomplete="off" class="input pl-9"
+                               placeholder="Cari nama atau SKU produk..." :disabled="full"
+                               @focus="search()" @input.debounce.300ms="search()" @keydown.enter.prevent="results[0] && add(results[0])">
+                    </div>
+                    <p class="hint" x-show="full">Sudah {{ \App\Services\Storefront\BestSellers::MAX_PICKS }} produk. Hapus salah satu untuk menambah.</p>
+                    <div x-show="open && !full" x-transition.opacity class="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-xl border border-stone-200 bg-white p-1 shadow-lg">
+                        <p x-show="loading && results.length === 0" class="px-3 py-2 text-sm text-stone-500">Memuat...</p>
+                        <p x-show="!loading && results.length === 0" class="px-3 py-2 text-sm text-stone-500">Produk tidak ditemukan.</p>
+                        <template x-for="product in results" :key="product.id">
+                            <button type="button" @click="add(product)" :disabled="has(product.id)"
+                                    class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-stone-50 disabled:cursor-default disabled:opacity-50">
+                                <span class="size-10 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                                    <img x-show="product.image" :src="product.image" alt="" class="size-full object-cover" loading="lazy">
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-medium text-stone-900" x-text="product.name"></span>
+                                    <span class="block truncate text-xs text-stone-500"><span x-text="product.price"></span> · Stok <span x-text="product.stock"></span><span x-show="product.sku"> · <span x-text="product.sku"></span></span></span>
+                                </span>
+                                <span x-show="problem(product)" x-text="problem(product)" class="badge bg-stone-100 text-stone-600"></span>
+                                <span x-show="has(product.id)" class="text-brand-600"><x-icon name="check" class="size-4" /></span>
+                                <span x-show="!has(product.id)" class="text-stone-400"><x-icon name="plus" class="size-4" /></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Daftar pilihan --}}
+                <div>
+                    <div class="mb-2 flex items-center justify-between text-xs text-stone-500">
+                        <span>Seret <x-icon name="grip" class="inline size-4 align-text-bottom" /><span class="max-sm:hidden"> atau pakai tombol panah</span> untuk mengubah urutan.</span>
+                        <span><span x-text="items.length"></span>/{{ \App\Services\Storefront\BestSellers::MAX_PICKS }}</span>
+                    </div>
+                    <p x-show="items.length === 0" class="rounded-xl border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500">Belum ada produk. Cari produk di atas untuk menambahkan.</p>
+                    <ol class="divide-y divide-stone-100 overflow-hidden rounded-xl border border-stone-200" x-show="items.length > 0">
+                        <template x-for="(product, index) in items" :key="product.id">
+                            <li :data-pick="index" class="flex items-center gap-2 bg-white px-2 py-2 sm:gap-3 sm:px-3"
+                                :class="{ 'bg-brand-50 ring-2 ring-inset ring-brand-400': dragging === product.id, 'opacity-60': !visibleIds.includes(product.id) }">
+                                <input type="hidden" name="best_seller_products[]" x-bind:value="product.id">
+                                <button type="button" class="cursor-grab touch-none rounded p-1 text-stone-400 hover:text-stone-600 active:cursor-grabbing" title="Seret untuk mengubah urutan"
+                                        @pointerdown.prevent="startDrag(index, $event)" @pointermove="drag($event)" @pointerup="endDrag()" @pointercancel="endDrag()">
+                                    <x-icon name="grip" class="size-5" /><span class="sr-only">Seret</span>
+                                </button>
+                                <span class="w-5 text-center text-xs font-semibold text-stone-400" x-text="index + 1"></span>
+                                <span class="size-10 shrink-0 sm:size-11 overflow-hidden rounded-lg bg-stone-100">
+                                    <img x-show="product.image" :src="product.image" alt="" class="size-full object-cover" loading="lazy">
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-medium text-stone-900" x-text="product.name"></span>
+                                    <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500">
+                                        <span><span x-text="product.price"></span> · Stok <span x-text="product.stock"></span></span>
+                                        <span x-show="problem(product)" class="badge whitespace-nowrap bg-amber-50 text-amber-700" title="Tidak tampil di beranda sampai produk aktif & ada stok" x-text="problem(product)"></span>
+                                        <span x-show="!problem(product) && !visibleIds.includes(product.id)" class="badge whitespace-nowrap bg-stone-100 text-stone-600" title="Tampil bila ada pilihan di atasnya yang habis">Cadangan</span>
+                                    </span>
+                                </span>
+                                <span class="flex shrink-0 items-center">
+                                    <button type="button" class="rounded p-1 text-stone-400 hover:text-stone-700 disabled:opacity-30 max-sm:hidden" :disabled="index === 0" @click="move(index, -1)" title="Naikkan"><x-icon name="chevron-up" class="size-4" /><span class="sr-only">Naikkan</span></button>
+                                    <button type="button" class="rounded p-1 text-stone-400 hover:text-stone-700 disabled:opacity-30 max-sm:hidden" :disabled="index === items.length - 1" @click="move(index, 1)" title="Turunkan"><x-icon name="chevron-down" class="size-4" /><span class="sr-only">Turunkan</span></button>
+                                    <button type="button" class="rounded p-1 text-stone-400 hover:text-rose-600" @click="remove(index)" title="Hapus"><x-icon name="x" class="size-4" /><span class="sr-only">Hapus</span></button>
+                                </span>
+                            </li>
+                        </template>
+                    </ol>
+                    <p class="hint">Produk nonaktif atau stok habis otomatis disembunyikan dari beranda, lalu tampil lagi saat stok kembali. Lebih dari {{ \App\Services\Storefront\BestSellers::LIMIT }} pilihan jadi cadangan.</p>
+                    <x-input-error for="best_seller_products" />
+                </div>
+            </div>
+
+            <p x-show="mode === 'auto' && items.length > 0" x-cloak class="text-xs text-stone-500">
+                Daftar manual (<span x-text="items.length"></span> produk) tetap tersimpan dan dipakai lagi bila beralih ke Manual.
+            </p>
+        </section>
+    </form>
 </x-layouts.admin>

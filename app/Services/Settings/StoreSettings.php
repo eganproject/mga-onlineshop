@@ -55,6 +55,9 @@ class StoreSettings
         'shop.storefront.hero_secondary_url' => 'string',
         'shop.storefront.hero_text' => 'string',
         'shop.storefront.announcements' => 'array',
+        'shop.storefront.best_seller_mode' => 'string',
+        'shop.storefront.best_seller_products' => 'array',
+        'shop.storefront.best_seller_fill' => 'bool',
 
         // Integrasi (Admin › Integrasi, khusus superadmin).
         'shop.payment.driver' => 'string',
