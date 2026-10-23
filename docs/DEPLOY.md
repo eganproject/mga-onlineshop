@@ -54,6 +54,8 @@ opcache.validate_timestamps = 0   ; deploy.sh me-reload PHP-FPM setelah update
 sudo mysql
 ```
 
+Bila `sudo mysql` ditolak karena root sudah berpassword, pakai `mysql -u root -p`. Bila MySQL menolak password user baru (ERROR 1819), buat password acak yang memenuhi aturan: `echo "Mga_$(openssl rand -hex 12)"`.
+
 ```sql
 CREATE DATABASE mga_onlineshop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'mga'@'localhost' IDENTIFIED BY 'ganti-password-kuat';
@@ -76,7 +78,7 @@ php artisan key:generate        # simpan salinan APP_KEY di tempat aman
 composer install --no-dev --prefer-dist --optimize-autoloader
 npm ci && npm run build
 php artisan migrate --force
-php artisan db:seed --force     # opsional: data awal + akun admin contoh
+php artisan shop:create-admin   # buat akun Superadmin (password diketik tersembunyi)
 php artisan storage:link
 php artisan optimize
 
@@ -84,7 +86,7 @@ sudo chown -R $USER:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 ```
 
-> Bila memakai seeder, **segera ganti** password akun `admin@mga.test` dan nonaktifkan akun contoh `gudang@mga.test` / `cs@mga.test` di **Admin → Staf** (atau buat Owner baru lalu nonaktifkan akun contoh).
+> **Jangan jalankan `php artisan db:seed` di produksi.** Seeder hanya untuk komputer lokal: isinya akun contoh berpassword `password`, produk, pesanan, dan voucher contoh. Akun staf lain dibuat dari **Admin → Staf** setelah login sebagai Superadmin.
 
 ### 4. Nginx + SSL
 
@@ -166,6 +168,7 @@ Lewat Terminal cPanel:
 cd ~/mga-onlineshop
 php artisan key:generate
 php artisan migrate --force
+php artisan shop:create-admin
 php artisan storage:link
 php artisan optimize
 php artisan shop:check
@@ -240,7 +243,7 @@ php artisan up
 
 - [ ] `php artisan shop:check` tanpa status **GAGAL**
 - [ ] SSL aktif dan `APP_URL` memakai `https://`
-- [ ] Password akun admin contoh sudah diganti
+- [ ] Akun Superadmin dibuat lewat `shop:create-admin`, tidak ada akun contoh `@mga.test`
 - [ ] Kunci Midtrans produksi terisi, URL notifikasi di dashboard Midtrans: `https://domain-anda/webhooks/midtrans`
 - [ ] API key RajaOngkir & `SHOP_ORIGIN_CITY_ID` terisi
 - [ ] Email SMTP bisa terkirim (coba fitur lupa password)

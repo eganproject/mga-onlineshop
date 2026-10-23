@@ -24,6 +24,13 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // Data contoh (akun berpassword "password", pesanan palsu) tidak boleh masuk server produksi.
+        if (app()->isProduction()) {
+            $this->command?->error('Seeder contoh tidak dijalankan di produksi. Buat akun Superadmin dengan: php artisan shop:create-admin');
+
+            return;
+        }
+
         User::updateOrCreate(['email' => 'admin@mga.test'], [
             'name' => 'Admin MGA',
             'password' => 'password',
