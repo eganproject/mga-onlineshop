@@ -20,18 +20,16 @@ use Illuminate\Support\Facades\DB;
 class SalesReportService
 {
     /** Status pesanan yang dihitung sebagai penjualan. */
-    public const REVENUE_STATUSES = [
-        OrderStatus::Paid,
-        OrderStatus::Processing,
-        OrderStatus::Shipped,
-        OrderStatus::Completed,
-    ];
+    public static function revenueStatuses(): array
+    {
+        return OrderStatus::revenueStatuses();
+    }
 
     /** Query pesanan terjual dalam periode. */
     public function paidOrders(ReportPeriod $period): Builder
     {
         return Order::query()
-            ->whereIn('orders.status', self::REVENUE_STATUSES)
+            ->whereIn('orders.status', self::revenueStatuses())
             ->whereBetween('orders.paid_at', [$period->start(), $period->end()]);
     }
 
@@ -96,7 +94,7 @@ class SalesReportService
 
         $itemsDaily = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereIn('orders.status', self::REVENUE_STATUSES)
+            ->whereIn('orders.status', self::revenueStatuses())
             ->whereBetween('orders.paid_at', [$period->start(), $period->end()])
             ->selectRaw('DATE(orders.paid_at) as day, SUM(order_items.quantity) as items')
             ->groupBy('day')
@@ -137,7 +135,7 @@ class SalesReportService
         $rows = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->leftJoin('products', 'products.id', '=', 'order_items.product_id')
-            ->whereIn('orders.status', self::REVENUE_STATUSES)
+            ->whereIn('orders.status', self::revenueStatuses())
             ->whereBetween('orders.paid_at', [$period->start(), $period->end()])
             ->groupBy('order_items.product_id', DB::raw('CASE WHEN order_items.product_id IS NULL THEN order_items.product_name END'))
             ->selectRaw('order_items.product_id, COALESCE(MAX(products.name), MAX(order_items.product_name)) as name, COALESCE(MAX(products.sku), MAX(order_items.sku)) as sku, SUM(order_items.quantity) as quantity, SUM(order_items.subtotal) as revenue, COUNT(DISTINCT order_items.order_id) as orders')
@@ -170,7 +168,7 @@ class SalesReportService
         $rows = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->leftJoin('products', 'products.id', '=', 'order_items.product_id')
-            ->whereIn('orders.status', self::REVENUE_STATUSES)
+            ->whereIn('orders.status', self::revenueStatuses())
             ->whereBetween('orders.paid_at', [$period->start(), $period->end()])
             ->groupBy('products.category_id')
             ->selectRaw('products.category_id, SUM(order_items.quantity) as quantity, SUM(order_items.subtotal) as revenue, COUNT(DISTINCT order_items.order_id) as orders, COUNT(DISTINCT order_items.product_id) as products')

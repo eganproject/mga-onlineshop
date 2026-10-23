@@ -142,7 +142,7 @@ class AdminPanelTest extends TestCase
         $item = $order->items->first();
         $stockBefore = $item->product->stock;
 
-        $this->actingAs($this->admin)->patch(route('admin.orders.status', $order), ['status' => 'cancelled']);
+        $this->actingAs($this->admin)->patch(route('admin.orders.status', $order), ['status' => 'cancelled', 'note' => 'Permintaan pelanggan']);
 
         $this->assertSame(OrderStatus::Cancelled, $order->refresh()->status);
         $this->assertSame($stockBefore + $item->quantity, $item->product->refresh()->stock);

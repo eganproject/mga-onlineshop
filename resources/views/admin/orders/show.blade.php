@@ -1,7 +1,15 @@
 <x-layouts.admin :title="'Pesanan '.$order->code">
-    <x-admin.page-header :title="$order->code" :back="route('admin.orders.index')">
+    <x-admin.page-header :title="$order->code" :description="'Dipesan '.$order->created_at->translatedFormat('d F Y, H:i')" :back="route('admin.orders.index')">
         <x-order-status :status="$order->status" class="px-3 py-1 text-sm" />
+        <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Invoice</a>
+        <a href="{{ route('admin.orders.packing-slip', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Packing slip</a>
     </x-admin.page-header>
+
+    @if ($order->status === \App\Enums\OrderStatus::Cancelled && $order->paid_at)
+        <div class="mb-6 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <x-icon name="warning" class="size-5 shrink-0" /> Pesanan ini sudah dibayar sebelum dibatalkan. Pastikan dana dikembalikan ke pelanggan.
+        </div>
+    @endif
 
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
@@ -48,12 +56,16 @@
                     <p class="p-5 text-sm text-stone-500">Belum ada pembayaran.</p>
                 @endforelse
             </div>
+
+            @if ($canTrack)
+                <x-order-tracking-panel :order="$order" :url="route('admin.orders.tracking', $order)" :refresh-url="route('admin.orders.tracking', [$order, 'fresh' => 1])" />
+            @endif
         </div>
 
         <div class="space-y-6">
             {{-- Update status --}}
             @if ($next = $order->status->nextStatuses())
-                <div class="card p-5" x-data="{ status: '{{ $next[0]->value }}' }">
+                <div class="card p-5" x-data="{ status: @js(old('status', $next[0]->value)) }">
                     <h2 class="font-bold text-stone-900">Perbarui status</h2>
                     <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="mt-4 space-y-4">
                         @csrf
@@ -67,14 +79,39 @@
                             @endforeach
                         </div>
                         <div x-show="status === 'shipped'" x-cloak>
-                            <label for="tracking_number" class="label">Nomor resi</label>
-                            <input id="tracking_number" name="tracking_number" value="{{ old('tracking_number') }}" class="input @error('tracking_number') input-error @enderror">
+                            <label for="tracking_number" class="label">Nomor resi {{ $order->courierLabel() }}</label>
+                            <input id="tracking_number" name="tracking_number" value="{{ old('tracking_number', $order->tracking_number) }}" class="input font-mono @error('tracking_number') input-error @enderror" autocomplete="off">
                             <x-input-error for="tracking_number" />
                         </div>
+                        <div>
+                            <label for="note" class="label" x-text="status === 'cancelled' ? 'Alasan pembatalan' : 'Catatan (opsional)'">Catatan (opsional)</label>
+                            <textarea id="note" name="note" rows="2" maxlength="250" class="input @error('note') input-error @enderror"
+                                      :required="status === 'cancelled'"
+                                      :placeholder="status === 'cancelled' ? 'Mis. stok habis, permintaan pelanggan' : 'Tampil di riwayat pesanan pelanggan'">{{ old('note') }}</textarea>
+                            <x-input-error for="note" />
+                        </div>
                         <button class="btn btn-primary w-full" :class="status === 'cancelled' && '!bg-rose-600 hover:!bg-rose-700'"
-                                onclick="return this.form.status.value !== 'cancelled' || confirm('Batalkan pesanan ini? Stok akan dikembalikan.')">
+                                onclick="return this.form.status.value !== 'cancelled' || confirm(@js($order->paid_at ? 'Batalkan pesanan ini? Stok dikembalikan dan dana pelanggan perlu dikembalikan manual.' : 'Batalkan pesanan ini? Stok akan dikembalikan.'))">
                             Simpan status
                         </button>
+                    </form>
+                </div>
+            @endif
+
+            @if ($order->status->isTrackable())
+                <div class="card p-5" x-data="{ edit: false }">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="font-bold text-stone-900">Nomor resi</h2>
+                            <p class="mt-1 font-mono text-sm font-semibold text-stone-800">{{ $order->tracking_number ?? '—' }}</p>
+                        </div>
+                        <button type="button" class="btn btn-ghost btn-sm" @click="edit = !edit" x-text="edit ? 'Batal' : 'Ubah'">Ubah</button>
+                    </div>
+                    <form x-show="edit" x-cloak method="POST" action="{{ route('admin.orders.tracking-number', $order) }}" class="mt-4 space-y-3">
+                        @csrf
+                        @method('PATCH')
+                        <input name="tracking_number" value="{{ $order->tracking_number }}" required maxlength="64" class="input font-mono" aria-label="Nomor resi baru">
+                        <button class="btn btn-primary w-full">Simpan resi</button>
                     </form>
                 </div>
             @endif
@@ -96,21 +133,21 @@
                     @if ($order->tracking_number)
                         <div><dt class="text-xs text-stone-500">No. resi</dt><dd class="font-mono font-semibold text-stone-800">{{ $order->tracking_number }}</dd></div>
                     @endif
+                    @if ($order->delivered_at)
+                        <div><dt class="text-xs text-stone-500">Sampai tujuan</dt><dd class="text-stone-700">{{ $order->delivered_at->translatedFormat('d M Y, H:i') }}</dd></div>
+                    @endif
+                    @if ($order->cancellation_reason)
+                        <div><dt class="text-xs text-stone-500">Alasan batal</dt><dd class="rounded-xl bg-rose-50 p-3 text-rose-800">{{ $order->cancellation_reason }}</dd></div>
+                    @endif
                     @if ($order->notes)
                         <div><dt class="text-xs text-stone-500">Catatan pembeli</dt><dd class="rounded-xl bg-amber-50 p-3 text-amber-800">{{ $order->notes }}</dd></div>
                     @endif
                 </dl>
             </div>
 
-            <div class="card p-5 text-sm">
-                <h2 class="font-bold text-stone-900">Linimasa</h2>
-                <ol class="mt-3 space-y-3">
-                    @foreach ([['Dibuat', $order->created_at], ['Dibayar', $order->paid_at], ['Dikirim', $order->shipped_at], ['Selesai', $order->completed_at], ['Dibatalkan', $order->cancelled_at]] as [$label, $at])
-                        @if ($at)
-                            <li class="flex items-center gap-3"><span class="size-2 rounded-full bg-brand-500"></span><span class="flex-1 text-stone-700">{{ $label }}</span><span class="text-xs text-stone-500">{{ $at->translatedFormat('d M Y, H:i') }}</span></li>
-                        @endif
-                    @endforeach
-                </ol>
+            <div class="card p-5">
+                <h2 class="mb-4 font-bold text-stone-900">Riwayat status</h2>
+                <x-order-timeline :order="$order" admin />
             </div>
         </div>
     </div>

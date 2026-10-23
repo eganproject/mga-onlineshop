@@ -93,11 +93,12 @@ class EmailTest extends TestCase
         $service->transition($order, OrderStatus::Paid);
         $service->transition($order, OrderStatus::Processing);
         $service->transition($order, OrderStatus::Shipped, 'JNE123456');
+        $service->transition($order, OrderStatus::Delivered);
         $service->transition($order, OrderStatus::Completed);
 
         $sent = Mail::queued(OrderStatusMail::class)->map(fn ($mail) => $mail->status)->values()->all();
         // "Diproses" tidak mengirim email agar pelanggan tidak kebanjiran notifikasi.
-        $this->assertSame([OrderStatus::Paid, OrderStatus::Shipped, OrderStatus::Completed], $sent);
+        $this->assertSame([OrderStatus::Paid, OrderStatus::Shipped, OrderStatus::Delivered, OrderStatus::Completed], $sent);
     }
 
     public function test_order_emails_render(): void
@@ -117,6 +118,7 @@ class EmailTest extends TestCase
         $completed->assertSeeInHtml('Tulis ulasan');
         $this->assertSame("Pesanan {$order->code} selesai, terima kasih!", $completed->envelope()->subject);
 
+        (new OrderStatusMail($order, OrderStatus::Delivered))->assertSeeInHtml('Pesanan diterima');
         (new OrderStatusMail($order, OrderStatus::Cancelled))->assertSeeInHtml('dibatalkan');
         (new WelcomeMail($order->user))->assertSeeInHtml('Mulai belanja');
     }

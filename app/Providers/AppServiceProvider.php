@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
+use App\Contracts\ShipmentTracker;
 use App\Contracts\ShippingProvider;
 use App\Enums\OrderStatus;
 use App\Models\Category;
@@ -12,7 +13,9 @@ use App\Services\Customer\WishlistService;
 use App\Services\Payment\FakePaymentGateway;
 use App\Services\Payment\MidtransPaymentGateway;
 use App\Services\Payment\PaymentService;
+use App\Services\Shipping\FakeShipmentTracker;
 use App\Services\Shipping\FakeShippingProvider;
+use App\Services\Shipping\RajaOngkirShipmentTracker;
 use App\Services\Shipping\RajaOngkirShippingProvider;
 use App\Support\Money;
 use Illuminate\Support\Facades\Blade;
@@ -45,6 +48,14 @@ class AppServiceProvider extends ServiceProvider
                 config('shop.shipping.couriers'),
             ),
             default => new FakeShippingProvider(config('shop.shipping.origin_district_id')),
+        });
+
+        $this->app->bind(ShipmentTracker::class, fn () => match (config('shop.shipping.driver')) {
+            'rajaongkir' => new RajaOngkirShipmentTracker(
+                config('services.rajaongkir.api_key'),
+                config('services.rajaongkir.base_url'),
+            ),
+            default => new FakeShipmentTracker,
         });
     }
 

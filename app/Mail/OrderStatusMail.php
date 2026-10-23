@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/** Kabar perubahan status pesanan (dibayar, dikirim, selesai, dibatalkan). */
+/** Kabar perubahan status pesanan (dibayar, dikirim, sampai, selesai, dibatalkan). */
 class OrderStatusMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
@@ -20,6 +20,7 @@ class OrderStatusMail extends Mailable implements ShouldQueue
     public const STATUSES = [
         OrderStatus::Paid,
         OrderStatus::Shipped,
+        OrderStatus::Delivered,
         OrderStatus::Completed,
         OrderStatus::Cancelled,
     ];
@@ -36,6 +37,7 @@ class OrderStatusMail extends Mailable implements ShouldQueue
         return new Envelope(subject: match ($this->status) {
             OrderStatus::Paid => "Pembayaran pesanan {$code} berhasil",
             OrderStatus::Shipped => "Pesanan {$code} sedang dikirim",
+            OrderStatus::Delivered => "Pesanan {$code} sudah sampai",
             OrderStatus::Completed => "Pesanan {$code} selesai, terima kasih!",
             OrderStatus::Cancelled => "Pesanan {$code} dibatalkan",
             default => "Status pesanan {$code}: {$this->status->label()}",

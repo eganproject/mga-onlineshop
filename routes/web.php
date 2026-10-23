@@ -75,6 +75,9 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::get('/pesanan', [Account\OrderController::class, 'index'])->name('orders.index');
         Route::get('/pesanan/{order}', [Account\OrderController::class, 'show'])->name('orders.show');
         Route::post('/pesanan/{order}/batal', [Account\OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/pesanan/{order}/diterima', [Account\OrderController::class, 'complete'])->name('orders.complete');
+        Route::get('/pesanan/{order}/lacak', [Account\OrderController::class, 'tracking'])->name('orders.tracking')->middleware('throttle:30,1');
+        Route::get('/pesanan/{order}/invoice', [Account\OrderController::class, 'invoice'])->name('orders.invoice');
         Route::post('/pesanan/{order}/simulasi-bayar', [Account\OrderController::class, 'simulatePayment'])->name('orders.simulate-payment');
 
         Route::controller(Account\PaymentController::class)->prefix('pesanan/{order}/bayar')->name('orders.payment')->group(function () {
@@ -127,9 +130,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/reviews/{review}', [Admin\ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
-    Route::patch('/orders/{order}/status', [Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/bulk', 'bulk')->name('bulk');
+        Route::get('/{order}', 'show')->name('show');
+        Route::patch('/{order}/status', 'updateStatus')->name('status');
+        Route::patch('/{order}/tracking-number', 'updateTracking')->name('tracking-number');
+        Route::get('/{order}/tracking', 'tracking')->name('tracking')->middleware('throttle:30,1');
+        Route::get('/{order}/invoice', 'invoice')->name('invoice');
+        Route::get('/{order}/packing-slip', 'packingSlip')->name('packing-slip');
+    });
 
     Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [Admin\CustomerController::class, 'show'])->name('customers.show');

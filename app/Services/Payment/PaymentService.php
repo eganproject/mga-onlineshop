@@ -183,11 +183,11 @@ class PaymentService
      * Pembatalan oleh pelanggan. Status dicek ke gateway dulu agar pesanan
      * yang ternyata sudah dibayar tidak ikut batal. False bila tidak jadi batal.
      */
-    public function cancelByCustomer(Order $order): bool
+    public function cancelByCustomer(Order $order, ?string $reason = null): bool
     {
         $this->syncPending($order);
 
-        return DB::transaction(function () use ($order) {
+        return DB::transaction(function () use ($order, $reason) {
             $locked = Order::query()->lockForUpdate()->find($order->id);
 
             if ($locked->status !== OrderStatus::PendingPayment) {
@@ -195,7 +195,7 @@ class PaymentService
             }
 
             // Stok dikembalikan; tagihan pending dibatalkan lewat voidPendingPayments().
-            $this->orders->cancel($locked);
+            $this->orders->cancel($locked, $reason);
 
             return true;
         });
@@ -272,7 +272,7 @@ class PaymentService
                 ->where('status', PaymentStatus::Pending)
                 ->update(['status' => PaymentStatus::Expired, 'updated_at' => now()]);
 
-            $this->orders->cancel($locked);
+            $this->orders->cancel($locked, 'Pembayaran kedaluwarsa.');
 
             return true;
         });

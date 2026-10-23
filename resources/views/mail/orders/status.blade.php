@@ -16,6 +16,19 @@ Pesanan **{{ $order->code }}** sudah diserahkan ke kurir **{{ $order->courierLab
 Nomor resi: **{{ $order->tracking_number }}**
 </x-mail::panel>
 @endif
+
+<x-mail::button :url="route('account.orders.show', $order)">
+Lacak paket
+</x-mail::button>
+@break
+@case($S::Delivered)
+# Paketmu sudah sampai
+
+Pesanan **{{ $order->code }}** tercatat sudah sampai di alamat tujuan. Jika paket sudah kamu terima dan isinya sesuai, tekan **Pesanan diterima** di halaman pesanan.
+@if (config('shop.orders.auto_complete_days') > 0)
+
+Pesanan akan selesai otomatis dalam {{ config('shop.orders.auto_complete_days') }} hari.
+@endif
 @break
 @case($S::Completed)
 # Pesanan selesai
@@ -31,7 +44,13 @@ Tulis ulasan
 @case($S::Cancelled)
 # Pesanan dibatalkan
 
-Pesanan **{{ $order->code }}** telah dibatalkan. Jika kamu sudah membayar, tim kami akan menghubungimu untuk proses pengembalian dana.
+Pesanan **{{ $order->code }}** telah dibatalkan.
+@if ($order->cancellation_reason)
+
+Alasan: {{ $order->cancellation_reason }}
+@endif
+
+Jika kamu sudah membayar, tim kami akan menghubungimu untuk proses pengembalian dana.
 @break
 @default
 # Status pesanan diperbarui
@@ -41,7 +60,7 @@ Status pesanan **{{ $order->code }}** sekarang: **{{ $status->label() }}**.
 
 @include('mail.orders._items')
 
-@unless ($status === $S::Completed)
+@unless (in_array($status, [$S::Completed, $S::Shipped], true))
 <x-mail::button :url="route('account.orders.show', $order)">
 Lihat pesanan
 </x-mail::button>

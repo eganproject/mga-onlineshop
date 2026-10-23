@@ -57,7 +57,7 @@ class DemoOrderSeeder extends Seeder
             random_int(1, 100) <= 7 => OrderStatus::Cancelled,
             $daysAgo === 0 => fake()->randomElement([OrderStatus::PendingPayment, OrderStatus::Paid, OrderStatus::Paid]),
             $daysAgo <= 2 => fake()->randomElement([OrderStatus::Paid, OrderStatus::Processing]),
-            $daysAgo <= 6 => fake()->randomElement([OrderStatus::Processing, OrderStatus::Shipped]),
+            $daysAgo <= 6 => fake()->randomElement([OrderStatus::Processing, OrderStatus::Shipped, OrderStatus::Delivered]),
             default => OrderStatus::Completed,
         };
 
@@ -89,15 +89,17 @@ class DemoOrderSeeder extends Seeder
             'total' => $subtotal + $shipping,
             'recipient_name' => $customer->name,
             'courier' => fake()->randomElement(['jne', 'sicepat', 'jnt']),
-            'tracking_number' => in_array($status, [OrderStatus::Shipped, OrderStatus::Completed], true) ? 'DEMO'.random_int(100000, 999999) : null,
+            'tracking_number' => $status->isTrackable() ? 'DEMO'.random_int(100000, 999999) : null,
             'created_at' => $at,
             'updated_at' => $at,
             'paid_at' => in_array($status, [OrderStatus::PendingPayment, OrderStatus::Cancelled], true) ? null : $at->copy()->addMinutes(random_int(1, 5)),
-            'shipped_at' => in_array($status, [OrderStatus::Shipped, OrderStatus::Completed], true) ? $at->copy()->addDay() : null,
+            'shipped_at' => $status->isTrackable() ? $at->copy()->addDay() : null,
+            'delivered_at' => in_array($status, [OrderStatus::Delivered, OrderStatus::Completed], true) ? $at->copy()->addDays(3) : null,
             'completed_at' => $status === OrderStatus::Completed ? $at->copy()->addDays(4) : null,
             'cancelled_at' => $status === OrderStatus::Cancelled ? $at->copy()->addHours(3) : null,
         ]);
 
         $order->items()->createMany($lines->all());
+        $order->rebuildStatusHistory();
     }
 }

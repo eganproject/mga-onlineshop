@@ -18,7 +18,7 @@ class DashboardController extends Controller
             'stats' => [
                 'total' => $user->orders()->count(),
                 'pending' => $user->orders()->where('status', OrderStatus::PendingPayment)->count(),
-                'active' => $user->orders()->whereIn('status', [OrderStatus::Paid, OrderStatus::Processing, OrderStatus::Shipped])->count(),
+                'active' => $user->orders()->whereIn('status', [OrderStatus::Paid, OrderStatus::Processing, OrderStatus::Shipped, OrderStatus::Delivered])->count(),
                 'completed' => $user->orders()->where('status', OrderStatus::Completed)->count(),
             ],
             'defaultAddress' => $user->defaultAddress,

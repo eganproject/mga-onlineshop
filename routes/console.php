@@ -44,3 +44,11 @@ Schedule::command('queue:work --stop-when-empty --tries=3 --max-time=50')
     ->when(fn () => config('security.queue_via_scheduler'))
     ->withoutOverlapping()
     ->runInBackground();
+
+// Pesanan: cek resi yang sedang dikirim, lalu selesaikan yang sudah sampai.
+Schedule::command('orders:sync-tracking')
+    ->everyThreeHours()
+    ->when(fn () => config('shop.shipping.tracking_sync'))
+    ->withoutOverlapping()
+    ->onOneServer();
+Schedule::command('orders:auto-complete')->hourly()->withoutOverlapping()->onOneServer();

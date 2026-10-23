@@ -12,6 +12,8 @@ return [
     'full_name' => 'Media Gudang Acc',
     'tagline' => 'Gudangnya aksesoris gadget original & terjangkau',
     'whatsapp' => env('SHOP_WHATSAPP'),
+    // Alamat gudang/pengirim, dicetak di invoice dan packing slip.
+    'address' => env('SHOP_ADDRESS'),
     'instagram' => env('SHOP_INSTAGRAM'),
 
     /*
@@ -52,6 +54,34 @@ return [
         'origin_district_id' => env('SHOP_ORIGIN_DISTRICT_ID', env('SHOP_ORIGIN_CITY_ID')),
         'couriers' => array_values(array_filter(explode(':', env('RAJAONGKIR_COURIERS', 'jne:sicepat:jnt:pos:tiki')))),
         'cache_minutes' => (int) env('SHIPPING_CACHE_MINUTES', 360),
+        // Lacak resi: lama hasil disimpan, dan apakah dicek otomatis terjadwal.
+        'tracking_cache_minutes' => (int) env('TRACKING_CACHE_MINUTES', 60),
+        'tracking_sync' => (bool) env('TRACKING_SYNC', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pesanan
+    |--------------------------------------------------------------------------
+    |
+    | auto_complete_days: pesanan "Sampai Tujuan" otomatis selesai setelah
+    | sekian hari bila pelanggan tidak menekan "Pesanan diterima".
+    | shipped_auto_complete_days: batas aman untuk pesanan "Dikirim" yang
+    | tidak pernah terdeteksi sampai (0 = nonaktif).
+    | cancel_reasons: pilihan alasan saat pelanggan membatalkan pesanan.
+    |
+    */
+
+    'orders' => [
+        'auto_complete_days' => (int) env('ORDER_AUTO_COMPLETE_DAYS', 3),
+        'shipped_auto_complete_days' => (int) env('ORDER_SHIPPED_AUTO_COMPLETE_DAYS', 14),
+        'cancel_reasons' => [
+            'Ingin mengubah pesanan (varian, jumlah, atau alamat)',
+            'Ingin mengganti metode pembayaran',
+            'Menemukan harga yang lebih murah',
+            'Tidak jadi membeli',
+            'Lainnya',
+        ],
     ],
 
     /*

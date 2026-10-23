@@ -79,7 +79,7 @@ class PaymentFlowTest extends TestCase
         [$order] = $this->checkout();
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'cancelled'])->assertSessionHasNoErrors();
+        $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'cancelled', 'note' => 'Stok habis'])->assertSessionHasNoErrors();
 
         $this->assertSame(OrderStatus::Cancelled, $order->refresh()->status);
         $this->assertSame(PaymentStatus::Cancelled, $order->latestPayment->status);
