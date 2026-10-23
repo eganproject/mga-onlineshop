@@ -79,3 +79,13 @@ SHOP_ORIGIN_CITY_ID=...   # ID lokasi gudang di RajaOngkir
 URL notifikasi Midtrans: `https://domain-anda/webhooks/midtrans` (juga tampil di Admin › Integrasi).
 
 > Kode Midtrans (Snap + verifikasi signature webhook) dan RajaOngkir (API Komerce) sudah ditulis tetapi belum diuji dengan API key asli.
+
+## Deploy ke produksi
+
+Panduan lengkap (VPS & shared hosting, tanpa Docker): **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
+- `.env.production.example`: contoh `.env` server produksi.
+- `deploy/`: contoh konfigurasi Nginx, Supervisor, `.htaccess` shared hosting, dan skrip `deploy.sh`.
+- `php artisan shop:check`: cek kesiapan konfigurasi produksi.
+- `php artisan shop:backup`: backup database + foto produk (otomatis tiap hari lewat scheduler).
+- Cron wajib: `* * * * * cd /path/app && php artisan schedule:run >> /dev/null 2>&1`

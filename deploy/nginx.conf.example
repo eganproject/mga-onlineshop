@@ -1,0 +1,54 @@
+# Contoh server block Nginx untuk MGA Online Shop (VPS).
+# Salin ke /etc/nginx/sites-available/mga, sesuaikan domain & path,
+# lalu: ln -s /etc/nginx/sites-available/mga /etc/nginx/sites-enabled/
+# SSL gratis: sudo certbot --nginx -d tokomga.com -d www.tokomga.com
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name tokomga.com www.tokomga.com;
+    root /var/www/mga-onlineshop/public;
+
+    index index.php;
+    charset utf-8;
+
+    # Batas upload foto produk (samakan dengan upload_max_filesize di php.ini).
+    client_max_body_size 20M;
+
+    # Jangan tampilkan versi Nginx.
+    server_tokens off;
+
+    gzip on;
+    gzip_comp_level 5;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # Aset hasil build (nama file sudah ber-hash) & foto produk: cache lama.
+    location ~* ^/(build|storage)/.*\.(css|js|jpg|jpeg|png|gif|webp|avif|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+        try_files $uri =404;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # Tolak akses ke file tersembunyi (.env, .git, dll).
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}

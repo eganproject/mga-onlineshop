@@ -1,0 +1,19 @@
+; Worker antrean (email, notifikasi) untuk VPS.
+; Salin ke /etc/supervisor/conf.d/mga-worker.conf lalu:
+;   sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl start mga-worker:*
+
+[program:mga-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/mga-onlineshop/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+directory=/var/www/mga-onlineshop
+user=www-data
+numprocs=1
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+stopwaitsecs=3600
+redirect_stderr=true
+stdout_logfile=/var/www/mga-onlineshop/storage/logs/worker.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3

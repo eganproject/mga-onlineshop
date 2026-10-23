@@ -1,0 +1,12 @@
+# Untuk shared hosting yang document root-nya TIDAK bisa diarahkan ke folder
+# public/. Simpan file ini sebagai .htaccess di folder root aplikasi.
+# Semua request diteruskan ke public/, file sensitif (.env, vendor, dll)
+# tidak bisa diakses dari browser.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(\.env|\.git|composer\.(json|lock)|artisan|package(-lock)?\.json) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|deploy|docs|lang|resources|routes|storage|tests|vendor)(/|$) - [F,L]
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

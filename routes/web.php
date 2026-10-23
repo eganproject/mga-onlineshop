@@ -32,16 +32,16 @@ Route::controller(Shop\CartController::class)->prefix('keranjang')->name('cart.'
 
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [Auth\AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/masuk', [Auth\AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1');
+    Route::post('/masuk', [Auth\AuthenticatedSessionController::class, 'store'])->middleware('throttle:login');
 
     Route::get('/daftar', [Auth\RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/daftar', [Auth\RegisteredUserController::class, 'store'])->middleware('throttle:6,1');
+    Route::post('/daftar', [Auth\RegisteredUserController::class, 'store'])->middleware('throttle:register');
 
     Route::get('/lupa-password', [Auth\PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('/lupa-password', [Auth\PasswordResetLinkController::class, 'store'])->middleware('throttle:6,1')->name('password.email');
+    Route::post('/lupa-password', [Auth\PasswordResetLinkController::class, 'store'])->middleware('throttle:password-reset')->name('password.email');
 
     Route::get('/reset-password/{token}', [Auth\NewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('/reset-password', [Auth\NewPasswordController::class, 'store'])->name('password.store');
+    Route::post('/reset-password', [Auth\NewPasswordController::class, 'store'])->middleware('throttle:password-reset')->name('password.store');
 });
 
 Route::post('/keluar', [Auth\AuthenticatedSessionController::class, 'destroy'])->middleware('auth')->name('logout');
