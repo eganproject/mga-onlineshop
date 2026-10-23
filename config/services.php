@@ -41,6 +41,17 @@ return [
         'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
     ],
 
+    // Login pelanggan dengan Google lewat Firebase Authentication. Nilai di
+    // bawah adalah konfigurasi web app Firebase (bukan rahasia). Tombol login
+    // hanya tampil bila API key dan Project ID terisi.
+    'firebase' => [
+        'enabled' => filled(env('FIREBASE_API_KEY')) && filled(env('FIREBASE_PROJECT_ID')),
+        'api_key' => env('FIREBASE_API_KEY'),
+        'auth_domain' => env('FIREBASE_AUTH_DOMAIN') ?: (env('FIREBASE_PROJECT_ID') ? env('FIREBASE_PROJECT_ID').'.firebaseapp.com' : null),
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'app_id' => env('FIREBASE_APP_ID'),
+    ],
+
     'rajaongkir' => [
         'api_key' => env('RAJAONGKIR_API_KEY'),
         'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),

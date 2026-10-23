@@ -32,6 +32,18 @@ class SettingController extends Controller
                     'env' => ['SHIPPING_DRIVER=rajaongkir', 'RAJAONGKIR_API_KEY'],
                     'webhook' => null,
                 ],
+                [
+                    'name' => 'Login Google (Firebase)',
+                    'description' => 'Pelanggan masuk/daftar dengan akun Google. Panduan: docs/FIREBASE.md.',
+                    'driver' => 'firebase',
+                    'active' => filled(config('services.firebase.api_key')) || filled(config('services.firebase.project_id')),
+                    'configured' => (bool) config('services.firebase.enabled'),
+                    'inactive_label' => 'Nonaktif',
+                    'mode_label' => 'Project ID',
+                    'mode' => config('services.firebase.project_id') ?: '-',
+                    'env' => ['FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID', 'FIREBASE_APP_ID'],
+                    'webhook' => null,
+                ],
             ],
         ]);
     }

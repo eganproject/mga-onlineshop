@@ -36,6 +36,7 @@ Route::controller(Shop\CartController::class)->prefix('keranjang')->name('cart.'
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [Auth\AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/masuk', [Auth\AuthenticatedSessionController::class, 'store'])->middleware('throttle:login');
+    Route::post('/masuk/google', [Auth\FirebaseLoginController::class, 'store'])->middleware('throttle:login')->name('login.firebase');
 
     Route::get('/daftar', [Auth\RegisteredUserController::class, 'create'])->name('register');
     Route::post('/daftar', [Auth\RegisteredUserController::class, 'store'])->middleware('throttle:register');

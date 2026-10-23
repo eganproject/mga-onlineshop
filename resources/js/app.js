@@ -6,6 +6,7 @@ import regionPicker from './components/region-picker';
 import bannerCarousel from './components/banner-carousel';
 import checkout from './components/checkout';
 import wishlistButton from './components/wishlist-button';
+import firebaseLogin from './components/firebase-login';
 
 window.Alpine = Alpine;
 
@@ -20,5 +21,6 @@ Alpine.data('regionPicker', regionPicker);
 Alpine.data('checkout', checkout);
 Alpine.data('bannerCarousel', bannerCarousel);
 Alpine.data('wishlistButton', wishlistButton);
+Alpine.data('firebaseLogin', firebaseLogin);
 
 Alpine.start();

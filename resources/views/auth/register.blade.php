@@ -1,4 +1,5 @@
 <x-layouts.auth title="Daftar" heading="Buat akun baru" subheading="Gratis, cepat, dan bikin belanja jadi lebih mudah.">
+    <x-firebase-login>Daftar dengan Google</x-firebase-login>
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
         @csrf
         <div>

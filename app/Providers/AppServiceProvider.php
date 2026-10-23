@@ -8,6 +8,7 @@ use App\Contracts\ShippingProvider;
 use App\Enums\OrderStatus;
 use App\Models\Category;
 use App\Models\Order;
+use App\Services\Auth\FirebaseTokenVerifier;
 use App\Services\Cart\CartService;
 use App\Services\Customer\WishlistService;
 use App\Services\Payment\FakePaymentGateway;
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(CartService::class);
         $this->app->scoped(WishlistService::class);
+        $this->app->bind(FirebaseTokenVerifier::class, fn () => new FirebaseTokenVerifier(config('services.firebase.project_id')));
 
         // Driver dipilih lewat .env (PAYMENT_DRIVER / SHIPPING_DRIVER), jadi
         // kode lain cukup bergantung pada interface-nya.

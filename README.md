@@ -78,6 +78,10 @@ app/
 - Ulasan diubah lewat `App\Services\Reviews\ReviewService` agar `products.rating_avg` & `review_count` selalu sinkron. `REVIEWS_AUTO_APPROVE=true` untuk melewati moderasi.
 - `SEO_INDEXING=false` (mis. di server staging) membuat seluruh situs `noindex` dan robots.txt menolak crawler.
 
+## Login Google untuk pelanggan (Firebase)
+
+Pelanggan bisa masuk/daftar dengan tombol **Lanjutkan dengan Google** (Firebase Authentication). Staf tetap memakai email + password. Tombol hanya tampil bila `FIREBASE_API_KEY` dan `FIREBASE_PROJECT_ID` diisi; tidak perlu service account. Langkah setup: [docs/FIREBASE.md](docs/FIREBASE.md).
+
 ## Integrasi Midtrans & RajaOngkir
 
 Default `.env` memakai driver `fake` agar alur checkout bisa dicoba tanpa API key: ongkir memakai tarif contoh dan pembayaran bisa disimulasikan dari halaman pesanan (non-production).
