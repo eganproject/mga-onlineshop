@@ -130,7 +130,9 @@ class MgaCatalogTest extends TestCase
         $this->assertModelMissing($demoCategory);
         $this->assertFalse($ordered->fresh()->is_active);
         $this->assertFalse($ordered->fresh()->is_featured);
-        $this->assertFalse($orderedCategory->fresh()->is_active, 'Kategori lama yang masih berisi produk disembunyikan.');
+        $this->assertModelMissing($orderedCategory);
+        $this->assertNull($ordered->fresh()->category_id);
+        $this->assertSame(12, Category::count());
         $this->assertTrue(Product::where('slug', 'tripod-banner-2-sisi')->exists());
     }
 
