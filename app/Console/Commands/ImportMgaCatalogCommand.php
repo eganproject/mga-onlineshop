@@ -37,7 +37,7 @@ class ImportMgaCatalogCommand extends Command
 
         if ($this->option('replace')) {
             $removed = $catalog->removeOthers($products);
-            $this->components->info("Produk lama: {$removed['deleted']} dihapus, {$removed['deactivated']} dinonaktifkan (punya pesanan). Kategori kosong dihapus: {$removed['categories']}, kategori lama disembunyikan: {$removed['hidden']}.");
+            $this->components->info("Produk lama: {$removed['deleted']} dihapus, {$removed['deactivated']} dinonaktifkan (punya pesanan). Kategori lama dihapus: {$removed['categories']}.");
         }
 
         $bar = $this->output->createProgressBar($total);

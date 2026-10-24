@@ -92,13 +92,13 @@ class MgaCatalog
      * Hapus produk & kategori yang bukan bagian katalog MGA (mis. data demo lama).
      * Produk yang pernah dipesan hanya dinonaktifkan supaya riwayat pesanan utuh.
      *
-     * Kategori lama yang masih berisi produk tersebut disembunyikan.
+     * Semua kategori di luar katalog MGA dihapus.
      *
-     * @return array{deleted: int, deactivated: int, categories: int, hidden: int}
+     * @return array{deleted: int, deactivated: int, categories: int}
      */
     public function removeOthers(ProductService $products): array
     {
-        $result = ['deleted' => 0, 'deactivated' => 0, 'categories' => 0, 'hidden' => 0];
+        $result = ['deleted' => 0, 'deactivated' => 0, 'categories' => 0];
 
         Product::whereNotIn('slug', $this->slugs())->withCount('orderItems')->get()
             ->each(function (Product $product) use ($products, &$result) {
@@ -113,17 +113,12 @@ class MgaCatalog
                 }
             });
 
-        $keep = $this->categorySlugs();
-        // Subkategori dulu, baru induknya.
-        Category::whereNotIn('slug', $keep)->orderByRaw('parent_id is null')->get()
+        // Kategori lama dihapus semua (subkategori dulu). Produk lama yang tersisa
+        // sudah nonaktif; kategorinya otomatis jadi kosong (FK nullOnDelete).
+        Category::whereNotIn('slug', $this->categorySlugs())->orderByRaw('parent_id is null')->get()
             ->each(function (Category $category) use (&$result) {
-                if (! $category->products()->exists() && ! $category->children()->exists()) {
-                    $category->delete();
-                    $result['categories']++;
-                } elseif ($category->is_active) {
-                    $category->update(['is_active' => false]);
-                    $result['hidden']++;
-                }
+                $category->delete();
+                $result['categories']++;
             });
 
         return $result;
