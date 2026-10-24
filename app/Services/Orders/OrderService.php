@@ -2,6 +2,7 @@
 
 namespace App\Services\Orders;
 
+use App\Contracts\PaymentGateway;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\StockMovementType;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Throwable;
 
 /** Semua perubahan status pesanan lewat sini agar aturannya konsisten. */
 class OrderService
@@ -157,9 +159,24 @@ class OrderService
     {
         $order->paid_at = now();
 
+        $pending = $order->payments()->where('status', PaymentStatus::Pending)->get();
+
         $order->payments()
-            ->where('status', PaymentStatus::Pending)
+            ->whereKey($pending->modelKeys())
             ->update(['status' => PaymentStatus::Paid, 'payment_type' => 'manual', 'paid_at' => now()]);
+
+        // Link bayar di gateway ditutup supaya pelanggan tidak membayar dua kali.
+        DB::afterCommit(function () use ($pending) {
+            $gateway = app(PaymentGateway::class);
+
+            foreach ($pending->where('gateway', $gateway->name()) as $payment) {
+                try {
+                    $gateway->cancel($payment);
+                } catch (Throwable $e) {
+                    report($e);
+                }
+            }
+        });
     }
 
     /**

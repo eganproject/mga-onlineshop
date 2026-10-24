@@ -98,8 +98,8 @@
                         <li class="flex items-center gap-3">
                             <span class="grid size-7 shrink-0 place-items-center rounded-lg bg-stone-100 text-xs font-bold text-stone-600">{{ $i + 1 }}</span>
                             <div class="min-w-0 flex-1">
-                                @if ($row->product_id)
-                                    <a href="{{ route('admin.products.edit', $row->product_id) }}" class="block truncate text-sm font-semibold text-stone-800 hover:text-brand-700">{{ $row->name }}</a>
+                                @if ($row->slug && auth()->user()->can('catalog.manage'))
+                                    <a href="{{ route('admin.products.edit', $row->slug) }}" class="block truncate text-sm font-semibold text-stone-800 hover:text-brand-700">{{ $row->name }}</a>
                                 @else
                                     <p class="truncate text-sm font-semibold text-stone-800">{{ $row->name }}</p>
                                 @endif

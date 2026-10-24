@@ -219,6 +219,19 @@ class MidtransWebhookTest extends TestCase
         Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/'.$order->code.'/cancel'));
     }
 
+    public function test_manual_paid_confirmation_closes_midtrans_payment_link(): void
+    {
+        $order = $this->checkout();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->patch(route('admin.orders.status', $order), ['status' => 'paid'])->assertSessionHas('success');
+
+        $this->assertSame(OrderStatus::Paid, $order->refresh()->status);
+        $this->assertSame(PaymentStatus::Paid, $order->latestPayment->status);
+        $this->assertSame('manual', $order->latestPayment->payment_type);
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/'.$order->code.'/cancel'));
+    }
+
     public function test_customer_cannot_cancel_order_that_midtrans_already_settled(): void
     {
         $order = $this->checkout();

@@ -46,13 +46,22 @@ class CartController extends Controller
             return back()->with('error', 'Maaf, stok produk ini sedang habis.');
         }
 
-        $this->cart->add($product, $variant, (int) ($data['quantity'] ?? 1));
+        $before = $this->cart->quantity(CartService::key($product->id, $variant?->id));
+        $wanted = $before + max(1, (int) ($data['quantity'] ?? 1));
+        $quantity = $this->cart->add($product, $variant, (int) ($data['quantity'] ?? 1));
 
         if ($request->boolean('buy_now')) {
             return redirect()->route('checkout.index');
         }
 
         $name = $variant ? "{$product->name} ({$variant->name})" : $product->name;
+
+        // Jumlah dibatasi stok: beri tahu pelanggan, jangan diam-diam.
+        if ($quantity < $wanted) {
+            return back()->with('warning', $quantity > $before
+                ? "{$name} ditambahkan, tapi stok hanya {$quantity}. Jumlah di keranjang disesuaikan."
+                : "Stok {$name} hanya {$quantity} dan semuanya sudah ada di keranjang.");
+        }
 
         return back()->with('success', "{$name} ditambahkan ke keranjang.");
     }

@@ -140,7 +140,7 @@ class SalesReportService
             ->whereIn('orders.status', self::revenueStatuses())
             ->whereBetween('orders.paid_at', [$period->start(), $period->end()])
             ->groupBy('order_items.product_id', DB::raw('CASE WHEN order_items.product_id IS NULL THEN order_items.product_name END'))
-            ->selectRaw('order_items.product_id, COALESCE(MAX(products.name), MAX(order_items.product_name)) as name, COALESCE(MAX(products.sku), MAX(order_items.sku)) as sku, SUM(order_items.quantity) as quantity, SUM(order_items.subtotal) as revenue, COUNT(DISTINCT order_items.order_id) as orders')
+            ->selectRaw('order_items.product_id, COALESCE(MAX(products.name), MAX(order_items.product_name)) as name, MAX(products.slug) as slug, COALESCE(MAX(products.sku), MAX(order_items.sku)) as sku, SUM(order_items.quantity) as quantity, SUM(order_items.subtotal) as revenue, COUNT(DISTINCT order_items.order_id) as orders')
             ->orderByDesc('revenue')
             ->orderByDesc('quantity')
             ->when($limit, fn ($q) => $q->limit($limit))
@@ -150,6 +150,7 @@ class SalesReportService
 
         return $rows->map(fn (object $row) => (object) [
             'product_id' => $row->product_id ? (int) $row->product_id : null,
+            'slug' => $row->slug,
             'name' => $row->name,
             'sku' => $row->sku,
             'quantity' => (int) $row->quantity,

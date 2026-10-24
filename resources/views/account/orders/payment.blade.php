@@ -63,7 +63,7 @@
                 </div>
 
                 @if ($isFake)
-                    <p class="mt-4 text-xs text-stone-500">Mode development: PAYMENT_DRIVER=fake. Isi MIDTRANS_SERVER_KEY & MIDTRANS_CLIENT_KEY lalu set PAYMENT_DRIVER=midtrans untuk pembayaran asli.</p>
+                    <p class="mt-4 text-xs text-stone-500">Mode uji coba: pembayaran hanya disimulasikan, tidak ada dana yang ditarik.</p>
                 @endif
 
                 <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-stone-200 pt-5 text-sm">
