@@ -15,7 +15,7 @@
         @endcan
     </x-admin.page-header>
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="space-y-6">
             <div class="card p-5 text-center">
                 <span class="mx-auto grid size-16 place-items-center rounded-full bg-brand-100 text-xl font-bold text-brand-700">{{ $customer->initials() }}</span>

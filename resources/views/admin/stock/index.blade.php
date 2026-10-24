@@ -4,7 +4,7 @@
         <a href="{{ route('admin.products.transfer') }}#stok" class="btn btn-secondary"><x-icon name="download" class="size-4 rotate-180" /> Update via file</a>
     </x-admin.page-header>
 
-    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <x-admin.stat-card label="Total unit di gudang" :value="number_format($summary['units'], 0, ',', '.')" icon="archive" />
         <a href="{{ route('admin.stock.index', ['status' => 'menipis']) }}" class="block rounded-3xl transition hover:-translate-y-0.5">
             <x-admin.stat-card label="Produk stok menipis" :value="$summary['low']" icon="warning" tone="violet" :hint="'Produk/varian aktif dengan stok ≤ '.$threshold.' unit'" />
@@ -47,7 +47,7 @@
                                 <td @if ($product->has_variants) colspan="2" @endif>
                                     <div class="flex min-w-0 items-center gap-3 sm:min-w-56">
                                         <x-product-image :product="$product" class="size-10 shrink-0 rounded-lg" />
-                                        <div class="min-w-0">
+                                        <div class="min-w-0 max-sm:max-w-[calc(100vw-11rem)]">
                                             @can('catalog.manage')
                                                 <a href="{{ route('admin.products.edit', $product) }}" class="block truncate font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</a>
                                             @else
@@ -64,14 +64,15 @@
                                 @unless ($product->has_variants)
                                     @include('admin.stock.partials.cells', ['product' => $product, 'row' => $rows->first()])
                                 @else
-                                    <td></td><td></td>
+                                    {{-- Di HP kolom SKU disembunyikan, jadi cukup satu sel kosong setelah colspan 2. --}}
+                                    <td class="max-sm:hidden"></td><td></td>
                                 @endunless
                             </tr>
                             @if ($product->has_variants)
                                 @foreach ($rows as $row)
                                     <tr class="bg-stone-50/40">
-                                        <td class="pl-8 sm:pl-16">
-                                            <span class="inline-flex items-center gap-2 text-stone-700">
+                                        <td class="pl-6 sm:pl-16">
+                                            <span class="inline-flex flex-wrap items-center gap-2 text-stone-700">
                                                 <x-icon name="swatch" class="size-4 text-stone-400" /> {{ $row['name'] }}
                                                 @unless ($row['active'])<span class="badge bg-stone-100 text-stone-500 ring-stone-500/20">Nonaktif</span>@endunless
                                             </span>

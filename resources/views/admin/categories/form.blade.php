@@ -4,7 +4,7 @@
 
     <form method="POST" enctype="multipart/form-data"
           action="{{ $editing ? route('admin.categories.update', $category) : route('admin.categories.store') }}"
-          class="grid gap-6 lg:grid-cols-3">
+          class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         @csrf
         @if ($editing) @method('PUT') @endif
 

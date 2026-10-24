@@ -1,6 +1,6 @@
 @props(['title' => null, 'heading', 'subheading' => null])
 <x-layouts.base :title="$title" body-class="bg-white text-stone-800">
-    <div class="grid min-h-screen lg:grid-cols-2">
+    <div class="grid grid-cols-1 min-h-screen lg:grid-cols-2">
         {{-- Panel brand --}}
         <div class="relative hidden overflow-hidden bg-ink lg:block">
             <x-logo variant="mark" mono class="pointer-events-none absolute -bottom-8 -left-10 h-80 text-white/[0.05]" aria-hidden="true" />

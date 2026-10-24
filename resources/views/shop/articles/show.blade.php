@@ -114,7 +114,7 @@
                 <h2 id="artikel-lain" class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Baca juga</h2>
                 <a href="{{ route('articles.index') }}" class="link-underline shrink-0 text-sm font-semibold">Semua artikel</a>
             </div>
-            <div class="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($related as $item)
                     <x-article-card :article="$item" />
                 @endforeach

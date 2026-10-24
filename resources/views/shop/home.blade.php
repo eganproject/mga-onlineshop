@@ -140,7 +140,7 @@
             <h2 class="display mt-2 text-3xl leading-none sm:text-5xl">Perlengkapan promosi sesuai kebutuhan</h2>
             <p class="mt-4 text-sm leading-relaxed text-stone-600 sm:text-base">Dari warung kopi sampai booth pameran, pilih media display yang paling pas untuk menarik pelanggan.</p>
         </div>
-        <div class="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
             @foreach ([
                 ['receipt', 'Kafe & Restoran', 'Menu di meja, papan promo di pintu, dan pesanan dapur yang rapi.', ['Standing sign' => 'standing sign', 'Tripod type H' => 'type h', 'Bill holder' => 'bill holder', 'Light box' => 'light box']],
                 ['storefront', 'Toko & Ritel', 'Tarik perhatian pejalan kaki dan pajang produk dengan rapi.', ['Tripod type A' => 'type a', 'Brosur tempel' => 'brosur tempel', 'Etalase mini' => 'etalase', 'Box display' => 'box display']],
@@ -165,7 +165,7 @@
 
     {{-- Banner editorial --}}
     <section class="shop-container mt-16 lg:mt-24">
-        <div class="grid overflow-hidden bg-ink text-white lg:grid-cols-2">
+        <div class="grid grid-cols-1 overflow-hidden bg-ink text-white lg:grid-cols-2">
             <div class="relative min-h-64 overflow-hidden bg-stone-800 lg:min-h-[520px]">
                 @if ($image = $bestSellers->first(fn ($p) => $p->imageUrl())?->imageUrl())
                     <img src="{{ $image }}" alt="" loading="lazy" class="absolute inset-0 size-full object-cover opacity-90">
@@ -210,7 +210,7 @@
 
     {{-- Janji layanan --}}
     <section class="shop-container mt-16 lg:mt-24">
-        <div class="grid gap-px overflow-hidden border border-stone-200 bg-stone-200 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-px overflow-hidden border border-stone-200 bg-stone-200 sm:grid-cols-3">
             @foreach ([
                 ['tag', 'Harga gudang', 'Langsung dari distributor perlengkapan promosi, tanpa perantara.'],
                 ['truck', 'Kirim hari ini', 'Pesanan sebelum 16.00 WIB dikirim di hari yang sama, Senin–Minggu.'],

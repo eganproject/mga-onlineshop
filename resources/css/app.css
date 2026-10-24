@@ -317,6 +317,10 @@
         .bottom-nav-spacer {
             padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
         }
+        /* Tombol WhatsApp melayang menutupi baris terakhir footer: beri ruang ekstra. */
+        .bottom-nav-spacer:has(~ [data-whatsapp-float]) {
+            padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
+        }
     }
     /* Tombol WhatsApp melayang: di HP berada di atas navigasi bawah / bar beli. */
     .whatsapp-float {
@@ -371,15 +375,26 @@
         @apply min-w-full divide-y divide-stone-100 text-sm;
     }
     .table-base th {
-        @apply px-4 py-3 text-left text-xs font-semibold tracking-wide text-stone-500 uppercase;
+        @apply px-3 py-3 sm:px-4 text-left text-xs font-semibold tracking-wide text-stone-500 uppercase;
     }
     .table-base td {
-        @apply px-4 py-3.5 text-stone-700;
+        @apply px-3 py-3.5 text-stone-700 sm:px-4;
+    }
+    /* Tabel yang lebih lebar dari layar (HP): bayangan tipis di tepi yang masih bisa digeser. */
+    .overflow-x-auto:has(> .table-base) {
+        background:
+            linear-gradient(to right, var(--color-white) 30%, transparent) left / 2.5rem 100% no-repeat local,
+            linear-gradient(to left, var(--color-white) 30%, transparent) right / 2.5rem 100% no-repeat local,
+            radial-gradient(farthest-side at 0 50%, rgb(28 25 23 / 0.14), transparent) left / 0.75rem 100% no-repeat scroll,
+            radial-gradient(farthest-side at 100% 50%, rgb(28 25 23 / 0.14), transparent) right / 0.75rem 100% no-repeat scroll;
     }
 }
 
 /* iOS Safari memperbesar halaman saat fokus ke input < 16px: di layar sentuh kecil pakai 16px. */
 @media (pointer: coarse) and (width < 64rem) {
+    input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden']),
+    select,
+    textarea,
     .input,
     .ts-wrapper .ts-control,
     .ts-wrapper .ts-control input {

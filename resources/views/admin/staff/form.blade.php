@@ -5,12 +5,12 @@
 <x-layouts.admin :title="$editing ? 'Ubah Staf' : 'Tambah Staf'">
     <x-admin.page-header :title="$editing ? 'Ubah akun staf' : 'Tambah akun staf'" :back="route('admin.staff.index')" />
 
-    <form method="POST" action="{{ $editing ? route('admin.staff.update', $member) : route('admin.staff.store') }}" class="grid items-start gap-6 lg:grid-cols-3">
+    <form method="POST" action="{{ $editing ? route('admin.staff.update', $member) : route('admin.staff.store') }}" class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         @csrf
         @if ($editing) @method('PUT') @endif
 
         <div class="card space-y-5 p-6 lg:col-span-2">
-            <div class="grid gap-5 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <x-form.input name="name" label="Nama" :value="$member->name" required maxlength="100" autocomplete="off" wrapper-class="sm:col-span-2" />
                 <x-form.input type="email" name="email" label="Email (untuk login)" icon="envelope" :value="$member->email" required autocomplete="off" />
                 <x-form.phone name="phone" label="No. HP" :value="$member->phone" optional />

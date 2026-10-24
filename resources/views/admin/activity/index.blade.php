@@ -25,7 +25,7 @@
     <x-admin.page-header title="Log Aktivitas" description="Catatan perubahan yang dilakukan staf di panel admin, terbaru di atas." />
 
     <div class="card overflow-hidden">
-        <form method="GET" class="grid gap-3 border-b border-stone-100 p-4 sm:grid-cols-2 lg:grid-cols-5" x-data @change="$el.submit()">
+        <form method="GET" class="grid grid-cols-1 gap-3 border-b border-stone-100 p-4 sm:grid-cols-2 lg:grid-cols-5" x-data @change="$el.submit()">
             <div class="relative lg:col-span-1">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari aksi / data..." class="input pl-10">
@@ -87,7 +87,7 @@
                                             </tbody>
                                         </table>
                                     @else
-                                        <dl class="grid gap-x-4 gap-y-1 sm:grid-cols-[max-content_1fr]">
+                                        <dl class="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-[max-content_1fr]">
                                             @foreach ($log->properties as $key => $value)
                                                 <dt class="font-medium text-stone-500">{{ \Illuminate\Support\Str::headline((string) $key) }}</dt>
                                                 <dd class="break-words text-stone-800">

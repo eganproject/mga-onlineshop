@@ -9,7 +9,7 @@
 <x-layouts.admin title="Pengaturan Toko">
     <x-admin.page-header title="Pengaturan Toko" description="Identitas, kontak, pengiriman, dan pembayaran. Perubahan langsung berlaku di seluruh toko." />
 
-    <form method="POST" action="{{ route('admin.store-settings.update') }}" class="grid gap-6 lg:grid-cols-3">
+    <form method="POST" action="{{ route('admin.store-settings.update') }}" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         @csrf
         @method('PUT')
 
@@ -20,7 +20,7 @@
                     <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="storefront" /></span>
                     <div><h2 class="font-bold text-stone-900">Identitas toko</h2><p class="text-xs text-stone-500">Tampil di judul halaman, email, invoice, dan footer.</p></div>
                 </div>
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.input name="name" label="Nama singkat" :value="$values['name']" required maxlength="30"
                                   tooltip="Dipakai di tempat sempit: judul tab browser dan beberapa email. Mis. MGA." />
                     <x-form.input name="full_name" label="Nama lengkap" :value="$values['full_name']" required maxlength="80"
@@ -40,7 +40,7 @@
                     <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="chat" /></span>
                     <div><h2 class="font-bold text-stone-900">Kontak & media sosial</h2><p class="text-xs text-stone-500">Dipakai untuk tombol WhatsApp dan tautan profil toko.</p></div>
                 </div>
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.phone name="whatsapp" label="No. WhatsApp" :value="$values['whatsapp']" placeholder="0812-3456-7890" hint="Disimpan dalam format 62xxx." optional
                                   tooltip="Nomor tujuan tombol WhatsApp melayang, tombol “Hubungi kami”, dan kontak di footer & packing slip."
                                   tooltip-tips="Pakai nomor WhatsApp (Business) yang selalu aktif dan dipegang admin/CS." />
@@ -86,7 +86,7 @@
                     <p class="font-semibold text-stone-800">{{ $values['origin_label'] ?: ($values['district_id'] ? 'ID '.$values['district_id'] : 'Belum diatur') }}</p>
                 </div>
 
-                <div class="grid gap-5 sm:grid-cols-3">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                     @foreach ([
                         ['province', 'province_id', 'Provinsi'],
                         ['city', 'city_id', 'Kota / Kabupaten'],

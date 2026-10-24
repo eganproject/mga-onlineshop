@@ -7,13 +7,13 @@
     <x-admin.page-header :title="$editing ? 'Edit voucher '.$voucher->code : 'Buat voucher'" :back="route('admin.vouchers.index')" />
 
     <form method="POST" action="{{ $editing ? route('admin.vouchers.update', $voucher) : route('admin.vouchers.store') }}"
-          class="grid gap-6 lg:grid-cols-3" x-data="{ type: @js($type) }">
+          class="grid grid-cols-1 gap-6 lg:grid-cols-3" x-data="{ type: @js($type) }">
         @csrf
         @if ($editing) @method('PUT') @endif
 
         <div class="space-y-6 lg:col-span-2">
             <div class="card space-y-5 p-6">
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <div class="label-row">
                             <label for="code" class="label">Kode voucher</label>
@@ -44,7 +44,7 @@
             <div class="card space-y-5 p-6">
                 <div>
                     <p class="label">Jenis voucher</p>
-                    <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         @foreach ([
                             [VoucherType::Percent, 'Potong sekian % dari subtotal barang'],
                             [VoucherType::Fixed, 'Potong nominal tetap dari subtotal'],
@@ -61,7 +61,7 @@
                     <x-input-error for="type" />
                 </div>
 
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <div class="label-row">
                             <label for="value" class="label">
@@ -94,7 +94,7 @@
 
             <div class="card space-y-5 p-6">
                 <h2 class="font-bold text-stone-900">Batas pemakaian & periode</h2>
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.number name="quota" label="Kuota total" optional :value="$voucher->quota" min="1" placeholder="Tanpa batas"
                                    :hint="$editing ? 'Sudah dipakai '.$used.' kali. Pesanan batal mengembalikan kuota.' : null"
                                    tooltip="Jumlah maksimal voucher bisa dipakai oleh semua pelanggan (siapa cepat dia dapat). Kosongkan untuk tanpa batas."

@@ -78,7 +78,7 @@
 
     {{-- Ringkasan hak akses tiap jabatan --}}
     <h2 class="mt-8 mb-3 font-bold text-stone-900">Hak akses per jabatan</h2>
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ($roles as $role)
             <div class="card p-5">
                 <span class="badge {{ $role->badgeClass() }}">{{ $role->label() }}</span>

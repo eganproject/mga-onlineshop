@@ -34,7 +34,7 @@
 
     @if (in_array($import->status, [ImportStatus::Ready, ImportStatus::Completed], true))
         {{-- Ringkasan --}}
-        <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <x-admin.stat-card label="Baris di file" :value="$fmt($import->total_rows)" icon="archive" />
             @if ($isStock)
                 <x-admin.stat-card :label="$import->status === ImportStatus::Completed ? 'Stok diperbarui' : 'Akan diubah'" :value="$fmt($result['changed'] ?? $summary['changed'] ?? 0)" icon="check-circle" tone="emerald" :hint="($summary['unchanged'] ?? 0).' baris tanpa perubahan'" />

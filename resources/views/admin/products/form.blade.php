@@ -36,7 +36,7 @@
 
     <form method="POST" enctype="multipart/form-data"
           action="{{ $editing ? route('admin.products.update', $product) : route('admin.products.store') }}"
-          class="grid gap-6 lg:grid-cols-3"
+          class="grid grid-cols-1 gap-6 lg:grid-cols-3"
           x-data="productForm(@js($formConfig))">
         @csrf
         @if ($editing) @method('PUT') @endif
@@ -46,7 +46,7 @@
             <div class="card space-y-5 p-6">
                 <h2 class="font-bold text-stone-900">Informasi produk</h2>
                 <x-form.input name="name" label="Nama produk" :value="$product->name" required maxlength="255" placeholder="Contoh: Frame Akrilik Dinding A4" />
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.category-select name="category_id" label="Kategori" :categories="$categories" :selected="$product->category_id" placeholder="Tanpa kategori" />
                     <x-form.input name="sku" label="SKU induk" optional :value="$product->sku" maxlength="64"
                                   tooltip="Kode unik produk untuk gudang (Stock Keeping Unit). Tidak tampil sebagai nama ke pelanggan, tapi bisa dicari di admin."
@@ -132,7 +132,7 @@
                 </div>
 
                 {{-- Tanpa varian --}}
-                <div x-show="!hasVariants" class="mt-5 grid gap-5 sm:grid-cols-2">
+                <div x-show="!hasVariants" class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.money name="price" label="Harga jual" :value="$product->price" x-bind:required="!hasVariants" x-bind:disabled="hasVariants" />
                     <x-form.money name="compare_at_price" label="Harga coret" optional :value="$product->compare_at_price" x-bind:disabled="hasVariants"
                                   hint="Harga sebelum diskon, tampil dicoret."
@@ -146,7 +146,7 @@
 
                 {{-- Dengan varian --}}
                 <div x-show="hasVariants" x-cloak class="mt-5 space-y-4">
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <div class="label-row">
                                 <label for="variant_label" class="label">Judul pilihan</label>

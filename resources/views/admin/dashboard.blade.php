@@ -83,7 +83,7 @@
     @can('reports.view')
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {{-- Produk terlaris --}}
         <div class="card min-w-0 p-5">
             <div class="flex items-center justify-between">
@@ -177,15 +177,15 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Pesanan</th><th>Pelanggan</th><th>Total</th><th>Status</th><th></th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th>Pesanan</th><th class="hidden sm:table-cell">Pelanggan</th><th>Total</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($recentOrders as $order)
                             <tr class="hover:bg-stone-50/50">
-                                <td class="whitespace-nowrap"><p class="font-semibold text-stone-900">{{ $order->code }}</p><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}</p></td>
-                                <td>{{ $order->user->name }}</td>
-                                <td class="font-semibold tabular-nums">@rupiah($order->total)</td>
-                                <td><x-order-status :status="$order->status" /></td>
-                                <td class="text-right"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a></td>
+                                <td class="whitespace-nowrap"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}<span class="sm:hidden"> · {{ $order->user->name }}</span></p><div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div></td>
+                                <td class="hidden sm:table-cell">{{ $order->user->name }}</td>
+                                <td class="font-semibold whitespace-nowrap tabular-nums">@rupiah($order->total)</td>
+                                <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>
+                                <td class="hidden text-right sm:table-cell"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a></td>
                             </tr>
                         @endforeach
                     </tbody>

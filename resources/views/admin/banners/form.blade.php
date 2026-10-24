@@ -6,7 +6,7 @@
 
     <form method="POST" enctype="multipart/form-data"
           action="{{ $editing ? route('admin.banners.update', $banner) : route('admin.banners.store') }}"
-          class="grid gap-6 lg:grid-cols-3">
+          class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         @csrf
         @if ($editing) @method('PUT') @endif
 
@@ -36,7 +36,7 @@
                     <input id="subtitle" name="subtitle" value="{{ old('subtitle', $banner->subtitle) }}" maxlength="255" placeholder="Pakai kode HEMAT10 sampai akhir bulan" class="input">
                     <x-input-error for="subtitle" />
                 </div>
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <div class="label-row">
                             <label for="link_url" class="label">Link <span class="font-normal text-stone-400">(opsional)</span></label>

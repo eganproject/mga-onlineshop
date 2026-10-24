@@ -34,7 +34,7 @@
           x-effect="if (!slugTouched) slug = slugify(title)"
           {{-- Enter di kotak isian (judul, tag, dll.) jangan langsung mengirim form. --}}
           @keydown.enter="if ($event.target.matches('input:not([type=submit])')) $event.preventDefault()"
-          class="grid gap-6 xl:grid-cols-3">
+          class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         @csrf
         @if ($editing) @method('PUT') @endif
 

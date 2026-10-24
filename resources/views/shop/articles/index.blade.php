@@ -63,7 +63,7 @@
                 @fragment('infinite-list')
                     <x-infinite-list :paginator="$articles" label="artikel" skeleton="article" :skeleton-count="3"
                                      class="{{ $featured ? 'mt-14 border-t border-stone-200 pt-12' : 'mt-8' }}"
-                                     items-class="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+                                     items-class="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($list as $article)
                             <x-article-card :article="$article" :eager="! $featured && $loop->index < 3" />
                         @endforeach

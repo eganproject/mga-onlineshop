@@ -317,7 +317,7 @@
         {{-- Footer --}}
         <footer class="bottom-nav-spacer mt-20 bg-ink text-white">
             <div class="shop-container py-14 lg:py-20">
-                <div class="grid gap-12 lg:grid-cols-12">
+                <div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
                     <div class="lg:col-span-5">
                         <a href="{{ route('home') }}" class="mb-8 inline-block" aria-label="{{ config('shop.full_name') }}"><x-logo dark class="h-14" /></a>
                         <h2 class="display text-3xl leading-[0.95] sm:text-4xl">Butuh bantuan memilih?</h2>

@@ -18,12 +18,12 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Kategori</th><th>Produk</th><th>Urutan</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th>Kategori</th><th>Produk</th><th class="hidden sm:table-cell">Urutan</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($categories as $category)
                             <tr @class(['hover:bg-stone-50/50', 'bg-stone-50/30' => $category->parent_id])>
                                 <td>
-                                    <div @class(['flex min-w-52 items-center gap-3', 'pl-8' => $category->parent_id && ! $search])>
+                                    <div @class(['flex min-w-44 items-center gap-3 sm:min-w-52', 'pl-8' => $category->parent_id && ! $search])>
                                         <div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-50 text-brand-500">
                                             @if ($category->imageUrl())
                                                 <img src="{{ $category->imageUrl() }}" alt="" class="size-full object-cover">
@@ -45,7 +45,7 @@
                                         <span class="text-xs text-stone-400">+{{ $category->children->sum('products_count') }} di subkategori</span>
                                     @endif
                                 </td>
-                                <td>{{ $category->sort_order }}</td>
+                                <td class="hidden sm:table-cell">{{ $category->sort_order }}</td>
                                 <td>
                                     <form method="POST" action="{{ route('admin.categories.toggle', $category) }}">
                                         @csrf

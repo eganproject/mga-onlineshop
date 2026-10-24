@@ -33,7 +33,7 @@
             @endif
         </div>
     @else
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($banners as $banner)
                 @php
                     [$label, $class] = match ($banner->state()) {
