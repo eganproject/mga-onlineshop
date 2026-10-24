@@ -26,6 +26,11 @@ export default function cart(Alpine) {
 
         // Ambil isian sebelum tombol dinonaktifkan (tombol nonaktif tidak ikut terkirim).
         const body = new FormData(form, submitter && submitter.form === form ? submitter : undefined);
+
+        // Halaman keranjang: angka jumlah langsung berubah, server lalu mengoreksi bila perlu.
+        const qtyLabel = form.querySelector('[data-cart-qty]');
+        const previousQty = qtyLabel?.textContent;
+        if (qtyLabel && body.has('quantity')) qtyLabel.textContent = body.get('quantity');
         const buttons = [...form.querySelectorAll('button'), ...(form.id ? document.querySelectorAll(`button[form="${form.id}"]`) : [])];
         const wasDisabled = new Map(buttons.map((button) => [button, button.disabled]));
         buttons.forEach((button) => {
@@ -47,6 +52,7 @@ export default function cart(Alpine) {
             const json = await res.json().catch(() => null);
 
             if (res.status === 419) {
+                if (qtyLabel?.isConnected) qtyLabel.textContent = previousQty;
                 window.toast('Sesi kamu sudah berakhir. Muat ulang halaman lalu coba lagi.', 'error');
                 return;
             }
@@ -61,8 +67,9 @@ export default function cart(Alpine) {
             if (typeof json.cart_count === 'number') Alpine.store('cart').count = json.cart_count;
 
             if (typeof json.html === 'string') {
+                // Morph: hanya bagian yang berubah yang diganti (foto tidak dimuat ulang, tidak berkedip).
                 const root = document.querySelector('[data-cart-root]');
-                if (root) root.innerHTML = json.html;
+                if (root) Alpine.morph(root, json.html.trim(), { key: (el) => el.dataset?.cartLine });
             }
 
             const type = res.ok ? (json.type ?? 'success') : 'error';
@@ -71,6 +78,7 @@ export default function cart(Alpine) {
 
             if (res.ok) form.dispatchEvent(new CustomEvent('cart-updated', { bubbles: true, detail: json }));
         } catch (error) {
+            if (qtyLabel?.isConnected) qtyLabel.textContent = previousQty;
             window.toast('Gagal terhubung ke server. Periksa koneksi lalu coba lagi.', 'error');
         } finally {
             busy.delete(form);

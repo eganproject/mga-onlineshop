@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import morph from '@alpinejs/morph';
 import forms from './forms';
 import dialogs from './components/dialogs';
 import cart from './components/cart';
@@ -16,6 +17,7 @@ import tooltip from './components/tooltip';
 
 window.Alpine = Alpine;
 
+Alpine.plugin(morph);
 Alpine.plugin(forms);
 Alpine.plugin(dialogs);
 Alpine.plugin(cart);
