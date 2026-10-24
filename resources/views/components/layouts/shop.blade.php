@@ -127,9 +127,9 @@
                         </div>
                     @endif
                     <a href="{{ $promoNav['url'] }}" @class([
-                        'relative flex items-center gap-1.5 py-7 text-sm font-semibold text-accent-600 transition hover:text-accent-700',
+                        'nav-promo relative flex items-center gap-1.5 py-7 text-sm font-semibold text-accent-600 transition hover:text-accent-700',
                         'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent-500' => $promoNav['active'],
-                    ])><span class="size-1.5 rounded-full bg-accent-500"></span>{{ $promoNav['label'] }}</a>
+                    ])><span class="nav-promo-dot size-1.5 rounded-full bg-accent-500"></span>{{ $promoNav['label'] }}</a>
                     <a href="{{ $articleNav['url'] }}" @class([
                         'relative py-7 text-sm font-medium transition hover:text-brand-600',
                         'text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-brand-500' => $articleNav['active'],
@@ -259,7 +259,7 @@
                         ] as [$label, $icon, $item, $tone])
                             <li>
                                 <a href="{{ $item['url'] }}" class="flex flex-col items-center gap-2 rounded-2xl py-2 text-center text-xs font-semibold active:bg-sand-50">
-                                    <span class="grid size-12 place-items-center rounded-2xl {{ $tone }} {{ $item['active'] ? 'ring-2 ring-current' : '' }}"><x-icon :name="$icon" class="size-6" /></span>
+                                    <span class="grid size-12 place-items-center rounded-2xl {{ $tone }} {{ $item['active'] ? 'ring-2 ring-current' : '' }} {{ $item === $promoNav && ! $item['active'] ? 'promo-pulse' : '' }}"><x-icon :name="$icon" class="size-6" /></span>
                                     {{ $label }}
                                 </a>
                             </li>

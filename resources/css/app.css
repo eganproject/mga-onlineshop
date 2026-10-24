@@ -220,6 +220,45 @@
             transition: none;
         }
     }
+    /*
+     * Link "Promo" di navbar: berdenyut pelan (warna + cahaya) supaya
+     * mengundang klik. Tanpa transform/ukuran, jadi tidak menggeser layout.
+     * Berhenti saat disorot/fokus dan untuk pengguna reduced-motion.
+     */
+    .nav-promo {
+        animation: promo-glow 2.4s ease-in-out infinite;
+    }
+    .nav-promo-dot {
+        animation: promo-dot 2.4s ease-in-out infinite;
+    }
+    .promo-pulse {
+        animation: promo-ring 2.4s ease-in-out infinite;
+    }
+    .nav-promo:hover,
+    .nav-promo:focus-visible,
+    .nav-promo:hover .nav-promo-dot,
+    .nav-promo:focus-visible .nav-promo-dot {
+        animation: none;
+    }
+    @keyframes promo-glow {
+        0%, 100% { color: var(--color-accent-600); text-shadow: 0 0 0 rgb(246 142 85 / 0); }
+        50% { color: var(--color-accent-500); text-shadow: 0 0 12px rgb(246 142 85 / 0.6); }
+    }
+    @keyframes promo-dot {
+        0% { box-shadow: 0 0 0 0 rgb(246 142 85 / 0.55); }
+        70%, 100% { box-shadow: 0 0 0 5px rgb(246 142 85 / 0); }
+    }
+    @keyframes promo-ring {
+        0% { box-shadow: 0 0 0 0 rgb(246 142 85 / 0.45); }
+        70%, 100% { box-shadow: 0 0 0 6px rgb(246 142 85 / 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .nav-promo,
+        .nav-promo-dot,
+        .promo-pulse {
+            animation: none;
+        }
+    }
     .field-error {
         @apply mt-1.5 flex items-start gap-1 text-xs font-medium text-rose-600;
     }
