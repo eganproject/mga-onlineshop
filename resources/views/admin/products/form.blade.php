@@ -48,17 +48,27 @@
                 <x-form.input name="name" label="Nama produk" :value="$product->name" required maxlength="255" placeholder="Contoh: Frame Akrilik Dinding A4" />
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-form.category-select name="category_id" label="Kategori" :categories="$categories" :selected="$product->category_id" placeholder="Tanpa kategori" />
-                    <x-form.input name="sku" label="SKU induk" optional :value="$product->sku" maxlength="64" />
+                    <x-form.input name="sku" label="SKU induk" optional :value="$product->sku" maxlength="64"
+                                  tooltip="Kode unik produk untuk gudang (Stock Keeping Unit). Tidak tampil sebagai nama ke pelanggan, tapi bisa dicari di admin."
+                                  :tooltip-tips="['Pakai pola konsisten, mis. CSG-IP15-CLR (jenis-tipe-warna).', 'SKU jadi kunci saat impor produk & update stok massal lewat Excel, jadi jangan sampai dobel.']" />
                 </div>
                 <x-form.textarea name="description" label="Deskripsi" :value="$product->description" rows="7" maxlength="10000"
-                                 placeholder="Jelaskan spesifikasi, kompatibilitas, dan isi paket..." />
-                <x-form.input name="slug" label="Slug URL" optional="kosongkan untuk otomatis" :value="$product->slug" />
+                                 placeholder="Jelaskan spesifikasi, kompatibilitas, dan isi paket..."
+                                 tooltip="Tampil di halaman detail produk, di bawah tombol beli."
+                                 :tooltip-tips="['Sebut tipe HP yang cocok, bahan, ukuran, dan isi paket.', 'Paragraf pendek & poin-poin lebih mudah dibaca di HP.']" />
+                <x-form.input name="slug" label="Slug URL" optional="kosongkan untuk otomatis" :value="$product->slug"
+                              tooltip="Bagian akhir alamat halaman produk, mis. /produk/frame-akrilik-a4. Dibuat otomatis dari nama bila kosong."
+                              :tooltip-tips="['Huruf kecil, angka, dan tanda hubung saja.', 'Hindari mengubah slug produk yang sudah dibagikan: link lama jadi tidak bisa dibuka.']" />
             </div>
 
             {{-- Galeri --}}
             <div class="card p-6">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                    <h2 class="font-bold text-stone-900">Foto produk</h2>
+                    <div class="flex items-center gap-1">
+                        <h2 class="font-bold text-stone-900">Foto produk</h2>
+                        <x-tooltip label="Foto produk" text="Foto pertama (sampul) tampil di kartu produk: katalog, Best Seller, pencarian, dan keranjang. Semua foto tampil di galeri halaman produk."
+                                   :tips="['Rasio 1:1 (persegi), min. 1000×1000 px supaya tetap tajam saat diperbesar.', 'Taruh produk di tengah dengan ruang kosong ±10% di kiri-kanan: di katalog desktop foto dipotong jadi 4:5, di HP tampil persegi.', 'Latar polos & terang dengan cahaya rata membuat katalog terlihat rapi.', 'Foto berikutnya: sisi belakang, detail, dan contoh saat dipakai.']" />
+                    </div>
                     <p class="text-xs text-stone-500">Foto pertama jadi sampul. Maks {{ $formConfig['maxImages'] }} foto, JPG/PNG/WebP 2 MB.</p>
                 </div>
 
@@ -117,6 +127,7 @@
                         <input type="hidden" name="has_variants" value="0">
                         <input type="checkbox" name="has_variants" value="1" x-model="hasVariants" @change="toggleVariants()" class="checkbox size-5">
                         Produk punya varian
+                        <x-tooltip label="Produk punya varian" text="Aktifkan bila satu produk punya beberapa pilihan, mis. warna atau tipe HP. Tiap varian punya harga, stok, SKU, berat, dan foto sendiri; pelanggan wajib memilih sebelum membeli." />
                     </label>
                 </div>
 
@@ -124,9 +135,12 @@
                 <div x-show="!hasVariants" class="mt-5 grid gap-5 sm:grid-cols-2">
                     <x-form.money name="price" label="Harga jual" :value="$product->price" x-bind:required="!hasVariants" x-bind:disabled="hasVariants" />
                     <x-form.money name="compare_at_price" label="Harga coret" optional :value="$product->compare_at_price" x-bind:disabled="hasVariants"
-                                  hint="Harga sebelum diskon, tampil dicoret." />
+                                  hint="Harga sebelum diskon, tampil dicoret."
+                                  tooltip="Bila lebih tinggi dari harga jual, kartu produk menampilkan harga ini dicoret plus label diskon oranye, mis. -20%."
+                                  tooltip-tips="Kosongkan bila produk sedang tidak promo, supaya label diskon tidak menyesatkan." />
                     <x-form.number name="stock" label="Stok" :value="$product->stock ?? 0" min="0" suffix="pcs" x-bind:required="!hasVariants" x-bind:disabled="hasVariants"
-                                   :hint="$editing ? 'Perubahan tercatat di riwayat stok.' : null" />
+                                   :hint="$editing ? 'Perubahan tercatat di riwayat stok.' : null"
+                                   tooltip="Jumlah barang siap jual. Berkurang otomatis saat pelanggan membuat pesanan dan kembali bila pesanan batal/kedaluwarsa. Stok 0 = tampil “Habis”." />
                     <input type="hidden" name="stock_original" value="{{ old('stock_original', $editing && ! $product->has_variants ? $product->stock : '') }}" :disabled="hasVariants">
                 </div>
 
@@ -134,13 +148,19 @@
                 <div x-show="hasVariants" x-cloak class="mt-5 space-y-4">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="variant_label" class="label">Judul pilihan</label>
+                            <div class="label-row">
+                                <label for="variant_label" class="label">Judul pilihan</label>
+                                <x-tooltip label="Judul pilihan" text="Nama jenis pilihan di halaman produk & keranjang, mis. “Warna: Hitam” atau “Tipe HP: iPhone 15”. Kosong = “Varian”." />
+                            </div>
                             <input id="variant_label" name="variant_label" value="{{ old('variant_label', $product->variant_label) }}" maxlength="50" placeholder="Contoh: Warna, Tipe HP" :disabled="!hasVariants" class="input">
                             <x-input-error for="variant_label" />
                         </div>
                         <div class="flex items-end gap-2">
                             <div class="flex-1">
-                                <label class="label">Isi semua varian</label>
+                                <div class="label-row">
+                                    <label class="label">Isi semua varian</label>
+                                    <x-tooltip label="Isi semua varian" text="Jalan pintas: isi harga dan/atau stok, lalu tekan Terapkan untuk menyalinnya ke semua baris varian sekaligus." />
+                                </div>
                                 <div class="flex gap-2">
                                     <input x-model="bulkPrice" x-money placeholder="Harga" class="input">
                                     <input x-model="bulkStock" type="number" min="0" placeholder="Stok" class="input">
@@ -154,7 +174,15 @@
                     <div class="-mx-6 overflow-x-auto">
                         <table class="table-base min-w-[940px]">
                             <thead class="bg-stone-50/70">
-                                <tr><th class="w-8"></th><th>Nama varian</th><th>SKU</th><th>Harga</th><th>Harga coret</th><th>Stok</th><th>Berat (gr)</th><th>Foto</th><th class="text-center">Aktif</th><th></th></tr>
+                                <tr>
+                                    <th class="w-8"></th><th>Nama varian</th>
+                                    <th><span class="inline-flex items-center gap-1">SKU <x-tooltip label="SKU varian" text="Kode unik tiap varian, dipakai untuk update stok massal lewat Excel. Boleh kosong." /></span></th>
+                                    <th>Harga</th><th>Harga coret</th><th>Stok</th>
+                                    <th><span class="inline-flex items-center gap-1">Berat (gr) <x-tooltip label="Berat varian" text="Isi bila berat varian ini berbeda. Kosongkan untuk memakai berat produk di samping." /></span></th>
+                                    <th><span class="inline-flex items-center gap-1">Foto <x-tooltip label="Foto varian" text="Foto yang ditampilkan saat pelanggan memilih varian ini. Pilihan diambil dari foto yang sudah tersimpan, jadi simpan dulu foto baru." /></span></th>
+                                    <th class="text-center"><span class="inline-flex items-center gap-1">Aktif <x-tooltip label="Varian aktif" text="Varian nonaktif tidak bisa dipilih pelanggan dan tidak dihitung di harga termurah maupun total stok." /></span></th>
+                                    <th></th>
+                                </tr>
                             </thead>
                             <tbody class="divide-y divide-stone-100" x-ref="variantRows">
                                 <template x-for="(variant, index) in variants" :key="variant.uid">
@@ -211,14 +239,16 @@
                     <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $product->is_active))>
                 </label>
                 <label class="flex items-center justify-between gap-3">
-                    <span><span class="block text-sm font-semibold text-stone-800">Produk unggulan</span><span class="text-xs text-stone-500">Tampil di beranda</span></span>
+                    <span><span class="flex items-center gap-1 text-sm font-semibold text-stone-800">Produk unggulan <x-tooltip label="Produk unggulan" text="Dipakai melengkapi tab Best Seller di beranda (mode Otomatis) saat data penjualan belum cukup, didahulukan sebelum produk terbaru." /></span><span class="text-xs text-stone-500">Tampil di beranda</span></span>
                     <input type="checkbox" name="is_featured" value="1" class="checkbox size-5" @checked(old('is_featured', $product->is_featured))>
                 </label>
             </div>
 
             <div class="card p-6">
                 <x-form.number name="weight" label="Berat" :value="$product->weight" min="1" suffix="gram" required
-                               hint="Dipakai untuk menghitung ongkos kirim. Varian bisa punya berat sendiri." />
+                               hint="Dipakai untuk menghitung ongkos kirim. Varian bisa punya berat sendiri."
+                               tooltip="Ongkir di checkout dihitung dari total berat semua barang di keranjang ke alamat pelanggan."
+                               :tooltip-tips="['Isi berat setelah dikemas (produk + kardus/bubble wrap), bukan berat bersih.', 'Berat terlalu kecil membuat ongkir yang dibayar pelanggan kurang dari tagihan kurir.']" />
             </div>
 
             <div class="lg:sticky lg:top-24">

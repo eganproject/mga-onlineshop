@@ -10,6 +10,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'value' => null,
     'time' => false,
@@ -26,7 +28,7 @@
     $value = $key ? old($key, $value) : $value;
     $placeholder ??= $time ? 'Pilih tanggal & jam' : 'Pilih tanggal';
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <div class="relative" x-data>
         <x-icon name="calendar" class="pointer-events-none absolute top-1/2 left-3.5 z-[1] size-4 -translate-y-1/2 text-stone-400" />
         <input type="text" {{ $time ? 'x-datepicker.time' : 'x-datepicker' }} autocomplete="off"

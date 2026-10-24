@@ -56,9 +56,14 @@
                         @if ($key === 'midtrans')
                             <div class="grid gap-5 sm:grid-cols-2">
                                 <x-form.select name="midtrans[driver]" id="midtrans_driver" label="Driver pembayaran" :selected="$value('midtrans', 'driver')"
-                                               :options="['fake' => 'Simulasi (fake)', 'midtrans' => 'Midtrans']" :hint="$source('midtrans', 'driver')" />
+                                               :options="['fake' => 'Simulasi (fake)', 'midtrans' => 'Midtrans']" :hint="$source('midtrans', 'driver')"
+                                               tooltip="Simulasi: pembayaran pura-pura untuk uji coba, tanpa uang sungguhan. Midtrans: pelanggan membayar lewat Midtrans (VA bank, e-wallet, QRIS, kartu)." />
                                 <div>
-                                    <p class="label">Mode</p>
+                                    <div class="label-row">
+                                        <p class="label">Mode</p>
+                                        <x-tooltip label="Mode Midtrans" text="Sandbox untuk uji coba (transaksi palsu, kunci berawalan SB-). Production untuk menerima uang sungguhan."
+                                                   tips="Mode harus sama dengan jenis kunci. Coba dulu di Sandbox sampai alur bayar lancar, baru pindah ke Production dengan kunci Production." />
+                                    </div>
                                     @php($production = (bool) old('midtrans.is_production', $value('midtrans', 'is_production')))
                                     <div class="grid grid-cols-2 gap-2">
                                         @foreach (['0' => 'Sandbox', '1' => 'Production'] as $mode => $text)
@@ -70,13 +75,20 @@
                                     </div>
                                     <p class="hint">Production = uang sungguhan. Kunci Sandbox berawalan "SB-".</p>
                                 </div>
-                                <x-form.input name="midtrans[merchant_id]" id="midtrans_merchant_id" label="Merchant ID" :value="$value('midtrans', 'merchant_id')" placeholder="G123456789" optional :hint="$source('midtrans', 'merchant_id')" />
-                                <x-form.input name="midtrans[client_key]" id="midtrans_client_key" label="Client key" :value="$value('midtrans', 'client_key')" placeholder="SB-Mid-client-..." :hint="$source('midtrans', 'client_key')" spellcheck="false" />
+                                <x-form.input name="midtrans[merchant_id]" id="midtrans_merchant_id" label="Merchant ID" :value="$value('midtrans', 'merchant_id')" placeholder="G123456789" optional :hint="$source('midtrans', 'merchant_id')"
+                                              tooltip="ID akun Midtrans, ada di Midtrans Dashboard › Settings › Access Keys. Hanya sebagai catatan, tidak wajib." />
+                                <x-form.input name="midtrans[client_key]" id="midtrans_client_key" label="Client key" :value="$value('midtrans', 'client_key')" placeholder="SB-Mid-client-..." :hint="$source('midtrans', 'client_key')" spellcheck="false"
+                                              tooltip="Kunci publik untuk membuka jendela pembayaran di browser pelanggan. Ada di Midtrans Dashboard › Settings › Access Keys." />
                             </div>
-                            @include('admin.partials.secret-input', ['integration' => 'midtrans', 'name' => 'server_key', 'label' => 'Server key', 'placeholder' => 'SB-Mid-server-...'])
+                            @include('admin.partials.secret-input', ['integration' => 'midtrans', 'name' => 'server_key', 'label' => 'Server key', 'placeholder' => 'SB-Mid-server-...',
+                                'tooltip' => 'Kunci rahasia untuk membuat transaksi dan mengecek status pembayaran dari server. Ada di Midtrans Dashboard › Settings › Access Keys.',
+                                'tooltipTips' => 'Jangan bagikan ke siapa pun. Bila bocor, buat ulang di dashboard Midtrans lalu simpan yang baru di sini.'])
 
                             <div>
-                                <p class="text-xs font-semibold text-stone-500 uppercase">URL notifikasi (webhook)</p>
+                                <p class="flex items-center gap-1 text-xs font-semibold text-stone-500 uppercase">URL notifikasi (webhook)
+                                    <x-tooltip label="URL notifikasi" text="Midtrans mengirim kabar ke alamat ini setiap ada pembayaran, sehingga status pesanan berubah jadi Dibayar secara otomatis."
+                                               tips="Wajib dipasang di dashboard Midtrans (Sandbox dan Production masing-masing). Tanpa ini pesanan tetap menunggu pembayaran." />
+                                </p>
                                 <div class="mt-2 flex items-center gap-2" x-data="{ copied: false }">
                                     <code class="min-w-0 flex-1 truncate rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-700 ring-1 ring-stone-200">{{ $webhook }}</code>
                                     <button type="button" class="btn btn-secondary btn-sm" x-on:click="navigator.clipboard.writeText(@js($webhook)); copied = true; setTimeout(() => copied = false, 1500)">
@@ -87,8 +99,11 @@
                             </div>
                         @elseif ($key === 'rajaongkir')
                             <x-form.select name="rajaongkir[driver]" id="rajaongkir_driver" label="Driver ongkir" :selected="$value('rajaongkir', 'driver')"
-                                           :options="['fake' => 'Simulasi (tarif contoh)', 'rajaongkir' => 'RajaOngkir (Komerce)']" :hint="$source('rajaongkir', 'driver')" />
-                            @include('admin.partials.secret-input', ['integration' => 'rajaongkir', 'name' => 'api_key', 'label' => 'API key', 'placeholder' => 'API key dari dashboard Komerce'])
+                                           :options="['fake' => 'Simulasi (tarif contoh)', 'rajaongkir' => 'RajaOngkir (Komerce)']" :hint="$source('rajaongkir', 'driver')"
+                                           tooltip="Simulasi: tarif ongkir contoh untuk uji coba. RajaOngkir: tarif asli dari kurir sesuai berat & alamat, plus lacak resi." />
+                            @include('admin.partials.secret-input', ['integration' => 'rajaongkir', 'name' => 'api_key', 'label' => 'API key', 'placeholder' => 'API key dari dashboard Komerce',
+                                'tooltip' => 'Kunci akses RajaOngkir dari dashboard Komerce (menu API Key). Dipakai untuk cek ongkir, daftar wilayah, dan lacak resi.',
+                                'tooltipTips' => 'Setelah disimpan, atur kecamatan asal di Pengaturan Toko lalu tekan Tes koneksi.'])
                             <div class="rounded-xl bg-stone-50 p-3 text-sm">
                                 <p class="text-xs text-stone-500">Kecamatan asal pengiriman</p>
                                 <p class="font-semibold text-stone-800">{{ $originLabel ?? 'Belum diatur' }}</p>
@@ -104,11 +119,15 @@
                                 <input type="checkbox" name="firebase[login_enabled]" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('firebase.login_enabled', $value('firebase', 'login_enabled')))>
                             </label>
                             <div class="grid gap-5 sm:grid-cols-2">
-                                <x-form.input name="firebase[api_key]" id="firebase_api_key" label="API key (apiKey)" :value="$value('firebase', 'api_key')" placeholder="AIza..." :hint="$source('firebase', 'api_key')" spellcheck="false" />
-                                <x-form.input name="firebase[project_id]" id="firebase_project_id" label="Project ID (projectId)" :value="$value('firebase', 'project_id')" placeholder="mga-shop" :hint="$source('firebase', 'project_id')" spellcheck="false" />
+                                <x-form.input name="firebase[api_key]" id="firebase_api_key" label="API key (apiKey)" :value="$value('firebase', 'api_key')" placeholder="AIza..." :hint="$source('firebase', 'api_key')" spellcheck="false"
+                                              tooltip="Nilai apiKey dari Firebase Console › Project settings › Your apps (Web app). Bukan kunci rahasia." />
+                                <x-form.input name="firebase[project_id]" id="firebase_project_id" label="Project ID (projectId)" :value="$value('firebase', 'project_id')" placeholder="mga-shop" :hint="$source('firebase', 'project_id')" spellcheck="false"
+                                              tooltip="Nilai projectId Firebase. Dipakai server untuk memastikan token login Google benar-benar dari project Anda." />
                                 <x-form.input name="firebase[auth_domain]" id="firebase_auth_domain" label="Auth domain (authDomain)" :value="$value('firebase', 'auth_domain')" placeholder="mga-shop.firebaseapp.com" optional
-                                              :hint="$source('firebase', 'auth_domain') ?? 'Kosong = <project-id>.firebaseapp.com.'" spellcheck="false" />
-                                <x-form.input name="firebase[app_id]" id="firebase_app_id" label="App ID (appId)" :value="$value('firebase', 'app_id')" placeholder="1:1234:web:abcd" optional :hint="$source('firebase', 'app_id')" spellcheck="false" />
+                                              :hint="$source('firebase', 'auth_domain') ?? 'Kosong = <project-id>.firebaseapp.com.'" spellcheck="false"
+                                              tooltip="Domain jendela login Google. Biarkan kosong kecuali Anda memakai domain khusus di Firebase." />
+                                <x-form.input name="firebase[app_id]" id="firebase_app_id" label="App ID (appId)" :value="$value('firebase', 'app_id')" placeholder="1:1234:web:abcd" optional :hint="$source('firebase', 'app_id')" spellcheck="false"
+                                              tooltip="Nilai appId dari pengaturan Web app Firebase. Opsional." />
                             </div>
                             <p class="hint">Nilai ini dari Firebase Console › Project settings › Your apps (Web app). Bukan rahasia: ikut terkirim ke browser pelanggan.</p>
                         @endif

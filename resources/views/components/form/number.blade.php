@@ -9,6 +9,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'value' => null,
     'suffix' => null,
@@ -23,7 +25,7 @@
     $step = "const n = \$refs.number; if (n.disabled || n.readOnly) return; %s; n.dispatchEvent(new Event('input', { bubbles: true })); n.dispatchEvent(new Event('change', { bubbles: true }))";
     $button = 'grid w-10 shrink-0 place-items-center text-stone-500 transition hover:bg-stone-50 hover:text-brand-700 disabled:opacity-40';
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <div x-data @class([
         'flex items-stretch overflow-hidden rounded-xl border bg-white shadow-xs transition focus-within:ring-4 has-[:disabled]:bg-stone-50 has-[:disabled]:text-stone-400',
         'border-stone-200 focus-within:border-brand-500 focus-within:ring-brand-500/15' => ! $invalid,

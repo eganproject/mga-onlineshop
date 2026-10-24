@@ -6,7 +6,7 @@
     $inputName = $integration.'['.$name.']';
 @endphp
 <div x-data="{ show: false, clear: false }">
-    <x-form.field :label="$label" :for="$id" :name="$inputName">
+    <x-form.field :label="$label" :for="$id" :name="$inputName" :tooltip="$tooltip ?? null" :tooltip-tips="$tooltipTips ?? null">
         <div class="relative">
             <input x-bind:type="show ? 'text' : 'password'" type="password" id="{{ $id }}" name="{{ $inputName }}"
                    autocomplete="new-password" spellcheck="false" x-bind:disabled="clear"

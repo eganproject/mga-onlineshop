@@ -113,7 +113,10 @@
                 <div class="grid grid-cols-2 gap-3">
                     <x-form.number id="adjust-qty" name="quantity" label="Jumlah" min="0" required />
                     <div>
-                        <label for="adjust-type" class="label">Jenis</label>
+                        <div class="label-row">
+                            <label for="adjust-type" class="label">Jenis</label>
+                            <x-tooltip label="Jenis perubahan stok" text="Label di riwayat stok. Barang masuk = kiriman supplier/restock. Penyesuaian = koreksi hasil stock opname, barang rusak, atau hilang." />
+                        </div>
                         <select id="adjust-type" name="type" class="input" x-effect="$el.value = mode === 'add' ? 'restock' : 'adjustment'">
                             @foreach ($types as $type)
                                 <option value="{{ $type->value }}">{{ $type->label() }}</option>

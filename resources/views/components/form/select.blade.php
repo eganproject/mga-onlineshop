@@ -11,6 +11,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'options' => [],
     'selected' => null,
@@ -28,7 +30,7 @@
     $isSelected = fn ($value) => (string) $value === (string) $selected;
     $config = array_filter(['search' => $search], fn ($v) => $v !== null);
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <select x-data x-searchable="@js($config)"
             @if ($id) id="{{ $id }}" @endif
             @if ($name) name="{{ $name }}" @endif

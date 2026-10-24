@@ -11,6 +11,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'placeholder' => 'Pilih rentang tanggal',
     'min' => null,
@@ -23,7 +25,7 @@
     $fmt = fn ($v) => $v instanceof \DateTimeInterface ? $v->format('Y-m-d') : $v;
     $invalid = FormField::hasError($from) || FormField::hasError($to);
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$from" :hint="$hint" :optional="$optional" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$from" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :class="$wrapperClass">
     <div class="relative" x-data x-daterange>
         <x-icon name="calendar" class="pointer-events-none absolute top-1/2 left-3.5 z-[1] size-4 -translate-y-1/2 text-stone-400" />
         <input type="text" data-range-display id="{{ $id }}" placeholder="{{ $placeholder }}" autocomplete="off"

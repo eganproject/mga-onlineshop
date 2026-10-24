@@ -4,6 +4,8 @@
         <input id="name" name="name" class="input">
     </x-form.field>
     `name` dipakai untuk mencari error (boleh "variants[0][price]" atau "variants.0.price").
+    Tooltip (?) di samping label untuk isian yang fungsinya kurang jelas:
+    tooltip="Fungsi isian" :tooltip-tips="['Saran agar hasil maksimal', '...']" (lihat <x-tooltip>).
 --}}
 @props([
     'label' => null,
@@ -11,6 +13,8 @@
     'name' => null,
     'hint' => null,
     'optional' => false,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'bag' => 'default',
 ])
 @php
@@ -18,12 +22,24 @@
 @endphp
 <div {{ $attributes }}>
     @if ($label || isset($labelSlot))
-        <label @if ($for) for="{{ $for }}" @endif class="label">
-            {{ $label }}{{ $labelSlot ?? '' }}
-            @if ($optional)
-                <span class="font-normal text-stone-400">({{ is_string($optional) ? $optional : 'opsional' }})</span>
-            @endif
-        </label>
+        @if ($tooltip || $tooltipTips)
+            <div class="label-row">
+                <label @if ($for) for="{{ $for }}" @endif class="label">
+                    {{ $label }}{{ $labelSlot ?? '' }}
+                    @if ($optional)
+                        <span class="font-normal text-stone-400">({{ is_string($optional) ? $optional : 'opsional' }})</span>
+                    @endif
+                </label>
+                <x-tooltip :text="$tooltip" :tips="$tooltipTips" :label="$label" />
+            </div>
+        @else
+            <label @if ($for) for="{{ $for }}" @endif class="label">
+                {{ $label }}{{ $labelSlot ?? '' }}
+                @if ($optional)
+                    <span class="font-normal text-stone-400">({{ is_string($optional) ? $optional : 'opsional' }})</span>
+                @endif
+            </label>
+        @endif
     @endif
     {{ $slot }}
     @if ($hint)

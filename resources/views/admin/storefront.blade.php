@@ -19,12 +19,18 @@
                 </div>
                 <x-form.image-upload name="hero_image" label="Foto utama (desktop)" optional :current="$images['hero_image']"
                     remove-name="remove_hero_image" aspect="aspect-video" :max-kb="5120"
-                    hint="Rasio 16:9, disarankan 2400×1350 px (min. lebar 1200 px). Taruh objek utama di sisi kanan, karena judul tampil di kiri." />
+                    hint="Rasio 16:9, disarankan 2400×1350 px (min. lebar 1200 px). Taruh objek utama di sisi kanan, karena judul tampil di kiri."
+                    tooltip="Foto besar paling atas beranda, tampil selebar layar di laptop/tablet dengan judul & tombol di sisi kiri."
+                    :tooltip-tips="['2400×1350 px (16:9) supaya tajam di layar besar.', 'Objek utama di sepertiga kanan; sisi kiri biarkan lapang untuk judul.', 'Tanpa foto versi HP, di HP hanya bagian tengah foto yang terlihat (dipotong tegak). Unggah juga foto HP agar hasilnya maksimal di dua tampilan.', 'Kompres ke < 500 KB (WebP/JPG kualitas ±80%) supaya beranda cepat terbuka.']" />
                 <x-form.image-upload name="hero_image_mobile" label="Foto versi HP" optional :current="$images['hero_image_mobile']"
                     remove-name="remove_hero_image_mobile" aspect="aspect-[9/16]" wrapper-class="max-w-52" :max-kb="4096"
-                    hint="Rasio 9:16 (mis. 1080×1920 px). Judul tampil di bagian bawah. Tanpa ini, foto utama dipotong otomatis." />
+                    hint="Rasio 9:16 (mis. 1080×1920 px). Judul tampil di bagian bawah. Tanpa ini, foto utama dipotong otomatis."
+                    tooltip="Menggantikan foto utama di HP (lebar di bawah 768 px). Hero di HP hampir setinggi layar, jadi foto tegak terlihat jauh lebih baik."
+                    :tooltip-tips="['1080×1920 px (9:16).', 'Judul & tombol tampil di ±40% bagian bawah: taruh objek utama di bagian atas atau tengah.', 'Boleh foto yang sama dengan desktop, cukup di-crop tegak.']" />
                 <x-form.select name="hero_text" label="Warna teks di atas foto" :search="false" :selected="$values['hero_text'] ?? 'light'"
-                    :options="['light' => 'Putih (untuk foto gelap)', 'dark' => 'Gelap (untuk foto terang)']" />
+                    :options="['light' => 'Putih (untuk foto gelap)', 'dark' => 'Gelap (untuk foto terang)']"
+                    tooltip="Warna judul & tombol di atas foto. Lapisan gradasi (gelap atau terang) otomatis ditambahkan supaya teks tetap terbaca."
+                    tooltip-tips="Cek beranda di HP setelah menyimpan: bila teks sulit dibaca, ganti pilihan ini." />
             </section>
 
             {{-- Teks hero --}}
@@ -33,13 +39,18 @@
                     <span class="grid size-10 place-items-center rounded-xl bg-accent-50 text-accent-600"><x-icon name="sparkles" /></span>
                     <div><h2 class="font-bold text-stone-900">Judul & tombol</h2><p class="text-xs text-stone-500">Teks yang tampil di atas foto hero.</p></div>
                 </div>
-                <x-form.input name="hero_eyebrow" label="Teks kecil di atas judul" :value="$values['hero_eyebrow']" maxlength="60" optional :hint="$hint('hero_eyebrow')" />
-                <x-form.input name="hero_title" label="Judul" :value="$values['hero_title']" maxlength="90" optional :hint="$hint('hero_title')" />
+                <x-form.input name="hero_eyebrow" label="Teks kecil di atas judul" :value="$values['hero_eyebrow']" maxlength="60" optional :hint="$hint('hero_eyebrow')"
+                    tooltip="Label pendek berhuruf kapital di atas judul hero, mis. KOLEKSI BARU atau PROMO AKHIR BULAN." />
+                <x-form.input name="hero_title" label="Judul" :value="$values['hero_title']" maxlength="90" optional :hint="$hint('hero_title')"
+                    tooltip="Tulisan paling besar di beranda."
+                    tooltip-tips="3–7 kata supaya tidak lebih dari 3 baris di HP." />
                 <x-form.textarea name="hero_subtitle" label="Deskripsi singkat" :value="$values['hero_subtitle']" rows="2" maxlength="200" optional :hint="$hint('hero_subtitle')" />
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-form.input name="hero_primary_label" label="Tombol utama" :value="$values['hero_primary_label']" maxlength="30" optional :hint="$hint('hero_primary_label')" />
-                    <x-form.input name="hero_primary_url" label="Link tombol utama" :value="$values['hero_primary_url']" maxlength="255" optional placeholder="/produk" :hint="$hint('hero_primary_url')" />
-                    <x-form.input name="hero_secondary_label" label="Tombol kedua" :value="$values['hero_secondary_label']" maxlength="30" optional :hint="$hint('hero_secondary_label')" />
+                    <x-form.input name="hero_primary_url" label="Link tombol utama" :value="$values['hero_primary_url']" maxlength="255" optional placeholder="/produk" :hint="$hint('hero_primary_url')"
+                        tooltip="Halaman yang dibuka tombol pertama. Awali / untuk halaman toko atau https:// untuk link luar." />
+                    <x-form.input name="hero_secondary_label" label="Tombol kedua" :value="$values['hero_secondary_label']" maxlength="30" optional :hint="$hint('hero_secondary_label')"
+                        tooltip="Tombol di samping tombol utama, untuk ajakan kedua (mis. Lihat promo). Di HP keduanya tampil berdampingan, jadi pakai teks pendek." />
                     <x-form.input name="hero_secondary_url" label="Link tombol kedua" :value="$values['hero_secondary_url']" maxlength="255" optional placeholder="/produk?promo=1" :hint="$hint('hero_secondary_url')" />
                 </div>
             </section>
@@ -53,7 +64,9 @@
                     <div><h2 class="font-bold text-stone-900">Pengumuman topbar</h2><p class="text-xs text-stone-500">Bergantian tiap beberapa detik di bar paling atas.</p></div>
                 </div>
                 <x-form.textarea name="announcements" label="Pengumuman" :value="$values['announcements']" rows="5" maxlength="1000" optional
-                    hint="Satu pengumuman per baris, maks. 6. Kosongkan untuk memakai teks bawaan." />
+                    hint="Satu pengumuman per baris, maks. 6. Kosongkan untuk memakai teks bawaan."
+                    tooltip="Tampil di bar tipis paling atas semua halaman toko, bergantian tiap beberapa detik."
+                    :tooltip-tips="['Maks. ±50 karakter per baris supaya muat satu baris di HP.', 'Isi info yang membuat orang membeli: gratis ongkir, kode voucher, jam kirim.']" />
             </section>
 
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
@@ -83,7 +96,10 @@
             <div class="flex flex-wrap items-center gap-3">
                 <span class="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600"><x-icon name="trending-up" /></span>
                 <div class="min-w-0 flex-1">
-                    <h2 class="font-bold text-stone-900">Best Seller</h2>
+                    <h2 class="flex items-center gap-1 font-bold text-stone-900">Best Seller
+                        <x-tooltip label="Best Seller" text="Otomatis: produk terlaris 90 hari terakhir dari pesanan yang sudah dibayar, diperbarui tiap 30 menit. Manual: Anda pilih & urutkan sendiri."
+                                   :tips="['Toko baru yang penjualannya belum banyak: pakai Manual atau tandai beberapa Produk unggulan.', 'Manual cocok untuk menonjolkan produk promo atau stok yang ingin dihabiskan.']" />
+                    </h2>
                     <p class="text-xs text-stone-500">Produk di tab "Best Seller" beranda (tampil maks. {{ \App\Services\Storefront\BestSellers::LIMIT }}).</p>
                 </div>
                 <button class="btn btn-primary max-sm:w-full">Simpan Best Seller</button>
