@@ -121,6 +121,105 @@
     .hint {
         @apply mt-1.5 text-xs text-stone-400;
     }
+
+    /*
+     * Tooltip bantuan <x-tooltip> (perilaku di resources/js/components/tooltip.js).
+     * Ikon kecil di samping label; panel gelap melayang, tidak menangkap klik
+     * (pointer-events: none) supaya tidak menghalangi isian di bawahnya.
+     */
+    .tip {
+        @apply inline-flex shrink-0 align-middle;
+    }
+    /* Label + ikon tooltip sebaris (dipakai x-form.field & label manual). */
+    .label-row {
+        @apply mb-1.5 flex items-center gap-1;
+    }
+    .label-row > .label {
+        @apply mb-0;
+    }
+    .tip-trigger {
+        @apply relative -my-1 inline-grid size-6 cursor-help place-items-center rounded-full text-stone-400 transition-colors hover:text-brand-600 focus-visible:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 aria-expanded:text-brand-600;
+        -webkit-tap-highlight-color: transparent;
+    }
+    /* Area sentuh lebih lebar di HP tanpa mengubah ukuran ikon. */
+    @media (pointer: coarse) {
+        .tip-trigger::after {
+            content: '';
+            position: absolute;
+            inset: -0.5rem;
+        }
+    }
+    .tip-panel {
+        @apply pointer-events-none fixed z-[200] block w-max rounded-xl bg-stone-900 px-3.5 py-3 text-left text-[12.5px] leading-relaxed font-normal tracking-normal text-stone-100 normal-case shadow-xl shadow-stone-900/20 ring-1 ring-white/10;
+        max-width: min(19rem, calc(100vw - 1rem));
+        opacity: 0;
+        transform: translateY(var(--tip-shift, 4px)) scale(0.97);
+        transform-origin: var(--tip-arrow, 50%) bottom;
+        transition: opacity 0.14s ease, transform 0.14s ease;
+    }
+    .tip-panel[hidden] {
+        display: none;
+    }
+    .tip-panel[data-pinned] {
+        @apply pointer-events-auto cursor-default;
+    }
+    .tip-panel[data-placement='bottom'] {
+        --tip-shift: -4px;
+        transform-origin: var(--tip-arrow, 50%) top;
+    }
+    .tip-panel[data-state='open'] {
+        opacity: 1;
+        transform: none;
+    }
+    .tip-text {
+        @apply block;
+    }
+    .tip-text + .tip-text {
+        @apply mt-1.5;
+    }
+    .tip-tips {
+        @apply mt-2.5 block border-t border-white/10 pt-2.5 text-stone-300;
+    }
+    .tip-text + .tip-tips {
+        @apply mt-2.5;
+    }
+    .tip-tips:first-child {
+        @apply mt-0 border-0 pt-0;
+    }
+    .tip-tips-title {
+        @apply mb-1 flex items-center gap-1 text-[11px] font-semibold tracking-wide text-accent-300 uppercase;
+    }
+    .tip-list {
+        @apply block space-y-1;
+    }
+    .tip-item {
+        @apply relative block pl-3.5;
+    }
+    .tip-item::before {
+        content: '';
+        @apply absolute top-[0.6em] left-0.5 size-1 rounded-full bg-brand-300;
+    }
+    .tip-panel strong,
+    .tip-panel b {
+        @apply font-semibold text-white;
+    }
+    .tip-panel code {
+        @apply rounded bg-white/10 px-1 font-mono text-[11.5px] text-white;
+    }
+    .tip-arrow {
+        @apply absolute size-2.5 rotate-45 bg-stone-900;
+        left: calc(var(--tip-arrow, 50%) - 0.3125rem);
+        bottom: -0.3125rem;
+    }
+    .tip-panel[data-placement='bottom'] .tip-arrow {
+        bottom: auto;
+        top: -0.3125rem;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .tip-panel {
+            transition: none;
+        }
+    }
     .field-error {
         @apply mt-1.5 flex items-start gap-1 text-xs font-medium text-rose-600;
     }

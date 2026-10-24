@@ -8,6 +8,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'value' => null,
     'counter' => true,
@@ -22,7 +24,7 @@
     $max = (int) $attributes->get('maxlength');
     $counter = $counter && $max > 0;
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <div @if ($counter) x-data="{ count: {{ mb_strlen((string) $value) }} }" @endif>
         <textarea
             @if ($id) id="{{ $id }}" @endif

@@ -8,6 +8,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'extensions' => [],
     'maxKb' => 10240,
@@ -20,7 +22,7 @@
     $maxLabel = $maxKb >= 1024 ? rtrim(rtrim(number_format($maxKb / 1024, 1, ',', ''), '0'), ',').' MB' : $maxKb.' KB';
     $formats = collect($extensions)->map(fn ($e) => strtoupper($e))->implode(', ');
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <div x-data="fileUpload({ extensions: @js(array_values($extensions)), maxKb: @js((int) $maxKb), maxLabel: @js($maxLabel) })">
         <label for="{{ $id }}"
                @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="drop($event)"
