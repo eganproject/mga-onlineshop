@@ -22,7 +22,11 @@
 
         <div class="space-y-6">
             <div class="card p-6">
-                <p class="label">Jabatan</p>
+                <div class="label-row">
+                    <p class="label">Jabatan</p>
+                    <x-tooltip label="Jabatan" text="Menentukan menu yang bisa dibuka staf ini. Menu di luar jabatannya disembunyikan dan ditolak bila dibuka lewat link."
+                               tips="Beri jabatan seminimal mungkin sesuai tugas. Superadmin cukup dipegang pemilik toko." />
+                </div>
                 <div class="grid gap-2">
                     @foreach ($roles as $role)
                         <label class="flex cursor-pointer gap-3 rounded-xl border border-stone-200 p-3 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">

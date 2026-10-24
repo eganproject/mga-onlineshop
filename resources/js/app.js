@@ -12,12 +12,16 @@ import firebaseLogin from './components/firebase-login';
 import articleEditor from './components/article-editor';
 import shareButtons from './components/share-buttons';
 import bestSellerPicker from './components/best-seller-picker';
+import tooltip from './components/tooltip';
 
 window.Alpine = Alpine;
 
 Alpine.plugin(forms);
 Alpine.plugin(dialogs);
 Alpine.plugin(cart);
+
+// Tooltip bantuan <x-tooltip> (event delegation, tanpa Alpine).
+tooltip();
 
 /** Format angka ke rupiah, dipakai di komponen Alpine. */
 window.rupiah = (value) => 'Rp' + new Intl.NumberFormat('id-ID').format(value || 0);

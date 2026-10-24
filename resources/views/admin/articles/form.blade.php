@@ -44,7 +44,9 @@
                     <input id="title" name="title" x-model="title" required maxlength="160" placeholder="5 Cara Merawat Baterai HP Agar Awet"
                            class="input py-3 text-lg font-semibold @error('title') input-error @enderror">
                 </x-form.field>
-                <x-form.field label="Slug (alamat URL)" for="slug" name="slug" hint="Otomatis dari judul. Hindari mengubah slug artikel yang sudah terbit supaya link lama tidak rusak.">
+                <x-form.field label="Slug (alamat URL)" for="slug" name="slug" hint="Otomatis dari judul. Hindari mengubah slug artikel yang sudah terbit supaya link lama tidak rusak."
+                              tooltip="Bagian akhir alamat artikel yang terlihat di browser & Google."
+                              tooltip-tips="Pendek dan memuat kata kunci, mis. cara-merawat-baterai-hp (tanpa tanggal atau kata sambung).">
                     <div class="flex items-stretch overflow-hidden rounded-xl border border-stone-200 bg-white focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/15 @error('slug') border-rose-300 @enderror">
                         <span class="hidden items-center bg-stone-50 px-3 text-sm text-stone-400 sm:flex">{{ str_replace(['https://', 'http://'], '', url('/artikel')) }}/</span>
                         <input id="slug" name="slug" x-model="slug" @input="slugTouched = true" maxlength="170" placeholder="cara-merawat-baterai-hp"
@@ -99,6 +101,7 @@
             <div class="card p-6">
                 <x-form.textarea name="excerpt" label="Ringkasan" optional maxlength="300" rows="3" x-model="excerpt"
                     hint="Tampil di daftar artikel & saat dibagikan. Kosongkan untuk memakai awal isi artikel."
+                    tooltip-tips="1–2 kalimat yang membuat orang penasaran, bukan mengulang judul."
                     :value="$article->excerpt" />
             </div>
 
@@ -112,8 +115,12 @@
                     <p class="mt-1 truncate text-lg leading-snug text-[#1a0dab]" x-text="(metaTitle || title || 'Judul artikel') + ' · {{ config('shop.name') }}'"></p>
                     <p class="mt-1 line-clamp-2 text-sm text-stone-600" x-text="metaDescription || excerpt || 'Ringkasan artikel akan tampil di sini.'"></p>
                 </div>
-                <x-form.input name="meta_title" label="Judul SEO" optional maxlength="70" x-model="metaTitle" :value="$article->meta_title" hint="Idealnya 50–60 karakter." />
-                <x-form.textarea name="meta_description" label="Deskripsi SEO" optional maxlength="160" rows="2" x-model="metaDescription" :value="$article->meta_description" hint="Idealnya 120–160 karakter." />
+                <x-form.input name="meta_title" label="Judul SEO" optional maxlength="70" x-model="metaTitle" :value="$article->meta_title" hint="Idealnya 50–60 karakter."
+                    tooltip="Judul biru yang tampil di hasil pencarian Google (lihat pratinjau di atas). Kosong = memakai judul artikel."
+                    tooltip-tips="Taruh kata kunci utama di depan, mis. “Cara Merawat Baterai HP: 5 Tips Mudah”." />
+                <x-form.textarea name="meta_description" label="Deskripsi SEO" optional maxlength="160" rows="2" x-model="metaDescription" :value="$article->meta_description" hint="Idealnya 120–160 karakter."
+                    tooltip="Teks abu-abu di bawah judul pada hasil Google. Kosong = memakai ringkasan."
+                    tooltip-tips="Sebut manfaat yang didapat pembaca dan ajakan singkat, mis. “Simak tipsnya di sini.”" />
             </div>
         </div>
 
@@ -147,14 +154,18 @@
             <div class="card p-6">
                 <x-form.image-upload name="cover_image" label="Gambar sampul" optional :current="$article->coverUrl()"
                     remove-name="remove_cover_image" aspect="aspect-[16/9]" :max-kb="4096"
-                    hint="Rasio 16:9, mis. 1600×900 px. Juga dipakai saat dibagikan ke WhatsApp/Facebook." />
+                    hint="Rasio 16:9, mis. 1600×900 px. Juga dipakai saat dibagikan ke WhatsApp/Facebook."
+                    tooltip="Tampil di kartu artikel (beranda & halaman Artikel), di atas isi artikel, dan sebagai gambar pratinjau saat link dibagikan."
+                    :tooltip-tips="['1600×900 px (16:9).', 'Jangan taruh tulisan penting di tepi: di kartu artikel gambar dipotong sedikit jadi 16:10.', 'Di HP kartu tampil kecil, jadi pilih gambar dengan satu objek yang jelas.']" />
             </div>
 
             <div class="card space-y-5 p-6">
                 <x-form.select name="article_category_id" label="Kategori" optional :options="$categories" :selected="$article->article_category_id" placeholder="Tanpa kategori"
                     :hint="$categories->isEmpty() ? 'Belum ada kategori. Tambah di menu Kategori Artikel.' : null" />
 
-                <x-form.field label="Tag" for="tags" name="tags" optional hint="Ketik lalu tekan Enter. Maks. 10 tag.">
+                <x-form.field label="Tag" for="tags" name="tags" optional hint="Ketik lalu tekan Enter. Maks. 10 tag."
+                              tooltip="Kata kunci kecil untuk mengelompokkan artikel lintas kategori, mis. baterai, iPhone, tips."
+                              tooltip-tips="Pakai ulang tag yang sudah ada (muncul sebagai saran) supaya tidak ada tag dobel seperti “iphone” dan “i-phone”.">
                     <select id="tags" name="tags[]" multiple data-placeholder="mis. baterai, tips"
                             x-data x-searchable="{ settings: { create: true, persist: false, createOnBlur: true, maxItems: 10 } }" class="input">
                         @foreach ($tagOptions as $tag)

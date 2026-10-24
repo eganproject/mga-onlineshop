@@ -21,10 +21,14 @@
                     <div><h2 class="font-bold text-stone-900">Identitas toko</h2><p class="text-xs text-stone-500">Tampil di judul halaman, email, invoice, dan footer.</p></div>
                 </div>
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <x-form.input name="name" label="Nama singkat" :value="$values['name']" required maxlength="30" />
-                    <x-form.input name="full_name" label="Nama lengkap" :value="$values['full_name']" required maxlength="80" />
+                    <x-form.input name="name" label="Nama singkat" :value="$values['name']" required maxlength="30"
+                                  tooltip="Dipakai di tempat sempit: judul tab browser dan beberapa email. Mis. MGA." />
+                    <x-form.input name="full_name" label="Nama lengkap" :value="$values['full_name']" required maxlength="80"
+                                  tooltip="Nama resmi toko di footer, invoice, packing slip, dan saat link toko dibagikan. Mis. Media Gudang Acc." />
                 </div>
-                <x-form.input name="tagline" label="Tagline" :value="$values['tagline']" maxlength="160" optional />
+                <x-form.input name="tagline" label="Tagline" :value="$values['tagline']" maxlength="160" optional
+                              tooltip="Kalimat pendek tentang toko yang tampil di footer semua halaman."
+                              tooltip-tips="Tulis tanpa titik di akhir (titik ditambahkan otomatis), mis. “Grosir aksesoris HP original”." />
                 <x-form.textarea name="address" label="Alamat gudang / pengirim" :value="$values['address']" rows="3" maxlength="500" optional
                                  placeholder="Jl. ..., Kecamatan, Kota, Kode pos"
                                  :hint="trim('Dicetak di invoice dan packing slip. '.$envHint('address'))" />
@@ -37,7 +41,9 @@
                     <div><h2 class="font-bold text-stone-900">Kontak & media sosial</h2><p class="text-xs text-stone-500">Dipakai untuk tombol WhatsApp dan tautan profil toko.</p></div>
                 </div>
                 <div class="grid gap-5 sm:grid-cols-2">
-                    <x-form.phone name="whatsapp" label="No. WhatsApp" :value="$values['whatsapp']" placeholder="0812-3456-7890" hint="Disimpan dalam format 62xxx." optional />
+                    <x-form.phone name="whatsapp" label="No. WhatsApp" :value="$values['whatsapp']" placeholder="0812-3456-7890" hint="Disimpan dalam format 62xxx." optional
+                                  tooltip="Nomor tujuan tombol WhatsApp melayang, tombol “Hubungi kami”, dan kontak di footer & packing slip."
+                                  tooltip-tips="Pakai nomor WhatsApp (Business) yang selalu aktif dan dipegang admin/CS." />
                     <x-form.input type="email" name="email" label="Email kontak" icon="envelope" :value="$values['email']" placeholder="halo@tokoanda.com" optional />
                     <x-form.input name="instagram" label="Instagram" prefix="@" :value="$values['instagram']" placeholder="username" optional />
                     <x-form.input name="tiktok" label="TikTok" prefix="@" :value="$values['tiktok']" placeholder="username" optional />
@@ -53,7 +59,9 @@
                 </label>
                 <x-form.textarea name="whatsapp_message" label="Pesan pembuka chat" :value="$values['whatsapp_message']" rows="2" maxlength="300" optional
                                  placeholder="Halo, saya mau tanya tentang produk di toko online."
-                                 hint="Otomatis terisi saat pelanggan membuka chat. Di halaman produk, nama & link produk ikut ditambahkan." />
+                                 hint="Otomatis terisi saat pelanggan membuka chat. Di halaman produk, nama & link produk ikut ditambahkan."
+                                 tooltip="Teks yang sudah terketik di WhatsApp pelanggan saat menekan tombol chat; pelanggan tinggal kirim."
+                                 tooltip-tips="Singkat & sopan, mis. “Halo MGA, saya mau tanya stok.” Admin langsung tahu chat berasal dari toko online." />
             </section>
 
             {{-- Pengiriman --}}
@@ -84,7 +92,9 @@
                         ['city', 'city_id', 'Kota / Kabupaten'],
                         ['district', 'district_id', 'Kecamatan'],
                     ] as [$ref, $field, $text])
-                        <x-form.field :label="$text" :for="$field" :name="$field">
+                        <x-form.field :label="$text" :for="$field" :name="$field"
+                                      :tooltip="$ref === 'district' ? 'Kecamatan gudang/lokasi pengiriman. Ongkir di checkout dihitung dari kecamatan ini ke alamat pelanggan.' : null"
+                                      :tooltip-tips="$ref === 'district' ? 'Wajib diisi sebelum memakai RajaOngkir; salah kecamatan = ongkir yang ditampilkan salah.' : null">
                             <select id="{{ $field }}" name="{{ $field }}" x-ref="{{ $ref }}" @class(['input', 'input-error' => $errors->has($field)])></select>
                         </x-form.field>
                     @endforeach
@@ -93,7 +103,11 @@
                 <p class="hint">Biarkan seperti semula bila kecamatan asal tidak berubah.</p>
 
                 <div>
-                    <p class="label">Kurir yang ditawarkan di checkout</p>
+                    <div class="label-row">
+                        <p class="label">Kurir yang ditawarkan di checkout</p>
+                        <x-tooltip label="Kurir" text="Hanya kurir yang dicentang yang muncul sebagai pilihan ongkir pelanggan."
+                                   tips="Pilih kurir yang benar-benar melayani pickup/drop-off di dekat gudang. Terlalu banyak pilihan membuat checkout lebih lambat." />
+                    </div>
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
                         @foreach ($couriers as $code => $label)
                             <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-stone-200 px-3 py-2.5 text-sm font-semibold text-stone-700 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
@@ -127,9 +141,12 @@
                     <div><h2 class="font-bold text-stone-900">Pesanan & pembayaran</h2></div>
                 </div>
                 <x-form.number name="payment_expiry_hours" label="Batas waktu bayar" :value="$values['payment_expiry_hours']" min="1" max="168" required suffix="jam"
-                               hint="Lewat dari ini pesanan dibatalkan otomatis dan stok kembali. Berlaku untuk pesanan baru." />
+                               hint="Lewat dari ini pesanan dibatalkan otomatis dan stok kembali. Berlaku untuk pesanan baru."
+                               tooltip="Waktu yang diberikan ke pelanggan untuk membayar setelah membuat pesanan. Selama menunggu, stok barang ditahan untuk pesanan itu."
+                               tooltip-tips="24 jam umum dipakai. Terlalu lama membuat stok tertahan oleh pesanan yang tidak jadi dibayar." />
                 <x-form.number name="auto_complete_days" label="Selesai otomatis setelah sampai" :value="$values['auto_complete_days']" min="1" max="30" required suffix="hari"
-                               hint='Bila pelanggan tidak menekan "Pesanan diterima".' />
+                               hint='Bila pelanggan tidak menekan "Pesanan diterima".'
+                               tooltip="Pesanan berstatus “Sampai Tujuan” otomatis menjadi Selesai setelah sekian hari. Pesanan Selesai tidak bisa diubah lagi." />
             </section>
 
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">

@@ -80,7 +80,10 @@
                             @endforeach
                         </div>
                         <div x-show="status === 'shipped'" x-cloak>
-                            <label for="tracking_number" class="label">Nomor resi {{ $order->courierLabel() }}</label>
+                            <div class="label-row">
+                                <label for="tracking_number" class="label">Nomor resi {{ $order->courierLabel() }}</label>
+                                <x-tooltip label="Nomor resi" text="Nomor dari kurir saat paket diserahkan. Pelanggan bisa melacak paket dari halaman pesanannya, dan resi dicek otomatis bila fitur cek resi aktif." />
+                            </div>
                             <input id="tracking_number" name="tracking_number" value="{{ old('tracking_number', $order->tracking_number) }}" class="input font-mono @error('tracking_number') input-error @enderror" autocomplete="off">
                             <x-input-error for="tracking_number" />
                         </div>

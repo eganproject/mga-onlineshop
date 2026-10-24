@@ -9,6 +9,8 @@
     'id' => null,
     'label' => null,
     'hint' => null,
+    'tooltip' => null,
+    'tooltipTips' => null,
     'optional' => false,
     'value' => null,
     'bag' => 'default',
@@ -20,7 +22,7 @@
     $invalid = FormField::hasError($name, $bag);
     $value = FormField::thousands($key ? old($key, $value) : $value);
 @endphp
-<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :optional="$optional" :bag="$bag" :class="$wrapperClass">
+<x-form.field :label="$label" :for="$id" :name="$name" :hint="$hint" :tooltip="$tooltip" :tooltip-tips="$tooltipTips" :optional="$optional" :bag="$bag" :class="$wrapperClass">
     <div class="relative" x-data>
         <span class="input-addon">Rp</span>
         <input type="text" x-money inputmode="numeric" autocomplete="off"
