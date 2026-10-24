@@ -3,7 +3,7 @@
     $featured = ! $filtered && $articles->onFirstPage() ? $articles->first() : null;
     $list = $featured ? $articles->getCollection()->slice(1) : $articles->getCollection();
     $heading = $activeCategory?->name ?? ($tag ? '#'.$tag : 'Artikel');
-    $description = $activeCategory?->description ?: 'Tips, panduan memilih, dan kabar terbaru seputar aksesoris HP & gadget dari '.config('shop.full_name').'.';
+    $description = $activeCategory?->description ?: 'Tips, panduan memilih, dan kabar terbaru seputar media promosi & display akrilik dari '.config('shop.full_name').'.';
 @endphp
 <x-layouts.shop :title="$activeCategory ? $activeCategory->name.' · Artikel' : ($tag ? 'Artikel tentang '.$tag : 'Artikel & Tips')" :description="$description">
     <x-slot:head>

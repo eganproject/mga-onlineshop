@@ -1,0 +1,617 @@
+{
+    "source": "Toko MGA (Shopee gudang.acc, disalin dari mga-advertising.co.id) — Oktober 2026",
+    "image_base": "https://mga-advertising.co.id/wp-content/uploads/",
+    "footer": "Pembelian grosir atau jumlah banyak? Chat admin untuk harga khusus.\nPesanan sebelum pukul 16.00 WIB dikirim di hari yang sama (Senin–Minggu, kecuali tanggal merah).\nWajib rekam video unboxing untuk klaim kerusakan saat pengiriman.",
+    "categories": [
+        {"slug": "tripod-stand-banner", "name": "Tripod & Stand Banner", "description": "X banner, Y banner, tripod 1 & 2 sisi, standing banner, dan easel untuk promosi di depan toko, kafe, maupun event."},
+        {"slug": "frame-akrilik", "name": "Frame Akrilik", "description": "Frame akrilik dinding A4 sampai A0 dan frame poster magnetic untuk poster, sertifikat, dan papan informasi."},
+        {"slug": "tempat-brosur", "name": "Tempat Brosur & Standing Sign", "description": "Brosur tempel, akrilik pocket, L-shape holder, dan standing sign untuk menu, brosur, dan informasi di meja.", "children": [
+            {"slug": "brosur-tempel", "name": "Brosur Tempel"},
+            {"slug": "akrilik-pocket", "name": "Akrilik Pocket"},
+            {"slug": "standing-sign", "name": "Standing Sign & L-Shape"}
+        ]},
+        {"slug": "lembaran-akrilik", "name": "Lembaran Akrilik & Mirror", "description": "Akrilik lembaran grade A berbagai warna dan ketebalan, serta akrilik mirror gold, rose gold, dan silver.", "children": [
+            {"slug": "akrilik-lembaran", "name": "Akrilik Lembaran"},
+            {"slug": "lembaran-mirror", "name": "Lembaran Mirror"}
+        ]},
+        {"slug": "box-etalase-akrilik", "name": "Box & Etalase Akrilik", "description": "Box display diecast & action figure, box multifungsi, etalase mini, dan kotak amal dari akrilik bening."},
+        {"slug": "light-box-digital-signage", "name": "Light Box & Digital Signage", "description": "Fabric light box LED, digital signage, dan cetak poster duratrans / fabric untuk promosi yang menyala."},
+        {"slug": "perlengkapan-toko-event", "name": "Perlengkapan Toko & Event", "description": "Event desk, bill holder, ID card, dudukan tablet kasir, dan perlengkapan lain untuk toko, kantor, dan pameran."}
+    ],
+    "products": [
+        {
+            "slug": "x-banner-rangka-standing-poster-60x160", "name": "X Banner Rangka Standing Poster 60x160 cm", "category": "tripod-stand-banner",
+            "price": 15000, "compare": 29000, "weight": 700, "featured": true,
+            "note": "Hanya rangka X banner, tidak termasuk banner/posternya.",
+            "specs": ["Model: X Banner", "Material: Fiber (sangat kokoh)", "Warna: Hitam", "Ukuran banner: lebar 60 cm × tinggi 160 cm"],
+            "uses": ["Display poster marketing / promosi", "Media campaign di kafe, restoran, dan bazar", "Media iklan bisnis / usaha"],
+            "images": ["2025/09/id-11134207-7rbk6-m99pgw8h7aj58a.webp", "2025/09/id-11134207-7rbk7-m99pgw8i0sgtba.webp", "2025/09/id-11134207-7rbkd-m99pgw8h5vz1f1.webp", "2025/09/id-11134207-7rbke-m99pgw8hlc7xa1.webp", "2025/09/id-11134207-7rbk5-m99pgw8hlc0250.webp"]
+        },
+        {
+            "slug": "rangka-y-banner-60x160", "name": "Rangka Y Banner 60x160 cm", "category": "tripod-stand-banner",
+            "price": 30000, "compare": 50000, "weight": 800,
+            "note": "Hanya rangka Y banner, tidak termasuk banner/posternya.",
+            "specs": ["Model: Rangka Y Banner", "Material: Fiber (sangat kokoh)", "Warna: Hitam", "Ukuran banner: lebar 60 cm × tinggi 160 cm"],
+            "uses": ["Display poster marketing / promosi", "Media campaign di kafe, restoran, dan bazar", "Media iklan bisnis / usaha"],
+            "images": ["2025/09/sg-11134201-7rdxo-mc0iayjqf8y6c0@resize_w900_nl.webp", "2025/09/sg-11134201-7rdve-mc0iayr84bse9a@resize_w900_nl.webp", "2025/09/sg-11134201-7rdw8-mc0iaz71h4xl9d@resize_w900_nl.webp", "2025/09/sg-11134201-7rdxm-mc0iayz9si7t9c@resize_w900_nl.webp"]
+        },
+        {
+            "slug": "tripod-banner-1-sisi", "name": "Tripod Banner 1 Sisi Standing Frame", "category": "tripod-stand-banner",
+            "price": 70000, "compare": 95000, "weight": 1500,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster. Bisa pembelian grosir.",
+            "specs": ["Model: Tripod 1 sisi", "Material: Aluminium alloy (sangat kokoh)", "Warna: Hitam", "Tinggi: 80 cm (min) – 150 cm (maks)"],
+            "uses": ["Display poster marketing", "Stand foto wedding / pernikahan", "Standing frame lukisan"],
+            "images": ["2025/09/id-11134207-7rbk6-m95qgvmd86wd8b.webp", "2025/09/id-11134207-7rbk8-m95qgvmd9lgte5.webp", "2025/09/id-11134207-7rbkb-m95qgvmdf7ql7e.webp", "2025/09/id-11134207-7rbk0-m95qgvmdb019ca.webp", "2025/09/id-11134207-7rbkb-m95qgvmdgmb1c9.webp"]
+        },
+        {
+            "slug": "tripod-banner-2-sisi", "name": "Tripod Banner 2 Sisi Standing Banner Promosi", "category": "tripod-stand-banner",
+            "price": 54000, "compare": 98000, "weight": 2000, "featured": true,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster. Bisa pembelian grosir.",
+            "specs": ["Model: Tripod banner 2 sisi", "Material: Aluminium alloy (sangat kokoh)", "Warna: Hitam"],
+            "uses": ["Display poster promosi yang terlihat dari dua arah", "Media informasi di toko, kantor, dan event"],
+            "images": ["2025/09/id-11134207-7rbk8-m95oi02xby8dc9@resize_w900_nl.webp", "2025/09/id-11134207-7rbk8-m95oi02xerd95d.webp", "2025/09/id-11134207-7rbke-m95oi02xdcst0d.webp", "2025/09/id-11134207-7rbk2-m95q61he2hr28b.webp", "2025/09/id-11134207-7rbk9-m95q61he84cb7d.webp"]
+        },
+        {
+            "slug": "tripod-banner-type-tegak-2-sisi", "name": "Tripod Banner Type Tegak 2 Sisi", "category": "tripod-stand-banner",
+            "price": 130500, "compare": 200000, "weight": 2500,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster. Bisa pembelian grosir.",
+            "specs": ["Model: Tripod banner type tegak", "Material: Besi", "Warna: Hitam", "Tinggi stand: 113–210 cm (adjustable)", "Tinggi frame media: 12–200 cm (adjustable)", "Lebar media: tidak terbatas", "Tebal media: maksimal 7 mm"],
+            "uses": ["Media promosi UMKM, ritel, toko, dan restoran", "Media informasi di sekolah, showroom, dan tempat umum", "Dua sisi, terlihat konsumen dari dua arah"],
+            "images": ["2025/09/id-11134207-7rbkd-m96u5ze5oikif5@resize_w900_nl.webp", "2025/09/id-11134207-7rbk2-m96u5ze5px4y9f@resize_w900_nl.webp", "2025/09/id-11134207-7rbk2-m96u5ze5vjeq60@resize_w900_nl.webp", "2025/09/id-11134207-7rbk4-m96u5ze5rbpe1d@resize_w900_nl.webp", "2025/09/id-11134207-7rbk5-m96u5ze5sq9u7d@resize_w900_nl.webp"]
+        },
+        {
+            "slug": "tripod-banner-type-h-frame-miring", "name": "Tripod Banner Type H Frame Miring", "category": "tripod-stand-banner",
+            "price": 125000, "compare": 155000, "weight": 1500,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster.",
+            "specs": ["Model: Display banner miring", "Material: Besi", "Warna: Hitam", "Tinggi stand: 130–150 cm (adjustable)", "Panjang banner: 60–100 cm (adjustable)", "Lebar banner: tidak terbatas", "Tebal media: maksimal 0,7 cm", "Berat frame: maks 500 gr"],
+            "uses": ["Display banner marketing", "Advertising showroom, outlet, kafe, restoran, dan toko", "Papan daftar menu kafe dan restoran"],
+            "images": ["2025/09/id-11134207-7rbkb-m96tdtitbj7x07@resize_w900_nl-1.webp", "2025/09/id-11134207-7rbk8-m96tdtiteccta4@resize_w900_nl-1.webp", "2025/09/id-11134207-7rbk3-m96tdtith5hp15@resize_w900_nl-1.webp", "2025/09/id-11134207-7rbkd-m96tdtitcxsd27@resize_w900_nl-1.webp", "2025/09/id-11134207-7rbk0-m96tdtitfqx9ec@resize_w900_nl-1.webp"]
+        },
+        {
+            "slug": "tripod-banner-type-a-sidewalk", "name": "Tripod Banner Type A 1 Sisi (Sidewalk Stand)", "category": "tripod-stand-banner",
+            "price": 150000, "compare": null, "weight": 3000,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster. Bisa pembelian grosir.",
+            "specs": ["Model: Tripod type A sidewalk", "Material: Full aluminium", "Warna: Hitam", "Bisa dilipat"],
+            "uses": ["Stand banner lipat di depan toko", "Papan promosi trotoar / pintu masuk"],
+            "images": ["2025/09/id-11134207-7rbk5-m96tdthz9xpp62.webp", "2025/09/id-11134207-7rbka-m96tdthz9xq370.webp", "2025/09/id-11134207-7rbk8-m96tdthz9xxp5a.webp", "2025/09/id-11134207-7rbka-m96tdthzcqul01.webp"]
+        },
+        {
+            "slug": "tripod-easel-kayu-150-170cm", "name": "Tripod Easel Kayu 150 cm & 170 cm", "category": "tripod-stand-banner",
+            "price": 128500, "compare": 350000, "weight": 2000,
+            "note": "Hanya tripod, belum termasuk akrilik dan poster.",
+            "specs": ["Model: Tripod stand easel kayu", "Material: Kayu", "Ukuran besar: tinggi 170 cm × lebar 50 cm (kanvas maks 130 cm)", "Ukuran kecil: tinggi 150 cm × lebar 50 cm (kanvas maks 105 cm)"],
+            "uses": ["Stand lukisan kanvas", "Display foto dan papan sambutan acara"],
+            "images": ["2025/09/id-11134207-7ra0n-mcwuspxhj4o385.webp", "2025/09/id-11134207-7ra0l-mbg4nwkq8lqs30@resize_w900_nl.webp", "2025/09/id-11134207-7ra0h-mdmq2xov99xo5d@resize_w900_nl.webp", "2025/09/id-11134207-7ra0k-mbg4nwkqbevo95@resize_w900_nl.webp"]
+        },
+        {
+            "slug": "stand-banner-a-frame-portable", "name": "Stand Banner A-Frame Portable Lipat", "category": "tripod-stand-banner",
+            "price": 645000, "compare": 1000000, "weight": 8000,
+            "note": "Hanya rangka, tidak termasuk banner/posternya.",
+            "specs": ["Model: Stand banner A-frame extendable", "Material: Hollow galvanis", "Warna: Abu-abu", "Ukuran banner: lebar 120–190 cm × tinggi 60–150 cm", "Bisa dilipat & diatur ukurannya"],
+            "uses": ["Display poster marketing / promosi", "Media campaign di kafe, restoran, bazar, dan pameran"],
+            "images": ["2025/09/id-11134207-7ra0q-mbgk0bthz6vn30.webp", "2025/09/id-11134207-7ra0l-mbgk0bthwdqrab.webp", "2025/09/id-11134207-7ra0q-mbgk0bthxsb738.webp", "2025/09/id-11134207-7ra0n-mbgkjhm04efo35.webp", "2025/09/id-11134207-7ra0n-mbgkjhm04ec01a.webp"]
+        },
+        {
+            "slug": "standing-banner-aluminium-270x200", "name": "Standing Banner Aluminium 270x200 cm dengan Roda", "category": "tripod-stand-banner",
+            "price": 1789000, "compare": 2500000, "weight": 12000,
+            "note": "Hanya rangka, tidak termasuk banner/posternya.",
+            "specs": ["Model: Standing banner", "Material: Hollow galvanis", "Warna: Abu-abu", "Ukuran produk: lebar 270 cm × tinggi 200 cm", "Ukuran banner: maks lebar 240 cm × tinggi 120 cm", "Dilengkapi roda"],
+            "uses": ["Display banner promosi event dan booth", "Papan informasi di area publik"],
+            "images": ["2025/09/id-11134207-7ra0q-mcwuspxhhq3n4d@resize_w900_nl.webp", "2025/09/id-11134207-7ra0m-mbgk0bthpcwj97@resize_w900_nl.webp", "2025/09/id-11134207-7ra0n-mbgk0bthqrgz53@resize_w900_nl.webp", "2025/09/id-11134207-7ra0s-mbgk0bthtklvdd@resize_w900_nl.webp", "2025/09/id-11134207-7ra0k-mbgk0bths61fe7@resize_w900_nl.webp"]
+        },
+
+        {
+            "slug": "frame-akrilik-a4", "name": "Frame Akrilik Dinding A4", "category": "frame-akrilik",
+            "price": 47000, "compare": 60000, "weight": 300, "featured": true, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 47000, 60000], ["Tumpul 2 mm", 47000, 60000], ["Tajam 3 mm", 65000, 90000], ["Tumpul 3 mm", 65000, 90000]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm / 3 mm", "Ukuran: 27 × 36 cm (untuk kertas A4)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Advertising di mall atau showroom", "Bingkai piagam dan sertifikat"],
+            "images": ["2025/08/FRAME-AKRILIK-A4-1.jpg", "2025/08/FRAME-AKRILIK-A4-5.jpg", "2025/08/FRAME-AKRILIK-A4-6.jpg", "2025/08/FRAME-AKRILIK-A4-7.jpg", "2025/08/FRAME-AKRILIK-A4-2.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-f4", "name": "Frame Akrilik Dinding F4", "category": "frame-akrilik",
+            "price": 57000, "compare": 85000, "weight": 350, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 57000, 85000], ["Tumpul 2 mm", 57000, 85000], ["Tajam 3 mm", 0, null, false], ["Tumpul 3 mm", 0, null, false]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: 39 × 27 cm (untuk kertas F4)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Bingkai piagam dan sertifikat"],
+            "images": ["2025/08/FRAME-AKRILIK-F4-1.jpg", "2025/08/FRAME-AKRILIK-F4-3.jpg", "2025/08/FRAME-AKRILIK-F4-2.jpg", "2025/08/FRAME-AKRILIK-F4-9.jpg", "2025/08/FRAME-AKRILIK-F4-6.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-a3", "name": "Frame Akrilik Dinding A3", "category": "frame-akrilik",
+            "price": 77000, "compare": 100000, "weight": 500, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 77000, 100000], ["Tumpul 2 mm", 77000, 100000], ["Tajam 3 mm", 110000, 150000], ["Tumpul 3 mm", 110000, 150000]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm / 3 mm", "Ukuran: 36 × 48 cm (untuk kertas A3)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Bingkai piagam dan sertifikat"],
+            "images": ["2025/08/FRAME-AKRILIK-A3-1.jpg", "2025/08/FRAME-AKRILIK-A3-5.jpg", "2025/08/FRAME-AKRILIK-A3-6.jpg", "2025/08/FRAME-AKRILIK-A3-7.jpg", "2025/08/FRAME-AKRILIK-A3-2.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-a3-plus", "name": "Frame Akrilik Dinding A3+", "category": "frame-akrilik",
+            "price": 90000, "compare": 120000, "weight": 600, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 90000, 120000], ["Tumpul 2 mm", 90000, 120000], ["Tajam 3 mm", 0, null, false], ["Tumpul 3 mm", 0, null, false]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: 54 × 39 cm (untuk kertas A3+)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Bingkai piagam dan sertifikat"],
+            "images": ["2025/08/FRAME-AKRILIK-A3-1-1.jpg", "2025/08/FRAME-AKRILIK-A3-5-1.jpg", "2025/08/FRAME-AKRILIK-A3-6-1.jpg", "2025/08/FRAME-AKRILIK-A3-7-1.jpg", "2025/08/FRAME-AKRILIK-A3-2-1.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-a2", "name": "Frame Akrilik Dinding A2", "category": "frame-akrilik",
+            "price": 135000, "compare": 150000, "weight": 1000, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 135000, 150000], ["Tumpul 2 mm", 135000, 150000], ["Tajam 3 mm", 195000, 250000], ["Tumpul 3 mm", 195000, 250000]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm / 3 mm", "Ukuran: 67 × 50 cm (untuk poster A2)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Advertising di mall atau showroom"],
+            "images": ["2025/08/FRAME-AKRILIK-A2-1.jpg", "2025/08/FRAME-AKRILIK-A2-4.jpg", "2025/08/FRAME-AKRILIK-A2-5.jpg", "2025/08/FRAME-AKRILIK-A2-6.jpg", "2025/08/FRAME-AKRILIK-A2-7.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-a1", "name": "Frame Akrilik Dinding A1", "category": "frame-akrilik",
+            "price": 235000, "compare": 300000, "weight": 2000, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 235000, 300000], ["Tumpul 2 mm", 235000, 300000], ["Tajam 3 mm", 340000, 400000], ["Tumpul 3 mm", 340000, 400000]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm / 3 mm", "Ukuran: 90 × 60 cm (untuk poster A1)"],
+            "uses": ["Media informasi di kantor, sekolah, dan tempat umum", "Poster di tempat usaha", "Advertising di mall atau showroom"],
+            "images": ["2025/08/FRAME-AKRILIK-A1-1.jpg", "2025/08/FRAME-AKRILIK-A1-5.jpg", "2025/08/FRAME-AKRILIK-A1-6.jpg", "2025/08/FRAME-AKRILIK-A1-7.jpg", "2025/08/FRAME-AKRILIK-A1-9.jpg"]
+        },
+        {
+            "slug": "frame-akrilik-a0", "name": "Frame Akrilik Dinding A0", "category": "frame-akrilik",
+            "price": 0, "compare": null, "weight": 3500, "active": false, "variant_label": "Sudut & tebal",
+            "variants": [["Tajam 2 mm", 0, null], ["Tumpul 2 mm", 0, null], ["Tajam 3 mm", 0, null], ["Tumpul 3 mm", 0, null]],
+            "specs": ["Model: Display akrilik dinding", "Material: Akrilik bening", "Tebal: 2 mm / 3 mm", "Ukuran: untuk poster A0"],
+            "uses": ["Poster besar di tempat usaha, mall, atau showroom"],
+            "images": ["2025/08/FRAME-AKRILIK-A0-1.jpg", "2025/08/FRAME-AKRILIK-A0-4.jpg", "2025/08/FRAME-AKRILIK-A0-5.jpg", "2025/08/FRAME-AKRILIK-A0-7-2.jpg", "2025/08/FRAME-AKRILIK-A0-9.jpg"]
+        },
+        {
+            "slug": "frame-poster-magnetic", "name": "Frame Poster Magnetic", "category": "frame-akrilik",
+            "price": 10000, "compare": 24000, "weight": 300, "variant_label": "Ukuran & warna",
+            "variants": [["A5 Silver", 10000, 24000], ["A4 Silver", 17000, 29000], ["A4 Gold", 17000, 29000], ["A3 Silver", 25000, 39000], ["A3 Gold", 25000, 39000]],
+            "specs": ["Model: Poster tempel magnet", "Material: Plastik pelindung tahan cuaca + bingkai magnetik", "Warna: Silver / Gold", "Ukuran A4: 33 × 24 cm"],
+            "uses": ["Display poster marketing / promosi", "Frame sertifikat", "Frame foto"],
+            "images": ["2025/08/FRAME-POSTER-MAGNETIC-1.jpg", "2025/08/FRAME-POSTER-MAGNETIC-6.jpg", "2025/08/FRAME-POSTER-MAGNETIC-7.jpg", "2025/08/FRAME-POSTER-MAGNETIC-8.jpg", "2025/08/FRAME-POSTER-MAGNETIC-9.jpg"]
+        },
+
+        {
+            "slug": "brosur-tempel-a5", "name": "Brosur Tempel Akrilik A5", "category": "brosur-tempel",
+            "price": 13000, "compare": 18000, "weight": 150, "variant_label": "Orientasi",
+            "variants": [["Portrait", 13000, 18000], ["Landscape", 13000, 18000]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A5 (21 × 15 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat brosur", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-A51.jpg", "2025/08/BROSUR-TEMPEL-A54.jpg", "2025/08/BROSUR-TEMPEL-A55.jpg", "2025/08/BROSUR-TEMPEL-A52.jpg", "2025/08/BROSUR-TEMPEL-A53.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-a4", "name": "Brosur Tempel Akrilik A4", "category": "brosur-tempel",
+            "price": 19000, "compare": 26500, "weight": 250, "featured": true, "variant_label": "Orientasi",
+            "variants": [["Portrait", 19000, 26500], ["Landscape", 19000, 26500]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A4 (29,7 × 21 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat brosur", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-A41.jpg", "2025/08/BROSUR-TEMPEL-A43.jpg", "2025/08/BROSUR-TEMPEL-A44.jpg", "2025/08/BROSUR-TEMPEL-A45.jpg", "2025/08/BROSUR-TEMPEL-A46.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-f4", "name": "Brosur Tempel Akrilik F4", "category": "brosur-tempel",
+            "price": 28600, "compare": 30000, "weight": 300, "variant_label": "Orientasi",
+            "variants": [["Portrait", 28600, 30000], ["Landscape", 28600, 30000]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: F4 (21 × 33 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat brosur", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-F41.jpg", "2025/08/BROSUR-TEMPEL-F44.jpg", "2025/08/BROSUR-TEMPEL-F45.jpg", "2025/08/BROSUR-TEMPEL-F46.jpg", "2025/08/BROSUR-TEMPEL-F42.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-a3", "name": "Brosur Tempel Akrilik A3", "category": "brosur-tempel",
+            "price": 33500, "compare": 50000, "weight": 400, "variant_label": "Orientasi",
+            "variants": [["Portrait", 33500, 50000], ["Landscape", 33500, 50000]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A3 (42 × 29,7 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat brosur", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-A31.jpg", "2025/08/BROSUR-TEMPEL-A34.jpg", "2025/08/BROSUR-TEMPEL-A35.jpg", "2025/08/BROSUR-TEMPEL-A36.jpg", "2025/08/BROSUR-TEMPEL-A32.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-a3-plus", "name": "Brosur Tempel Akrilik A3+", "category": "brosur-tempel",
+            "price": 0, "compare": null, "weight": 500, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A3+"],
+            "uses": ["Display poster marketing / promosi", "Tempat brosur dan poster"],
+            "images": ["2025/08/BROSUR-TEMPEL-A31-1.jpg", "2025/08/BROSUR-TEMPEL-A35-1.jpg", "2025/08/BROSUR-TEMPEL-A36-1.jpg", "2025/08/BROSUR-TEMPEL-A32-1.jpg", "2025/08/BROSUR-TEMPEL-A33-1.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-a2", "name": "Brosur Tempel Akrilik A2", "category": "brosur-tempel",
+            "price": 73000, "compare": 80000, "weight": 800, "variant_label": "Orientasi",
+            "variants": [["Portrait", 73000, 80000], ["Landscape", 73000, 80000]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A2 (59,4 × 42 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-A24.jpg", "2025/08/BROSUR-TEMPEL-A25.jpg", "2025/08/BROSUR-TEMPEL-A26.jpg", "2025/08/BROSUR-TEMPEL-A22.jpg"]
+        },
+        {
+            "slug": "brosur-tempel-a1", "name": "Brosur Tempel Akrilik A1", "category": "brosur-tempel",
+            "price": 133000, "compare": 200000, "weight": 1500, "variant_label": "Orientasi",
+            "variants": [["Portrait", 133000, 200000], ["Landscape", 133000, 200000]],
+            "specs": ["Model: Brosur tempel akrilik", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A1 (84,1 × 59,4 cm)"],
+            "uses": ["Display poster marketing / promosi", "Tempat poster di dinding atau kaca"],
+            "images": ["2025/08/BROSUR-TEMPEL-A11.jpg", "2025/08/BROSUR-TEMPEL-A13.jpg", "2025/08/BROSUR-TEMPEL-A14.jpg", "2025/08/BROSUR-TEMPEL-A12.jpg", "2025/08/BROSUR-TEMPEL-A16.jpg"]
+        },
+
+        {
+            "slug": "akrilik-pocket-bening-a6", "name": "Akrilik Pocket Tempat Brosur Bening A6", "category": "akrilik-pocket",
+            "price": 19000, "compare": 35000, "weight": 120, "variant_label": "Orientasi",
+            "variants": [["Portrait", 19000, 35000], ["Landscape", 19000, 35000]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A6 (10,5 × 14,8 cm)"],
+            "uses": ["Tempat brosur di meja kasir atau resepsionis", "Display poster dan daftar harga"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-A6-1.jpg", "2025/08/AKRILIK-POCKET-BENING-A6-2.jpg", "2025/08/AKRILIK-POCKET-BENING-A6-6.jpg", "2025/08/AKRILIK-POCKET-BENING-A6-4.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-bening-a5", "name": "Akrilik Pocket Tempat Brosur Bening A5", "category": "akrilik-pocket",
+            "price": 28000, "compare": 35000, "weight": 180, "variant_label": "Orientasi",
+            "variants": [["Portrait", 28000, 35000], ["Landscape", 28000, 35000]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A5 (21 × 15 cm)"],
+            "uses": ["Tempat brosur di meja kasir atau resepsionis", "Display poster dan daftar harga"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-A5-1.jpg", "2025/08/AKRILIK-POCKET-BENING-A5-4.jpg", "2025/08/AKRILIK-POCKET-BENING-A5-5.jpg", "2025/08/AKRILIK-POCKET-BENING-A5-6.jpg", "2025/08/AKRILIK-POCKET-BENING-A5-2.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-bening-a4", "name": "Akrilik Pocket Tempat Brosur Bening A4", "category": "akrilik-pocket",
+            "price": 38000, "compare": 50000, "weight": 280, "featured": true, "variant_label": "Orientasi",
+            "variants": [["Portrait", 38000, 50000], ["Landscape", 38000, 50000]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A4 (21 × 30 cm)"],
+            "uses": ["Tempat brosur di meja kasir atau resepsionis", "Display poster dan daftar harga"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-A4-1.jpg", "2025/08/AKRILIK-POCKET-BENING-A4-4.jpg", "2025/08/AKRILIK-POCKET-BENING-A4-5.jpg", "2025/08/AKRILIK-POCKET-BENING-A4-6.jpg", "2025/08/AKRILIK-POCKET-BENING-A4-2.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-bening-a3", "name": "Akrilik Pocket Tempat Brosur Bening A3", "category": "akrilik-pocket",
+            "price": 68000, "compare": 85000, "weight": 450, "variant_label": "Orientasi",
+            "variants": [["Portrait", 68000, 85000], ["Landscape", 68000, 85000]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A3 (29,7 × 42 cm)"],
+            "uses": ["Tempat brosur dan katalog", "Display poster dan daftar harga"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-A3-1.jpg", "2025/08/AKRILIK-POCKET-BENING-A3-3.jpg", "2025/08/AKRILIK-POCKET-BENING-A3-4.jpg", "2025/08/AKRILIK-POCKET-BENING-A3-5.jpg", "2025/08/AKRILIK-POCKET-BENING-A3-6.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-bening-a7", "name": "Akrilik Pocket Tempat Brosur Bening A7", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 80, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: A7"],
+            "uses": ["Tempat kartu nama dan brosur kecil"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-A7-1.jpg", "2025/08/AKRILIK-POCKET-BENING-A7-3.jpg", "2025/08/AKRILIK-POCKET-BENING-A7-4.jpg", "2025/08/AKRILIK-POCKET-BENING-A7-2.jpg", "2025/08/AKRILIK-POCKET-BENING-A7-6.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-bening-f4", "name": "Akrilik Pocket Tempat Brosur Bening F4", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 320, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening", "Tebal: 2 mm", "Ukuran: F4"],
+            "uses": ["Tempat brosur dan dokumen F4"],
+            "images": ["2025/08/AKRILIK-POCKET-BENING-F4-1.jpg", "2025/08/AKRILIK-POCKET-BENING-F4-3.jpg", "2025/08/AKRILIK-POCKET-BENING-F4-4.jpg", "2025/08/AKRILIK-POCKET-BENING-F4-5.jpg", "2025/08/AKRILIK-POCKET-BENING-F4-6.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-a4", "name": "Akrilik Pocket Tempat Brosur Hitam A4", "category": "akrilik-pocket",
+            "price": 42000, "compare": 58300, "weight": 280, "variant_label": "Orientasi",
+            "variants": [["Portrait", 42000, 58300], ["Landscape", 42000, 58300]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: A4 (29,7 × 21 cm)"],
+            "uses": ["Tempat brosur di meja kasir atau resepsionis", "Display poster dan daftar harga"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-A4-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-A4-5.jpg", "2025/08/AKRILIK-POCKET-HITAM-A4-6.jpg", "2025/08/AKRILIK-POCKET-HITAM-A4-2.jpg", "2025/08/AKRILIK-POCKET-HITAM-A4-3.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-a7", "name": "Akrilik Pocket Tempat Brosur Hitam A7", "category": "akrilik-pocket",
+            "price": 50000, "compare": null, "weight": 80, "variant_label": "Orientasi",
+            "variants": [["Portrait", 50000, null], ["Landscape", 50000, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: A7"],
+            "uses": ["Tempat kartu nama dan brosur kecil"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-A7-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-A7-5.jpg", "2025/08/AKRILIK-POCKET-HITAM-A7-6.jpg", "2025/08/AKRILIK-POCKET-HITAM-A7-4.jpg", "2025/08/AKRILIK-POCKET-HITAM-A7-2.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-a6", "name": "Akrilik Pocket Tempat Brosur Hitam A6", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 120, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: A6"],
+            "uses": ["Tempat brosur di meja kasir"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-A6-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-A6-4.jpg", "2025/08/AKRILIK-POCKET-HITAM-A6-5.jpg", "2025/08/AKRILIK-POCKET-HITAM-A6-6.jpg", "2025/08/AKRILIK-POCKET-HITAM-A6-2.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-a5", "name": "Akrilik Pocket Tempat Brosur Hitam A5", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 180, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: A5"],
+            "uses": ["Tempat brosur di meja kasir"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-A5-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-A5-6.jpg", "2025/08/AKRILIK-POCKET-HITAM-A5-3.jpg", "2025/08/AKRILIK-POCKET-HITAM-A5-4.jpg", "2025/08/AKRILIK-POCKET-HITAM-A5-2.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-a3", "name": "Akrilik Pocket Tempat Brosur Hitam A3", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 450, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: A3"],
+            "uses": ["Tempat brosur dan katalog"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-A3-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-A3-2.jpg", "2025/08/AKRILIK-POCKET-HITAM-A3-3.jpg", "2025/08/AKRILIK-POCKET-HITAM-A3-4.jpg"]
+        },
+        {
+            "slug": "akrilik-pocket-hitam-f4", "name": "Akrilik Pocket Tempat Brosur Hitam F4", "category": "akrilik-pocket",
+            "price": 0, "compare": null, "weight": 320, "active": false, "variant_label": "Orientasi",
+            "variants": [["Portrait", 0, null], ["Landscape", 0, null]],
+            "specs": ["Model: Tempat brosur pocket", "Material: Akrilik bening + hitam", "Tebal: 2 mm", "Ukuran: F4"],
+            "uses": ["Tempat brosur dan dokumen F4"],
+            "images": ["2025/08/AKRILIK-POCKET-HITAM-F4-1.jpg", "2025/08/AKRILIK-POCKET-HITAM-F4-4.jpg", "2025/08/AKRILIK-POCKET-HITAM-F4-5.jpg", "2025/08/AKRILIK-POCKET-HITAM-F4-6.jpg", "2025/08/AKRILIK-POCKET-HITAM-F4-2.jpg"]
+        },
+
+        {
+            "slug": "standing-sign-a6", "name": "Standing Sign Akrilik A6", "category": "standing-sign",
+            "price": 26400, "compare": 34800, "weight": 80,
+            "specs": ["Model: Standing sign", "Material: Akrilik, list hitam", "Ukuran: A6 (10,5 × 14,8 cm)", "Panjang kaki: 9,5 cm"],
+            "uses": ["Display brosur dan promo di meja", "Bingkai foto di rumah / ruang kerja", "Daftar menu kafe dan restoran"],
+            "images": ["2025/08/STANDING-SIGN-A6.jpg", "2025/08/STANDING-SIGN-A6-3.jpg", "2025/08/STANDING-SIGN-A6-4.jpg", "2025/08/STANDING-SIGN-A6-5.jpg", "2025/08/STANDING-SIGN-A6-6.jpg"]
+        },
+        {
+            "slug": "standing-sign-a5", "name": "Standing Sign Akrilik A5", "category": "standing-sign",
+            "price": 45120, "compare": 56400, "weight": 150,
+            "specs": ["Model: Standing sign", "Material: Akrilik, list hitam", "Ukuran: A5", "Panjang kaki: 9,5 cm"],
+            "uses": ["Display brosur dan promo di meja", "Informasi di kantor dan sekolah", "Daftar menu kafe dan restoran"],
+            "images": ["2025/08/STANDING-SIGN-A5.jpg", "2025/08/STANDING-SIGN-A5-6.jpg", "2025/08/STANDING-SIGN-A5-4.jpg", "2025/08/STANDING-SIGN-A5-5.jpg", "2025/08/STANDING-SIGN-A5-1.jpg"]
+        },
+        {
+            "slug": "standing-sign-a4", "name": "Standing Sign Akrilik A4", "category": "standing-sign",
+            "price": 76000, "compare": 108000, "weight": 250, "featured": true,
+            "specs": ["Model: Standing sign", "Material: Akrilik, list hitam", "Ukuran: A4 (29,7 × 21 cm)", "Panjang kaki: 9,5 cm"],
+            "uses": ["Display brosur dan promo di meja", "Informasi di kantor dan sekolah", "Daftar menu kafe dan restoran"],
+            "images": ["2025/08/STANDING-SIGN-A4.jpg", "2025/08/STANDING-SIGN-A4-5.jpg", "2025/08/STANDING-SIGN-A4-6.jpg", "2025/08/STANDING-SIGN-A4-1.jpg", "2025/08/STANDING-SIGN-A4-2.jpg"]
+        },
+        {
+            "slug": "standing-sign-a3", "name": "Standing Sign Akrilik A3", "category": "standing-sign",
+            "price": 137250, "compare": 195000, "weight": 450,
+            "specs": ["Model: Standing sign", "Material: Akrilik, list hitam", "Ukuran: A3 (29,7 × 42 cm)", "Panjang kaki: 9,5 cm"],
+            "uses": ["Display promo di meja resepsionis", "Informasi di kantor dan sekolah", "Daftar menu kafe dan restoran"],
+            "images": ["2025/08/STANDING-SIGN-A3.jpg", "2025/08/STANDING-SIGN-A3-1.jpg", "2025/08/STANDING-SIGN-A3-2.jpg", "2025/08/STANDING-SIGN-A3-3.jpg", "2025/08/STANDING-SIGN-A3-4.jpg"]
+        },
+        {
+            "slug": "l-shape-holder-a5", "name": "L Shape Holder Akrilik A5", "category": "standing-sign",
+            "price": 0, "compare": null, "weight": 100, "active": false,
+            "specs": ["Model: L shape holder", "Material: Akrilik bening", "Ukuran: A5"],
+            "uses": ["Display menu, promo, dan informasi di meja"],
+            "images": ["2025/08/L-SHAPE-HOLDER-A5.jpg", "2025/08/L-SHAPE-HOLDER-A5-3.jpg", "2025/08/L-SHAPE-HOLDER-A5-4.jpg", "2025/08/L-SHAPE-HOLDER-A5-5.jpg", "2025/08/L-SHAPE-HOLDER-A5-6.jpg"]
+        },
+        {
+            "slug": "l-shape-holder-a4", "name": "L Shape Holder Akrilik A4", "category": "standing-sign",
+            "price": 0, "compare": null, "weight": 180, "active": false,
+            "specs": ["Model: L shape holder", "Material: Akrilik bening", "Ukuran: A4"],
+            "uses": ["Display menu, promo, dan informasi di meja"],
+            "images": ["2025/08/L-SHAPE-HOLDER-A4.jpg", "2025/08/L-SHAPE-HOLDER-A4-2.jpg", "2025/08/L-SHAPE-HOLDER-A4-3.jpg", "2025/08/L-SHAPE-HOLDER-A4-4.jpg", "2025/08/L-SHAPE-HOLDER-A4-5.jpg"]
+        },
+        {
+            "slug": "l-shape-holder-a3", "name": "L Shape Holder Akrilik A3", "category": "standing-sign",
+            "price": 0, "compare": null, "weight": 300, "active": false,
+            "specs": ["Model: L shape holder", "Material: Akrilik bening", "Ukuran: A3"],
+            "uses": ["Display menu, promo, dan informasi di meja"],
+            "images": ["2025/08/L-SHAPE-HOLDER-A3.jpg", "2025/08/L-SHAPE-HOLDER-A3-4.jpg", "2025/08/L-SHAPE-HOLDER-A3-5.jpg", "2025/08/L-SHAPE-HOLDER-A3-6.jpg", "2025/08/L-SHAPE-HOLDER-A3-2.jpg"]
+        },
+
+        {
+            "slug": "akrilik-lembaran-a5", "name": "Akrilik Lembaran A5", "category": "akrilik-lembaran",
+            "price": 4900, "compare": 6000, "weight": 100, "variant_label": "Warna & tebal",
+            "variants": [["Bening 1,5 mm", 4900, 6000], ["Bening sudut tajam 2 mm", 5400, 10000], ["Bening sudut tumpul 2 mm", 5400, 10000], ["Bening sudut ½ bulat 2 mm", 5900, 10000], ["Bening 3 mm", 8400, 15000], ["Putih susu 2 mm", 6200, 10000], ["Hitam solid 2 mm", 7200, 15000], ["Putih solid 2 mm", 8400, 10000], ["Kuning solid 2 mm", 9500, 15000], ["Merah solid 2 mm", 9500, 15000], ["Biru solid 2 mm", 9500, 15000], ["Hijau muda 2 mm", 9500, 15000], ["Hijau tua 2 mm", 9500, 15000]],
+            "specs": ["Model: Akrilik lembaran", "Material: Akrilik grade A", "Ukuran: A5 (15 × 21 cm)", "Tebal: 1,5 mm / 2 mm / 3 mm"],
+            "uses": ["Bahan baku kerajinan dan produk akrilik", "Pelapis dinding atau partisi akrilik"],
+            "images": ["2025/08/AKRILIK-LEMBARAN-A5-1.jpg", "2025/08/AKRILIK-LEMBARAN-A5-2.jpg", "2025/08/AKRILIK-LEMBARAN-A5-3.jpg", "2025/08/AKRILIK-LEMBARAN-A5-4.jpg", "2025/08/AKRILIK-LEMBARAN-A5-5.jpg"]
+        },
+        {
+            "slug": "akrilik-lembaran-a4", "name": "Akrilik Lembaran A4", "category": "akrilik-lembaran",
+            "price": 9500, "compare": 11270, "weight": 180, "featured": true, "variant_label": "Warna & tebal",
+            "variants": [["Bening 1,5 mm", 9500, 11270], ["Bening sudut tajam 2 mm", 10800, 24000], ["Bening sudut tumpul 2 mm", 11000, 26000], ["Bening sudut ½ bulat 2 mm", 11500, 28000], ["Bening 3 mm", 16500, 30000], ["Putih susu 2 mm", 12000, 24000], ["Hitam solid 2 mm", 14000, 24000], ["Putih solid 2 mm", 15500, 24000], ["Kuning solid 2 mm", 19000, 24000], ["Merah solid 2 mm", 19000, 24000], ["Biru solid 2 mm", 19000, 24000], ["Hijau muda 2 mm", 19000, 24000], ["Hijau tua 2 mm", 19000, 24000], ["Putih susu 3 mm", 20500, 30000], ["Hitam solid 3 mm", 20500, 30000], ["Hitam rayban 2 mm", 0, null, false]],
+            "specs": ["Model: Akrilik lembaran", "Material: Akrilik grade A", "Ukuran: A4 (21 × 30 cm)", "Tebal: 1,5 mm / 2 mm / 3 mm"],
+            "uses": ["Bahan baku kerajinan dan produk akrilik", "Pelapis dinding atau partisi akrilik"],
+            "images": ["2025/08/AKRILIK-LEMBARAN-A4-1.jpg", "2025/08/AKRILIK-LEMBARAN-A4-12.jpg", "2025/08/AKRILIK-LEMBARAN-A4-13.jpg", "2025/08/AKRILIK-LEMBARAN-A4-14.jpg", "2025/08/AKRILIK-LEMBARAN-A4-15.jpg"]
+        },
+        {
+            "slug": "akrilik-lembaran-a3", "name": "Akrilik Lembaran A3", "category": "akrilik-lembaran",
+            "price": 19500, "compare": 30000, "weight": 350, "variant_label": "Warna & tebal",
+            "variants": [["Bening 1,5 mm", 19500, 30000], ["Bening sudut tajam 2 mm", 21499, 50000], ["Bening sudut tumpul 2 mm", 22500, 35000], ["Bening sudut ½ bulat 2 mm", 23500, 35000], ["Bening 3 mm", 33000, 70000], ["Putih susu 2 mm", 24000, 50000], ["Putih solid 2 mm", 24000, 50000], ["Hitam solid 2 mm", 28000, 50000], ["Kuning solid 2 mm", 38000, 50000], ["Merah solid 2 mm", 38000, 50000], ["Biru solid 2 mm", 38000, 50000], ["Hijau muda 2 mm", 38000, 50000], ["Hijau tua 2 mm", 38000, 50000], ["Hitam solid 3 mm", 40000, 70000], ["Putih susu 3 mm", 43000, 70000]],
+            "specs": ["Model: Akrilik lembaran", "Material: Akrilik grade A", "Ukuran: A3 (30 × 42 cm)", "Tebal: 1,5 mm / 2 mm / 3 mm"],
+            "uses": ["Bahan baku kerajinan dan produk akrilik", "Pelapis dinding atau partisi akrilik"],
+            "images": ["2025/08/AKRILIK-LEMBARAN-A3-1.jpg", "2025/08/AKRILIK-LEMBARAN-A3-5.jpg", "2025/08/AKRILIK-LEMBARAN-A3-6.jpg", "2025/08/AKRILIK-LEMBARAN-A3-7.jpg", "2025/08/AKRILIK-LEMBARAN-A3-8.jpg"]
+        },
+        {
+            "slug": "akrilik-lembaran-a2", "name": "Akrilik Lembaran A2", "category": "akrilik-lembaran",
+            "price": 39000, "compare": 70000, "weight": 700, "variant_label": "Warna & tebal",
+            "variants": [["Bening 1,5 mm", 39000, 70000], ["Hitam 1,5 mm", 39000, 70000], ["Putih susu 1,5 mm", 39000, 70000], ["Bening 2 mm", 43999, 80000], ["Hitam solid 2 mm", 54500, 100000], ["Putih susu 2 mm", 54500, 100000], ["Putih solid 2 mm", 54500, 100000], ["Kuning solid 2 mm", 74500, 100000], ["Merah solid 2 mm", 74500, 100000], ["Biru solid 2 mm", 74500, 100000], ["Hijau muda 2 mm", 74500, 100000], ["Hijau tua 2 mm", 74500, 100000]],
+            "specs": ["Model: Akrilik lembaran", "Material: Akrilik grade A", "Ukuran: A2 (42 × 60 cm)", "Tebal: 1,5 mm / 2 mm"],
+            "uses": ["Bahan baku kerajinan dan produk akrilik", "Pelapis dinding atau partisi akrilik"],
+            "images": ["2025/08/AKRILIK-LEMBARAN-A2-1.jpg", "2025/08/AKRILIK-LEMBARAN-A2-6.jpg", "2025/08/AKRILIK-LEMBARAN-A2-7.jpg", "2025/08/AKRILIK-LEMBARAN-A2-8.jpg", "2025/08/AKRILIK-LEMBARAN-A2-9.jpg"]
+        },
+        {
+            "slug": "akrilik-lembaran-a6", "name": "Akrilik Lembaran A6", "category": "akrilik-lembaran",
+            "price": 0, "compare": null, "weight": 50, "active": false, "variant_label": "Warna & tebal",
+            "variants": [["Bening 2 mm", 0, null], ["Putih susu 2 mm", 0, null], ["Hitam solid 2 mm", 0, null], ["Putih solid 2 mm", 0, null], ["Kuning solid 2 mm", 0, null], ["Merah solid 2 mm", 0, null], ["Biru solid 2 mm", 0, null], ["Hijau muda 2 mm", 0, null], ["Hijau tua 2 mm", 0, null]],
+            "specs": ["Model: Akrilik lembaran", "Material: Akrilik grade A", "Ukuran: A6 (10,5 × 14,8 cm)", "Tebal: 2 mm"],
+            "uses": ["Bahan baku kerajinan dan produk akrilik"],
+            "images": ["2025/08/AKRILIK-LEMBARAN-A6-1.jpg", "2025/08/AKRILIK-LEMBARAN-A6-2.jpg", "2025/08/AKRILIK-LEMBARAN-A6-3.jpg", "2025/08/AKRILIK-LEMBARAN-A6-4.jpg", "2025/08/AKRILIK-LEMBARAN-A6-5.jpg"]
+        },
+        {
+            "slug": "lembaran-mirror-a5", "name": "Akrilik Lembaran Mirror A5", "category": "lembaran-mirror",
+            "price": 9500, "compare": 13000, "weight": 100, "variant_label": "Warna",
+            "variants": [["Gold", 9500, 13000], ["Rose gold", 9500, 22000], ["Silver", 9500, 22000], ["Biru", 9500, 22000], ["Merah", 9500, 22000]],
+            "specs": ["Model: Akrilik lembaran mirror", "Material: Akrilik grade A", "Ukuran: A5 (14,8 × 21 cm)", "Tebal: 2 mm"],
+            "uses": ["Bahan baku produk akrilik", "Pelapis dinding atau partisi bercermin"],
+            "images": ["2025/08/LEMBARAN-MIRROR-A5-1.jpg", "2025/08/LEMBARAN-MIRROR-A5-4.jpg", "2025/08/LEMBARAN-MIRROR-A5-5.jpg", "2025/08/LEMBARAN-MIRROR-A5-6.jpg", "2025/08/LEMBARAN-MIRROR-A5-3.jpg"]
+        },
+        {
+            "slug": "lembaran-mirror-a4", "name": "Akrilik Lembaran Mirror A4", "category": "lembaran-mirror",
+            "price": 20000, "compare": 26000, "weight": 180, "variant_label": "Warna",
+            "variants": [["Gold", 20000, 26000], ["Rose gold", 20000, 32000], ["Silver", 20000, 32000], ["Biru", 20000, 32000], ["Merah", 20000, 32000]],
+            "specs": ["Model: Akrilik lembaran mirror", "Material: Akrilik grade A", "Ukuran: A4 (21 × 29,7 cm)", "Tebal: 2 mm"],
+            "uses": ["Bahan baku produk akrilik", "Pelapis dinding atau partisi bercermin"],
+            "images": ["2025/08/LEMBARAN-MIRROR-A4-1.jpg", "2025/08/LEMBARAN-MIRROR-A4-5.jpg", "2025/08/LEMBARAN-MIRROR-A4-6.jpg", "2025/08/LEMBARAN-MIRROR-A4-2.jpg", "2025/08/LEMBARAN-MIRROR-A4-3.jpg"]
+        },
+        {
+            "slug": "lembaran-mirror-a3", "name": "Akrilik Lembaran Mirror A3", "category": "lembaran-mirror",
+            "price": 40000, "compare": 55000, "weight": 350, "variant_label": "Warna",
+            "variants": [["Gold", 40000, 55000], ["Rose gold", 40000, 55000], ["Silver", 40000, 55000], ["Biru", 40000, 55000], ["Merah", 40000, 55000]],
+            "specs": ["Model: Akrilik lembaran mirror", "Material: Akrilik grade A", "Ukuran: A3 (29,7 × 42 cm)", "Tebal: 2 mm"],
+            "uses": ["Bahan baku produk akrilik", "Pelapis dinding atau partisi bercermin"],
+            "images": ["2025/08/LEMBARAN-MIRROR-A3-1.jpg", "2025/08/LEMBARAN-MIRROR-A3-5.jpg", "2025/08/LEMBARAN-MIRROR-A3-6.jpg", "2025/08/LEMBARAN-MIRROR-A3-2.jpg", "2025/08/LEMBARAN-MIRROR-A3-3.jpg"]
+        },
+        {
+            "slug": "lembaran-mirror-a2", "name": "Akrilik Lembaran Mirror A2", "category": "lembaran-mirror",
+            "price": 79500, "compare": 110000, "weight": 700, "variant_label": "Warna",
+            "variants": [["Gold", 79500, 110000], ["Rose gold", 79500, 110000], ["Silver", 79500, 110000], ["Biru", 79500, 110000], ["Merah", 79500, 110000]],
+            "specs": ["Model: Akrilik lembaran mirror", "Material: Akrilik grade A", "Ukuran: A2 (42 × 59,4 cm)", "Tebal: 2 mm"],
+            "uses": ["Bahan baku produk akrilik", "Pelapis dinding atau partisi bercermin"],
+            "images": ["2025/08/LEMBARAN-MIRROR-A2-1.jpg", "2025/08/LEMBARAN-MIRROR-A2-5.jpg", "2025/08/LEMBARAN-MIRROR-A2-6.jpg", "2025/08/LEMBARAN-MIRROR-A2-7.jpg", "2025/08/LEMBARAN-MIRROR-A2-2.jpg"]
+        },
+
+        {
+            "slug": "box-display-akrilik-mobil", "name": "Box Display Akrilik Diecast Mobil", "category": "box-etalase-akrilik",
+            "price": 13800, "compare": 17500, "weight": 300, "featured": true, "variant_label": "Skala",
+            "variants": [["1:64 (2 mm)", 13800, 17500], ["1:43 (2 mm)", 19800, 23575], ["1:32 (2 mm)", 26000, 31625], ["1:24 (2 mm)", 51500, 61525], ["1:18 (3 mm)", 94500, 100000]],
+            "specs": ["Model: Box display akrilik", "Material: Akrilik bening, alas hitam", "Tebal: 2 mm (1:18 tebal 3 mm)", "Skala: 1:64 sampai 1:18"],
+            "uses": ["Display koleksi diecast di toko atau rumah", "Melindungi koleksi dari debu"],
+            "images": ["2025/08/BOX-DISPLAY-AKRILIK.jpg", "2025/08/BOX-DISPLAY-AKRILIK-MOBIL-1-1.jpg", "2025/08/BOX-DISPLAY-AKRILIK-MOBIL-7-1.jpg", "2025/08/BOX-DISPLAY-AKRILIK-MOBIL-8-1.jpg", "2025/08/BOX-DISPLAY-AKRILIK-MOBIL-5-1.jpg"]
+        },
+        {
+            "slug": "box-display-akrilik-figure", "name": "Box Display Akrilik Action Figure", "category": "box-etalase-akrilik",
+            "price": 25000, "compare": 30000, "weight": 400, "variant_label": "Ukuran",
+            "variants": [["1:11 (20 × 15 × 15 cm)", 25000, 30000], ["1:17 (15 × 10 × 10 cm)", 42000, 44000], ["1:20 (12 × 7 × 7 cm)", 55000, 65000]],
+            "specs": ["Model: Box display akrilik", "Material: Akrilik bening, alas hitam", "Tebal: 2 mm"],
+            "uses": ["Display produk di toko", "Pajangan koleksi di ruang tamu", "Menjaga barang tetap bersih"],
+            "images": ["2025/08/AKRILIK-DISPLAY-FIGURE.jpg", "2025/08/BOX-DISPLAY-AKRILIK-FIGURE-1.jpg", "2025/08/BOX-DISPLAY-AKRILIK-FIGURE-4.jpg", "2025/08/BOX-DISPLAY-AKRILIK-FIGURE-5.jpg", "2025/08/BOX-DISPLAY-AKRILIK-FIGURE-6.jpg"]
+        },
+        {
+            "slug": "box-multifungsi-akrilik", "name": "Box Multifungsi Akrilik", "category": "box-etalase-akrilik",
+            "price": 21000, "compare": 41000, "weight": 200, "variant_label": "Ukuran",
+            "variants": [["6 × 6 × 6 cm", 21000, 41000], ["10 × 10 × 10 cm", 35000, 50000]],
+            "specs": ["Model: Box multifungsi", "Material: Akrilik bening", "Tebal: 2 mm"],
+            "uses": ["Kemasan merchandise", "Kotak hadiah dan hampers"],
+            "images": []
+        },
+        {
+            "slug": "etalase-mini-akrilik", "name": "Etalase Mini Akrilik", "category": "box-etalase-akrilik",
+            "price": 155000, "compare": 265000, "weight": 900,
+            "specs": ["Model: Etalase mini akrilik", "Material: Akrilik bening, alas hitam", "Ukuran: 50 × 10 × 25 cm", "Tebal: 3 mm", "Potongan laser, sisi halus"],
+            "uses": ["Display produk di warung dan toko", "Menjaga produk tetap higienis"],
+            "images": ["2025/08/ETALASE-MINI-AKRILIK.jpg", "2025/08/ETALASE-MINI-AKRILIK-1.jpg", "2025/08/ETALASE-MINI-AKRILIK-3.jpg", "2025/08/ETALASE-MINI-AKRILIK-2.jpg", "2025/08/ETALASE-MINI-AKRILIK-5.jpg"]
+        },
+        {
+            "slug": "kotak-amal-akrilik", "name": "Kotak Amal Akrilik", "category": "box-etalase-akrilik",
+            "price": 0, "compare": null, "weight": 800, "active": false, "variant_label": "Model",
+            "variants": [["Jadi – Small", 0, null], ["Jadi – Medium", 0, null], ["Rakit – Small", 0, null], ["Rakit – Medium", 0, null]],
+            "specs": ["Model: Kotak amal", "Material: Akrilik bening"],
+            "uses": ["Kotak donasi di masjid, toko, dan acara"],
+            "images": []
+        },
+        {
+            "slug": "display-etalase-kue", "name": "Display Etalase Kue Akrilik", "category": "box-etalase-akrilik",
+            "price": 0, "compare": null, "weight": 1000, "active": false,
+            "specs": ["Model: Etalase kue", "Material: Akrilik bening"],
+            "uses": ["Display kue dan roti di toko atau kafe"],
+            "images": []
+        },
+
+        {
+            "slug": "fabric-light-box-led-80x180", "name": "Fabric Light Box LED 80x180 cm", "category": "light-box-digital-signage",
+            "price": 1489000, "compare": 1700000, "weight": 8000, "featured": true,
+            "note": "Hanya rangka, cetak banner fabric dijual terpisah.",
+            "specs": ["Model: Fabric light box", "Material: Aluminium", "Warna: Hitam", "Ukuran: 60 × 8 × 180 cm", "Penerangan: 2400K–9000K", "Input listrik: 12V–24V", "Knockdown 4 bagian sambung"],
+            "uses": ["Display iklan menyala untuk kafe, resto, dan booth", "Papan menu dan promo di dalam toko"],
+            "images": ["2025/09/id-11134207-7rbk5-m9459f1p21hed9@resize_w900_nl.webp", "2025/09/id-11134207-7rbk8-m9459f1oxts244@resize_w900_nl.webp", "2025/09/id-11134207-7rbkc-m9459f1oz8ci34@resize_w900_nl.webp", "2025/09/id-11134207-7rbk2-m9459f1p4uma5c@resize_w900_nl.webp", "2025/09/id-11134207-7rbke-m9459f1p696q8a@resize_w900_nl.webp"]
+        },
+        {
+            "slug": "cetak-fabric-textile", "name": "Cetak Fabric Textile untuk Light Box", "category": "light-box-digital-signage",
+            "price": 229000, "compare": null, "weight": 500,
+            "specs": ["Cetak kain fabric textile untuk fabric light box", "Kirim desain lewat chat admin setelah order"],
+            "uses": ["Isi media fabric light box"],
+            "images": ["2025/08/CETAK-FABRIC-TEXTILE-1.jpg", "2025/08/CETAK-FABRIC-TEXTILE-3.jpg", "2025/08/CETAK-FABRIC-TEXTILE-4.jpg", "2025/08/CETAK-FABRIC-TEXTILE-2.jpg"]
+        },
+        {
+            "slug": "cetak-poster-duratrans-a2-a3-a4", "name": "Cetak Poster Duratrans A2 / A3 / A4", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 200, "active": false, "variant_label": "Ukuran",
+            "variants": [["A2", 0, null], ["A3", 0, null], ["A4", 0, null]],
+            "specs": ["Cetak poster duratrans tembus cahaya untuk light box"],
+            "uses": ["Isi media slim light box"],
+            "images": ["2025/08/CETAK-POSTER-DURATRANS-1-1.jpg", "2025/08/CETAK-POSTER-DURATRANS-3-1.jpg", "2025/08/CETAK-POSTER-DURATRANS-4-1.jpg", "2025/08/CETAK-POSTER-DURATRANS-5-1.jpg", "2025/08/CETAK-POSTER-DURATRANS-2-1.jpg"]
+        },
+        {
+            "slug": "cetak-poster-duratrans-a1", "name": "Cetak Poster Duratrans A1 / 60x120 / 80x120", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 300, "active": false, "variant_label": "Ukuran",
+            "variants": [["60 × 120 cm", 0, null], ["80 × 120 cm", 0, null]],
+            "specs": ["Cetak poster duratrans tembus cahaya untuk light box ukuran besar"],
+            "uses": ["Isi media light box"],
+            "images": ["2025/08/CETAK-POSTER-DURATRANS-1.jpg", "2025/08/CETAK-POSTER-DURATRANS-4.jpg", "2025/08/CETAK-POSTER-DURATRANS-5.jpg", "2025/08/CETAK-POSTER-DURATRANS-6.jpg", "2025/08/CETAK-POSTER-DURATRANS-2.jpg"]
+        },
+        {
+            "slug": "fortu-digital-signage-smart-32-inch", "name": "Fortu Digital Signage Smart 32 Inch", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 8000, "active": false,
+            "specs": ["Layar digital signage 32 inch untuk menu dan promosi"],
+            "uses": ["Menu board digital kafe dan resto", "Layar promosi di toko"],
+            "images": ["2025/08/FORTU-DIGITAL-SIGNAGE-SMART-32-INCH-1.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-SMART-32-INCH-3.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-SMART-32-INCH-4.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-SMART-32-INCH-5.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-SMART-32-INCH-2.jpg"]
+        },
+        {
+            "slug": "fortu-digital-signage-43-inch", "name": "Fortu Digital Signage 43 Inch", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 15000, "active": false,
+            "specs": ["Layar digital signage 43 inch"],
+            "uses": ["Layar promosi di toko, lobi, dan showroom"],
+            "images": ["2025/08/FORTU-DIGITAL-SIGNAGE-43-INCH-1.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-43-INCH-4.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-43-INCH-5.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-43-INCH-2.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-43-INCH-3.jpg"]
+        },
+        {
+            "slug": "fortu-digital-signage-55-inch", "name": "Fortu Digital Signage 55 Inch", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 25000, "active": false,
+            "specs": ["Layar digital signage 55 inch"],
+            "uses": ["Layar promosi di toko, lobi, dan showroom"],
+            "images": ["2025/08/FORTU-DIGITAL-SIGNAGE-55-INCH-1.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-55-INCH-3.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-55-INCH-4.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-55-INCH-2.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-55-INCH-5.jpg"]
+        },
+        {
+            "slug": "fortu-digital-signage-meeting-tv-65-inch", "name": "Fortu Digital Signage Meeting TV 65 Inch", "category": "light-box-digital-signage",
+            "price": 0, "compare": null, "weight": 35000, "active": false,
+            "specs": ["Layar interaktif 65 inch untuk ruang meeting dan kelas"],
+            "uses": ["Presentasi ruang meeting", "Papan tulis interaktif di sekolah"],
+            "images": ["2025/08/FORTU-DIGITAL-SIGNAGE-MEETING-TV-65-INCH-1.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-MEETING-TV-65-INCH-3.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-MEETING-TV-65-INCH-4.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-MEETING-TV-65-INCH-5.jpg", "2025/08/FORTU-DIGITAL-SIGNAGE-MEETING-TV-65-INCH-2.jpg"]
+        },
+
+        {
+            "slug": "event-desk-meja-promosi-portable", "name": "Event Desk Meja Promosi Portable", "category": "perlengkapan-toko-event",
+            "price": 388500, "compare": 550000, "weight": 9000, "featured": true,
+            "note": "Hanya rangka, belum termasuk cetakan gambar. Gratis tas hitam.",
+            "specs": ["Model: Booth portable", "Material: PVC dan tiang besi", "Warna: Putih", "Berat: 9 kg (beban maks 55 kg)", "Tampak depan: 80 × 80 cm", "Papan atas: 30 × 80 cm", "Ukuran cetakan: 160 × 80 cm (stiker albatros / vinyl)"],
+            "uses": ["Meja pameran dan jualan", "Booth promosi di mall dan keramaian", "Meja bazar UMKM"],
+            "images": ["2025/09/id-11134207-7rbkd-m9b9ir21b40taf@resize_w900_nl.webp", "2025/09/id-11134207-7rbk6-m9b9ir21cil9f8@resize_w900_nl.webp", "2025/09/id-11134207-7rbk4-m9b9ir21dx5pd9@resize_w900_nl.webp", "2025/09/id-11134207-7rbkc-m9b9ir21fbq513@resize_w900_nl.webp", "2025/09/id-11134207-7rbk4-m9b9ir21gqalb2@resize_w900_nl.webp"]
+        },
+        {
+            "slug": "bill-holder-aluminium", "name": "Bill Holder Aluminium Penjepit Nota", "category": "perlengkapan-toko-event",
+            "price": 35999, "compare": 120000, "weight": 400, "variant_label": "Panjang",
+            "variants": [["30 cm", 43500, 80000], ["60 cm", 35999, 120000], ["90 cm", 83000, 130000], ["100 cm", 187500, 189000], ["120 cm", 163500, 210000]],
+            "specs": ["Model: Bill holder", "Material: Aluminium", "Warna: Silver", "Panjang: 30–120 cm"],
+            "uses": ["Penjepit bill di dapur restoran dan kafe", "Menjaga struk dan bon pesanan tetap rapi"],
+            "images": ["2025/08/BILL-HOLDER.jpg", "2025/08/BILL-HOLDER-1a.jpg", "2025/08/BILL-HOLDER-7.jpg", "2025/08/BILL-HOLDER-6.jpg", "2025/08/BILL-HOLDER-5.jpg"]
+        },
+        {
+            "slug": "akrilik-id-card-holder", "name": "Akrilik ID Card Holder 2 Sisi", "category": "perlengkapan-toko-event",
+            "price": 5600, "compare": 7000, "weight": 20, "variant_label": "Model",
+            "variants": [["Model A", 5600, 7000], ["Model B", 5600, 7000]],
+            "specs": ["Model: ID card 2 sisi", "Material: Akrilik bening", "Ukuran: 10,5 × 6,5 cm", "Tebal: 1,5 mm"],
+            "uses": ["Tempat ID card karyawan", "Tanda pengenal acara", "Tempat kartu e-money"],
+            "images": ["2025/08/AKRILIK-ID-CARD.jpg", "2025/08/AKRILIK-ID-CARD-2A.jpg", "2025/08/AKRILIK-ID-CARD-2B.jpg", "2025/08/AKRILIK-ID-CARD-3A.jpg", "2025/08/AKRILIK-ID-CARD-3B.jpg"]
+        },
+        {
+            "slug": "dudukan-tablet-meja-kasir", "name": "Dudukan Tablet Meja Kasir Akrilik", "category": "perlengkapan-toko-event",
+            "price": 0, "compare": null, "weight": 300, "active": false, "variant_label": "Warna",
+            "variants": [["Putih solid", 0, null], ["Putih susu", 0, null], ["Hitam solid", 0, null], ["Biru solid", 0, null], ["Kuning solid", 0, null], ["Merah solid", 0, null], ["Hijau tua", 0, null]],
+            "specs": ["Model: Dudukan tablet kasir", "Material: Akrilik"],
+            "uses": ["Stand tablet untuk aplikasi kasir (POS)"],
+            "images": ["2025/08/DUDUKAN-TABLET-MEJA-KASIR.jpg", "2025/08/DUDUKAN-TABLET-MEJA-KASIR-1.jpg", "2025/08/DUDUKAN-TABLET-MEJA-KASIR-9.jpg", "2025/08/DUDUKAN-TABLET-MEJA-KASIR-10.jpg", "2025/08/DUDUKAN-TABLET-MEJA-KASIR-8.jpg"]
+        },
+        {
+            "slug": "dudukan-kartu-perdana", "name": "Dudukan Kartu Perdana Akrilik", "category": "perlengkapan-toko-event",
+            "price": 0, "compare": null, "weight": 200, "active": false, "variant_label": "Ukuran",
+            "variants": [["Kecil", 0, null], ["Besar", 0, null]],
+            "specs": ["Model: Display kartu perdana / voucher", "Material: Akrilik bening"],
+            "uses": ["Display kartu perdana dan voucher di konter pulsa"],
+            "images": ["2025/08/DUDUKAN-KARTU-PERDANA.jpg", "2025/08/DUDUKAN-KARTU-PERDANA-1.jpg", "2025/08/DUDUKAN-KARTU-PERDANA-3.jpg", "2025/08/DUDUKAN-KARTU-PERDANA-2.jpg", "2025/08/DUDUKAN-KARTU-PERDANA-4.jpg"]
+        },
+        {
+            "slug": "holder-stand-hp-akrilik", "name": "Holder Stand HP Akrilik", "category": "perlengkapan-toko-event",
+            "price": 0, "compare": null, "weight": 100, "active": false, "variant_label": "Warna",
+            "variants": [["Bening", 0, null], ["Hitam", 0, null]],
+            "specs": ["Model: Stand HP", "Material: Akrilik"],
+            "uses": ["Display HP di konter", "Stand HP di meja kerja"],
+            "images": ["2025/08/HOLDER-STAND-HP-1.jpg", "2025/08/HOLDER-STAND-HP-4.jpg", "2025/08/HOLDER-STAND-HP-5.jpg", "2025/08/HOLDER-STAND-HP-2.jpg", "2025/08/HOLDER-STAND-HP-3.jpg"]
+        },
+        {
+            "slug": "frame-photocard-akrilik", "name": "Frame Photocard Akrilik", "category": "perlengkapan-toko-event",
+            "price": 0, "compare": null, "weight": 100, "active": false, "variant_label": "Ukuran",
+            "variants": [["2R", 0, null], ["3R", 0, null], ["4R", 0, null], ["5R", 0, null]],
+            "specs": ["Model: Frame photocard", "Material: Akrilik bening"],
+            "uses": ["Bingkai photocard dan foto kecil"],
+            "images": ["2025/08/FRAME-PHOTOCARD.jpg", "2025/08/FRAME-PHOTOCARD-1.jpg", "2025/08/FRAME-PHOTOCARD-5.jpg", "2025/08/FRAME-PHOTOCARD-6.jpg", "2025/08/FRAME-PHOTOCARD-2.jpg"]
+        },
+        {
+            "slug": "engsel-gembok-akrilik", "name": "Engsel Gembok Akrilik", "category": "perlengkapan-toko-event",
+            "price": 0, "compare": null, "weight": 20, "active": false, "variant_label": "Ukuran",
+            "variants": [["1,6 × 4 cm", 0, null], ["2,5 cm", 0, null], ["2,5 × 5,5 cm", 0, null], ["3,3 cm", 0, null], ["4,5 cm", 0, null], ["6,5 cm", 0, null]],
+            "specs": ["Model: Engsel gembok untuk kotak akrilik"],
+            "uses": ["Aksesoris kotak amal dan box akrilik"],
+            "images": []
+        }
+    ]
+}

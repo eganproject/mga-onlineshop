@@ -23,7 +23,7 @@
             <div class="card space-y-5 p-6">
                 <div>
                     <label for="title" class="label">Judul</label>
-                    <input id="title" name="title" value="{{ old('title', $banner->title) }}" required maxlength="120" placeholder="Diskon 10% semua casing" class="input @error('title') input-error @enderror">
+                    <input id="title" name="title" value="{{ old('title', $banner->title) }}" required maxlength="120" placeholder="Diskon 10% semua frame akrilik" class="input @error('title') input-error @enderror">
                     <p class="mt-1.5 text-xs text-stone-400">Juga dipakai sebagai teks alternatif gambar.</p>
                     <x-input-error for="title" />
                 </div>

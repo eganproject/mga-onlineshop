@@ -162,7 +162,7 @@ class SalesReportService
 
     /**
      * Penjualan per kategori (kategori produk saat ini). Subkategori ditampilkan
-     * dengan nama induknya, mis. "Casing HP › Casing iPhone".
+     * dengan nama induknya, mis. "Tempat Brosur › Brosur Tempel".
      *
      * @return Collection<int, object{category_id:?int, name:string, quantity:int, revenue:int, orders:int, products:int, share:float}>
      */

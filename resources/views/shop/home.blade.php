@@ -104,8 +104,8 @@
                     @foreach ($categories as $category)
                         <a href="{{ route('products.index', ['kategori' => $category->slug]) }}" class="group flex flex-col rounded-lg transition-colors hover:bg-stone-100">
                             <div class="relative aspect-square overflow-hidden rounded-lg bg-stone-200/70">
-                                @if ($category->imageUrl())
-                                    <img src="{{ $category->imageUrl() }}" alt="" loading="lazy" class="size-full object-cover transition duration-700 group-hover:scale-[1.04]">
+                                @if ($category->cover_url)
+                                    <img src="{{ $category->cover_url }}" alt="" loading="lazy" class="size-full object-cover transition duration-700 group-hover:scale-[1.04]">
                                 @else
                                     <div class="grid size-full place-items-center">
                                         <div class="flex flex-col items-center gap-3 text-center">
@@ -133,6 +133,36 @@
         @include('shop.partials.banners')
     @endif
 
+    {{-- Solusi per jenis usaha: pintasan pencarian sesuai kebutuhan --}}
+    <section class="shop-container mt-16 lg:mt-24">
+        <div class="max-w-2xl">
+            <p class="eyebrow text-brand-600">Solusi untuk usahamu</p>
+            <h2 class="display mt-2 text-3xl leading-none sm:text-5xl">Perlengkapan promosi sesuai kebutuhan</h2>
+            <p class="mt-4 text-sm leading-relaxed text-stone-600 sm:text-base">Dari warung kopi sampai booth pameran, pilih media display yang paling pas untuk menarik pelanggan.</p>
+        </div>
+        <div class="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+            @foreach ([
+                ['receipt', 'Kafe & Restoran', 'Menu di meja, papan promo di pintu, dan pesanan dapur yang rapi.', ['Standing sign' => 'standing sign', 'Tripod type H' => 'type h', 'Bill holder' => 'bill holder', 'Light box' => 'light box']],
+                ['storefront', 'Toko & Ritel', 'Tarik perhatian pejalan kaki dan pajang produk dengan rapi.', ['Tripod type A' => 'type a', 'Brosur tempel' => 'brosur tempel', 'Etalase mini' => 'etalase', 'Box display' => 'box display']],
+                ['users', 'Kantor & Sekolah', 'Papan informasi, sertifikat, dan tanda pengenal yang rapi.', ['Frame akrilik' => 'frame akrilik', 'Akrilik pocket' => 'pocket', 'ID card' => 'id card', 'Frame magnetic' => 'magnetic']],
+                ['megaphone', 'Event & Pameran', 'Booth yang cepat dipasang, mudah dibawa, dan mencolok.', ['X banner' => 'x banner', 'Event desk' => 'event desk', 'Standing banner' => 'standing banner', 'A-frame' => 'a-frame']],
+            ] as [$icon, $title, $desc, $links])
+                <div class="flex flex-col rounded-lg border border-stone-200 bg-white p-5 sm:p-6">
+                    <div class="grid size-11 place-items-center rounded-full bg-brand-50 text-brand-700">
+                        <x-icon :name="$icon" class="size-5" />
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold tracking-tight text-ink">{{ $title }}</h3>
+                    <p class="mt-1.5 text-sm leading-relaxed text-stone-600">{{ $desc }}</p>
+                    <div class="mt-4 flex flex-wrap gap-2 pt-1">
+                        @foreach ($links as $label => $query)
+                            <a href="{{ route('products.index', ['q' => $query]) }}" class="inline-flex min-h-9 items-center rounded-full border border-stone-200 px-3 text-xs font-medium text-stone-700 transition hover:border-brand-600 hover:bg-brand-50 hover:text-brand-700 sm:text-[13px]">{{ $label }}</a>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
     {{-- Banner editorial --}}
     <section class="shop-container mt-16 lg:mt-24">
         <div class="grid overflow-hidden bg-ink text-white lg:grid-cols-2">
@@ -146,9 +176,9 @@
                 @endif
             </div>
             <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
-                <p class="eyebrow text-brand-400">Untuk reseller & toko</p>
+                <p class="eyebrow text-brand-400">Untuk reseller, percetakan & korporat</p>
                 <h2 class="display mt-4 text-4xl leading-[0.92] sm:text-6xl">Belanja grosir, harga spesial.</h2>
-                <p class="mt-5 max-w-md leading-relaxed text-white/70">Dapatkan harga khusus untuk pembelian dalam jumlah banyak. Stok gudang lengkap, siap kirim ke tokomu.</p>
+                <p class="mt-5 max-w-md leading-relaxed text-white/70">Butuh puluhan tripod untuk cabang baru atau perlengkapan event? Chat admin untuk harga khusus. Stok lengkap di gudang Jakarta & Surabaya.</p>
                 <div class="mt-8">
                     <a href="{{ config('shop.whatsapp') ? 'https://wa.me/'.config('shop.whatsapp') : route('products.index') }}" class="btn btn-light btn-pill" @if (config('shop.whatsapp')) target="_blank" rel="noopener" @endif>
                         Hubungi kami <x-icon name="arrow-right" class="size-4" />
@@ -182,9 +212,9 @@
     <section class="shop-container mt-16 lg:mt-24">
         <div class="grid gap-px overflow-hidden border border-stone-200 bg-stone-200 sm:grid-cols-3">
             @foreach ([
-                ['shield', 'Dijamin original', 'Semua produk berasal dari distributor resmi dan bergaransi toko.'],
-                ['truck', 'Dikirim cepat', 'Pilih kurir favoritmu: JNE, SiCepat, J&T, POS, dan lainnya.'],
-                ['refresh', 'Garansi tukar', 'Produk cacat pabrik? Kami bantu tukar tanpa ribet.'],
+                ['tag', 'Harga gudang', 'Langsung dari distributor perlengkapan promosi, tanpa perantara.'],
+                ['truck', 'Kirim hari ini', 'Pesanan sebelum 16.00 WIB dikirim di hari yang sama, Senin–Minggu.'],
+                ['shield', 'Aman sampai tujuan', 'Packing tebal. Ada kerusakan saat pengiriman? Kirim video unboxing, kami bantu.'],
             ] as [$icon, $title, $desc])
                 <div class="bg-white p-8 lg:p-10">
                     <x-icon :name="$icon" class="size-7" />

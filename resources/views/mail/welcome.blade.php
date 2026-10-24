@@ -1,7 +1,7 @@
 <x-mail::message>
 # Halo, {{ \Illuminate\Support\Str::words($user->name, 1, '') }}!
 
-Terima kasih sudah bergabung di **{{ config('shop.full_name') }}**. Akunmu sudah aktif, jadi kamu bisa langsung belanja aksesoris gadget original dengan harga bersahabat.
+Terima kasih sudah bergabung di **{{ config('shop.full_name') }}**. Akunmu sudah aktif, jadi kamu bisa langsung belanja perlengkapan promosi dan display akrilik dengan harga gudang.
 
 Dengan akun ini kamu bisa:
 

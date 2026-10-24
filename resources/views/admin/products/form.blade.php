@@ -45,7 +45,7 @@
             {{-- Informasi --}}
             <div class="card space-y-5 p-6">
                 <h2 class="font-bold text-stone-900">Informasi produk</h2>
-                <x-form.input name="name" label="Nama produk" :value="$product->name" required maxlength="255" placeholder="Contoh: Casing iPhone 15 Clear Magsafe" />
+                <x-form.input name="name" label="Nama produk" :value="$product->name" required maxlength="255" placeholder="Contoh: Frame Akrilik Dinding A4" />
                 <div class="grid gap-5 sm:grid-cols-2">
                     <x-form.category-select name="category_id" label="Kategori" :categories="$categories" :selected="$product->category_id" placeholder="Tanpa kategori" />
                     <x-form.input name="sku" label="SKU induk" optional :value="$product->sku" maxlength="64" />

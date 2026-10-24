@@ -93,7 +93,7 @@
                 <button type="button" @click="search = true"
                         class="ml-2 flex h-11 min-w-0 flex-1 items-center gap-2.5 rounded-full bg-stone-100 px-4 text-left text-sm text-stone-400 transition active:bg-stone-200 lg:hidden">
                     <x-icon name="search" class="size-[18px] shrink-0 text-stone-500" />
-                    <span class="truncate">{{ request('q') ?: 'Cari casing, charger...' }}</span>
+                    <span class="truncate">{{ request('q') ?: 'Cari tripod, frame akrilik...' }}</span>
                 </button>
 
                 {{-- Navigasi utama (desktop, di tengah) --}}
@@ -218,7 +218,7 @@
                     </div>
                     <form action="{{ route('products.index') }}" method="GET" class="mt-3 flex items-center gap-3 border-b-2 border-ink pb-3">
                         <x-icon name="search" class="size-6 shrink-0 text-stone-400" />
-                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Casing, charger, earphone..."
+                        <input type="search" name="q" value="{{ request('q') }}" placeholder="Tripod banner, frame akrilik..."
                                x-effect="if (search) $nextTick(() => $el.focus())"
                                class="w-full border-0 bg-transparent p-0 font-display text-2xl font-bold tracking-tight placeholder:text-stone-300 focus:ring-0 sm:text-4xl">
                         <button class="btn btn-ink btn-pill hidden shrink-0 sm:inline-flex">Cari</button>

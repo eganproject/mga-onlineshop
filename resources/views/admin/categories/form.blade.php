@@ -16,7 +16,7 @@
             </div>
             <x-form.select name="parent_id" label="Induk kategori" placeholder="Tidak ada (kategori utama)" :search="true"
                 :options="$parents->pluck('name', 'id')->all()" :selected="$category->parent_id"
-                hint="Pilih induk untuk menjadikannya subkategori, mis. Casing HP › Casing iPhone." />
+                hint="Pilih induk untuk menjadikannya subkategori, mis. Tempat Brosur › Akrilik Pocket." />
             <div>
                 <label for="slug" class="label">Slug URL <span class="font-normal text-stone-400">(kosongkan untuk otomatis)</span></label>
                 <input id="slug" name="slug" value="{{ old('slug', $category->slug) }}" class="input @error('slug') input-error @enderror">

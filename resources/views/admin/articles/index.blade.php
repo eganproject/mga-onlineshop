@@ -25,7 +25,7 @@
         </form>
 
         @if ($articles->isEmpty())
-            <x-empty-state icon="newspaper" :title="request()->hasAny(['q', 'kategori']) || $state ? 'Artikel tidak ditemukan' : 'Belum ada artikel'" description="Tulis artikel pertama, misalnya tips merawat baterai HP atau panduan memilih charger.">
+            <x-empty-state icon="newspaper" :title="request()->hasAny(['q', 'kategori']) || $state ? 'Artikel tidak ditemukan' : 'Belum ada artikel'" description="Tulis artikel pertama, misalnya tips merawat akrilik atau panduan memilih stand banner.">
                 <a href="{{ route('admin.articles.create') }}" class="btn btn-primary">Tulis artikel</a>
             </x-empty-state>
         @else

@@ -8,10 +8,10 @@
                 <a href="{{ route('home') }}" class="self-start"><x-wordmark dark size="lg" /></a>
                 <div class="max-w-md">
                     <p class="eyebrow text-accent-400">{{ config('shop.full_name') }}</p>
-                    <h2 class="display mt-4 text-5xl leading-[0.92]">Aksesoris gadget favoritmu, semua di satu gudang.</h2>
-                    <p class="mt-5 text-base text-white/60">Casing, charger, kabel data, earphone, dan banyak lagi. Original, bergaransi, dan harga bersahabat.</p>
+                    <h2 class="display mt-4 text-5xl leading-[0.92]">Perlengkapan promosi usahamu, semua di satu gudang.</h2>
+                    <p class="mt-5 text-base text-white/60">Tripod banner, frame akrilik, tempat brosur, light box, dan banyak lagi. Harga gudang, bisa grosir, kirim ke seluruh Indonesia.</p>
                     <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
-                        @foreach ([['shield', 'Original'], ['truck', 'Kirim cepat'], ['lock', 'Bayar aman']] as [$icon, $label])
+                        @foreach ([['tag', 'Harga gudang'], ['truck', 'Kirim cepat'], ['lock', 'Bayar aman']] as [$icon, $label])
                             <li class="flex items-center gap-2"><x-icon :name="$icon" class="size-4 text-white/50" /> {{ $label }}</li>
                         @endforeach
                     </ul>

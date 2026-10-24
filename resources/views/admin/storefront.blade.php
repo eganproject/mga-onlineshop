@@ -58,7 +58,7 @@
 
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
                 <x-icon name="info" class="size-5 shrink-0" />
-                <p>Link diawali <code class="font-mono">/</code> untuk halaman toko, mis. <code class="font-mono">/produk?kategori=casing</code>, atau <code class="font-mono">https://</code> untuk link luar.</p>
+                <p>Link diawali <code class="font-mono">/</code> untuk halaman toko, mis. <code class="font-mono">/produk?kategori=frame-akrilik</code>, atau <code class="font-mono">https://</code> untuk link luar.</p>
             </div>
 
             <div class="card sticky top-20 p-4">

@@ -15,8 +15,8 @@ class ArticleSeeder extends Seeder
     public function run(): void
     {
         $categories = collect([
-            ['tips-trik', 'Tips & Trik', 'Cara merawat dan memaksimalkan gadget sehari-hari.'],
-            ['panduan-belanja', 'Panduan Belanja', 'Bingung memilih? Panduan singkat sebelum membeli aksesoris.'],
+            ['tips-trik', 'Tips & Trik', 'Cara merawat display akrilik dan perlengkapan promosi supaya awet.'],
+            ['panduan-belanja', 'Panduan Belanja', 'Bingung memilih? Panduan singkat sebelum membeli media promosi.'],
             ['kabar-toko', 'Kabar Toko', 'Promo, produk baru, dan info layanan MGA.'],
         ])->mapWithKeys(fn ($c, $i) => [$c[0] => ArticleCategory::updateOrCreate(['slug' => $c[0]], ['name' => $c[1], 'description' => $c[2], 'sort_order' => $i])]);
 
@@ -24,45 +24,46 @@ class ArticleSeeder extends Seeder
 
         $articles = [
             [
-                'slug' => 'cara-merawat-baterai-hp-agar-awet',
+                'slug' => 'cara-merawat-akrilik-agar-tetap-bening',
                 'category' => 'tips-trik',
-                'title' => '7 Cara Merawat Baterai HP Agar Awet Bertahun-tahun',
-                'excerpt' => 'Baterai cepat drop? Kebiasaan kecil saat mengisi daya ternyata sangat berpengaruh. Ini tujuh kebiasaan yang bikin baterai lebih awet.',
-                'tags' => ['baterai', 'charger', 'tips'],
-                'products' => 'charger',
+                'title' => '6 Cara Merawat Display Akrilik Agar Tetap Bening',
+                'excerpt' => 'Akrilik yang kusam dan penuh baret bikin promosi kurang menarik. Ini cara membersihkan dan merawat frame, brosur tempel, dan box akrilik.',
+                'tags' => ['akrilik', 'perawatan', 'tips'],
+                'products' => 'Akrilik',
                 'days' => 2,
-                'body' => '<p>Baterai lithium-ion di HP modern dirancang untuk ratusan siklus pengisian. Tapi cara kita mengisi daya setiap hari menentukan seberapa cepat kapasitasnya turun.</p>'
-                    .'<h2>1. Jaga di kisaran 20–80%</h2><p>Mengisi penuh sampai 100% lalu membiarkannya turun ke 0% membuat sel baterai bekerja paling berat. Usahakan mengisi saat tersisa sekitar 20% dan cabut di kisaran 80%.</p>'
-                    .'<h2>2. Pakai charger yang tepat</h2><p>Gunakan charger original atau bersertifikat yang mendukung protokol fast charging HP-mu (PD, QC, atau PPS). Charger abal-abal sering tidak stabil dan membuat baterai cepat panas.</p>'
-                    .'<h2>3. Hindari panas berlebih</h2><p>Panas adalah musuh utama baterai. Jangan mengisi daya sambil main game berat, dan lepas casing tebal bila HP terasa panas saat dicas.</p>'
-                    .'<h3>Tanda baterai mulai bermasalah</h3><ul><li>Persentase turun drastis dalam waktu singkat</li><li>HP mati sendiri padahal masih 15–20%</li><li>Bodi HP menggembung</li></ul>'
-                    .'<blockquote><p>Bila baterai sudah menggembung, segera hentikan pemakaian dan ganti di servis resmi.</p></blockquote>'
-                    .'<h2>4. Kabel juga berpengaruh</h2><p>Kabel data yang rusak atau tipis bisa membuat arus tidak stabil. Pilih kabel dengan dukungan daya sesuai charger, misalnya 60W atau 100W untuk USB-C.</p>',
+                'body' => '<p>Akrilik dipilih karena bening seperti kaca tetapi jauh lebih ringan dan tidak mudah pecah. Supaya tetap jernih bertahun-tahun, rawat dengan cara yang tepat.</p>'
+                    .'<h2>1. Lepas plastik pelindung saat dipasang</h2><p>Akrilik baru dilapisi plastik pelindung di kedua sisi. Biarkan selama pengiriman dan pemasangan, lalu lepas saat display siap dipakai.</p>'
+                    .'<h2>2. Pakai kain microfiber</h2><p>Lap dengan kain microfiber yang lembut. Tisu kering dan kain kasar bisa meninggalkan baret halus.</p>'
+                    .'<h2>3. Cukup air sabun lembut</h2><p>Campur sedikit sabun cuci piring dengan air, usap perlahan, lalu keringkan. Hindari alkohol, thinner, dan pembersih kaca beramonia karena bisa membuat akrilik retak rambut.</p>'
+                    .'<h3>Tanda akrilik salah dirawat</h3><ul><li>Muncul retak halus di sekitar lubang baut</li><li>Permukaan berkabut walau sudah dilap</li><li>Baret melingkar bekas lap kasar</li></ul>'
+                    .'<blockquote><p>Simpan akrilik lembaran berdiri atau ditumpuk rata dengan alas kertas, jangan ditindih benda berat.</p></blockquote>'
+                    .'<h2>4. Jauhkan dari panas langsung</h2><p>Frame akrilik di dekat lampu sorot atau kompor bisa melengkung. Beri jarak yang cukup dari sumber panas.</p>',
             ],
             [
-                'slug' => 'panduan-memilih-power-bank',
+                'slug' => 'panduan-memilih-stand-banner',
                 'category' => 'panduan-belanja',
-                'title' => 'Panduan Memilih Power Bank: Kapasitas, Output, dan Keamanan',
-                'excerpt' => 'Angka mAh bukan satu-satunya patokan. Kenali output, fitur fast charging, dan sertifikasi sebelum membeli power bank.',
-                'tags' => ['power bank', 'panduan'],
-                'products' => 'power',
+                'title' => 'X Banner, Tripod, atau Type A? Panduan Memilih Stand Banner',
+                'excerpt' => 'Setiap stand banner punya kelebihan sendiri. Kenali bedanya supaya promosi di depan toko, kafe, atau event tampil maksimal.',
+                'tags' => ['banner', 'panduan', 'promosi'],
+                'products' => 'Banner',
                 'days' => 6,
-                'body' => '<p>Power bank adalah teman wajib saat bepergian. Supaya tidak salah pilih, perhatikan beberapa hal berikut.</p>'
-                    .'<h2>Kapasitas sesuai kebutuhan</h2><p>Untuk HP saja, 10.000 mAh sudah cukup untuk 1–2 kali pengisian penuh. Bila juga ingin mengisi tablet atau laptop, pilih 20.000 mAh ke atas dengan output USB-C PD.</p>'
-                    .'<h2>Perhatikan output</h2><ol><li><strong>18–20W</strong>: cukup untuk sebagian besar HP.</li><li><strong>30–45W</strong>: fast charging HP flagship dan tablet.</li><li><strong>65W+</strong>: bisa untuk laptop USB-C.</li></ol>'
-                    .'<h2>Keamanan</h2><p>Pilih power bank dengan proteksi arus pendek, suhu, dan pengisian berlebih. Untuk dibawa naik pesawat, kapasitas maksimal umumnya 100Wh (sekitar 27.000 mAh).</p>',
+                'body' => '<p>Stand banner adalah media promosi paling praktis: mudah dipindah, cepat dipasang, dan posternya bisa diganti kapan saja.</p>'
+                    .'<h2>X Banner & Y Banner</h2><p>Pilihan paling hemat untuk poster 60 × 160 cm. Rangkanya ringan dan cocok untuk event, bazar, atau promo musiman di dalam ruangan.</p>'
+                    .'<h2>Tripod banner</h2><ol><li><strong>1 sisi</strong>: untuk poster berbingkai akrilik, menu, atau foto wedding.</li><li><strong>2 sisi</strong>: terlihat dari dua arah, pas di lorong mall atau pintu masuk.</li><li><strong>Type H miring</strong>: posisi poster miring sehingga nyaman dibaca, cocok untuk daftar menu.</li></ol>'
+                    .'<h2>Type A / sidewalk</h2><p>Berdiri kokoh di trotoar depan toko dan bisa dilipat saat tutup. Pilih bahan aluminium supaya tidak berkarat walau sering terkena hujan.</p>'
+                    .'<p>Butuh banyak untuk cabang atau event? Chat admin MGA untuk harga grosir.</p>',
             ],
             [
                 'slug' => 'mga-kini-hadir-online',
                 'category' => 'kabar-toko',
-                'title' => 'MGA Kini Hadir Online: Belanja Aksesoris Lebih Mudah',
-                'excerpt' => 'Sekarang kamu bisa belanja aksesoris original langsung dari website kami, lengkap dengan pembayaran aman dan lacak pesanan.',
+                'title' => 'MGA Kini Hadir Online: Belanja Perlengkapan Promosi Lebih Mudah',
+                'excerpt' => 'Sekarang kamu bisa belanja tripod banner, frame akrilik, dan tempat brosur langsung dari website kami, lengkap dengan pembayaran aman dan lacak pesanan.',
                 'tags' => ['info toko', 'promo'],
                 'products' => null,
                 'days' => 10,
-                'body' => '<p>Kabar gembira! Toko online resmi kami sudah bisa dipakai untuk berbelanja langsung dari rumah.</p>'
+                'body' => '<p>Kabar gembira! Toko online resmi Media Gudang Acc sudah bisa dipakai untuk berbelanja langsung dari rumah atau kantor.</p>'
                     .'<h2>Yang bisa kamu lakukan</h2><ul><li>Bayar lewat transfer bank, e-wallet, QRIS, atau kartu kredit</li><li>Pilih kurir favorit dan lihat ongkir sebelum bayar</li><li>Lacak pesanan langsung dari halaman akun</li><li>Simpan produk incaran di wishlist</li></ul>'
-                    .'<p>Pakai kode <strong>HEMAT10</strong> untuk diskon 10% di pesanan pertamamu. Selamat berbelanja!</p>',
+                    .'<p>Pesanan sebelum pukul 16.00 WIB dikirim di hari yang sama dari gudang kami. Pakai kode <strong>HEMAT10</strong> untuk diskon 10% di pesanan pertamamu!</p>',
             ],
         ];
 
