@@ -1,7 +1,7 @@
 <x-layouts.admin title="Impor & ekspor produk">
     <x-admin.page-header title="Impor & ekspor" description="Tambah atau ubah banyak produk sekaligus, unduh katalog, dan update stok lewat file Excel / CSV." :back="auth()->user()->can('catalog.manage') ? route('admin.products.index') : route('admin.stock.index')" />
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {{-- Ekspor --}}
         <div class="card min-w-0 p-6" x-data="{ format: 'xlsx' }">
             <div class="flex items-center gap-3">

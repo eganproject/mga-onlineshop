@@ -48,7 +48,7 @@
         </div>
 
         @if ($paginator->hasPages())
-            <nav role="navigation" aria-label="Navigasi halaman" class="flex items-center gap-1">
+            <nav role="navigation" aria-label="Navigasi halaman" class="flex flex-wrap items-center gap-1 xl:shrink-0">
                 @php($base = 'inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2.5 text-sm font-semibold transition')
                 @if ($paginator->onFirstPage())
                     <span class="{{ $base }} cursor-not-allowed text-stone-300" aria-disabled="true"><x-icon name="chevron-left" class="size-4" /><span class="sr-only">Sebelumnya</span></span>
@@ -59,7 +59,7 @@
                 {{-- HP: cukup "2 / 15" --}}
                 <span class="px-2 text-sm font-semibold text-stone-600 sm:hidden">{{ $paginator->currentPage() }} / {{ $paginator->lastPage() }}</span>
 
-                <div class="hidden items-center gap-1 sm:flex">
+                <div class="hidden flex-wrap items-center gap-1 sm:flex">
                     @foreach ($elements as $element)
                         @if (is_string($element))
                             <span class="{{ $base }} text-stone-400">…</span>

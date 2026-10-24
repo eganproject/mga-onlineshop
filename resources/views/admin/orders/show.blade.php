@@ -11,7 +11,7 @@
         </div>
     @endif
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <div class="card overflow-hidden">
                 <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Item pesanan</h2></div>

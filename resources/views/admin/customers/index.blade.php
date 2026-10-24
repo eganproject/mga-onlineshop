@@ -26,21 +26,21 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="nama">Pelanggan</x-admin.sort-link></th><th>No. HP</th><th><x-admin.sort-link column="pesanan" desc>Pesanan</x-admin.sort-link></th><th><x-admin.sort-link column="belanja" desc>Total belanja</x-admin.sort-link></th><th><x-admin.sort-link column="terdaftar" desc>Terdaftar</x-admin.sort-link></th><th>Status</th><th></th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="nama">Pelanggan</x-admin.sort-link></th><th class="hidden sm:table-cell">No. HP</th><th class="hidden sm:table-cell"><x-admin.sort-link column="pesanan" desc>Pesanan</x-admin.sort-link></th><th class="hidden sm:table-cell"><x-admin.sort-link column="belanja" desc>Total belanja</x-admin.sort-link></th><th class="hidden sm:table-cell"><x-admin.sort-link column="terdaftar" desc>Terdaftar</x-admin.sort-link></th><th class="hidden sm:table-cell">Status</th><th></th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($customers as $customer)
                             <tr class="hover:bg-stone-50/50">
                                 <td>
                                     <div class="flex items-center gap-3">
                                         <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">{{ $customer->initials() }}</span>
-                                        <div class="min-w-0"><p class="truncate font-semibold text-stone-900">{{ $customer->name }}</p><p class="truncate text-xs text-stone-500">{{ $customer->email }}</p></div>
+                                        <div class="min-w-0 max-sm:max-w-[calc(100vw-13rem)]"><p class="truncate font-semibold text-stone-900">{{ $customer->name }}</p><p class="truncate text-xs text-stone-500">{{ $customer->email }}</p><p class="mt-0.5 text-xs text-stone-600 sm:hidden">{{ $customer->orders_count }} pesanan · <span class="font-semibold text-stone-900">@rupiah($customer->total_spent)</span>@unless ($customer->is_active) · <span class="font-semibold text-rose-600">Diblokir</span>@endunless</p></div>
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap">{{ $customer->phone ?? '—' }}</td>
-                                <td>{{ $customer->orders_count }}</td>
-                                <td class="whitespace-nowrap font-semibold">@rupiah($customer->total_spent)</td>
-                                <td class="whitespace-nowrap text-xs text-stone-500">{{ $customer->created_at->translatedFormat('d M Y') }}</td>
-                                <td>
+                                <td class="hidden whitespace-nowrap sm:table-cell">{{ $customer->phone ?? '—' }}</td>
+                                <td class="hidden sm:table-cell">{{ $customer->orders_count }}</td>
+                                <td class="hidden whitespace-nowrap font-semibold sm:table-cell">@rupiah($customer->total_spent)</td>
+                                <td class="hidden whitespace-nowrap text-xs text-stone-500 sm:table-cell">{{ $customer->created_at->translatedFormat('d M Y') }}</td>
+                                <td class="hidden sm:table-cell">
                                     @if ($customer->is_active)
                                         <span class="badge bg-emerald-50 text-emerald-700 ring-emerald-600/20">Aktif</span>
                                     @else

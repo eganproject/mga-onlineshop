@@ -17,7 +17,7 @@
         @if ($editing) @method('PUT') @endif
         <input type="hidden" name="redirect_to" value="{{ request('redirect_to') }}">
 
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <x-form.input name="label" label="Label alamat" :value="$address->label" list="label-options" required placeholder="Rumah, Kantor, ...">
                 <x-slot:after><datalist id="label-options"><option value="Rumah"><option value="Kantor"><option value="Kos"><option value="Toko"></datalist></x-slot:after>
             </x-form.input>
@@ -30,7 +30,7 @@
             <p class="flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"><x-icon name="warning" class="size-4 shrink-0" /> Alamat ini dibuat dengan format lama ({{ collect([$address->district, $address->city, $address->province])->filter()->implode(', ') }}). Pilih ulang provinsi, kota, dan kecamatan agar ongkir bisa dihitung.</p>
         @endif
 
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             @foreach ([
                 ['province', 'province_id', 'Provinsi'],
                 ['city', 'city_id', 'Kota / Kabupaten'],

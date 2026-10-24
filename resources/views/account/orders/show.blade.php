@@ -124,7 +124,7 @@
         </div>
     @endif
 
-    <div class="grid gap-6 xl:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div class="card overflow-hidden xl:col-span-2">
             <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Produk</h2></div>
             <ul class="divide-y divide-stone-100">

@@ -7,7 +7,7 @@
             <input id="name" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" @class(['input', 'input-error' => $errors->has('name')])>
             <x-input-error for="name" />
         </div>
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
                 <label for="email" class="label">Email</label>
                 <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" @class(['input', 'input-error' => $errors->has('email')])>

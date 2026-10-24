@@ -23,7 +23,7 @@
             </div>
         </header>
 
-        <section class="grid gap-6 border-b border-stone-200 py-6 text-sm sm:grid-cols-2">
+        <section class="grid grid-cols-1 gap-6 border-b border-stone-200 py-6 text-sm sm:grid-cols-2">
             <div>
                 <p class="text-xs font-bold tracking-wider text-stone-400 uppercase">Ditagihkan kepada</p>
                 <p class="mt-1 font-semibold">{{ $order->recipient_name }}</p>

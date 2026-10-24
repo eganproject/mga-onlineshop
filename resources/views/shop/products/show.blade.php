@@ -47,7 +47,7 @@
             $lowStock = config('shop.low_stock_threshold');
             $imageCount = $product->images->count();
         @endphp
-        <div class="mt-5 grid gap-8 lg:grid-cols-12 lg:gap-14" x-data="productPage(@js($pageConfig))">
+        <div class="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-14" x-data="productPage(@js($pageConfig))">
             {{-- Galeri: desktop = thumbnail vertikal di kiri + zoom saat kursor diarahkan;
                  HP = geser foto, ketuk untuk layar penuh (bisa dicubit/zoom). --}}
             <div class="-mx-4 min-w-0 sm:mx-0 lg:col-span-7">

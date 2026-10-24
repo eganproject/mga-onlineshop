@@ -6,7 +6,7 @@
         <a href="{{ route('home') }}" target="_blank" rel="noopener" class="btn btn-secondary"><x-icon name="external" class="size-4" /> Lihat beranda</a>
     </x-admin.page-header>
 
-    <form method="POST" action="{{ route('admin.storefront.update') }}" enctype="multipart/form-data" class="grid gap-6 lg:grid-cols-3">
+    <form method="POST" action="{{ route('admin.storefront.update') }}" enctype="multipart/form-data" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         @csrf
         @method('PUT')
 
@@ -45,7 +45,7 @@
                     tooltip="Tulisan paling besar di beranda."
                     tooltip-tips="3–7 kata supaya tidak lebih dari 3 baris di HP." />
                 <x-form.textarea name="hero_subtitle" label="Deskripsi singkat" :value="$values['hero_subtitle']" rows="2" maxlength="200" optional :hint="$hint('hero_subtitle')" />
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <x-form.input name="hero_primary_label" label="Tombol utama" :value="$values['hero_primary_label']" maxlength="30" optional :hint="$hint('hero_primary_label')" />
                     <x-form.input name="hero_primary_url" label="Link tombol utama" :value="$values['hero_primary_url']" maxlength="255" optional placeholder="/produk" :hint="$hint('hero_primary_url')"
                         tooltip="Halaman yang dibuka tombol pertama. Awali / untuk halaman toko atau https:// untuk link luar." />
@@ -105,7 +105,7 @@
                 <button class="btn btn-primary max-sm:w-full">Simpan Best Seller</button>
             </div>
 
-            <fieldset class="grid gap-3 sm:grid-cols-2">
+            <fieldset class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <legend class="sr-only">Cara memilih produk</legend>
                 <label class="flex cursor-pointer gap-3 rounded-xl border p-4 transition" :class="mode === 'auto' ? 'border-brand-500 bg-brand-50/60 ring-1 ring-brand-500' : 'border-stone-200 hover:border-stone-300'">
                     <input type="radio" name="best_seller_mode" value="auto" x-model="mode" class="mt-0.5 text-brand-600 focus:ring-brand-500">

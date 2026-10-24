@@ -18,7 +18,7 @@
 <x-layouts.admin title="Integrasi">
     <x-admin.page-header title="Integrasi" description="Driver dan kunci API payment gateway, ongkos kirim, dan login Google. Halaman ini hanya bisa dibuka Superadmin." />
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="min-w-0 space-y-6 lg:col-span-2">
             @foreach ($cards as $key => [$name, $description, $icon, $iconClass])
                 <section id="{{ $key }}" class="card min-w-0 scroll-mt-24 p-6">
@@ -54,7 +54,7 @@
                         @method('PUT')
 
                         @if ($key === 'midtrans')
-                            <div class="grid gap-5 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <x-form.select name="midtrans[driver]" id="midtrans_driver" label="Driver pembayaran" :selected="$value('midtrans', 'driver')"
                                                :options="['fake' => 'Simulasi (fake)', 'midtrans' => 'Midtrans']" :hint="$source('midtrans', 'driver')"
                                                tooltip="Simulasi: pembayaran pura-pura untuk uji coba, tanpa uang sungguhan. Midtrans: pelanggan membayar lewat Midtrans (VA bank, e-wallet, QRIS, kartu)." />
@@ -118,7 +118,7 @@
                                 <input type="hidden" name="firebase[login_enabled]" value="0">
                                 <input type="checkbox" name="firebase[login_enabled]" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('firebase.login_enabled', $value('firebase', 'login_enabled')))>
                             </label>
-                            <div class="grid gap-5 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <x-form.input name="firebase[api_key]" id="firebase_api_key" label="API key (apiKey)" :value="$value('firebase', 'api_key')" placeholder="AIza..." :hint="$source('firebase', 'api_key')" spellcheck="false"
                                               tooltip="Nilai apiKey dari Firebase Console › Project settings › Your apps (Web app). Bukan kunci rahasia." />
                                 <x-form.input name="firebase[project_id]" id="firebase_project_id" label="Project ID (projectId)" :value="$value('firebase', 'project_id')" placeholder="mga-shop" :hint="$source('firebase', 'project_id')" spellcheck="false"

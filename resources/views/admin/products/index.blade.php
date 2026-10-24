@@ -51,7 +51,7 @@
                                        :checked="selected.length === all.length"
                                        @change="selected = $event.target.checked ? [...all] : []">
                             </th>
-                            <th><x-admin.sort-link column="nama">Produk</x-admin.sort-link></th><th class="hidden md:table-cell">Kategori</th><th><x-admin.sort-link column="harga" desc>Harga</x-admin.sort-link></th><th><x-admin.sort-link column="stok">Stok</x-admin.sort-link></th><th class="hidden sm:table-cell">Status</th><th class="text-right">Aksi</th>
+                            <th><x-admin.sort-link column="nama">Produk</x-admin.sort-link></th><th class="hidden md:table-cell">Kategori</th><th class="hidden sm:table-cell"><x-admin.sort-link column="harga" desc>Harga</x-admin.sort-link></th><th class="hidden sm:table-cell"><x-admin.sort-link column="stok">Stok</x-admin.sort-link></th><th class="hidden sm:table-cell">Status</th><th class="text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
@@ -61,23 +61,29 @@
                                     <input type="checkbox" form="bulk-form" name="ids[]" value="{{ $product->id }}" x-model.number="selected" class="checkbox" aria-label="Pilih {{ $product->name }}">
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="flex min-w-48 items-center gap-3 sm:min-w-56">
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="flex min-w-36 items-center gap-3 sm:min-w-56">
                                         <x-product-image :product="$product" class="size-12 shrink-0 rounded-xl" />
-                                        <div class="min-w-0">
-                                            <p class="truncate font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</p>
+                                        <div class="min-w-0 max-sm:max-w-[calc(100vw-16.5rem)]">
+                                            <p class="truncate font-semibold text-stone-900 hover:text-brand-700 max-sm:line-clamp-2 max-sm:whitespace-normal">{{ $product->name }}</p>
                                             <p class="text-xs text-stone-500">
                                                 {{ $product->sku ?? 'Tanpa SKU' }} · {{ $product->weight }} gr
                                                 @if ($product->variants_count) · <span class="font-semibold text-brand-700">{{ $product->variants_count }} varian</span>@endif
+                                            </p>
+                                            {{-- HP: harga & stok di bawah nama (kolomnya disembunyikan) --}}
+                                            <p class="mt-0.5 text-xs sm:hidden">
+                                                <span class="font-semibold text-stone-900">@rupiah($product->price)</span>
+                                                · Stok <span @class(['font-semibold', 'text-rose-600' => $product->stock === 0, 'text-amber-600' => $product->stock > 0 && $product->isLowStock()])>{{ $product->stock }}</span>
+                                                @unless ($product->is_active) · <span class="text-stone-400">Nonaktif</span>@endunless
                                             </p>
                                         </div>
                                     </a>
                                 </td>
                                 <td class="hidden whitespace-nowrap md:table-cell">{{ $product->category?->name ?? '—' }}</td>
-                                <td class="whitespace-nowrap">
+                                <td class="hidden whitespace-nowrap sm:table-cell">
                                     <p class="font-semibold text-stone-900">@if ($product->has_variants)<span class="text-xs font-normal text-stone-400">mulai</span> @endif @rupiah($product->price)</p>
                                     @if ($product->isOnSale())<p class="text-xs text-stone-400 line-through">@rupiah($product->compare_at_price)</p>@endif
                                 </td>
-                                <td>
+                                <td class="hidden sm:table-cell">
                                     <span @class(['font-semibold', 'text-rose-600' => $product->stock === 0, 'text-amber-600' => $product->stock > 0 && $product->isLowStock(), 'text-stone-700' => ! $product->isLowStock()])>{{ $product->stock }}</span>
                                 </td>
                                 <td class="hidden sm:table-cell">
@@ -94,7 +100,7 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ route('products.show', $product) }}" target="_blank" class="btn btn-ghost btn-sm" title="Lihat di toko"><x-icon name="eye" class="size-4" /></a>
+                                        <a href="{{ route('products.show', $product) }}" target="_blank" class="btn btn-ghost btn-sm max-sm:hidden" title="Lihat di toko"><x-icon name="eye" class="size-4" /></a>
                                         <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
                                         <x-confirm-delete :action="route('admin.products.destroy', $product)" title="Hapus produk?" message="{{ $product->name }} beserta foto, varian, ulasan, dan riwayat stoknya akan dihapus permanen. Pesanan lama tetap tersimpan. Kalau hanya ingin menyembunyikan, nonaktifkan saja." />
                                     </div>

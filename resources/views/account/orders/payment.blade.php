@@ -5,7 +5,7 @@
 <x-layouts.account :title="'Pembayaran '.$order->code">
     <a href="{{ route('account.orders.show', $order) }}" class="mb-3 inline-flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-stone-800"><x-icon name="arrow-left" class="size-4" /> Detail pesanan</a>
 
-    <div class="grid gap-6 lg:grid-cols-5">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <section class="lg:col-span-3">
             <div class="border border-stone-200 p-5 sm:p-8">
                 <p class="eyebrow text-stone-500">Pembayaran · {{ $order->code }}</p>

@@ -1,6 +1,6 @@
 {{-- Ulasan & rating produk. Variabel: $product, $reviews, $ratingDistribution, $myReview, $canReview --}}
 <section id="ulasan" class="mt-20 scroll-mt-28 border-t border-stone-200 pt-12 lg:mt-28 lg:pt-16">
-    <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
         {{-- Ringkasan --}}
         <div class="lg:col-span-4">
             <h2 class="display text-3xl leading-none sm:text-5xl">Ulasan</h2>

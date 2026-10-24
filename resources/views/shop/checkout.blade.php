@@ -45,7 +45,7 @@
                             <a href="{{ route('account.addresses.create', ['redirect_to' => 'checkout']) }}" class="btn btn-ink btn-pill mt-3">Tambah alamat</a>
                         </div>
                     @else
-                        <div class="mt-4 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Alamat pengiriman">
+                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Alamat pengiriman">
                             @foreach ($addresses as $item)
                                 <label class="relative block cursor-pointer border-2 p-4 text-sm transition"
                                        :class="addressId === '{{ $item->id }}' ? 'border-ink bg-sand-50' : 'border-stone-200 hover:border-stone-300'">

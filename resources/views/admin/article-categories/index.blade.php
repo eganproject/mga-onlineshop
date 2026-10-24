@@ -2,7 +2,7 @@
 <x-layouts.admin title="Kategori Artikel">
     <x-admin.page-header title="Kategori artikel" description="Kelompokkan artikel, mis. Tips & Trik, Review Produk, Kabar Toko." :back="route('admin.articles.index')" />
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="card overflow-hidden lg:col-span-2">
             @if ($categories->isEmpty())
                 <x-empty-state icon="tag" title="Belum ada kategori" description="Tambah kategori pertama lewat form di samping." />

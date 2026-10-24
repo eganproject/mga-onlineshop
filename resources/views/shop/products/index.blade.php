@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <div class="shop-container mt-8 grid gap-10 lg:grid-cols-[230px_1fr] xl:gap-14">
+        <div class="shop-container mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[230px_1fr] xl:gap-14">
             {{-- Filter: sidebar di desktop, drawer di mobile --}}
             <div x-show="filters" x-cloak x-transition.opacity @click="filters = false" class="fixed inset-0 z-50 bg-ink/40 lg:hidden"></div>
             <aside :class="{ 'max-lg:-translate-x-full': ! filters }"

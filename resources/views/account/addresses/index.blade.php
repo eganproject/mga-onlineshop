@@ -2,7 +2,7 @@
     <div class="mb-4 flex justify-end">
         <a href="{{ route('account.addresses.create') }}" class="btn btn-ink rounded-full"><x-icon name="plus" class="size-4" /> Tambah alamat</a>
     </div>
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         @forelse ($addresses as $address)
             <div @class(['card flex flex-col p-5', 'ring-2 ring-brand-500' => $address->is_default])>
                 <div class="flex items-center gap-2">

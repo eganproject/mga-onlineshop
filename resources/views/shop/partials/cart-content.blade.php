@@ -17,7 +17,7 @@
             <a href="{{ route('products.index') }}" class="btn btn-ink btn-pill">Mulai belanja</a>
         </x-empty-state>
     @else
-        <div class="mt-2 grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <div class="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
             <ul class="divide-y divide-stone-200 lg:col-span-8">
                 @foreach ($lines as $line)
                     <li class="flex gap-4 py-6 sm:gap-6" data-cart-line="{{ $line->key() }}">
