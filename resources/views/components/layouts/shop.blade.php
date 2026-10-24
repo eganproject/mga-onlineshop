@@ -10,7 +10,7 @@
     $articleNav = ['label' => 'Artikel', 'url' => route('articles.index'), 'active' => request()->routeIs('articles.*')];
     $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
-<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" :viewport-fit="true" body-class="bg-white text-ink">
+<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" :viewport-fit="true" body-class="bg-white text-ink" data-cart-count="{{ $cartCount }}">
     @isset($head)
         <x-slot:head>{{ $head }}</x-slot:head>
     @endisset
@@ -192,13 +192,11 @@
                         </a>
                     @endunless
 
-                    <a href="{{ route('cart.index') }}" class="relative -mr-1 grid size-11 lg:size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0" aria-label="Keranjang ({{ $cartCount }})">
+                    <a href="{{ route('cart.index') }}" class="relative -mr-1 grid size-11 lg:size-10 place-items-center rounded-full hover:bg-sand-100 lg:mr-0"
+                       aria-label="Keranjang ({{ $cartCount }})" x-bind:aria-label="`Keranjang (${$store.cart.count})`">
                         <x-icon name="bag" />
-                        @if ($cartCount > 0)
-                            <span class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-accent-500 px-1 text-[10px] leading-[18px] font-bold text-white">
-                                {{ $cartCount > 99 ? '99+' : $cartCount }}
-                            </span>
-                        @endif
+                        <span x-show="$store.cart.count > 0" x-text="$store.cart.count > 99 ? '99+' : $store.cart.count" @if (! $cartCount) x-cloak @endif
+                              class="absolute right-0.5 top-0.5 grid min-w-[18px] place-items-center rounded-full bg-accent-500 px-1 text-[10px] leading-[18px] font-bold text-white">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
                     </a>
                 </div>
             </div>

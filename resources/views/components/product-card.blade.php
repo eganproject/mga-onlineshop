@@ -17,13 +17,20 @@
         </div>
 
         @if ($quickAdd && $product->inStock())
-            <form method="POST" action="{{ route('cart.store', $product) }}"
-                  class="absolute inset-x-3 bottom-3 z-10 hidden translate-y-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 lg:block">
-                @csrf
-                <button class="btn btn-light w-full rounded-full py-2.5 shadow-lg shadow-stone-900/10">
-                    <x-icon name="plus" class="size-4" /> Tambah ke keranjang
-                </button>
-            </form>
+            @php($quickAddClasses = 'absolute inset-x-3 bottom-3 z-10 hidden translate-y-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100')
+            @if ($product->has_variants)
+                {{-- Produk bervarian harus dipilih variannya dulu di halaman produk. --}}
+                <a href="{{ route('products.show', $product) }}" class="{{ $quickAddClasses }} btn btn-light rounded-full py-2.5 shadow-lg shadow-stone-900/10 lg:flex">
+                    Pilih {{ mb_strtolower($product->variant_label ?: 'varian') }}
+                </a>
+            @else
+                <form method="POST" action="{{ route('cart.store', $product) }}" data-cart-form class="{{ $quickAddClasses }} lg:block">
+                    @csrf
+                    <button class="btn btn-light w-full rounded-full py-2.5 shadow-lg shadow-stone-900/10 aria-busy:opacity-70">
+                        <x-icon name="plus" class="size-4" /> Tambah ke keranjang
+                    </button>
+                </form>
+            @endif
         @endif
     </div>
 

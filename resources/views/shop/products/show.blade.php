@@ -140,7 +140,7 @@
                     @endif
 
                     @if ($product->inStock())
-                        <form id="add-to-cart" method="POST" action="{{ route('cart.store', $product) }}" class="mt-8"
+                        <form id="add-to-cart" method="POST" action="{{ route('cart.store', $product) }}" class="mt-8" data-cart-form
                               @submit="if (needsVariant) { $event.preventDefault(); $refs.variantHint.classList.remove('hidden'); $refs.variantHint.scrollIntoView({ behavior: 'smooth', block: 'center' }) }">
                             @csrf
                             @if ($variants->isNotEmpty())
@@ -156,7 +156,7 @@
                             <p x-ref="variantHint" x-show="needsVariant" class="mt-4 hidden text-sm font-medium text-brand-700">Pilih {{ mb_strtolower($product->variant_label ?: 'varian') }} terlebih dahulu.</p>
                             <div class="mt-6 grid gap-3">
                                 <button class="btn btn-ink btn-pill w-full py-4 text-[15px]">Tambah ke keranjang</button>
-                                <button name="buy_now" value="1" class="btn btn-outline btn-pill w-full py-4 text-[15px]">Beli sekarang</button>
+                                <button name="buy_now" value="1" data-cart-native class="btn btn-outline btn-pill w-full py-4 text-[15px]">Beli sekarang</button>
                             </div>
                         </form>
                     @else
