@@ -37,9 +37,9 @@ class ProductExporter
         return [
             'Produk' => [
                 ProductImporter::COLUMNS,
-                ['', 'Kabel Data USB-C 1m', 'Kabel & Charger > Kabel Data', 'Kabel data fast charging 3A.', 'KBL-C1M', 'ya', 'tidak', '', '', '', '', 35000, 50000, 80, 25, 'https://contoh.com/foto/kabel-c.jpg'],
-                ['', 'Casing iPhone 15 Clear', 'Casing HP > Casing iPhone', 'Casing bening anti kuning.', '', 'ya', 'ya', 'Warna', 'Hitam', 'CS15-HTM', 'ya', 45000, '', 100, 10, ''],
-                ['', 'Casing iPhone 15 Clear', '', '', '', '', '', '', 'Putih', 'CS15-PTH', 'ya', 45000, '', 100, 8, ''],
+                ['', 'X Banner 60x160 cm', 'Tripod & Stand Banner', 'Rangka X banner fiber, tanpa poster.', 'XB-60160', 'ya', 'tidak', '', '', '', '', 15000, 29000, 700, 25, 'https://contoh.com/foto/x-banner.jpg'],
+                ['', 'Brosur Tempel Akrilik A4', 'Tempat Brosur > Brosur Tempel', 'Akrilik bening 2 mm.', '', 'ya', 'ya', 'Orientasi', 'Portrait', 'BT-A4-P', 'ya', 19000, '', 250, 10, ''],
+                ['', 'Brosur Tempel Akrilik A4', '', '', '', '', '', '', 'Landscape', 'BT-A4-L', 'ya', 19000, '', 250, 8, ''],
             ],
             'Petunjuk' => self::productGuide(),
         ];

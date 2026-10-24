@@ -19,7 +19,7 @@ final readonly class CartLine
         return CartService::key($this->product->id, $this->variant?->id);
     }
 
-    /** Nama untuk ditampilkan, contoh: "Casing iPhone 15 (Hitam)". */
+    /** Nama untuk ditampilkan, contoh: "Brosur Tempel Akrilik A4 (Portrait)". */
     public function name(): string
     {
         return $this->variant ? "{$this->product->name} ({$this->variant->name})" : $this->product->name;

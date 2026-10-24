@@ -27,7 +27,7 @@
             <div class="card space-y-5 p-6">
                 <div>
                     <label for="title" class="label">Judul</label>
-                    <input id="title" name="title" value="{{ old('title', $banner->title) }}" required maxlength="120" placeholder="Diskon 10% semua casing" class="input @error('title') input-error @enderror">
+                    <input id="title" name="title" value="{{ old('title', $banner->title) }}" required maxlength="120" placeholder="Diskon 10% semua frame akrilik" class="input @error('title') input-error @enderror">
                     <p class="mt-1.5 text-xs text-stone-400">Juga dipakai sebagai teks alternatif gambar.</p>
                     <x-input-error for="title" />
                 </div>
@@ -40,7 +40,7 @@
                     <div>
                         <div class="label-row">
                             <label for="link_url" class="label">Link <span class="font-normal text-stone-400">(opsional)</span></label>
-                            <x-tooltip label="Link banner" text="Halaman yang dibuka saat banner diklik. Awali / untuk halaman toko (mis. /produk?kategori=casing) atau https:// untuk link luar (dibuka di tab baru)." />
+                            <x-tooltip label="Link banner" text="Halaman yang dibuka saat banner diklik. Awali / untuk halaman toko (mis. /produk?kategori=frame-akrilik) atau https:// untuk link luar (dibuka di tab baru)." />
                         </div>
                         <input id="link_url" name="link_url" value="{{ old('link_url', $banner->link_url) }}" maxlength="500" placeholder="/produk?promo=1" class="input @error('link_url') input-error @enderror">
                         <x-input-error for="link_url" />

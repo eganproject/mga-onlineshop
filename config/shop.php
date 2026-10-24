@@ -10,7 +10,7 @@ return [
 
     'name' => 'MGA',
     'full_name' => 'Media Gudang Acc',
-    'tagline' => 'Gudangnya aksesoris gadget original & terjangkau',
+    'tagline' => 'Gudangnya perlengkapan promosi & display akrilik',
     'whatsapp' => env('SHOP_WHATSAPP'),
     // Tombol WhatsApp melayang di halaman pelanggan (tampil bila nomor terisi).
     'whatsapp_button' => (bool) env('SHOP_WHATSAPP_BUTTON', true),
@@ -46,17 +46,17 @@ return [
     'storefront' => [
         'hero_image' => env('SHOP_HERO_IMAGE'),
         'hero_image_mobile' => env('SHOP_HERO_IMAGE_MOBILE'),
-        'hero_eyebrow' => 'Koleksi terbaru MGA',
-        'hero_title' => 'Aksesoris original, harga gudang.',
-        'hero_subtitle' => 'Casing, charger, kabel, dan audio yang awet dipakai setiap hari.',
+        'hero_eyebrow' => 'Perlengkapan promosi usaha',
+        'hero_title' => 'Bikin promosi tokomu lebih menonjol.',
+        'hero_subtitle' => 'Tripod banner, frame akrilik, tempat brosur, dan light box langsung dari gudang. Harga grosir untuk UMKM, kafe, dan event.',
         'hero_primary_label' => 'Belanja sekarang',
         'hero_primary_url' => '/produk',
         'hero_secondary_label' => 'Lihat promo',
         'hero_secondary_url' => '/produk?promo=1',
         'hero_text' => 'light',
         'announcements' => [
-            'Kirim ke seluruh Indonesia',
-            'Produk 100% original & bergaransi',
+            'Gudang Jakarta & Surabaya, kirim ke seluruh Indonesia',
+            'Pesan sebelum 16.00 WIB, dikirim hari ini',
             'Bayar mudah: transfer bank, e-wallet & QRIS',
         ],
         // Tab Best Seller: "auto" (terlaris 90 hari) atau "manual" (pilihan admin, berurutan).
@@ -160,7 +160,7 @@ return [
 
     'seo' => [
         'indexing' => (bool) env('SEO_INDEXING', true),
-        'description' => env('SEO_DESCRIPTION', 'Belanja aksesoris HP & gadget original: casing, charger, kabel data, earphone, powerbank. Harga terjangkau, kirim ke seluruh Indonesia.'),
+        'description' => env('SEO_DESCRIPTION', 'Belanja perlengkapan promosi & display akrilik: tripod banner, X banner, frame akrilik, tempat brosur, standing sign, light box. Harga gudang, kirim ke seluruh Indonesia.'),
         'default_image' => env('SEO_DEFAULT_IMAGE') ?: 'images/brand/og-default.png',
     ],
 

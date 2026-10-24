@@ -7,6 +7,7 @@ use App\Enums\StaffRole;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\User;
 use App\Support\Storefront;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,6 +28,19 @@ class StorefrontTest extends TestCase
         ]);
     }
 
+    public function test_category_tiles_fall_back_to_a_product_photo_and_use_cases_link_to_search(): void
+    {
+        $parent = Category::factory()->create(['name' => 'Tempat Brosur']);
+        $child = Category::factory()->create(['name' => 'Brosur Tempel', 'parent_id' => $parent->id]);
+        $product = Product::factory()->create(['category_id' => $child->id, 'is_featured' => true]);
+        $image = ProductImage::factory()->create(['product_id' => $product->id]);
+
+        $this->get(route('home'))->assertOk()
+            ->assertSee($image->url(), false)
+            ->assertSee('Solusi untuk usahamu')
+            ->assertSee(route('products.index', ['q' => 'standing sign']), false);
+    }
+
     public function test_homepage_shows_default_hero_tabs_and_announcements(): void
     {
         $category = Category::factory()->create(['name' => 'Casing HP']);
@@ -35,12 +49,12 @@ class StorefrontTest extends TestCase
         $this->get(route('home'))->assertOk()
             ->assertSee(asset(Storefront::DEFAULT_IMAGE), false)
             ->assertSee(asset(Storefront::DEFAULT_IMAGE_MOBILE), false)
-            ->assertSee('Aksesoris original, harga gudang.')
+            ->assertSee('Bikin promosi tokomu lebih menonjol.')
             ->assertSee('Best Seller')
             ->assertSee('Kategori')
             ->assertSee('Casing HP')
             ->assertSee('Kabel Data')
-            ->assertSee('Produk 100% original &amp; bergaransi', false);
+            ->assertSee('Pesan sebelum 16.00 WIB, dikirim hari ini');
     }
 
     public function test_best_sellers_are_ordered_by_paid_sales_and_filled_with_other_products(): void
@@ -100,7 +114,7 @@ class StorefrontTest extends TestCase
         $this->put(route('admin.storefront.update'), ['hero_text' => 'light', 'remove_hero_image' => 1])->assertSessionHasNoErrors();
         Storage::disk('public')->assertMissing($image);
         $this->assertNull(config('shop.storefront.hero_image'));
-        $this->assertSame('Aksesoris original, harga gudang.', config('shop.storefront.hero_title'));
+        $this->assertSame('Bikin promosi tokomu lebih menonjol.', config('shop.storefront.hero_title'));
     }
 
     public function test_storefront_page_requires_promo_permission(): void

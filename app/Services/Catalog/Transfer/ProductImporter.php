@@ -386,7 +386,7 @@ class ProductImporter extends Importer
     }
 
     /**
-     * "Casing HP > Casing iPhone" atau "Casing iPhone". Mengembalikan
+     * "Tempat Brosur > Brosur Tempel" atau "Brosur Tempel". Mengembalikan
      * ['id' => ?int, 'path' => [induk, anak], 'new' => ?label, 'label' => label].
      */
     private function category(mixed $value, Collection $categories): ?array
@@ -398,7 +398,7 @@ class ProductImporter extends Importer
 
         $parts = array_values(array_filter(array_map('trim', preg_split('/\s*[>\/]\s*/', $text)), 'strlen'));
         if (count($parts) > 2) {
-            throw new InvalidCell('Kategori maksimal 2 tingkat, contoh: "Casing HP > Casing iPhone".');
+            throw new InvalidCell('Kategori maksimal 2 tingkat, contoh: "Tempat Brosur > Brosur Tempel".');
         }
         foreach ($parts as $part) {
             if (mb_strlen($part) > 100) {

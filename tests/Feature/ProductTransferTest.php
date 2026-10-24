@@ -125,8 +125,8 @@ class ProductTransferTest extends TestCase
 
             $rows = $this->readDownload($response, $format);
             $this->assertCount(3, $rows);
-            $this->assertSame('Kabel Data USB-C 1m', $rows[0]['nama_produk']);
-            $this->assertSame('Hitam', $rows[1]['nama_varian']);
+            $this->assertSame('X Banner 60x160 cm', $rows[0]['nama_produk']);
+            $this->assertSame('Portrait', $rows[1]['nama_varian']);
         }
     }
 

@@ -16,12 +16,12 @@
             </div>
             <x-form.select name="parent_id" label="Induk kategori" placeholder="Tidak ada (kategori utama)" :search="true"
                 :options="$parents->pluck('name', 'id')->all()" :selected="$category->parent_id"
-                hint="Pilih induk untuk menjadikannya subkategori, mis. Casing HP › Casing iPhone."
+                hint="Pilih induk untuk menjadikannya subkategori, mis. Tempat Brosur › Akrilik Pocket."
                 tooltip="Kategori hanya 2 tingkat: kategori utama dan subkategori. Subkategori tidak bisa punya anak lagi." />
             <div>
                 <div class="label-row">
                     <label for="slug" class="label">Slug URL <span class="font-normal text-stone-400">(kosongkan untuk otomatis)</span></label>
-                    <x-tooltip label="Slug URL" text="Dipakai di alamat filter katalog, mis. /produk?kategori=casing-iphone. Dibuat otomatis dari nama bila kosong."
+                    <x-tooltip label="Slug URL" text="Dipakai di alamat filter katalog, mis. /produk?kategori=akrilik-pocket. Dibuat otomatis dari nama bila kosong."
                                tips="Hindari mengubah slug yang sudah dibagikan supaya link lama tetap berfungsi." />
                 </div>
                 <input id="slug" name="slug" value="{{ old('slug', $category->slug) }}" class="input @error('slug') input-error @enderror">
