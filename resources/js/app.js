@@ -13,6 +13,7 @@ import articleEditor from './components/article-editor';
 import shareButtons from './components/share-buttons';
 import bestSellerPicker from './components/best-seller-picker';
 import tooltip from './components/tooltip';
+import infiniteScroll from './components/infinite-scroll';
 
 window.Alpine = Alpine;
 
@@ -36,5 +37,9 @@ Alpine.data('firebaseLogin', firebaseLogin);
 Alpine.data('articleEditor', articleEditor);
 Alpine.data('shareButtons', shareButtons);
 Alpine.data('bestSellerPicker', bestSellerPicker);
+
+// Infinite scroll daftar pelanggan (<x-infinite-list>); sebelum Alpine.start supaya
+// item yang dipulihkan saat Back ikut diinisialisasi Alpine.
+infiniteScroll();
 
 Alpine.start();

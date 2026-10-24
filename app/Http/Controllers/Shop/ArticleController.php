@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Support\InfiniteScroll;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class ArticleController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|Response
     {
         $category = $request->filled('kategori')
             ? ArticleCategory::where('slug', $request->string('kategori'))->first()
@@ -27,13 +29,13 @@ class ArticleController extends Controller
             ->paginate(9)
             ->withQueryString();
 
-        return view('shop.articles.index', [
+        return InfiniteScroll::respond($request, view('shop.articles.index', [
             'articles' => $articles,
             'categories' => ArticleCategory::whereHas('articles', fn ($q) => $q->published())->orderBy('sort_order')->orderBy('name')->get(),
             'activeCategory' => $category,
             'tag' => $tag,
             'search' => $search,
-        ]);
+        ]));
     }
 
     public function show(Request $request, Article $article): View

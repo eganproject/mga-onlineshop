@@ -9,8 +9,10 @@ use App\Models\Order;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\PaymentService;
 use App\Services\Shipping\TrackingService;
+use App\Support\InfiniteScroll;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -18,11 +20,11 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|Response
     {
         $status = OrderStatus::tryFrom((string) $request->query('status'));
 
-        return view('account.orders.index', [
+        return InfiniteScroll::respond($request, view('account.orders.index', [
             'orders' => $request->user()->orders()
                 ->with('items.product')
                 ->when($status, fn ($q) => $q->where('status', $status))
@@ -35,7 +37,7 @@ class OrderController extends Controller
                 ->paginate(10)
                 ->withQueryString(),
             'status' => $status,
-        ]);
+        ]));
     }
 
     public function show(Request $request, Order $order, TrackingService $tracking): View

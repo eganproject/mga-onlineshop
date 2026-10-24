@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Reviews\ReviewService;
+use App\Support\InfiniteScroll;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -18,7 +20,7 @@ class ProductController extends Controller
         'nama' => 'Nama A-Z',
     ];
 
-    public function index(Request $request): View
+    public function index(Request $request): View|Response
     {
         $category = $request->filled('kategori')
             ? Category::active()->with('parent')->where('slug', $request->string('kategori'))->first()
@@ -44,7 +46,7 @@ class ProductController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('shop.products.index', [
+        return InfiniteScroll::respond($request, view('shop.products.index', [
             'products' => $products,
             'categories' => Category::active()->root()
                 ->with(['children' => fn ($q) => $q->active()])
@@ -54,16 +56,16 @@ class ProductController extends Controller
             'sorts' => self::SORTS,
             'minPrice' => $minPrice,
             'maxPrice' => $maxPrice,
-        ]);
+        ]));
     }
 
-    public function show(Request $request, Product $product, ReviewService $reviewService): View
+    public function show(Request $request, Product $product, ReviewService $reviewService): View|Response
     {
         abort_unless($product->is_active, 404);
 
         $user = $request->user();
 
-        return view('shop.products.show', [
+        return InfiniteScroll::respond($request, view('shop.products.show', [
             'product' => $product->load(['category.parent', 'images', 'activeVariants.image']),
             'related' => Product::active()
                 ->where('category_id', $product->category_id)
@@ -79,6 +81,6 @@ class ProductController extends Controller
             'ratingDistribution' => $product->review_count > 0 ? $reviewService->distribution($product) : [],
             'myReview' => $user?->isCustomer() ? $user->reviews()->where('product_id', $product->id)->first() : null,
             'canReview' => $user?->isCustomer() && $reviewService->canReview($user, $product),
-        ]);
+        ]));
     }
 }

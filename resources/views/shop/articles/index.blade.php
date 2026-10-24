@@ -60,14 +60,15 @@
                 <x-article-card :article="$featured" large eager class="mt-8 lg:mt-10" />
             @endif
             @if ($list->isNotEmpty())
-                <div @class(['grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3', 'mt-14 border-t border-stone-200 pt-12' => $featured, 'mt-8' => ! $featured])>
-                    @foreach ($list as $article)
-                        <x-article-card :article="$article" :eager="! $featured && $loop->index < 3" />
-                    @endforeach
-                </div>
-            @endif
-            @if ($articles->hasPages())
-                <div class="mt-14">{{ $articles->links() }}</div>
+                @fragment('infinite-list')
+                    <x-infinite-list :paginator="$articles" label="artikel" skeleton="article" :skeleton-count="3"
+                                     class="{{ $featured ? 'mt-14 border-t border-stone-200 pt-12' : 'mt-8' }}"
+                                     items-class="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach ($list as $article)
+                            <x-article-card :article="$article" :eager="! $featured && $loop->index < 3" />
+                        @endforeach
+                    </x-infinite-list>
+                @endfragment
             @endif
         @endif
     </div>
