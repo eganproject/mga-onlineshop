@@ -1,4 +1,4 @@
-<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product" :bottom-nav="! $product->inStock()">
+<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product" :bottom-nav="! $product->inStock()" :whatsapp-context="$product->name.' — '.route('products.show', $product)">
     <x-slot:head>
         <meta property="product:price:amount" content="{{ $product->price }}">
         <meta property="product:price:currency" content="IDR">

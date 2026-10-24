@@ -24,6 +24,8 @@ class StoreSettingController extends Controller
         'tagline' => 'shop.tagline',
         'email' => 'shop.email',
         'whatsapp' => 'shop.whatsapp',
+        'whatsapp_button' => 'shop.whatsapp_button',
+        'whatsapp_message' => 'shop.whatsapp_message',
         'address' => 'shop.address',
         'instagram' => 'shop.instagram',
         'tiktok' => 'shop.tiktok',
@@ -41,6 +43,8 @@ class StoreSettingController extends Controller
         'shop.tagline' => 'Tagline',
         'shop.email' => 'Email kontak',
         'shop.whatsapp' => 'WhatsApp',
+        'shop.whatsapp_button' => 'Tombol WhatsApp melayang',
+        'shop.whatsapp_message' => 'Pesan pembuka WhatsApp',
         'shop.address' => 'Alamat gudang',
         'shop.instagram' => 'Instagram',
         'shop.tiktok' => 'TikTok',
@@ -83,6 +87,8 @@ class StoreSettingController extends Controller
             'tagline' => ['nullable', 'string', 'max:160'],
             'email' => ['nullable', 'email', 'max:120'],
             'whatsapp' => ['nullable', 'regex:/^62\d{8,13}$/'],
+            'whatsapp_button' => ['boolean'],
+            'whatsapp_message' => ['nullable', 'string', 'max:300'],
             'address' => ['nullable', 'string', 'max:500'],
             'instagram' => ['nullable', 'string', 'max:60', 'regex:/^[A-Za-z0-9._]+$/'],
             'tiktok' => ['nullable', 'string', 'max:60', 'regex:/^[A-Za-z0-9._]+$/'],
@@ -103,11 +109,13 @@ class StoreSettingController extends Controller
         ], [
             'name' => 'nama singkat', 'full_name' => 'nama lengkap', 'district_id' => 'kecamatan asal',
             'payment_expiry_hours' => 'batas waktu bayar', 'auto_complete_days' => 'selesai otomatis',
+            'whatsapp_message' => 'pesan pembuka WhatsApp',
         ]);
 
         $values = collect(self::FORM)
             ->mapWithKeys(fn (string $key, string $field) => [$key => $data[$field] ?? null])
             ->put('shop.shipping.tracking_sync', $request->boolean('tracking_sync'))
+            ->put('shop.whatsapp_button', $request->boolean('whatsapp_button'))
             ->all();
 
         // Kecamatan asal (hanya bila dipilih lengkap): nama wilayah dicocokkan ke
