@@ -114,7 +114,8 @@ class MgaCatalogTest extends TestCase
     {
         $demoCategory = Category::factory()->create(['name' => 'Casing HP', 'slug' => 'casing-hp']);
         $unused = Product::factory()->create(['category_id' => $demoCategory->id, 'slug' => 'casing-lama']);
-        $ordered = Product::factory()->create(['slug' => 'charger-lama', 'is_active' => true, 'is_featured' => true]);
+        $orderedCategory = Category::factory()->create(['name' => 'Charger', 'slug' => 'charger', 'is_active' => true]);
+        $ordered = Product::factory()->create(['category_id' => $orderedCategory->id, 'slug' => 'charger-lama', 'is_active' => true, 'is_featured' => true]);
         Order::factory()->create()->items()->create([
             'product_id' => $ordered->id,
             'product_name' => $ordered->name,
@@ -129,6 +130,7 @@ class MgaCatalogTest extends TestCase
         $this->assertModelMissing($demoCategory);
         $this->assertFalse($ordered->fresh()->is_active);
         $this->assertFalse($ordered->fresh()->is_featured);
+        $this->assertFalse($orderedCategory->fresh()->is_active, 'Kategori lama yang masih berisi produk disembunyikan.');
         $this->assertTrue(Product::where('slug', 'tripod-banner-2-sisi')->exists());
     }
 

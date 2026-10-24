@@ -92,11 +92,13 @@ class MgaCatalog
      * Hapus produk & kategori yang bukan bagian katalog MGA (mis. data demo lama).
      * Produk yang pernah dipesan hanya dinonaktifkan supaya riwayat pesanan utuh.
      *
-     * @return array{deleted: int, deactivated: int, categories: int}
+     * Kategori lama yang masih berisi produk tersebut disembunyikan.
+     *
+     * @return array{deleted: int, deactivated: int, categories: int, hidden: int}
      */
     public function removeOthers(ProductService $products): array
     {
-        $result = ['deleted' => 0, 'deactivated' => 0, 'categories' => 0];
+        $result = ['deleted' => 0, 'deactivated' => 0, 'categories' => 0, 'hidden' => 0];
 
         Product::whereNotIn('slug', $this->slugs())->withCount('orderItems')->get()
             ->each(function (Product $product) use ($products, &$result) {
@@ -118,6 +120,9 @@ class MgaCatalog
                 if (! $category->products()->exists() && ! $category->children()->exists()) {
                     $category->delete();
                     $result['categories']++;
+                } elseif ($category->is_active) {
+                    $category->update(['is_active' => false]);
+                    $result['hidden']++;
                 }
             });
 
