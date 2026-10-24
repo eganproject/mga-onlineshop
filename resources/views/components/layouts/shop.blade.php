@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false, 'bottomNav' => true])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false, 'bottomNav' => true, 'whatsappContext' => null])
 @php
     $user = auth()->user();
     $announcements = \App\Support\Storefront::announcements();
@@ -380,6 +380,8 @@
                 </div>
             </div>
         </footer>
+
+        <x-whatsapp-float :context="$whatsappContext" />
 
         @if ($bottomNav)
             <x-bottom-nav :cart-count="$cartCount" :wishlist-count="$wishlistCount" />

@@ -43,6 +43,17 @@
                     <x-form.input name="tiktok" label="TikTok" prefix="@" :value="$values['tiktok']" placeholder="username" optional />
                     <x-form.input type="url" name="facebook" label="Halaman Facebook" icon="external" :value="$values['facebook']" placeholder="https://facebook.com/namatoko" optional wrapper-class="sm:col-span-2" />
                 </div>
+                <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
+                    <span>
+                        <span class="block text-sm font-semibold text-stone-800">Tombol WhatsApp melayang</span>
+                        <span class="text-xs text-stone-500">Tombol chat di pojok kanan bawah halaman toko, langsung ke nomor WhatsApp di atas. Tidak tampil bila nomor kosong.</span>
+                    </span>
+                    <input type="hidden" name="whatsapp_button" value="0">
+                    <input type="checkbox" name="whatsapp_button" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('whatsapp_button', $values['whatsapp_button']))>
+                </label>
+                <x-form.textarea name="whatsapp_message" label="Pesan pembuka chat" :value="$values['whatsapp_message']" rows="2" maxlength="300" optional
+                                 placeholder="Halo, saya mau tanya tentang produk di toko online."
+                                 hint="Otomatis terisi saat pelanggan membuka chat. Di halaman produk, nama & link produk ikut ditambahkan." />
             </section>
 
             {{-- Pengiriman --}}

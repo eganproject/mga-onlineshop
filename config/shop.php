@@ -12,6 +12,10 @@ return [
     'full_name' => 'Media Gudang Acc',
     'tagline' => 'Gudangnya aksesoris gadget original & terjangkau',
     'whatsapp' => env('SHOP_WHATSAPP'),
+    // Tombol WhatsApp melayang di halaman pelanggan (tampil bila nomor terisi).
+    'whatsapp_button' => (bool) env('SHOP_WHATSAPP_BUTTON', true),
+    // Pesan pembuka yang otomatis terisi saat pelanggan membuka chat.
+    'whatsapp_message' => env('SHOP_WHATSAPP_MESSAGE', 'Halo, saya mau tanya tentang produk di toko online.'),
     // Alamat gudang/pengirim, dicetak di invoice dan packing slip.
     'address' => env('SHOP_ADDRESS'),
     'instagram' => env('SHOP_INSTAGRAM'),

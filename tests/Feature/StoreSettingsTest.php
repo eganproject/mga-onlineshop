@@ -32,6 +32,8 @@ class StoreSettingsTest extends TestCase
             'tagline' => 'Gudangnya aksesoris',
             'email' => 'halo@mga.test',
             'whatsapp' => '0812-3456-7890',
+            'whatsapp_button' => '1',
+            'whatsapp_message' => 'Halo MGA, saya mau tanya.',
             'address' => 'Jl. Dago No. 1, Bandung',
             'instagram' => 'https://instagram.com/mga.official/',
             'tiktok' => '@mga.tiktok',

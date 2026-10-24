@@ -32,6 +32,8 @@ class StoreSettings
         'shop.tagline' => 'string',
         'shop.email' => 'string',
         'shop.whatsapp' => 'string',
+        'shop.whatsapp_button' => 'bool',
+        'shop.whatsapp_message' => 'string',
         'shop.address' => 'string',
         'shop.instagram' => 'string',
         'shop.tiktok' => 'string',
