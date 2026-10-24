@@ -178,7 +178,9 @@ class ReportTest extends TestCase
         }
 
         $this->get(route('admin.reports.index'))->assertOk()->assertSee('Rp510.000');
-        $this->get(route('admin.reports.index', ['tab' => 'produk']))->assertOk()->assertSee('Earbuds Pro');
+        $this->get(route('admin.reports.index', ['tab' => 'produk']))->assertOk()->assertSee('Earbuds Pro')
+            ->assertSee(route('admin.products.edit', $product), false);
+        $this->get(route('admin.dashboard'))->assertSee(route('admin.products.edit', $product), false);
         $this->get(route('admin.reports.index', ['tab' => 'kategori']))->assertOk()->assertSee($product->category->name);
         $this->get(route('admin.reports.index', ['preset' => 'custom', 'from' => '2026-10-23', 'to' => '2026-10-01', 'group' => 'week']))->assertOk();
         $this->get(route('admin.reports.index', ['preset' => 'custom', 'from' => 'bukan-tanggal', 'to' => '2026-13-45']))->assertOk();

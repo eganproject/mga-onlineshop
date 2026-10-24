@@ -184,8 +184,10 @@
                                         <td class="text-stone-400 tabular-nums">{{ $i + 1 }}</td>
                                         <td>
                                             @if ($tab === 'produk')
-                                                @if ($row->product_id)
-                                                    <a href="{{ route('admin.products.edit', $row->product_id) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $row->name }}</a>
+                                                @if ($row->slug && auth()->user()->can('catalog.manage'))
+                                                    <a href="{{ route('admin.products.edit', $row->slug) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $row->name }}</a>
+                                                @elseif ($row->product_id)
+                                                    <span class="font-semibold text-stone-900">{{ $row->name }}</span>
                                                 @else
                                                     <span class="font-semibold text-stone-900">{{ $row->name }}</span> <span class="badge bg-stone-100 text-stone-500 ring-stone-500/20">dihapus</span>
                                                 @endif

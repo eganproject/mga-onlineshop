@@ -141,7 +141,7 @@
 
                     @if ($product->inStock())
                         <form id="add-to-cart" method="POST" action="{{ route('cart.store', $product) }}" class="mt-8"
-                              @submit="if (needsVariant) { $event.preventDefault(); $refs.variantHint.classList.remove('hidden') }">
+                              @submit="if (needsVariant) { $event.preventDefault(); $refs.variantHint.classList.remove('hidden'); $refs.variantHint.scrollIntoView({ behavior: 'smooth', block: 'center' }) }">
                             @csrf
                             @if ($variants->isNotEmpty())
                                 <input type="hidden" name="variant_id" :value="selectedId ?? ''">

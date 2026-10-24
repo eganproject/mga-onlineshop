@@ -61,7 +61,8 @@ class ShopTest extends TestCase
     {
         $product = Product::factory()->create(['stock' => 3]);
 
-        $this->post(route('cart.store', $product), ['quantity' => 10])->assertRedirect();
+        $this->post(route('cart.store', $product), ['quantity' => 10])->assertRedirect()->assertSessionHas('warning');
+        $this->post(route('cart.store', $product))->assertSessionHas('warning', fn ($m) => str_contains($m, 'sudah ada di keranjang'));
         $this->get(route('cart.index'))->assertOk()->assertSee($product->name);
         $this->assertSame([$product->id => 3], session('cart'));
 

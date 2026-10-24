@@ -1,5 +1,5 @@
 <x-layouts.admin title="Impor & ekspor produk">
-    <x-admin.page-header title="Impor & ekspor" description="Tambah atau ubah banyak produk sekaligus, unduh katalog, dan update stok lewat file Excel / CSV." :back="route('admin.products.index')" />
+    <x-admin.page-header title="Impor & ekspor" description="Tambah atau ubah banyak produk sekaligus, unduh katalog, dan update stok lewat file Excel / CSV." :back="auth()->user()->can('catalog.manage') ? route('admin.products.index') : route('admin.stock.index')" />
 
     <div class="grid gap-6 lg:grid-cols-3">
         {{-- Ekspor --}}

@@ -126,6 +126,13 @@ class PaymentService
                 'payment_type' => $update->paymentType,
             ]) + ['payload' => $update->payload ?: $payment->payload];
 
+            if ($update->status === PaymentStatus::Paid && $payment->status === PaymentStatus::Paid && $payment->payment_type === 'manual') {
+                // Sudah dikonfirmasi manual oleh admin, tapi pelanggan tetap membayar lewat gateway.
+                Log::warning('Pembayaran gateway masuk untuk pesanan yang sudah dikonfirmasi manual, cek kemungkinan bayar ganda', [
+                    'order' => $payment->order->code, 'payment' => $payment->id,
+                ]);
+            }
+
             if (! $update->status || ! $payment->status->canMoveTo($update->status)) {
                 // Notifikasi ganda / terlambat. Selama masih pending, catat metode yang dipilih.
                 if ($payment->status === PaymentStatus::Pending) {

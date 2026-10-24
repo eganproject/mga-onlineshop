@@ -119,6 +119,12 @@ class CartService
         $this->set($key, 0);
     }
 
+    /** Jumlah yang tersimpan untuk sebuah baris (0 bila belum ada). */
+    public function quantity(string $key): int
+    {
+        return (int) ($this->raw()[$key] ?? 0);
+    }
+
     public function find(string $key): ?CartLine
     {
         return $this->lines()->first(fn (CartLine $line) => $line->key() === $key);
