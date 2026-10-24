@@ -15,8 +15,16 @@
         </div>
     </div>
 
-    <div class="space-y-4">
-        @forelse ($orders as $order)
+    @if ($orders->isEmpty())
+        <div class="card">
+            <x-empty-state icon="receipt" title="Belum ada pesanan" description="Pesanan dengan status ini belum ada.">
+                <a href="{{ route('products.index') }}" class="btn btn-ink rounded-full">Mulai belanja</a>
+            </x-empty-state>
+        </div>
+    @else
+    @fragment('infinite-list')
+    <x-infinite-list :paginator="$orders" label="pesanan" skeleton="order" :skeleton-count="2" items-class="space-y-4">
+        @foreach ($orders as $order)
             <div class="card overflow-hidden">
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 bg-stone-50/50 px-5 py-3 text-sm">
                     <div class="flex items-center gap-2">
@@ -53,13 +61,8 @@
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="card">
-                <x-empty-state icon="receipt" title="Belum ada pesanan" description="Pesanan dengan status ini belum ada.">
-                    <a href="{{ route('products.index') }}" class="btn btn-ink rounded-full">Mulai belanja</a>
-                </x-empty-state>
-            </div>
-        @endforelse
-    </div>
-    <div class="mt-6">{{ $orders->links() }}</div>
+        @endforeach
+    </x-infinite-list>
+    @endfragment
+    @endif
 </x-layouts.account>

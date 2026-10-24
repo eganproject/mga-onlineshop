@@ -74,7 +74,10 @@
 
         {{-- Daftar ulasan --}}
         <div class="lg:col-span-8">
-            @forelse ($reviews as $review)
+            @if ($reviews->isNotEmpty())
+            @fragment('infinite-list')
+            <x-infinite-list :paginator="$reviews" label="ulasan" skeleton="review" :skeleton-count="2" :auto="false" more="Lihat ulasan lainnya">
+            @foreach ($reviews as $review)
                 <article class="border-b border-stone-200 py-6 first:pt-0">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <x-star-rating :rating="$review->rating" />
@@ -97,16 +100,15 @@
                         </div>
                     @endif
                 </article>
-            @empty
+            @endforeach
+            </x-infinite-list>
+            @endfragment
+            @else
                 <div class="bg-sand-50 p-8 text-center">
                     <x-icon name="star" class="mx-auto size-8 text-stone-400" />
                     <p class="mt-3 text-sm font-semibold">Jadilah yang pertama mengulas</p>
                     <p class="mt-1 text-sm text-stone-500">Ulasan ditulis oleh pembeli yang pesanannya sudah selesai.</p>
                 </div>
-            @endforelse
-
-            @if ($reviews->hasPages())
-                <div class="mt-6">{{ $reviews->links() }}</div>
             @endif
         </div>
     </div>

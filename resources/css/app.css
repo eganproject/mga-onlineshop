@@ -320,6 +320,10 @@
     .no-scrollbar {
         scrollbar-width: none;
     }
+    /* Kerangka saat memuat (infinite scroll). */
+    .skeleton {
+        @apply bg-sand-100 motion-safe:animate-pulse;
+    }
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }

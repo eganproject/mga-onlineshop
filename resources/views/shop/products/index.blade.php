@@ -77,7 +77,7 @@
                         <span class="grid size-5 place-items-center rounded-full bg-ink text-[10px] text-white">{{ $filterCount }}</span>
                     @endif
                 </button>
-                <p class="hidden text-sm text-stone-500 lg:block">Menampilkan {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} dari {{ $products->total() }}</p>
+                <p class="hidden text-sm text-stone-500 lg:block">{{ number_format($products->total(), 0, ',', '.') }} produk</p>
                 <form method="GET" x-data @change="$el.submit()" class="flex items-center gap-2">
                     @foreach (\Illuminate\Support\Arr::except($baseQuery, 'urut') as $key => $value)
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -174,12 +174,14 @@
                         </x-empty-state>
                     </div>
                 @else
-                    <div class="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 md:grid-cols-3 2xl:grid-cols-4">
-                        @foreach ($products as $product)
-                            <x-product-card :product="$product" />
-                        @endforeach
-                    </div>
-                    <div class="mt-14">{{ $products->links() }}</div>
+                    @fragment('infinite-list')
+                        <x-infinite-list :paginator="$products" label="produk" skeleton="product" :skeleton-count="6"
+                                         items-class="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 md:grid-cols-3 2xl:grid-cols-4">
+                            @foreach ($products as $product)
+                                <x-product-card :product="$product" />
+                            @endforeach
+                        </x-infinite-list>
+                    @endfragment
                 @endif
             </div>
         </div>

@@ -45,44 +45,66 @@
             ];
             $priceRange = $variants->isNotEmpty() && $variants->pluck('price')->unique()->count() > 1;
             $lowStock = config('shop.low_stock_threshold');
+            $imageCount = $product->images->count();
         @endphp
         <div class="mt-5 grid gap-8 lg:grid-cols-12 lg:gap-14" x-data="productPage(@js($pageConfig))">
-            {{-- Galeri --}}
+            {{-- Galeri: desktop = thumbnail vertikal di kiri + zoom saat kursor diarahkan;
+                 HP = geser foto, ketuk untuk layar penuh (bisa dicubit/zoom). --}}
             <div class="-mx-4 min-w-0 sm:mx-0 lg:col-span-7">
-                <div class="relative">
-                    @if ($product->images->isEmpty())
-                        <x-product-image :product="$product" :eager="true" class="aspect-square sm:aspect-[4/5]" />
-                    @else
-                        <div class="relative aspect-square overflow-hidden bg-sand-100 sm:aspect-[4/5]">
-                            @foreach ($product->images as $index => $image)
-                                <img src="{{ $image->url() }}" alt="{{ $product->name }} — foto {{ $index + 1 }}"
-                                     @if ($index > 0) loading="lazy" x-cloak @endif decoding="async"
-                                     x-show="active === {{ $index }}" x-transition.opacity.duration.200ms
-                                     class="absolute inset-0 size-full object-cover">
-                            @endforeach
-                        </div>
-                        @if ($product->images->count() > 1)
-                            <button type="button" @click="next(-1)" class="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow transition hover:bg-white" aria-label="Foto sebelumnya"><x-icon name="chevron-left" class="size-5" /></button>
-                            <button type="button" @click="next(1)" class="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow transition hover:bg-white" aria-label="Foto berikutnya"><x-icon name="chevron-right" class="size-5" /></button>
-                            <span class="absolute bottom-4 right-4 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white" x-text="`${active + 1} / ${images.length}`">1 / {{ $product->images->count() }}</span>
-                        @endif
-                    @endif
-                    <template x-if="discount">
-                        <span class="absolute left-4 top-4 bg-brand-600 px-2.5 py-1 text-[11px] font-bold tracking-wider text-white uppercase" x-text="`Hemat ${discount}%`"></span>
-                    </template>
-                </div>
-                @if ($product->images->count() > 1)
-                    <div class="no-scrollbar mt-3 flex gap-2 overflow-x-auto px-4 sm:px-0">
-                        @foreach ($product->images as $index => $image)
-                            <button type="button" @click="active = {{ $index }}"
-                                    class="size-16 shrink-0 overflow-hidden border-2 transition sm:size-20"
-                                    :class="active === {{ $index }} ? 'border-ink' : 'border-transparent opacity-60 hover:opacity-100'"
-                                    aria-label="Lihat foto {{ $index + 1 }}">
-                                <img src="{{ $image->url() }}" alt="" loading="lazy" class="size-full object-cover">
+                <div @class(['flex flex-col', 'lg:grid lg:grid-cols-[72px_minmax(0,1fr)] lg:gap-4 xl:grid-cols-[84px_minmax(0,1fr)]' => $imageCount > 1])>
+                    <div class="relative lg:order-2">
+                        @if ($product->images->isEmpty())
+                            <x-product-image :product="$product" :eager="true" class="aspect-square sm:aspect-[4/5]" />
+                        @else
+                            <div x-ref="track" @scroll.debounce.80ms="syncFromScroll()"
+                                 class="no-scrollbar flex aspect-square snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-sand-100 sm:aspect-[4/5]"
+                                 aria-roledescription="carousel" aria-label="Foto {{ $product->name }}">
+                                @foreach ($product->images as $index => $image)
+                                    <a href="{{ $image->url() }}" @click.prevent="openLightbox({{ $index }})"
+                                       @mouseenter="zoomStart($event)" @mousemove="zoomMove($event)" @mouseleave="zoomEnd($event)"
+                                       class="gallery-slide relative block size-full shrink-0 snap-center snap-always overflow-hidden"
+                                       aria-label="Perbesar foto {{ $index + 1 }} dari {{ $imageCount }}">
+                                        <img src="{{ $image->url() }}" alt="{{ $product->name }} — foto {{ $index + 1 }}"
+                                             @if ($index > 0) loading="lazy" @else fetchpriority="high" @endif decoding="async"
+                                             class="gallery-zoom size-full object-cover" draggable="false">
+                                    </a>
+                                @endforeach
+                            </div>
+                            @if ($imageCount > 1)
+                                <button type="button" @click="next(-1)" class="absolute left-3 top-1/2 hidden size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow transition hover:bg-white sm:grid" aria-label="Foto sebelumnya"><x-icon name="chevron-left" class="size-5" /></button>
+                                <button type="button" @click="next(1)" class="absolute right-3 top-1/2 hidden size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow transition hover:bg-white sm:grid" aria-label="Foto berikutnya"><x-icon name="chevron-right" class="size-5" /></button>
+                                <span class="pointer-events-none absolute bottom-4 right-4 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white" x-text="`${active + 1} / ${images.length}`">1 / {{ $imageCount }}</span>
+                            @endif
+                            <button type="button" @click="openLightbox(active)"
+                                    class="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-ink shadow transition hover:bg-white"
+                                    aria-label="Lihat foto layar penuh">
+                                <x-icon name="search" class="size-3.5" />
+                                <span class="hidden lg:inline">Arahkan kursor untuk zoom · klik untuk layar penuh</span>
+                                <span class="lg:hidden">Ketuk untuk perbesar</span>
                             </button>
-                        @endforeach
+                        @endif
+                        <template x-if="discount">
+                            <span class="pointer-events-none absolute left-4 top-4 bg-brand-600 px-2.5 py-1 text-[11px] font-bold tracking-wider text-white uppercase" x-text="`Hemat ${discount}%`"></span>
+                        </template>
                     </div>
-                @endif
+
+                    @if ($imageCount > 1)
+                        {{-- Thumbnail: baris di bawah (HP/tablet), kolom vertikal di kiri (desktop). --}}
+                        <div class="relative mt-3 lg:order-1 lg:mt-0">
+                            <div x-ref="thumbs" class="no-scrollbar flex gap-2 overflow-x-auto px-4 sm:px-0 lg:absolute lg:inset-0 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:overscroll-contain">
+                                @foreach ($product->images as $index => $image)
+                                    <button type="button" @click="go({{ $index }})" @mouseenter="hoverThumb({{ $index }})"
+                                            class="aspect-square w-16 shrink-0 overflow-hidden border-2 bg-sand-100 transition sm:w-20 lg:aspect-[4/5] lg:w-full"
+                                            :class="active === {{ $index }} ? 'border-ink' : 'border-transparent opacity-60 hover:opacity-100'"
+                                            :aria-current="active === {{ $index }}"
+                                            aria-label="Lihat foto {{ $index + 1 }}">
+                                        <img src="{{ $image->url() }}" alt="" loading="lazy" decoding="async" class="size-full object-cover">
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             {{-- Info --}}
