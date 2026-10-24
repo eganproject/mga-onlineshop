@@ -47,18 +47,15 @@
         {{-- Tombol tengah: Keranjang --}}
         <li class="relative flex justify-center">
             <a href="{{ route('cart.index') }}" class="group -mt-5 flex flex-col items-center gap-1 focus-visible:outline-none"
-               aria-label="Keranjang ({{ $cartCount }} barang)" @if ($cartActive) aria-current="page" @endif>
+               aria-label="Keranjang ({{ $cartCount }} barang)" x-bind:aria-label="`Keranjang (${$store.cart.count} barang)`" @if ($cartActive) aria-current="page" @endif>
                 <span @class([
                     'relative grid size-14 place-items-center rounded-full text-white shadow-lg ring-4 ring-white transition group-active:scale-95 group-focus-visible:ring-brand-200',
                     'bg-brand-700 shadow-brand-700/40' => $cartActive,
                     'bg-brand-600 shadow-brand-600/30' => ! $cartActive,
                 ])>
                     <x-icon name="bag" class="size-6" />
-                    @if ($cartCount > 0)
-                        <span class="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-accent-500 px-1 text-[11px] leading-5 font-bold text-white ring-2 ring-white">
-                            {{ $cartCount > 99 ? '99+' : $cartCount }}
-                        </span>
-                    @endif
+                    <span x-show="$store.cart.count > 0" x-text="$store.cart.count > 99 ? '99+' : $store.cart.count" @if (! $cartCount) x-cloak @endif
+                          class="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-accent-500 px-1 text-[11px] leading-5 font-bold text-white ring-2 ring-white">{{ $cartCount > 99 ? '99+' : $cartCount }}</span>
                 </span>
                 <span @class(['text-[11px] leading-none', 'font-semibold text-brand-700' => $cartActive, 'font-medium text-stone-500' => ! $cartActive])>Keranjang</span>
             </a>

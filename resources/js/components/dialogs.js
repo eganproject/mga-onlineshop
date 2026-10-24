@@ -52,6 +52,7 @@ export default function dialogs(Alpine) {
             const id = this.nextId++;
             this.items.push({ id, message, type, show: true });
             if (timeout) setTimeout(() => this.dismiss(id), timeout);
+            return id;
         },
 
         dismiss(id) {
