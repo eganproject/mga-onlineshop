@@ -12,15 +12,22 @@
                         <p class="mt-1 text-sm text-stone-500">dari {{ $product->review_count }} ulasan</p>
                     </div>
                 </div>
-                <ul class="mt-6 space-y-2">
+                {{-- Klik baris bintang untuk menyaring ulasan. --}}
+                <ul class="mt-6 space-y-1">
                     @foreach ($ratingDistribution as $star => $count)
                         @php($percent = $product->review_count ? round($count / $product->review_count * 100) : 0)
-                        <li class="flex items-center gap-3 text-xs">
-                            <span class="flex w-8 items-center gap-1 font-semibold">{{ $star }} <x-icon name="star" class="size-3 fill-ink text-ink" /></span>
-                            <span class="h-1.5 flex-1 overflow-hidden rounded-full bg-sand-100">
-                                <span class="block h-full rounded-full bg-ink" style="width: {{ $percent }}%"></span>
-                            </span>
-                            <span class="w-8 text-right text-stone-500">{{ $count }}</span>
+                        <li>
+                            @php($active = $starFilter === $star)
+                            <a href="{{ $active ? request()->fullUrlWithoutQuery(['bintang', 'ulasan']) : request()->fullUrlWithQuery(['bintang' => $star, 'ulasan' => null]) }}#ulasan" rel="nofollow"
+                               @class(['-mx-2 flex items-center gap-3 rounded px-2 py-1 text-xs transition hover:bg-sand-50', 'bg-sand-100 hover:bg-sand-100' => $active, 'pointer-events-none opacity-50' => $count === 0])
+                               @if ($count === 0) aria-disabled="true" tabindex="-1" @endif
+                               aria-label="{{ $active ? 'Tampilkan semua ulasan' : "Tampilkan ulasan bintang {$star}" }}" @if ($active) aria-current="true" @endif>
+                                <span class="flex w-8 items-center gap-1 font-semibold">{{ $star }} <x-icon name="star" class="size-3 fill-amber-400 text-amber-400" /></span>
+                                <span class="h-1.5 flex-1 overflow-hidden rounded-full bg-sand-100">
+                                    <span class="block h-full rounded-full bg-ink" style="width: {{ $percent }}%"></span>
+                                </span>
+                                <span class="w-8 text-right text-stone-500">{{ $count }}</span>
+                            </a>
                         </li>
                     @endforeach
                 </ul>
@@ -74,6 +81,12 @@
 
         {{-- Daftar ulasan --}}
         <div class="lg:col-span-8">
+            @if ($starFilter)
+                <div class="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+                    <p class="text-stone-600">Menampilkan ulasan <span class="font-semibold text-ink">bintang {{ $starFilter }}</span></p>
+                    <a href="{{ request()->fullUrlWithoutQuery(['bintang', 'ulasan']) }}#ulasan" class="link-underline font-semibold">Lihat semua ulasan</a>
+                </div>
+            @endif
             @if ($reviews->isNotEmpty())
             @fragment('infinite-list')
             <x-infinite-list :paginator="$reviews" label="ulasan" skeleton="review" :skeleton-count="2" :auto="false" more="Lihat ulasan lainnya">

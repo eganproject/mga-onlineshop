@@ -36,7 +36,7 @@ class BestSellers
         return array_values(array_unique(array_map('intval', (array) config('shop.storefront.best_seller_products', []))));
     }
 
-    /** @return Collection<int, Product> dengan atribut sold_count, rank_best, rank_new */
+    /** @return Collection<int, Product> dengan atribut sold_recent (90 hari), rank_best, rank_new */
     public function forHome(): Collection
     {
         $sold = $this->soldCounts();
@@ -117,7 +117,7 @@ class BestSellers
         $newest = $products->sortByDesc(fn (Product $p) => [$p->created_at?->timestamp ?? 0, $p->id])->pluck('id')->flip();
 
         return $products->each(function (Product $p, int $rank) use ($sold, $newest) {
-            $p->setAttribute('sold_count', $sold[$p->id] ?? 0);
+            $p->setAttribute('sold_recent', $sold[$p->id] ?? 0);
             $p->setAttribute('rank_best', $rank);
             $p->setAttribute('rank_new', $newest[$p->id]);
         });

@@ -2,19 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ReviewStatus;
 use App\Enums\StaffRole;
 use App\Enums\UserRole;
 use App\Enums\VoucherType;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductReview;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Services\Catalog\MgaCatalog;
-use App\Services\Reviews\ReviewService;
+use App\Services\Catalog\SoldCountService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -78,7 +74,8 @@ class DatabaseSeeder extends Seeder
         $this->seedCatalog();
         // Tanpa event model supaya ratusan pesanan contoh tidak mengantrekan email.
         Order::withoutEvents(fn () => $this->call(DemoOrderSeeder::class));
-        $this->seedReviews();
+        $this->call(DemoReviewSeeder::class);
+        app(SoldCountService::class)->sync();
         $this->seedVouchers();
         $this->call(ArticleSeeder::class);
     }
@@ -95,41 +92,6 @@ class DatabaseSeeder extends Seeder
         foreach ($vouchers as $voucher) {
             Voucher::updateOrCreate(['code' => $voucher['code']], $voucher + ['is_active' => true, 'is_public' => true]);
         }
-    }
-
-    /** Contoh ulasan yang sudah tayang supaya tampilan rating terlihat saat demo. */
-    private function seedReviews(): void
-    {
-        $samples = [
-            [5, 'Mantap, sesuai deskripsi', 'Barang original, packing rapi pakai bubble wrap. Pengiriman cepat, besoknya sudah sampai.'],
-            [4, 'Bagus', 'Kualitas oke untuk harganya. Pengiriman agak lama karena kurir, tapi seller responsif.'],
-            [5, 'Recommended seller', 'Sudah beli kedua kalinya di sini, selalu puas. Admin ramah dan membantu pilih tipe yang cocok.'],
-        ];
-
-        $reviewers = collect(['Rina Wulandari', 'Agus Pratama', 'Dewi Lestari'])->map(fn ($name) => User::firstOrCreate(
-            ['email' => Str::slug($name, '.').'@contoh.test'],
-            ['name' => $name, 'password' => 'password', 'email_verified_at' => now()],
-        ));
-
-        $reviewService = app(ReviewService::class);
-
-        Product::where('is_featured', true)->get()->each(function (Product $product) use ($reviewers, $samples, $reviewService) {
-            foreach ($reviewers as $i => $reviewer) {
-                [$rating, $title, $body] = $samples[($product->id + $i) % count($samples)];
-
-                ProductReview::firstOrNew(['user_id' => $reviewer->id, 'product_id' => $product->id])->forceFill([
-                    'user_id' => $reviewer->id,
-                    'product_id' => $product->id,
-                    'rating' => $rating,
-                    'title' => $title,
-                    'body' => $body,
-                    'status' => ReviewStatus::Approved,
-                    'approved_at' => now()->subDays($i * 3),
-                ])->save();
-            }
-
-            $reviewService->syncSummary($product);
-        });
     }
 
     /** Katalog asli MGA tanpa foto (foto diunduh lewat `php artisan shop:import-mga --images`). */

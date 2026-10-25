@@ -29,13 +29,14 @@ class DemoOrderSeeder extends Seeder
         }
 
         $customers = User::where('role', UserRole::Customer)->get();
-        foreach (['Siti Rahma', 'Andi Pratama', 'Dewi Lestari', 'Rizky Hidayat', 'Nur Aisyah', 'Fajar Nugroho'] as $i => $name) {
-            $customers->push(User::factory()->create([
+        foreach (['Siti Rahma', 'Andi Pratama', 'Dewi Lestari', 'Rizky Hidayat', 'Nur Aisyah', 'Fajar Nugroho', 'Rina Wulandari', 'Agus Setiawan', 'Maya Kartika', 'Hendra Gunawan', 'Lina Marlina', 'Yusuf Maulana'] as $i => $name) {
+            $customers->push(User::firstWhere('email', 'demo'.($i + 1).'@mga.test') ?? User::factory()->create([
                 'name' => $name,
                 'email' => 'demo'.($i + 1).'@mga.test',
                 'created_at' => now()->subDays(random_int(1, 150)),
             ]));
         }
+        $customers = $customers->unique('id')->values();
 
         DB::transaction(function () use ($products, $customers) {
             for ($daysAgo = 120; $daysAgo >= 0; $daysAgo--) {
