@@ -50,18 +50,21 @@ class DemoActivityCommand extends Command
 
                 return self::FAILURE;
             }
-
-            DB::transaction(function () {
-                ProductReview::query()->delete();
-                Order::query()->delete(); // item, pembayaran & riwayat status ikut terhapus (cascade)
-            });
-            $this->components->info('Pesanan & ulasan lama dihapus.');
         } elseif (Order::exists()) {
             $this->components->warn('Sudah ada pesanan, jadi pesanan contoh tidak dibuat. Pakai --reset untuk mengganti semuanya.');
         }
 
-        Order::withoutEvents(fn () => $this->callSilently('db:seed', ['--class' => DemoOrderSeeder::class, '--force' => true]));
-        $this->callSilently('db:seed', ['--class' => DemoReviewSeeder::class, '--force' => true]);
+        // Satu transaksi: kalau pembuatan data contoh gagal, pesanan & ulasan lama tidak ikut hilang.
+        DB::transaction(function () {
+            if ($this->option('reset')) {
+                ProductReview::query()->delete();
+                Order::query()->delete(); // item, pembayaran & riwayat status ikut terhapus (cascade)
+            }
+
+            Order::withoutEvents(fn () => app(DemoOrderSeeder::class)->run());
+            app(DemoReviewSeeder::class)->run();
+        });
+
         $this->resync($sold, $reviews);
 
         return self::SUCCESS;

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -30,11 +31,18 @@ class DemoOrderSeeder extends Seeder
 
         $customers = User::where('role', UserRole::Customer)->get();
         foreach (['Siti Rahma', 'Andi Pratama', 'Dewi Lestari', 'Rizky Hidayat', 'Nur Aisyah', 'Fajar Nugroho', 'Rina Wulandari', 'Agus Setiawan', 'Maya Kartika', 'Hendra Gunawan', 'Lina Marlina', 'Yusuf Maulana'] as $i => $name) {
-            $customers->push(User::firstWhere('email', 'demo'.($i + 1).'@mga.test') ?? User::factory()->create([
+            $email = 'demo'.($i + 1).'@mga.test';
+            // Tanpa factory: server produksi/staging dipasang tanpa paket dev (Faker).
+            $customers->push(User::firstWhere('email', $email) ?? User::unguarded(fn () => User::create([
                 'name' => $name,
-                'email' => 'demo'.($i + 1).'@mga.test',
+                'email' => $email,
+                'phone' => '0812'.random_int(10000000, 99999999),
+                'password' => 'password',
+                'role' => UserRole::Customer,
+                'is_active' => true,
+                'email_verified_at' => now(),
                 'created_at' => now()->subDays(random_int(1, 150)),
-            ]));
+            ])));
         }
         $customers = $customers->unique('id')->values();
 
@@ -56,9 +64,9 @@ class DemoOrderSeeder extends Seeder
     {
         $status = match (true) {
             random_int(1, 100) <= 7 => OrderStatus::Cancelled,
-            $daysAgo === 0 => fake()->randomElement([OrderStatus::PendingPayment, OrderStatus::Paid, OrderStatus::Paid]),
-            $daysAgo <= 2 => fake()->randomElement([OrderStatus::Paid, OrderStatus::Processing]),
-            $daysAgo <= 6 => fake()->randomElement([OrderStatus::Processing, OrderStatus::Shipped, OrderStatus::Delivered]),
+            $daysAgo === 0 => Arr::random([OrderStatus::PendingPayment, OrderStatus::Paid, OrderStatus::Paid]),
+            $daysAgo <= 2 => Arr::random([OrderStatus::Paid, OrderStatus::Processing]),
+            $daysAgo <= 6 => Arr::random([OrderStatus::Processing, OrderStatus::Shipped, OrderStatus::Delivered]),
             default => OrderStatus::Completed,
         };
 
@@ -81,15 +89,21 @@ class DemoOrderSeeder extends Seeder
         });
 
         $subtotal = $lines->sum('subtotal');
-        $shipping = fake()->randomElement([9000, 12000, 15000, 22000]);
+        $shipping = Arr::random([9000, 12000, 15000, 22000]);
 
-        $order = Order::factory()->for($customer)->create([
+        $order = Order::unguarded(fn () => Order::create([
+            'code' => Order::generateCode(),
+            'user_id' => $customer->id,
             'status' => $status,
             'subtotal' => $subtotal,
             'shipping_cost' => $shipping,
             'total' => $subtotal + $shipping,
+            'total_weight' => $lines->sum(fn ($line) => $line['weight'] * $line['quantity']),
             'recipient_name' => $customer->name,
-            'courier' => fake()->randomElement(['jne', 'sicepat', 'jnt']),
+            'recipient_phone' => $customer->phone ?: '081200000000',
+            'shipping_address' => 'Jl. Contoh No. '.random_int(1, 200).', Bandung, Jawa Barat',
+            'courier_service' => 'REG',
+            'courier' => Arr::random(['jne', 'sicepat', 'jnt']),
             'tracking_number' => $status->isTrackable() ? 'DEMO'.random_int(100000, 999999) : null,
             'created_at' => $at,
             'updated_at' => $at,
@@ -98,7 +112,7 @@ class DemoOrderSeeder extends Seeder
             'delivered_at' => in_array($status, [OrderStatus::Delivered, OrderStatus::Completed], true) ? $at->copy()->addDays(3) : null,
             'completed_at' => $status === OrderStatus::Completed ? $at->copy()->addDays(4) : null,
             'cancelled_at' => $status === OrderStatus::Cancelled ? $at->copy()->addHours(3) : null,
-        ]);
+        ]));
 
         $order->items()->createMany($lines->all());
         $order->rebuildStatusHistory();
