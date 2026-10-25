@@ -21,9 +21,9 @@ class Product extends Model
 {
     use HasFactory;
 
-    // `stock`, `has_variants`, `rating_avg`, `review_count` sengaja tidak mass-assignable. Stok diubah lewat
+    // `stock`, `has_variants`, `rating_avg`, `review_count`, `sold_count` sengaja tidak mass-assignable. Stok diubah lewat
     // StockService (tercatat di riwayat), ringkasan varian lewat syncVariantSummary(),
-    // ringkasan rating lewat ReviewService::syncSummary().
+    // ringkasan rating lewat ReviewService::syncSummary(), jumlah terjual lewat SoldCountService.
 
     /** Foto sampul selalu ikut dimuat karena dipakai di hampir semua tampilan produk. */
     protected $with = ['coverImage'];
@@ -40,6 +40,7 @@ class Product extends Model
             'has_variants' => 'boolean',
             'rating_avg' => 'float',
             'review_count' => 'integer',
+            'sold_count' => 'integer',
         ];
     }
 
@@ -164,6 +165,18 @@ class Product extends Model
     public function hasReviews(): bool
     {
         return $this->review_count > 0;
+    }
+
+    /** Jumlah terjual ringkas gaya marketplace: 87, 1,2rb, 10rb+. */
+    public function soldLabel(): string
+    {
+        $sold = (int) $this->sold_count;
+
+        return match (true) {
+            $sold >= 10000 => floor($sold / 10000) * 10 .'rb+',
+            $sold >= 1000 => rtrim(rtrim(number_format(floor($sold / 100) / 10, 1, ',', '.'), '0'), ',').'rb',
+            default => (string) $sold,
+        };
     }
 
     /** Ringkasan singkat untuk meta description / Open Graph. */

@@ -41,13 +41,7 @@
         @if ($product->relationLoaded('category') && $product->category)
             <p class="mt-0.5 text-xs text-stone-500">{{ $product->category->name }}</p>
         @endif
-        @if ($product->review_count > 0)
-            <p class="mt-1 flex items-center gap-1 text-xs text-stone-500">
-                <x-icon name="star" class="size-3.5 fill-amber-400 text-amber-400" />
-                <span class="font-semibold text-ink">{{ number_format($product->rating_avg, 1, ',', '.') }}</span>
-                <span>({{ $product->review_count }})</span>
-            </p>
-        @endif
+        <x-product-stats :product="$product" class="mt-1" />
         <div class="mt-1.5 flex flex-wrap items-baseline gap-x-2">
             <p @class(['text-sm font-semibold', 'text-accent-700' => $product->isOnSale()])>@rupiah($product->price)</p>
             @if ($product->isOnSale())

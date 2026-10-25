@@ -85,7 +85,7 @@
                             @endforeach
                         </div>
                     @endif
-                    @include('shop.articles.partials.share')
+                    @include('shop.partials.share', ['shareUrl' => route('articles.show', $article), 'shareText' => $article->title])
                 </footer>
             </div>
         </div>

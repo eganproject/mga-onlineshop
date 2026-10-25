@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Services\Auth\FirebaseTokenVerifier;
 use App\Services\Cart\CartService;
+use App\Services\Catalog\SoldCountService;
 use App\Services\Customer\WishlistService;
 use App\Services\Payment\FakePaymentGateway;
 use App\Services\Payment\MidtransPaymentGateway;
@@ -68,6 +69,18 @@ class AppServiceProvider extends ServiceProvider
         Order::updated(function (Order $order) {
             if ($order->wasChanged('status') && $order->status === OrderStatus::Cancelled) {
                 DB::afterCommit(fn () => app(PaymentService::class)->voidPendingPayments($order));
+            }
+
+            // Jumlah terjual produk ikut berubah saat pesanan masuk/keluar status pendapatan
+            // (dibayar, atau dibatalkan/dikembalikan).
+            if ($order->wasChanged('status')) {
+                $revenue = OrderStatus::revenueStatuses();
+                $before = $order->getOriginal('status');
+                $before = $before instanceof OrderStatus ? $before : OrderStatus::tryFrom((string) $before);
+
+                if (in_array($before, $revenue, true) !== in_array($order->status, $revenue, true)) {
+                    DB::afterCommit(fn () => app(SoldCountService::class)->sync($order->items()->pluck('product_id')));
+                }
             }
         });
 

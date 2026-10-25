@@ -114,12 +114,22 @@
                         <a href="{{ route('products.index', ['kategori' => $product->category->slug]) }}" class="eyebrow text-stone-500 hover:text-ink">{{ $product->category->name }}</a>
                     @endif
                     <h1 class="mt-2 font-display text-3xl leading-[1.05] font-extrabold tracking-tight sm:text-4xl">{{ $product->name }}</h1>
-                    @if ($product->hasReviews())
-                        <a href="#ulasan" class="mt-3 inline-flex items-center gap-2 text-sm">
-                            <x-star-rating :rating="$product->rating_avg" />
-                            <span class="font-semibold">{{ number_format($product->rating_avg, 1, ',', '.') }}</span>
-                            <span class="text-stone-500 underline underline-offset-4">{{ $product->review_count }} ulasan</span>
-                        </a>
+                    @if ($product->hasReviews() || $product->sold_count > 0)
+                        <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                            @if ($product->hasReviews())
+                                <a href="#ulasan" class="inline-flex items-center gap-2">
+                                    <x-star-rating :rating="$product->rating_avg" />
+                                    <span class="font-semibold">{{ number_format($product->rating_avg, 1, ',', '.') }}</span>
+                                    <span class="text-stone-500 underline underline-offset-4">{{ $product->review_count }} ulasan</span>
+                                </a>
+                            @endif
+                            @if ($product->hasReviews() && $product->sold_count > 0)
+                                <span aria-hidden="true" class="h-4 w-px bg-stone-300"></span>
+                            @endif
+                            @if ($product->sold_count > 0)
+                                <span class="text-stone-500"><span class="font-semibold text-ink">{{ $product->soldLabel() }}</span> terjual</span>
+                            @endif
+                        </div>
                     @endif
 
                     <div class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -230,6 +240,10 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+
+                    <div class="mt-6">
+                        @include('shop.partials.share', ['shareUrl' => route('products.show', $product), 'shareText' => $product->name])
                     </div>
                 </div>
             </div>

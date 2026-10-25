@@ -15,6 +15,8 @@ class ProductController extends Controller
 {
     public const SORTS = [
         'terbaru' => 'Terbaru',
+        'terlaris' => 'Terlaris',
+        'rating' => 'Rating tertinggi',
         'termurah' => 'Harga terendah',
         'termahal' => 'Harga tertinggi',
         'nama' => 'Nama A-Z',
@@ -40,6 +42,8 @@ class ProductController extends Controller
             ->when($minPrice, fn ($q) => $q->where('price', '>=', $minPrice))
             ->when($maxPrice, fn ($q) => $q->where('price', '<=', $maxPrice))
             ->when($sort === 'terbaru', fn ($q) => $q->latest())
+            ->when($sort === 'terlaris', fn ($q) => $q->orderByDesc('sold_count')->orderByDesc('rating_avg')->latest())
+            ->when($sort === 'rating', fn ($q) => $q->orderByDesc('rating_avg')->orderByDesc('review_count')->orderByDesc('sold_count'))
             ->when($sort === 'termurah', fn ($q) => $q->orderBy('price'))
             ->when($sort === 'termahal', fn ($q) => $q->orderByDesc('price'))
             ->when($sort === 'nama', fn ($q) => $q->orderBy('name'))
@@ -64,6 +68,7 @@ class ProductController extends Controller
         abort_unless($product->is_active, 404);
 
         $user = $request->user();
+        $star = in_array($request->integer('bintang'), range(1, 5), true) ? $request->integer('bintang') : null;
 
         return InfiniteScroll::respond($request, view('shop.products.show', [
             'product' => $product->load(['category.parent', 'images', 'activeVariants.image']),
@@ -75,9 +80,12 @@ class ProductController extends Controller
                 ->take(4)
                 ->get(),
             'reviews' => $product->reviews()->approved()->with('user:id,name')
+                ->when($star, fn ($q) => $q->where('rating', $star))
                 ->latest('approved_at')->latest('id')
                 ->paginate(5, pageName: 'ulasan')
+                ->withQueryString()
                 ->fragment('ulasan'),
+            'starFilter' => $star,
             'ratingDistribution' => $product->review_count > 0 ? $reviewService->distribution($product) : [],
             'myReview' => $user?->isCustomer() ? $user->reviews()->where('product_id', $product->id)->first() : null,
             'canReview' => $user?->isCustomer() && $reviewService->canReview($user, $product),

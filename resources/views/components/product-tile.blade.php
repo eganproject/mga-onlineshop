@@ -31,5 +31,6 @@
                 <p class="text-xs text-stone-400 line-through">@rupiah($product->compare_at_price)</p>
             @endif
         </div>
+        <x-product-stats :product="$product" class="mt-1" />
     </div>
 </article>
