@@ -9,6 +9,7 @@ use App\Services\Reviews\ReviewService;
 use App\Support\InfiniteScroll;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -52,15 +53,35 @@ class ProductController extends Controller
 
         return InfiniteScroll::respond($request, view('shop.products.index', [
             'products' => $products,
-            'categories' => Category::active()->root()
-                ->with(['children' => fn ($q) => $q->active()])
-                ->orderBy('sort_order')->orderBy('name')->get(),
+            'categories' => $this->filterCategories(),
             'activeCategory' => $category,
             'sort' => $sort,
             'sorts' => self::SORTS,
             'minPrice' => $minPrice,
             'maxPrice' => $maxPrice,
         ]));
+    }
+
+    /**
+     * Kategori induk + subkategori aktif untuk panel filter, lengkap dengan jumlah produk aktif
+     * (jumlah induk = produknya sendiri + produk di subkategorinya).
+     */
+    private function filterCategories(): Collection
+    {
+        $counts = Product::active()
+            ->whereNotNull('category_id')
+            ->selectRaw('category_id, COUNT(*) as aggregate')
+            ->groupBy('category_id')
+            ->pluck('aggregate', 'category_id');
+
+        return Category::active()->root()
+            ->with(['children' => fn ($q) => $q->active()->orderBy('sort_order')->orderBy('name')])
+            ->orderBy('sort_order')->orderBy('name')
+            ->get()
+            ->each(function (Category $category) use ($counts) {
+                $category->children->each(fn (Category $child) => $child->product_count = (int) ($counts[$child->id] ?? 0));
+                $category->product_count = (int) ($counts[$category->id] ?? 0) + $category->children->sum('product_count');
+            });
     }
 
     public function show(Request $request, Product $product, ReviewService $reviewService): View|Response

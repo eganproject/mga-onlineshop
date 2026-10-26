@@ -6,6 +6,7 @@ use App\Data\ShippingRate;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Address;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -48,6 +49,34 @@ class ShopTest extends TestCase
 
         // Beranda menampilkan bagian promo bila ada produk diskon.
         $this->get(route('home'))->assertOk()->assertSee('Lagi diskon');
+    }
+
+    public function test_category_filter_lives_in_side_panel_with_counts_and_keeps_query(): void
+    {
+        $parent = Category::factory()->create(['name' => 'Frame Akrilik', 'slug' => 'frame-akrilik']);
+        $child = Category::factory()->create(['name' => 'Frame Dinding', 'slug' => 'frame-dinding', 'parent_id' => $parent->id]);
+        Product::factory()->count(2)->create(['category_id' => $parent->id]);
+        Product::factory()->create(['category_id' => $child->id]);
+        Product::factory()->inactive()->create(['category_id' => $child->id]);
+
+        $page = $this->get(route('products.index', ['kategori' => 'frame-dinding', 'urut' => 'termurah', 'harga_min' => 1000]))->assertOk();
+        $html = $page->getContent();
+
+        // Jumlah induk = produk aktif sendiri + subkategori; subkategori aktif ditandai.
+        $page->assertSee('aria-labelledby="f-category"', false)->assertSee('Kategori: Frame Dinding');
+        $this->assertMatchesRegularExpression('/Frame Akrilik<\/span>\s*<span[^>]*>3<\/span>/', $html);
+        $this->assertMatchesRegularExpression('/aria-current="page"[^>]*>\s*<span[^>]*>Frame Dinding<\/span>\s*<span[^>]*>1<\/span>/', $html);
+
+        // Link kategori membawa filter lain (urutan, harga) tanpa menumpuk kategori lama.
+        $page->assertSee(e(route('products.index', ['kategori' => 'frame-akrilik', 'urut' => 'termurah', 'harga_min' => 1000])), false);
+        $page->assertSee(e(route('products.index', ['urut' => 'termurah', 'harga_min' => 1000])), false);
+    }
+
+    public function test_navbar_has_no_newest_or_best_seller_links(): void
+    {
+        $this->get(route('home'))->assertOk()
+            ->assertDontSee(e(route('products.index', ['urut' => 'terbaru'])), false)
+            ->assertDontSee(e(route('products.index', ['urut' => 'terlaris'])), false);
     }
 
     public function test_inactive_product_page_returns_404(): void

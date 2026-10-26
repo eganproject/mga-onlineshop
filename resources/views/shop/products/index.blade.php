@@ -11,6 +11,7 @@
     // Filter aktif yang bisa dihapus satu per satu.
     $activeFilters = array_filter([
         'q' => request('q') ? 'Kata kunci: '.request('q') : null,
+        'kategori' => $activeCategory ? 'Kategori: '.$activeCategory->name : null,
         'tersedia' => request()->boolean('tersedia') ? 'Tersedia' : null,
         'promo' => request()->boolean('promo') ? 'Sedang diskon' : null,
         'harga' => ($minPrice || $maxPrice)
@@ -18,6 +19,10 @@
             : null,
     ]);
     $filterCount = count(array_diff_key($activeFilters, ['q' => true]));
+
+    // Link kategori di panel filter: filter lain (kata kunci, harga, urutan, dll.) tetap dibawa.
+    $categoryUrl = fn ($category = null) => route('products.index', ($category ? ['kategori' => $category->slug] : []) + \Illuminate\Support\Arr::except($baseQuery, 'kategori'));
+    $openParentId = $activeCategory ? ($activeCategory->parent_id ?? $activeCategory->id) : null;
 @endphp
 @php
     $metaDescription = $activeCategory
@@ -42,29 +47,6 @@
                     <h1 class="display text-4xl leading-[0.92] break-words sm:text-6xl">{{ $heading }}</h1>
                     <p class="text-sm text-stone-500">{{ $products->total() }} produk</p>
                 </div>
-
-                {{-- Kategori --}}
-                @if ($categories->isNotEmpty())
-                    <div class="no-scrollbar -mx-4 mt-6 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-                        <a href="{{ route('products.index', \Illuminate\Support\Arr::except($baseQuery, 'kategori')) }}" @class(['chip', 'chip-active' => ! $activeCategory])>Semua</a>
-                        @foreach ($categories as $category)
-                            <a href="{{ route('products.index', ['kategori' => $category->slug] + \Illuminate\Support\Arr::except($baseQuery, 'kategori')) }}"
-                               @class(['chip', 'chip-active' => $activeCategory?->is($category) || ($activeCategory && (int) $activeCategory->parent_id === $category->id)])>{{ $category->name }}</a>
-                        @endforeach
-                    </div>
-                    {{-- Subkategori dari kategori induk yang sedang dibuka --}}
-                    @php($openParent = $activeCategory ? $categories->first(fn ($c) => $activeCategory->is($c) || (int) $activeCategory->parent_id === $c->id) : null)
-                    @if ($openParent?->children->isNotEmpty())
-                        <div class="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-                            <a href="{{ route('products.index', ['kategori' => $openParent->slug] + \Illuminate\Support\Arr::except($baseQuery, 'kategori')) }}"
-                               @class(['chip px-3 py-1.5 text-xs', 'chip-active' => $activeCategory->is($openParent)])>Semua {{ $openParent->name }}</a>
-                            @foreach ($openParent->children as $child)
-                                <a href="{{ route('products.index', ['kategori' => $child->slug] + \Illuminate\Support\Arr::except($baseQuery, 'kategori')) }}"
-                                   @class(['chip px-3 py-1.5 text-xs', 'chip-active' => $activeCategory->is($child)])>{{ $child->name }}</a>
-                            @endforeach
-                        </div>
-                    @endif
-                @endif
             </div>
         </section>
 
@@ -96,7 +78,7 @@
             {{-- Filter: sidebar di desktop, drawer di mobile --}}
             <div x-show="filters" x-cloak x-transition.opacity @click="filters = false" class="fixed inset-0 z-50 bg-ink/40 lg:hidden"></div>
             <aside :class="{ 'max-lg:-translate-x-full': ! filters }"
-                   class="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-white transition-transform duration-300 max-lg:-translate-x-full lg:sticky lg:top-[152px] lg:z-auto lg:w-auto lg:max-w-none lg:self-start lg:bg-transparent lg:transition-none"
+                   class="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-white transition-transform duration-300 max-lg:-translate-x-full lg:sticky lg:top-[152px] lg:z-auto lg:max-h-[calc(100dvh-168px)] lg:overflow-y-auto lg:overscroll-contain lg:-mx-1 lg:px-1 lg:pb-4 lg:[scrollbar-width:thin] lg:w-auto lg:max-w-none lg:self-start lg:bg-transparent lg:transition-none"
                    aria-label="Filter produk">
                 <div class="flex h-16 items-center justify-between border-b border-stone-200 px-5 lg:hidden">
                     <p class="display text-xl">Filter</p>
@@ -110,7 +92,53 @@
                     @endforeach
 
                     <div class="flex-1 divide-y divide-stone-200 px-5 lg:px-0">
-                        <div class="py-5 lg:pt-0" role="group" aria-labelledby="f-stock">
+                        @if ($categories->isNotEmpty())
+                            <div class="py-5 lg:pt-0" role="group" aria-labelledby="f-category">
+                                <h3 id="f-category" class="eyebrow text-stone-500">Kategori</h3>
+                                <ul class="mt-2 lg:mt-3">
+                                    <li>
+                                        <a href="{{ $categoryUrl() }}" @if (! $activeCategory) aria-current="page" @endif
+                                           @class(['filter-cat', 'filter-cat-active' => ! $activeCategory])>
+                                            <span class="min-w-0 flex-1 break-words leading-snug">Semua kategori</span>
+                                        </a>
+                                    </li>
+                                    @foreach ($categories as $category)
+                                        @php($isOpen = $openParentId === $category->id)
+                                        <li x-data="{ open: @js($isOpen) }">
+                                            <div class="flex items-center">
+                                                <a href="{{ $categoryUrl($category) }}" @if ($activeCategory?->is($category)) aria-current="page" @endif
+                                                   @class(['filter-cat min-w-0 flex-1', 'filter-cat-active' => $activeCategory?->is($category), 'font-semibold text-ink' => $isOpen && ! $activeCategory?->is($category)])>
+                                                    <span class="min-w-0 flex-1 break-words leading-snug">{{ $category->name }}</span>
+                                                    <span class="shrink-0 text-xs tabular-nums text-stone-400">{{ $category->product_count }}</span>
+                                                </a>
+                                                @if ($category->children->isNotEmpty())
+                                                    <button type="button" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="f-cat-{{ $category->id }}"
+                                                            class="-mr-2 grid size-11 shrink-0 place-items-center text-stone-400 hover:text-ink lg:size-8 lg:-mr-1">
+                                                        <x-icon name="chevron-down" class="size-4 transition" x-bind:class="open && 'rotate-180'" />
+                                                        <span class="sr-only">Subkategori {{ $category->name }}</span>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                            @if ($category->children->isNotEmpty())
+                                                <ul id="f-cat-{{ $category->id }}" x-show="open" @if (! $isOpen) x-cloak @endif class="mb-1 ml-3 border-l border-stone-200 pl-3">
+                                                    @foreach ($category->children as $child)
+                                                        <li>
+                                                            <a href="{{ $categoryUrl($child) }}" @if ($activeCategory?->is($child)) aria-current="page" @endif
+                                                               @class(['filter-cat text-[13px]', 'filter-cat-active' => $activeCategory?->is($child)])>
+                                                                <span class="min-w-0 flex-1 break-words leading-snug">{{ $child->name }}</span>
+                                                                <span class="shrink-0 text-xs tabular-nums text-stone-400">{{ $child->product_count }}</span>
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <div @class(['py-5', 'lg:pt-0' => $categories->isEmpty()]) role="group" aria-labelledby="f-stock">
                             <h3 id="f-stock" class="eyebrow text-stone-500">Ketersediaan</h3>
                             <div class="mt-2 lg:mt-4 lg:space-y-3">
                                 <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm lg:min-h-0">
@@ -145,7 +173,7 @@
                     </div>
 
                     <div class="sticky bottom-0 grid grid-cols-2 gap-2 border-t border-stone-200 bg-white p-5 lg:static lg:mt-2 lg:border-0 lg:bg-transparent lg:p-0">
-                        <a href="{{ route('products.index', \Illuminate\Support\Arr::only($baseQuery, ['q', 'kategori', 'urut'])) }}" class="btn btn-outline rounded-full py-2.5">Reset</a>
+                        <a href="{{ route('products.index', \Illuminate\Support\Arr::only($baseQuery, ['q', 'urut'])) }}" class="btn btn-outline rounded-full py-2.5">Reset</a>
                         <button class="btn btn-ink rounded-full py-2.5">Terapkan</button>
                     </div>
                 </form>
@@ -162,7 +190,7 @@
                             </a>
                         @endforeach
                         @if (count($activeFilters) > 1)
-                            <a href="{{ route('products.index', \Illuminate\Support\Arr::only($baseQuery, ['kategori'])) }}" class="link-underline px-1 text-xs font-semibold">Hapus semua</a>
+                            <a href="{{ route('products.index', \Illuminate\Support\Arr::only($baseQuery, ['urut'])) }}" class="link-underline px-1 text-xs font-semibold">Hapus semua</a>
                         @endif
                     </div>
                 @endif

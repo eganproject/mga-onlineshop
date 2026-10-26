@@ -3,9 +3,7 @@
     $user = auth()->user();
     $announcements = \App\Support\Storefront::announcements();
     $nav = [
-        ['label' => 'Semua Produk', 'url' => route('products.index'), 'active' => request()->routeIs('products.index') && ! request()->hasAny(['kategori', 'promo', 'urut'])],
-        ['label' => 'Terbaru', 'url' => route('products.index', ['urut' => 'terbaru']), 'active' => request('urut') === 'terbaru'],
-        ['label' => 'Terlaris', 'url' => route('products.index', ['urut' => 'terlaris']), 'active' => request('urut') === 'terlaris'],
+        ['label' => 'Semua Produk', 'url' => route('products.index'), 'active' => request()->routeIs('products.index') && ! request()->hasAny(['kategori', 'promo'])],
     ];
     $promoNav = ['label' => 'Promo', 'url' => route('products.index', ['promo' => 1]), 'active' => request()->boolean('promo')];
     $articleNav = ['label' => 'Artikel', 'url' => route('articles.index'), 'active' => request()->routeIs('articles.*')];
@@ -251,10 +249,9 @@
                     </button>
                 </div>
                 <div class="overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-                    <ul class="mt-3 grid grid-cols-4 gap-2">
+                    <ul class="mt-3 grid grid-cols-3 gap-2">
                         @foreach ([
                             ['Semua', 'cube', $nav[0], 'bg-brand-50 text-brand-700'],
-                            ['Terbaru', 'sparkles', $nav[1], 'bg-sand-100 text-ink'],
                             ['Promo', 'tag', $promoNav, 'bg-accent-50 text-accent-600'],
                             ['Artikel', 'newspaper', $articleNav, 'bg-stone-100 text-stone-700'],
                         ] as [$label, $icon, $item, $tone])
