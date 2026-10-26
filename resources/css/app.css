@@ -360,6 +360,13 @@
     .chip-active {
         @apply border-ink bg-ink text-white hover:border-ink;
     }
+    /* Daftar kategori di panel filter katalog. */
+    .filter-cat {
+        @apply flex min-h-11 items-center gap-3 py-2 text-sm text-stone-600 transition hover:text-ink lg:min-h-0 lg:py-1.5;
+    }
+    .filter-cat-active {
+        @apply font-semibold text-brand-700 hover:text-brand-700;
+    }
     .no-scrollbar {
         scrollbar-width: none;
     }
