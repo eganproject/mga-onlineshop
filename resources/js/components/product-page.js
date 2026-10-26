@@ -3,11 +3,11 @@
  * mengganti harga, stok, dan foto (bila varian punya foto sendiri).
  *
  * Galeri = jalur geser (scroll-snap) yang disinkronkan dengan `active`:
- * - desktop (kursor): arahkan kursor = zoom 2,5x mengikuti posisi kursor;
+ * - desktop (kursor): arahkan kursor = zoom 1,75x mengikuti posisi kursor;
  * - klik/ketuk = lightbox layar penuh PhotoSwipe (cubit/zoom, geser, Esc),
  *   library-nya dimuat dinamis hanya saat pertama dibuka.
  */
-const ZOOM = 2.5;
+const ZOOM = 1.75;
 const canHoverZoom = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 /** Ukuran asli foto (PhotoSwipe butuh lebar/tinggi). */
