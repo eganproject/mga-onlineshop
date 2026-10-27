@@ -8,6 +8,7 @@ use App\Enums\VoucherType;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Voucher;
+use App\Services\Billing\InvoiceNumberer;
 use App\Services\Catalog\MgaCatalog;
 use App\Services\Catalog\SoldCountService;
 use Illuminate\Database\Seeder;
@@ -74,6 +75,7 @@ class DatabaseSeeder extends Seeder
         $this->seedCatalog();
         // Tanpa event model supaya ratusan pesanan contoh tidak mengantrekan email.
         Order::withoutEvents(fn () => $this->call(DemoOrderSeeder::class));
+        app(InvoiceNumberer::class)->backfill();
         $this->call(DemoReviewSeeder::class);
         app(SoldCountService::class)->sync();
         $this->seedVouchers();

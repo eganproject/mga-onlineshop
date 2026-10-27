@@ -122,6 +122,47 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame(OrderStatus::Paid, $order->refresh()->status);
     }
 
+    public function test_settlement_records_payment_method_and_estimated_midtrans_fee(): void
+    {
+        $order = $this->checkout();
+
+        $payload = $this->payload($order->code, 'settlement') + ['va_numbers' => [['bank' => 'bca', 'va_number' => '12345']]];
+        $this->postJson(route('webhooks.midtrans'), $payload)->assertOk();
+
+        $order->refresh();
+        $this->assertSame('bca_va', $order->payment_method);
+        $this->assertSame(4000, $order->gateway_fee);
+        $this->assertSame(0, $order->payment_fee);
+        $this->assertSame($order->total - 4000, $order->netReceived());
+        $this->assertNotNull($order->invoice_number);
+    }
+
+    public function test_buyer_fee_is_sent_as_fee_item_and_snap_is_limited_to_chosen_method(): void
+    {
+        config(['shop.billing.payment_methods' => ['qris' => ['percent' => 0.7, 'charge_to' => 'buyer']]]);
+        $order = $this->checkout();
+        Http::assertNothingSent();
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'qris'])->assertRedirect();
+        $payment = $order->latestPayment()->first();
+
+        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/snap/v1/transactions')
+            && $request['enabled_payments'] === ['other_qris']
+            && $request['transaction_details']['gross_amount'] === $payment->amount
+            && collect($request['item_details'])->firstWhere('id', 'FEE')['price'] === $payment->fee
+            && array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $request['item_details'])) === $payment->amount);
+
+        $payload = $this->payload($order->code, 'settlement', gross: number_format($payment->amount, 2, '.', ''));
+        $payload['payment_type'] = 'qris';
+        $payload['signature_key'] = hash('sha512', $order->code.'200'.$payload['gross_amount'].self::SERVER_KEY);
+        $this->postJson(route('webhooks.midtrans'), $payload)->assertOk();
+
+        $order->refresh();
+        $this->assertSame(OrderStatus::Paid, $order->status);
+        $this->assertSame($payment->fee, $order->payment_fee);
+        $this->assertSame($order->total + $payment->fee, $order->amountPaid());
+    }
+
     public function test_invalid_signature_unknown_order_and_wrong_amount_are_rejected(): void
     {
         $order = $this->checkout();

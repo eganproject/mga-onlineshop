@@ -12,10 +12,12 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Voucher;
+use App\Services\Billing\PriceCalculator;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\StockService;
 use App\Services\Payment\PaymentService;
 use App\Services\Promo\VoucherService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -27,6 +29,7 @@ class CheckoutService
         private readonly PaymentService $payments,
         private readonly StockService $stock,
         private readonly VoucherService $vouchers,
+        private readonly PriceCalculator $prices,
     ) {}
 
     /**
@@ -34,8 +37,10 @@ class CheckoutService
      * transaksi agar tidak terjadi overselling. Voucher (bila ada) diperiksa
      * ulang di dalam transaksi yang sama dengan baris voucher dikunci, jadi
      * kuota tidak bisa terlampaui oleh checkout bersamaan.
+     *
+     * @param  array{billing_name?: ?string, billing_npwp?: ?string, billing_address?: ?string, billing_email?: ?string}  $billing
      */
-    public function placeOrder(User $user, Address $address, ShippingRate $rate, ?string $notes = null, ?string $voucherCode = null): Order
+    public function placeOrder(User $user, Address $address, ShippingRate $rate, ?string $notes = null, ?string $voucherCode = null, array $billing = []): Order
     {
         $lines = $this->cart->lines();
 
@@ -43,7 +48,7 @@ class CheckoutService
             throw ValidationException::withMessages(['cart' => 'Keranjang belanja masih kosong.']);
         }
 
-        $order = DB::transaction(function () use ($user, $address, $rate, $notes, $lines, $voucherCode) {
+        $order = DB::transaction(function () use ($user, $address, $rate, $notes, $lines, $voucherCode, $billing) {
             // Kunci baris produk & varian agar dua pembeli tidak mengambil stok yang sama.
             $products = Product::whereKey($lines->pluck('product.id')->unique())->lockForUpdate()->get()->keyBy('id');
             $variants = ProductVariant::whereKey($lines->pluck('variant.id')->filter())->lockForUpdate()->get()->keyBy('id');
@@ -91,6 +96,9 @@ class CheckoutService
 
             [$voucher, $discounts] = $this->applyVoucher($voucherCode, $user, $subtotal, $rate->cost);
 
+            // Biaya layanan, PPN & pembulatan sesuai Admin › Pajak & Biaya (disalin ke pesanan).
+            $charges = $this->prices->calculate($subtotal, $discounts['discount'], $rate->cost, $discounts['shipping_discount']);
+
             $order = $user->orders()->create([
                 'code' => Order::generateCode(),
                 'status' => OrderStatus::PendingPayment,
@@ -98,7 +106,8 @@ class CheckoutService
                 'shipping_cost' => $rate->cost,
                 'discount' => $discounts['discount'],
                 'shipping_discount' => $discounts['shipping_discount'],
-                'total' => $subtotal - $discounts['discount'] + $rate->cost - $discounts['shipping_discount'],
+                ...$charges,
+                ...array_map(fn ($v) => filled($v) ? trim((string) $v) : null, Arr::only($billing, ['billing_name', 'billing_npwp', 'billing_address', 'billing_email'])),
                 'voucher_id' => $voucher?->id,
                 'voucher_code' => $voucher?->code,
                 'total_weight' => $weight,
@@ -129,7 +138,10 @@ class CheckoutService
         $this->vouchers->forget();
 
         try {
-            $this->payments->createFor($order);
+            // Bila pembeli harus memilih metode (ada biaya transaksi), tagihan dibuat di halaman bayar.
+            if (! $this->payments->requiresMethodChoice()) {
+                $this->payments->createFor($order);
+            }
         } catch (Throwable $e) {
             // Pesanan tetap tersimpan; tagihan dibuat ulang saat halaman bayar dibuka.
             report($e);

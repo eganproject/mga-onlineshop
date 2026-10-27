@@ -13,7 +13,7 @@
                 <x-icon name="download" class="size-4" /> Ekspor CSV <x-icon name="chevron-down" class="size-4" />
             </button>
             <div x-show="open" x-cloak x-transition.origin.top.right class="absolute right-0 z-20 mt-2 w-60 rounded-2xl border border-stone-200 bg-white p-1.5 shadow-xl shadow-stone-900/10">
-                @foreach (['penjualan' => 'Rekap penjualan per '.['day' => 'hari', 'week' => 'minggu', 'month' => 'bulan'][$period->group], 'produk' => 'Penjualan per produk', 'kategori' => 'Penjualan per kategori', 'pesanan' => 'Daftar pesanan terjual'] as $type => $label)
+                @foreach (['penjualan' => 'Rekap penjualan per '.['day' => 'hari', 'week' => 'minggu', 'month' => 'bulan'][$period->group], 'produk' => 'Penjualan per produk', 'kategori' => 'Penjualan per kategori', 'pesanan' => 'Daftar pesanan terjual (lengkap)', 'metode' => 'Per metode bayar & biaya Midtrans', 'pajak' => 'Rekap PPN per invoice'] as $type => $label)
                     <a href="{{ route('admin.reports.export', ['type' => $type] + $query) }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-stone-700 hover:bg-stone-50">
                         <x-icon name="download" class="size-4 text-stone-400" /> {{ $label }}
                     </a>
@@ -159,6 +159,8 @@
                     </table>
                 </div>
             </div>
+        @elseif ($tab === 'keuangan')
+            @include('admin.reports.partials.finance')
         @else
             @php($rows = $tab === 'produk' ? $products : $categories)
             <div class="card overflow-hidden">

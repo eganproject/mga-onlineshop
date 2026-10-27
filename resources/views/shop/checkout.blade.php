@@ -22,6 +22,7 @@
                   voucher: @js($voucher),
                   voucherError: @js($voucherNotice),
                   code: @js(old('code', '')),
+                  billing: @js($billing->toClient()),
               })">
         {{-- Form voucher terpisah (tidak boleh bersarang di form checkout); input-nya memakai atribut form. --}}
         <form id="voucher-form" method="POST" action="{{ route('checkout.voucher.apply') }}" @submit.prevent="applyVoucher()">@csrf</form>
@@ -146,6 +147,26 @@
                 <section class="border border-stone-200 p-4 sm:p-6">
                     <x-form.textarea name="notes" label="Catatan untuk penjual" optional rows="2" maxlength="500" placeholder="Contoh: warna cadangan hitam" />
                 </section>
+
+                @if ($billing->buyerTaxInfo())
+                    @php $companyOn = (bool) old('company_invoice', false); @endphp
+                    <section class="border border-stone-200 p-4 sm:p-6" x-data="{ company: @js($companyOn) }">
+                        <label class="flex cursor-pointer items-start gap-3">
+                            <input type="hidden" name="company_invoice" value="0">
+                            <input type="checkbox" name="company_invoice" value="1" x-model="company" class="checkbox mt-0.5 size-5 shrink-0" @checked($companyOn)>
+                            <span>
+                                <span class="flex items-center gap-2 font-display text-base font-extrabold tracking-tight uppercase sm:text-lg"><x-icon name="receipt" class="size-5 text-ink" /> Invoice atas nama perusahaan</span>
+                                <span class="block text-sm text-stone-500">Centang bila butuh invoice dengan nama perusahaan/instansi dan NPWP untuk keperluan pembukuan.</span>
+                            </span>
+                        </label>
+                        <div x-show="company" @unless ($companyOn) x-cloak @endunless class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <x-form.input name="billing_name" label="Nama perusahaan / instansi" :value="$lastBilling?->billing_name" maxlength="150" placeholder="PT Contoh Jaya Abadi" x-bind:required="company" />
+                            <x-form.input name="billing_npwp" label="NPWP" :value="$lastBilling?->billing_npwp" maxlength="22" inputmode="numeric" optional placeholder="15 atau 16 digit" />
+                            <x-form.textarea name="billing_address" label="Alamat penagihan" :value="$lastBilling?->billing_address" rows="2" maxlength="500" optional hint="Kosongkan bila sama dengan alamat pengiriman." wrapper-class="sm:col-span-2" />
+                            <x-form.input type="email" name="billing_email" label="Email penagihan" :value="$lastBilling?->billing_email" maxlength="150" optional placeholder="finance@perusahaan.co.id" wrapper-class="sm:col-span-2" />
+                        </div>
+                    </section>
+                @endif
             </div>
 
             {{-- Ringkasan --}}
@@ -154,7 +175,8 @@
                 $initialDiscount = $voucher['discount'] ?? 0;
                 $initialShippingDiscount = ($voucher['type'] ?? null) === 'free_shipping'
                     ? min($voucher['shipping_cap'] ?? $initialShipping, $initialShipping) : 0;
-                $initialTotal = max(\App\Services\Promo\VoucherService::MIN_PAYABLE, $subtotal - $initialDiscount + $initialShipping - $initialShippingDiscount);
+                $initial = app(\App\Services\Billing\PriceCalculator::class)->calculate($subtotal, $initialDiscount, $initialShipping, $initialShippingDiscount, $billing);
+                $initialTotal = $initial['total'];
             @endphp
             <div class="min-w-0 lg:sticky lg:top-24 lg:self-start">
                 <div class="border border-stone-200 p-4 sm:p-6">
@@ -231,8 +253,23 @@
                         <div x-show="shippingDiscount > 0" @unless ($initialShippingDiscount) x-cloak @endunless class="flex justify-between text-emerald-700">
                             <dt>Potongan ongkir</dt><dd x-text="'−' + rupiah(shippingDiscount)">−@rupiah($initialShippingDiscount)</dd>
                         </div>
+                        @if ($billing->serviceFee())
+                            <div class="flex justify-between"><dt class="text-stone-500">{{ $billing->serviceFeeLabel() }}</dt><dd>@rupiah($billing->serviceFee())</dd></div>
+                        @endif
+                        @if ($billing->taxEnabled())
+                            <div @class(['flex justify-between', 'text-xs text-stone-500' => $billing->taxInclusive()])>
+                                <dt @class(['text-stone-500' => ! $billing->taxInclusive()])>{{ $billing->taxInclusive() ? 'Termasuk ' : '' }}{{ $billing->toClient()['taxLabel'] }}</dt>
+                                <dd x-text="rupiah(tax)">@rupiah($initial['tax_amount'])</dd>
+                            </div>
+                        @endif
+                        <div x-show="rounding !== 0" @unless ($initial['rounding']) x-cloak @endunless class="flex justify-between">
+                            <dt class="text-stone-500">Pembulatan</dt><dd x-text="(rounding < 0 ? '−' : '') + rupiah(Math.abs(rounding))">{{ $initial['rounding'] < 0 ? '−' : '' }}@rupiah(abs($initial['rounding']))</dd>
+                        </div>
                         <div class="flex justify-between border-t border-stone-100 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd x-text="rupiah(total)">@rupiah($initialTotal)</dd></div>
                     </dl>
+                    @if ($needsMethodChoice)
+                        <p class="mt-2 text-xs text-stone-500">{{ $billing->paymentFeeLabel() }} (bila ada) mengikuti metode bayar yang kamu pilih di langkah berikutnya.</p>
+                    @endif
                     <button class="btn btn-ink btn-pill mt-6 w-full py-4 disabled:cursor-not-allowed disabled:opacity-50" :disabled="!canSubmit" @disabled(! $address || empty($quote['rates']))>
                         <x-icon name="lock" class="size-4" />
                         <span x-text="submitting ? 'Memproses...' : 'Buat pesanan & bayar'">Buat pesanan & bayar</span>

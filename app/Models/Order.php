@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Events\OrderStatusChanged;
 use App\Observers\OrderObserver;
+use App\Services\Billing\BillingSettings;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -19,6 +21,9 @@ use Illuminate\Support\Str;
 #[Fillable([
     'code', 'user_id', 'status', 'subtotal', 'shipping_cost', 'discount', 'shipping_discount', 'total', 'total_weight',
     'voucher_id', 'voucher_code',
+    'service_fee', 'tax_label', 'tax_rate', 'tax_inclusive', 'tax_dpp_other', 'tax_base', 'tax_amount', 'rounding',
+    'payment_method', 'payment_fee', 'gateway_fee',
+    'billing_name', 'billing_npwp', 'billing_address', 'billing_email',
     'recipient_name', 'recipient_phone', 'shipping_address', 'destination_id',
     'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes', 'payment_due_at',
     'paid_at', 'shipped_at', 'delivered_at', 'completed_at', 'cancelled_at', 'cancellation_reason',
@@ -113,6 +118,16 @@ class Order extends Model
             'shipping_discount' => 'integer',
             'total' => 'integer',
             'total_weight' => 'integer',
+            'service_fee' => 'integer',
+            'tax_rate' => 'float',
+            'tax_inclusive' => 'boolean',
+            'tax_dpp_other' => 'boolean',
+            'tax_base' => 'integer',
+            'tax_amount' => 'integer',
+            'rounding' => 'integer',
+            'payment_fee' => 'integer',
+            'gateway_fee' => 'integer',
+            'invoice_issued_at' => 'datetime',
             'payment_due_at' => 'datetime',
             'paid_at' => 'datetime',
             'shipped_at' => 'datetime',
@@ -150,6 +165,41 @@ class Order extends Model
     public function discountTotal(): int
     {
         return (int) $this->discount + (int) $this->shipping_discount;
+    }
+
+    public function hasTax(): bool
+    {
+        return (int) $this->tax_amount > 0;
+    }
+
+    /** Mis. "PPN 11%", atau "PPN 12% (DPP 11/12)". */
+    public function taxLabel(): string
+    {
+        return trim(($this->tax_label ?: 'PPN').' '.BillingSettings::percent((float) $this->tax_rate))
+            .($this->tax_dpp_other ? ' (DPP 11/12)' : '');
+    }
+
+    /** Total yang dibayar pembeli, termasuk biaya transaksi metode bayar. */
+    public function amountPaid(): int
+    {
+        return (int) $this->total + (int) $this->payment_fee;
+    }
+
+    /** Perkiraan dana bersih yang diterima toko setelah potongan Midtrans. */
+    public function netReceived(): int
+    {
+        return $this->amountPaid() - (int) $this->gateway_fee;
+    }
+
+    public function paymentMethodLabel(): ?string
+    {
+        return PaymentMethod::labelFor($this->payment_method);
+    }
+
+    /** Nama di invoice: nama perusahaan bila diisi, selain itu penerima. */
+    public function billedName(): string
+    {
+        return $this->billing_name ?: $this->recipient_name;
     }
 
     public function items(): HasMany

@@ -132,6 +132,64 @@ return [
         'expiry_hours' => (int) env('PAYMENT_EXPIRY_HOURS', 24),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pajak, Biaya & Invoice
+    |--------------------------------------------------------------------------
+    |
+    | Semua nilai di sini bisa diubah dari Admin › Pajak & Biaya; isi di sini
+    | hanya nilai bawaan. Angka yang sudah tersimpan di pesanan tidak ikut
+    | berubah bila pengaturan diganti (pesanan menyimpan salinannya).
+    |
+    | tax_mode: "exclusive" (PPN ditambahkan ke tagihan pembeli) atau
+    | "inclusive" (harga produk sudah termasuk PPN, hanya dirinci di invoice).
+    | tax_dpp: "full" (DPP = harga jual) atau "other" (DPP nilai lain 11/12,
+    | dipakai bersama tarif 12% sesuai PMK 131/2024).
+    | payment_methods: tarif biaya Midtrans per metode. charge_to "buyer" =
+    | ditambahkan ke tagihan pembeli, "store" = ditanggung toko.
+    | rounding_mode: none | nearest | up | down, ke kelipatan rounding_unit.
+    | invoice_format: token {PREFIX} {YYYY} {YY} {MM} {DD} {SEQ} {ORDER}.
+    |
+    */
+
+    'billing' => [
+        'tax_enabled' => false,
+        'tax_label' => 'PPN',
+        'tax_rate' => 11,
+        'tax_dpp' => 'full',
+        'tax_mode' => 'exclusive',
+        'tax_shipping' => false,
+        'tax_price_note' => true,
+
+        'service_fee' => 0,
+        'service_fee_label' => 'Biaya layanan',
+
+        'payment_fee_label' => 'Biaya transaksi',
+        'payment_fee_gross_up' => false,
+        'payment_fee_vat' => 0,
+        'payment_methods' => [],
+
+        'rounding_mode' => 'none',
+        'rounding_unit' => 100,
+
+        'invoice_prefix' => 'INV',
+        'invoice_format' => '{PREFIX}/{YYYY}/{MM}/{SEQ}',
+        'invoice_padding' => 5,
+        'invoice_reset' => 'yearly',
+        'invoice_issue_on' => 'paid',
+        'company_name' => null,
+        'company_npwp' => null,
+        'company_address' => null,
+        'company_phone' => null,
+        'company_email' => null,
+        'is_pkp' => false,
+        'buyer_tax_info' => true,
+        'invoice_notes' => null,
+        'invoice_footer' => 'Terima kasih telah berbelanja. Invoice ini dibuat otomatis oleh sistem dan sah tanpa tanda tangan basah.',
+        'signatory_name' => null,
+        'signatory_title' => null,
+    ],
+
     'low_stock_threshold' => 5,
 
     /*

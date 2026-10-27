@@ -260,7 +260,7 @@ class PromoTest extends TestCase
 
         $csv = $this->get(route('admin.reports.export', 'pesanan'))->streamedContent();
         $this->assertStringContainsString('Voucher,"Diskon (Rp)"', $csv);
-        $this->assertStringContainsString(',HEMAT,10000,100000,', $csv);
+        $this->assertStringContainsString(',HEMAT,10000,0,0,0,100000,', $csv);
     }
 
     // ---------------------------------------------------------------

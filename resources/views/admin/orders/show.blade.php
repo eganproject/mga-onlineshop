@@ -1,7 +1,8 @@
 <x-layouts.admin :title="'Pesanan '.$order->code">
     <x-admin.page-header :title="$order->code" :description="'Dipesan '.$order->created_at->translatedFormat('d F Y, H:i')" :back="route('admin.orders.index')">
         <x-order-status :status="$order->status" class="px-3 py-1 text-sm" />
-        <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Invoice</a>
+        <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> {{ $order->paid_at ? 'Invoice' : 'Tagihan' }}</a>
+        <a href="{{ route('admin.orders.invoice.pdf', $order) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4" /> PDF</a>
         <a href="{{ route('admin.orders.packing-slip', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Packing slip</a>
     </x-admin.page-header>
 
@@ -33,10 +34,7 @@
                     @endforeach
                 </ul>
                 <dl class="space-y-2 border-t border-stone-100 bg-stone-50/50 p-5 text-sm">
-                    <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd>@rupiah($order->subtotal)</dd></div>
-                    <div class="flex justify-between"><dt class="text-stone-500">Ongkir ({{ $order->courierLabel() }}, {{ number_format($order->total_weight / 1000, 2, ',', '.') }} kg)</dt><dd>@rupiah($order->shipping_cost)</dd></div>
-                    <x-order-discounts :order="$order" />
-                    <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd>@rupiah($order->total)</dd></div>
+                    <x-order-totals :order="$order" />
                 </dl>
             </div>
 
@@ -45,12 +43,12 @@
                 @forelse ($order->payments as $payment)
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 p-5 last:border-0 text-sm">
                         <div>
-                            <p class="font-semibold text-stone-800">{{ ucfirst($payment->gateway) }} @if($payment->payment_type)<span class="font-normal text-stone-500">· {{ str_replace('_', ' ', $payment->payment_type) }}</span>@endif</p>
+                            <p class="font-semibold text-stone-800">{{ ucfirst($payment->gateway) }} @if($payment->methodLabel())<span class="font-normal text-stone-500">· {{ $payment->methodLabel() }}</span>@endif</p>
                             <p class="text-xs text-stone-500">{{ $payment->reference ?? '—' }} · {{ $payment->created_at->translatedFormat('d M Y, H:i') }}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-semibold">@rupiah($payment->amount)</p>
-                            <p class="text-xs text-stone-500">{{ $payment->status->label() }}</p>
+                            <p class="text-xs text-stone-500">{{ $payment->status->label() }}@if ($payment->fee) · biaya pembeli @rupiah($payment->fee)@endif</p>
                         </div>
                     </div>
                 @empty
@@ -64,6 +62,8 @@
         </div>
 
         <div class="space-y-6">
+            @include('admin.orders.partials.finance')
+
             {{-- Update status --}}
             @if (auth()->user()->can('orders.manage') && ($next = $order->status->nextStatuses()))
                 <div class="card p-5" x-data="{ status: @js(old('status', $next[0]->value)) }">

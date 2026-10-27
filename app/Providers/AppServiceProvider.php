@@ -9,6 +9,8 @@ use App\Enums\OrderStatus;
 use App\Models\Category;
 use App\Models\Order;
 use App\Services\Auth\FirebaseTokenVerifier;
+use App\Services\Billing\BillingSettings;
+use App\Services\Billing\InvoiceNumberer;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\SoldCountService;
 use App\Services\Customer\WishlistService;
@@ -64,9 +66,19 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Nomor invoice: terbit saat pesanan dibuat atau saat lunas (Admin › Pajak & Biaya).
+        Order::created(function (Order $order) {
+            if ($order->paid_at || BillingSettings::current()->invoiceIssueOn() === 'created') {
+                app(InvoiceNumberer::class)->issue($order);
+            }
+        });
         // Pesanan batal (oleh pelanggan, admin, atau kedaluwarsa): tagihan yang masih
         // pending ikut dibatalkan, juga di gateway, setelah transaksi DB selesai.
         Order::updated(function (Order $order) {
+            if ($order->wasChanged('paid_at') && $order->paid_at && ! $order->invoice_number) {
+                app(InvoiceNumberer::class)->issue($order);
+            }
+
             if ($order->wasChanged('status') && $order->status === OrderStatus::Cancelled) {
                 DB::afterCommit(fn () => app(PaymentService::class)->voidPendingPayments($order));
             }

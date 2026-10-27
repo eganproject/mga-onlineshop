@@ -36,7 +36,13 @@ class OrderService
             $order = $payment->order()->lockForUpdate()->first();
 
             if ($order->status === OrderStatus::PendingPayment) {
-                $order->update(['status' => OrderStatus::Paid, 'paid_at' => $payment->paid_at]);
+                $order->update([
+                    'status' => OrderStatus::Paid,
+                    'paid_at' => $payment->paid_at,
+                    'payment_method' => $payment->method ?: $payment->payment_type,
+                    'payment_fee' => $payment->fee,
+                    'gateway_fee' => $payment->gateway_fee,
+                ]);
             } elseif ($order->status === OrderStatus::Cancelled) {
                 // Dana masuk untuk pesanan yang sudah batal: perlu refund manual oleh admin.
                 Log::warning('Pembayaran diterima untuk pesanan yang sudah dibatalkan', ['order' => $order->code]);
@@ -157,13 +163,14 @@ class OrderService
 
     private function settleManually(Order $order): void
     {
-        $order->paid_at = now();
+        // Dibayar di luar gateway (tunai/transfer langsung): tanpa biaya transaksi & potongan Midtrans.
+        $order->forceFill(['paid_at' => now(), 'payment_method' => 'manual', 'payment_fee' => 0, 'gateway_fee' => 0]);
 
         $pending = $order->payments()->where('status', PaymentStatus::Pending)->get();
 
         $order->payments()
             ->whereKey($pending->modelKeys())
-            ->update(['status' => PaymentStatus::Paid, 'payment_type' => 'manual', 'paid_at' => now()]);
+            ->update(['status' => PaymentStatus::Paid, 'payment_type' => 'manual', 'method' => 'manual', 'gateway_fee' => 0, 'paid_at' => now()]);
 
         // Link bayar di gateway ditutup supaya pelanggan tidak membayar dua kali.
         DB::afterCommit(function () use ($pending) {
