@@ -131,8 +131,10 @@
             <ul class="divide-y divide-stone-100">
                 @foreach ($order->items as $item)
                     <li class="flex items-center gap-4 p-5">
-                        @if ($item->product)
+                        @if ($item->product?->is_active)
                             <a href="{{ route('products.show', $item->product) }}"><x-product-image :product="$item->product" class="size-16 shrink-0 rounded-xl" /></a>
+                        @elseif ($item->product)
+                            <x-product-image :product="$item->product" class="size-16 shrink-0 rounded-xl" />
                         @else
                             <div class="grid size-16 shrink-0 place-items-center rounded-xl bg-stone-100 text-stone-400"><x-icon name="cube" /></div>
                         @endif

@@ -1,4 +1,4 @@
-<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product" :bottom-nav="! $product->inStock()" :whatsapp-context="$product->name.' — '.route('products.show', $product)">
+<x-layouts.shop :title="$product->name" :description="$product->metaDescription()" :image="$product->imageUrl()" type="product" :noindex="! $product->is_active" :bottom-nav="! $product->inStock()" :whatsapp-context="$product->name.' — '.route('products.show', $product)">
     <x-slot:head>
         <meta property="product:price:amount" content="{{ $product->price }}">
         <meta property="product:price:currency" content="IDR">
@@ -15,6 +15,16 @@
         ) !!}
     </x-slot:head>
     <div class="shop-container pb-28 pt-6 lg:pb-0 lg:pt-8">
+        @unless ($product->is_active)
+            {{-- Hanya staf yang bisa sampai di sini (lihat Product::isViewableBy). --}}
+            <div class="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200" role="status">
+                <x-icon name="eye" class="size-4 shrink-0" />
+                <p class="min-w-0 flex-1"><span class="font-semibold">Pratinjau admin.</span> Produk ini nonaktif, jadi pelanggan belum bisa melihat atau membelinya.</p>
+                @can('catalog.manage')
+                    <a href="{{ route('admin.products.edit', $product) }}" class="font-semibold underline underline-offset-4">Edit produk</a>
+                @endcan
+            </div>
+        @endunless
         <nav class="flex flex-wrap items-center gap-1.5 text-xs text-stone-500" aria-label="Breadcrumb">
             <a href="{{ route('home') }}" class="hover:text-ink">Beranda</a>
             <span>/</span>

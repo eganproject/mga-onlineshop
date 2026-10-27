@@ -49,6 +49,15 @@ class Product extends Model
         return 'slug';
     }
 
+    /**
+     * Halaman detail produk nonaktif hanya bisa dibuka staf (pratinjau dari admin).
+     * Pelanggan & tamu mendapat 404, jadi jangan tampilkan link ke produk seperti itu.
+     */
+    public function isViewableBy(?User $user): bool
+    {
+        return $this->is_active || (bool) $user?->isAdmin();
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

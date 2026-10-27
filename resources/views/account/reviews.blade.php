@@ -22,8 +22,10 @@
             <article class="card mt-4 p-4 sm:p-5">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="min-w-0">
-                        @if ($review->product)
+                        @if ($review->product?->is_active)
                             <a href="{{ route('products.show', $review->product) }}#ulasan" class="text-sm font-semibold hover:underline">{{ $review->product->name }}</a>
+                        @elseif ($review->product)
+                            <p class="text-sm font-semibold">{{ $review->product->name }}</p>
                         @endif
                         <div class="mt-1 flex items-center gap-2">
                             <x-star-rating :rating="$review->rating" />

@@ -86,9 +86,9 @@ class ProductController extends Controller
 
     public function show(Request $request, Product $product, ReviewService $reviewService): View|Response
     {
-        abort_unless($product->is_active, 404);
-
         $user = $request->user();
+
+        abort_unless($product->isViewableBy($user), 404);
         $star = in_array($request->integer('bintang'), range(1, 5), true) ? $request->integer('bintang') : null;
 
         return InfiniteScroll::respond($request, view('shop.products.show', [
