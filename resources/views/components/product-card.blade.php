@@ -1,4 +1,6 @@
 @props(['product', 'quickAdd' => true])
+{{-- Produk nonaktif (mis. di wishlist) tetap tampil tanpa link, karena halaman detailnya 404 untuk pelanggan. --}}
+@php($available = $product->is_active)
 <article {{ $attributes->merge(['class' => 'group relative flex flex-col']) }}>
     <div class="relative">
         <x-product-image :product="$product" class="aspect-[4/5]" />
@@ -7,16 +9,18 @@
             @if ($product->isOnSale())
                 <span class="bg-accent-500 px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase">-{{ $product->discountPercent() }}%</span>
             @endif
-            @unless ($product->inStock())
+            @if (! $available)
+                <span class="bg-white px-2 py-1 text-[10px] font-bold tracking-wider text-ink uppercase">Tidak dijual lagi</span>
+            @elseif (! $product->inStock())
                 <span class="bg-white px-2 py-1 text-[10px] font-bold tracking-wider text-ink uppercase">Stok habis</span>
-            @endunless
+            @endif
         </div>
 
         <div class="absolute right-2.5 top-2.5 z-10 sm:right-3 sm:top-3">
             <x-wishlist-button :product="$product" />
         </div>
 
-        @if ($quickAdd && $product->inStock())
+        @if ($quickAdd && $available && $product->inStock())
             @php($quickAddClasses = 'absolute inset-x-3 bottom-3 z-10 hidden translate-y-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100')
             @if ($product->has_variants)
                 {{-- Produk bervarian harus dipilih variannya dulu di halaman produk. --}}
@@ -36,7 +40,11 @@
 
     <div class="flex flex-1 flex-col pt-3">
         <h3 class="text-sm leading-snug font-semibold text-ink line-clamp-2 sm:text-[15px]">
-            <a href="{{ route('products.show', $product) }}" class="after:absolute after:inset-0">{{ $product->name }}</a>
+            @if ($available)
+                <a href="{{ route('products.show', $product) }}" class="after:absolute after:inset-0">{{ $product->name }}</a>
+            @else
+                <span class="text-stone-500">{{ $product->name }}</span>
+            @endif
         </h3>
         @if ($product->relationLoaded('category') && $product->category)
             <p class="mt-0.5 text-xs text-stone-500">{{ $product->category->name }}</p>
