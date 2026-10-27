@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Billing\BillingSettings;
 use App\Services\Reports\ReportPeriod;
 use App\Services\Reports\SalesReportService;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class ReportController extends Controller
         'penjualan' => 'Penjualan',
         'produk' => 'Per produk',
         'kategori' => 'Per kategori',
+        'keuangan' => 'Keuangan & pajak',
     ];
 
     public function __construct(private readonly SalesReportService $reports) {}
@@ -38,13 +40,14 @@ class ReportController extends Controller
             'vouchers' => $tab === 'penjualan' ? $this->reports->byVoucher($period) : collect(),
             'products' => $tab === 'produk' ? $this->reports->byProduct($period) : collect(),
             'categories' => $tab === 'kategori' ? $this->reports->byCategory($period) : collect(),
+            'methods' => $tab === 'keuangan' ? $this->reports->byPaymentMethod($period) : collect(),
         ]);
     }
 
     /** Unduh laporan sebagai CSV (dibuka langsung di Excel / Google Sheets). */
     public function export(Request $request, string $type): StreamedResponse
     {
-        abort_unless(in_array($type, ['penjualan', 'produk', 'kategori', 'pesanan'], true), 404);
+        abort_unless(in_array($type, ['penjualan', 'produk', 'kategori', 'pesanan', 'pajak', 'metode'], true), 404);
 
         $period = ReportPeriod::fromRequest($request);
         $filename = sprintf('laporan-%s_%s_%s.csv', $type, $period->from->toDateString(), $period->to->toDateString());
@@ -88,11 +91,12 @@ class ReportController extends Controller
                 break;
 
             case 'pesanan':
-                yield ['Kode pesanan', 'Tanggal bayar', 'Status', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Voucher', 'Diskon (Rp)', 'Total (Rp)', 'Kurir'];
+                yield ['Kode pesanan', 'No. invoice', 'Tanggal bayar', 'Status', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Voucher', 'Diskon (Rp)', 'Biaya layanan (Rp)', 'PPN (Rp)', 'Pembulatan (Rp)', 'Total pesanan (Rp)', 'Metode bayar', 'Biaya transaksi pembeli (Rp)', 'Dibayar pelanggan (Rp)', 'Potongan Midtrans (Rp)', 'Bersih diterima (Rp)', 'Kurir'];
                 foreach ($this->reports->orders($period)->lazy(500) as $order) {
                     /** @var Order $order */
                     yield [
                         $order->code,
+                        $order->invoice_number,
                         $order->paid_at?->format('Y-m-d H:i'),
                         $order->status->label(),
                         $order->user?->name,
@@ -102,9 +106,43 @@ class ReportController extends Controller
                         $order->shipping_cost,
                         $order->voucher_code,
                         $order->discountTotal(),
+                        $order->service_fee,
+                        $order->tax_amount,
+                        $order->rounding,
                         $order->total,
+                        $order->paymentMethodLabel(),
+                        $order->payment_fee,
+                        $order->amountPaid(),
+                        $order->gateway_fee,
+                        $order->netReceived(),
                         $order->courierLabel(),
                     ];
+                }
+                break;
+
+            case 'pajak':
+                yield ['No. invoice', 'Tanggal invoice', 'Kode pesanan', 'Nama pembeli', 'NPWP pembeli', 'Cara hitung', 'Tarif (%)', 'DPP (Rp)', 'PPN (Rp)', 'Total pesanan (Rp)'];
+                foreach ($this->reports->taxedOrders($period)->lazy(500) as $order) {
+                    /** @var Order $order */
+                    yield [
+                        $order->invoice_number,
+                        ($order->invoice_issued_at ?? $order->paid_at)?->format('Y-m-d'),
+                        $order->code,
+                        $order->billedName(),
+                        BillingSettings::formatNpwp($order->billing_npwp),
+                        ($order->tax_inclusive ? 'Termasuk harga' : 'Ditambahkan').($order->tax_dpp_other ? ', DPP 11/12' : ''),
+                        $order->tax_rate,
+                        $order->tax_base,
+                        $order->tax_amount,
+                        $order->total,
+                    ];
+                }
+                break;
+
+            case 'metode':
+                yield ['Metode bayar', 'Pesanan', 'Dibayar pelanggan (Rp)', 'Biaya transaksi pembeli (Rp)', 'Potongan Midtrans (Rp)', 'Bersih diterima (Rp)', 'Porsi (%)'];
+                foreach ($this->reports->byPaymentMethod($period) as $row) {
+                    yield [$row->label, $row->orders, $row->paid, $row->payment_fee, $row->gateway_fee, $row->net, $row->share];
                 }
                 break;
         }

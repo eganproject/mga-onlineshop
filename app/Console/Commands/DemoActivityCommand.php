@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
+use App\Services\Billing\InvoiceNumberer;
 use App\Services\Catalog\SoldCountService;
 use App\Services\Reviews\ReviewService;
 use Database\Seeders\DemoOrderSeeder;
@@ -59,9 +60,11 @@ class DemoActivityCommand extends Command
             if ($this->option('reset')) {
                 ProductReview::query()->delete();
                 Order::query()->delete(); // item, pembayaran & riwayat status ikut terhapus (cascade)
+                DB::table('invoice_sequences')->delete(); // nomor invoice contoh mulai dari 1 lagi
             }
 
             Order::withoutEvents(fn () => app(DemoOrderSeeder::class)->run());
+            app(InvoiceNumberer::class)->backfill();
             app(DemoReviewSeeder::class)->run();
         });
 

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'order_id', 'gateway', 'external_id', 'reference', 'status', 'amount', 'payment_type',
+    'order_id', 'gateway', 'external_id', 'reference', 'status', 'amount', 'fee', 'gateway_fee', 'payment_type', 'method',
     'snap_token', 'redirect_url', 'payload', 'paid_at', 'expires_at',
 ])]
 class Payment extends Model
@@ -18,10 +19,17 @@ class Payment extends Model
         return [
             'status' => PaymentStatus::class,
             'amount' => 'integer',
+            'fee' => 'integer',
+            'gateway_fee' => 'integer',
             'payload' => 'array',
             'paid_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
+    }
+
+    public function methodLabel(): ?string
+    {
+        return PaymentMethod::labelFor($this->method ?: $this->payment_type);
     }
 
     public function order(): BelongsTo

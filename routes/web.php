@@ -84,6 +84,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::post('/pesanan/{order}/diterima', [Account\OrderController::class, 'complete'])->name('orders.complete');
         Route::get('/pesanan/{order}/lacak', [Account\OrderController::class, 'tracking'])->name('orders.tracking')->middleware('throttle:30,1');
         Route::get('/pesanan/{order}/invoice', [Account\OrderController::class, 'invoice'])->name('orders.invoice');
+        Route::get('/pesanan/{order}/invoice/pdf', [Account\OrderController::class, 'invoicePdf'])->name('orders.invoice.pdf')->middleware('throttle:20,1');
         Route::post('/pesanan/{order}/simulasi-bayar', [Account\OrderController::class, 'simulatePayment'])->name('orders.simulate-payment');
 
         Route::controller(Account\PaymentController::class)->prefix('pesanan/{order}/bayar')->name('orders.payment')->group(function () {
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
             Route::get('/selesai', 'finish')->name('.finish')->middleware('throttle:20,1');
             Route::post('/cek', 'check')->name('.check')->middleware('throttle:10,1');
             Route::post('/baru', 'regenerate')->name('.regenerate')->middleware('throttle:5,1');
+            Route::post('/metode', 'choose')->name('.method')->middleware('throttle:10,1');
         });
 
         Route::controller(Account\RegionController::class)->prefix('wilayah')->name('regions.')->middleware('throttle:120,1')->group(function () {
@@ -182,6 +184,7 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::patch('/{order}/tracking-number', 'updateTracking')->name('tracking-number')->middleware('can:orders.manage');
         Route::get('/{order}/tracking', 'tracking')->name('tracking')->middleware('throttle:30,1');
         Route::get('/{order}/invoice', 'invoice')->name('invoice');
+        Route::get('/{order}/invoice/pdf', 'invoicePdf')->name('invoice.pdf')->middleware('throttle:30,1');
         Route::get('/{order}/packing-slip', 'packingSlip')->name('packing-slip');
     });
 
@@ -193,7 +196,7 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
 
     Route::middleware('can:reports.view')->group(function () {
         Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/export/{type}', [Admin\ReportController::class, 'export'])->name('reports.export')->whereIn('type', ['penjualan', 'produk', 'kategori', 'pesanan']);
+        Route::get('/reports/export/{type}', [Admin\ReportController::class, 'export'])->name('reports.export')->whereIn('type', ['penjualan', 'produk', 'kategori', 'pesanan', 'pajak', 'metode']);
     });
 
     Route::middleware('can:settings.manage')->group(function () {
@@ -206,6 +209,12 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
             Route::get('/provinces/{province}/cities', 'cities')->name('cities');
             Route::get('/cities/{city}/districts', 'districts')->name('districts');
         });
+    });
+
+    Route::middleware('can:billing.manage')->controller(Admin\BillingSettingController::class)->prefix('billing')->name('billing.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::put('/', 'update')->name('update');
+        Route::post('/preview', 'preview')->name('preview')->middleware('throttle:120,1');
     });
 
     // Kunci API & driver integrasi: khusus superadmin (jabatan Owner).

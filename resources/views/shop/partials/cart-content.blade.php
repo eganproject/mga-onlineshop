@@ -77,6 +77,10 @@
                     <div class="mt-5 flex justify-between border-t border-stone-200 pt-5 text-base font-semibold">
                         <span>Total</span><span>@rupiah($subtotal)</span>
                     </div>
+                    @php $billing = \App\Services\Billing\BillingSettings::current(); @endphp
+                    @if ($billing->priceNote() || $billing->serviceFee())
+                        <p class="mt-2 text-xs text-stone-500">{{ collect([$billing->priceNote(), $billing->serviceFee() ? $billing->serviceFeeLabel().' '.\App\Support\Money::rupiah($billing->serviceFee()) : null])->filter()->implode(' · ') }}, dihitung saat checkout.</p>
+                    @endif
                     <a href="{{ route('checkout.index') }}" class="btn btn-ink btn-pill mt-6 w-full py-4">Checkout <x-icon name="arrow-right" class="size-4" /></a>
                     <a href="{{ route('products.index') }}" class="link-underline mx-auto mt-2 block w-fit py-3 text-center text-sm font-semibold lg:mt-4 lg:py-0">Lanjut belanja</a>
                     <ul class="mt-6 space-y-2 border-t border-stone-200 pt-5 text-xs text-stone-500">

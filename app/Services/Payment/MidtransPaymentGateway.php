@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Contracts\PaymentGateway;
+use App\Data\PaymentCharge;
 use App\Data\PaymentUpdate;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
@@ -31,9 +32,11 @@ class MidtransPaymentGateway implements PaymentGateway
         return 'midtrans';
     }
 
-    public function createPayment(Order $order, CarbonInterface $expiresAt): Payment
+    public function createPayment(Order $order, CarbonInterface $expiresAt, ?PaymentCharge $charge = null): Payment
     {
         $this->ensureConfigured();
+
+        $charge ??= new PaymentCharge(amount: $order->total);
 
         $order->loadMissing('items', 'user');
 
@@ -41,31 +44,7 @@ class MidtransPaymentGateway implements PaymentGateway
         $attempt = $order->payments()->where('gateway', $this->name())->count() + 1;
         $externalId = $order->code.($attempt > 1 ? '-'.$attempt : '');
 
-        $items = $order->items->map(fn ($item) => [
-            'id' => mb_substr($item->sku ?: (string) ($item->product_id ?? $item->id), 0, 50),
-            'price' => $item->price,
-            'quantity' => $item->quantity,
-            'name' => mb_substr(trim($item->product_name.' '.($item->variant_name ? "({$item->variant_name})" : '')), 0, 50),
-        ])->values()->all();
-
-        if ($order->shipping_cost > 0) {
-            $items[] = [
-                'id' => 'SHIPPING',
-                'price' => $order->shipping_cost,
-                'quantity' => 1,
-                'name' => mb_substr('Ongkir '.$order->courierLabel(), 0, 50),
-            ];
-        }
-
-        // Potongan voucher sebagai item bernilai negatif agar jumlah item = gross_amount.
-        if ($order->discountTotal() > 0) {
-            $items[] = [
-                'id' => 'VOUCHER',
-                'price' => -$order->discountTotal(),
-                'quantity' => 1,
-                'name' => mb_substr('Voucher '.$order->voucher_code, 0, 50),
-            ];
-        }
+        $items = self::itemDetails($order, $charge);
 
         // Tanpa start_time, Midtrans menghitung kedaluwarsa sejak pelanggan memilih
         // metode bayar, sehingga bisa melewati batas bayar pesanan.
@@ -76,9 +55,10 @@ class MidtransPaymentGateway implements PaymentGateway
             ->post($this->snapBaseUrl().'/snap/v1/transactions', [
                 'transaction_details' => [
                     'order_id' => $externalId,
-                    'gross_amount' => $order->total,
+                    'gross_amount' => $charge->amount,
                 ],
                 'item_details' => $items,
+                ...($charge->enabledPayments ? ['enabled_payments' => $charge->enabledPayments] : []),
                 'customer_details' => [
                     'first_name' => mb_substr($order->recipient_name, 0, 255),
                     'email' => $order->user->email,
@@ -103,11 +83,55 @@ class MidtransPaymentGateway implements PaymentGateway
             'gateway' => $this->name(),
             'external_id' => $externalId,
             'status' => PaymentStatus::Pending,
-            'amount' => $order->total,
+            'amount' => $charge->amount,
+            'fee' => $charge->fee,
+            'gateway_fee' => $charge->gatewayFee,
+            'method' => $charge->method?->value,
             'snap_token' => $response->json('token'),
             'redirect_url' => $response->json('redirect_url'),
             'expires_at' => $start->copy()->addMinutes($minutes),
         ]);
+    }
+
+    /**
+     * Rincian item untuk Snap. Jumlah semua item harus sama dengan gross_amount,
+     * jadi biaya layanan, PPN (bila belum termasuk harga), pembulatan, dan
+     * biaya transaksi ikut menjadi item; potongan voucher bernilai negatif.
+     *
+     * @return list<array{id: string, price: int, quantity: int, name: string}>
+     */
+    public static function itemDetails(Order $order, PaymentCharge $charge): array
+    {
+        $items = $order->items->map(fn ($item) => [
+            'id' => mb_substr($item->sku ?: (string) ($item->product_id ?? $item->id), 0, 50),
+            'price' => $item->price,
+            'quantity' => $item->quantity,
+            'name' => mb_substr(trim($item->product_name.' '.($item->variant_name ? "({$item->variant_name})" : '')), 0, 50),
+        ])->values()->all();
+
+        $extra = [
+            'SHIPPING' => [$order->shipping_cost, 'Ongkir '.$order->courierLabel()],
+            'VOUCHER' => [-$order->discountTotal(), 'Voucher '.$order->voucher_code],
+            'SERVICE' => [(int) $order->service_fee, config('shop.billing.service_fee_label') ?: 'Biaya layanan'],
+            'TAX' => [$order->tax_inclusive ? 0 : (int) $order->tax_amount, $order->taxLabel()],
+            'ROUNDING' => [(int) $order->rounding, 'Pembulatan'],
+            'FEE' => [$charge->fee, $charge->feeLabel.($charge->method ? ' '.$charge->method->shortLabel() : '')],
+        ];
+
+        foreach ($extra as $id => [$price, $name]) {
+            if ($price !== 0) {
+                $items[] = ['id' => $id, 'price' => $price, 'quantity' => 1, 'name' => mb_substr(trim($name), 0, 50)];
+            }
+        }
+
+        // Pengaman: selisih (mis. total minimum Rp1) disamakan supaya Snap tidak menolak.
+        $difference = $charge->amount - array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $items));
+
+        if ($difference !== 0) {
+            $items[] = ['id' => 'ADJUSTMENT', 'price' => $difference, 'quantity' => 1, 'name' => 'Penyesuaian'];
+        }
+
+        return $items;
     }
 
     public function parseNotification(array $payload): ?PaymentUpdate

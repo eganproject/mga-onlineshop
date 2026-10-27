@@ -5,10 +5,12 @@ namespace App\Services\Payment;
 use App\Contracts\PaymentGateway;
 use App\Data\PaymentUpdate;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Exceptions\PaymentUnavailableException;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\Billing\FeeCalculator;
 use App\Services\Orders\OrderService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +27,23 @@ class PaymentService
     public function __construct(
         private readonly PaymentGateway $gateway,
         private readonly OrderService $orders,
+        private readonly FeeCalculator $fees,
     ) {}
+
+    /**
+     * Pembeli harus memilih metode di halaman toko dulu, karena ada metode
+     * yang biaya transaksinya dibebankan ke pembeli (nominal tiap metode beda).
+     */
+    public function requiresMethodChoice(): bool
+    {
+        return $this->fees->requiresMethodChoice();
+    }
+
+    /** @return array<string, list<array{method: PaymentMethod, fee: int, amount: int}>> */
+    public function methodOptions(Order $order): array
+    {
+        return $this->fees->options($order->total);
+    }
 
     public function gateway(): PaymentGateway
     {
@@ -53,19 +71,20 @@ class PaymentService
         return $order->status === OrderStatus::PendingPayment && $order->paymentDeadline()->isFuture();
     }
 
-    /** Buat tagihan pertama saat checkout. */
-    public function createFor(Order $order): Payment
+    /** Buat tagihan untuk metode tertentu, atau semua metode (dipilih di Midtrans). */
+    public function createFor(Order $order, ?PaymentMethod $method = null): Payment
     {
-        return $this->gateway->createPayment($order, $order->paymentDeadline());
+        return $this->gateway->createPayment($order, $order->paymentDeadline(), $this->fees->charge($order->total, $method));
     }
 
     /**
      * Tagihan untuk halaman pembayaran: pakai yang aktif, atau buat baru bila
-     * belum ada / sebelumnya gagal / kedaluwarsa.
+     * belum ada / sebelumnya gagal / kedaluwarsa. Null bila pembeli harus
+     * memilih metode bayar dulu.
      *
      * @throws PaymentUnavailableException
      */
-    public function preparePayment(Order $order): Payment
+    public function preparePayment(Order $order): ?Payment
     {
         return $this->withOrderLock($order, function () use ($order) {
             if ($payment = $this->activePayment($order)) {
@@ -74,17 +93,43 @@ class PaymentService
 
             $this->ensureCanCreate($order);
 
-            return $this->createFor($order);
+            return $this->requiresMethodChoice() ? null : $this->createFor($order);
+        });
+    }
+
+    /**
+     * Pembeli memilih metode bayar di halaman toko: tagihan lama dibatalkan,
+     * tagihan baru dibuat khusus metode itu (dengan biaya transaksinya).
+     *
+     * @throws PaymentUnavailableException
+     */
+    public function choose(Order $order, PaymentMethod $method): Payment
+    {
+        return $this->withOrderLock($order, function () use ($order, $method) {
+            $active = $this->activePayment($order);
+
+            if ($active && $active->method === $method->value) {
+                return $active;
+            }
+
+            $this->syncPending($order);
+            $order->refresh();
+
+            $this->ensureCanCreate($order);
+            $this->voidPendingPayments($order);
+
+            return $this->createFor($order, $method);
         });
     }
 
     /**
      * Buat link pembayaran baru (mis. ingin ganti metode bayar). Tagihan
-     * pending sebelumnya dicek dulu ke gateway, lalu dibatalkan.
+     * pending sebelumnya dicek dulu ke gateway, lalu dibatalkan. Null bila
+     * pembeli perlu memilih metode lagi di halaman toko.
      *
      * @throws PaymentUnavailableException
      */
-    public function regenerate(Order $order): Payment
+    public function regenerate(Order $order): ?Payment
     {
         return $this->withOrderLock($order, function () use ($order) {
             $this->syncPending($order);
@@ -93,7 +138,7 @@ class PaymentService
             $this->ensureCanCreate($order);
             $this->voidPendingPayments($order);
 
-            return $this->createFor($order);
+            return $this->requiresMethodChoice() ? null : $this->createFor($order);
         });
     }
 
@@ -143,6 +188,13 @@ class PaymentService
             }
 
             if ($update->status === PaymentStatus::Paid) {
+                // Metode sebenarnya dari Midtrans; perkiraan potongan dihitung dari tarif saat ini.
+                $method = PaymentMethod::fromMidtrans($update->paymentType, $update->payload)
+                    ?? PaymentMethod::tryFrom((string) $payment->method);
+
+                $attributes['method'] = $method?->value ?? $payment->method;
+                $attributes['gateway_fee'] = $method ? $this->fees->gatewayFee($method, $payment->amount) : $payment->gateway_fee;
+
                 $this->orders->markPaid($payment, $attributes);
 
                 return;

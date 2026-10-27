@@ -96,6 +96,7 @@
                                     </button>
                                 </div>
                                 <p class="hint">Tempel di Midtrans Dashboard › Settings › Payment › Notification URL.</p>
+                                <p class="hint">Tarif biaya per metode, siapa yang menanggung, dan metode yang aktif diatur di <a href="{{ route('admin.billing.edit') }}" class="font-semibold text-brand-700 underline">Pajak & Biaya</a>.</p>
                             </div>
                         @elseif ($key === 'rajaongkir')
                             <x-form.select name="rajaongkir[driver]" id="rajaongkir_driver" label="Driver ongkir" :selected="$value('rajaongkir', 'driver')"

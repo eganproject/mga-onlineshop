@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Billing\InvoiceRenderer;
 use App\Services\Orders\OrderService;
 use App\Services\Shipping\TrackingService;
 use App\Support\AdminList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -109,9 +111,14 @@ class OrderController extends Controller
         ]);
     }
 
-    public function invoice(Order $order): View
+    public function invoice(Order $order, InvoiceRenderer $invoices): View
     {
-        return view('orders.invoice', ['order' => $order->load('items', 'latestPayment')]);
+        return view('orders.invoice', $invoices->data($order) + ['pdfUrl' => route('admin.orders.invoice.pdf', $order)]);
+    }
+
+    public function invoicePdf(Order $order, InvoiceRenderer $invoices): Response
+    {
+        return $invoices->pdf($order);
     }
 
     public function packingSlip(Order $order): View

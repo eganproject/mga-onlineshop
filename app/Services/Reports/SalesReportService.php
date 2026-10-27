@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Models\Category;
 use App\Models\Order;
 use Carbon\CarbonImmutable;
@@ -37,13 +38,18 @@ class SalesReportService
     /**
      * Ringkasan angka utama periode.
      *
-     * @return array{revenue:int, product_sales:int, shipping:int, discount:int, orders:int, items:int, average:int, customers:int, cancelled:int}
+     * Rincian keuangan: tax = PPN dipungut, service_fee = biaya layanan,
+     * payment_fee = biaya transaksi yang dibayar pembeli, gateway_fee = perkiraan
+     * potongan Midtrans, net = dana bersih (dibayar pembeli − potongan Midtrans).
+     *
+     * @return array{revenue:int, product_sales:int, shipping:int, discount:int, orders:int, items:int, average:int, customers:int, cancelled:int, tax:int, tax_included:int, service_fee:int, rounding:int, payment_fee:int, gateway_fee:int, paid:int, net:int, net_after_tax:int}
      */
     public function summary(ReportPeriod $period): array
     {
         $totals = $this->paidOrders($period)
             ->toBase()
             ->selectRaw('COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue, COALESCE(SUM(subtotal), 0) as product_sales, COALESCE(SUM(shipping_cost), 0) as shipping, COALESCE(SUM(discount + shipping_discount), 0) as discount, COUNT(DISTINCT user_id) as customers')
+            ->selectRaw('COALESCE(SUM(tax_amount), 0) as tax, COALESCE(SUM(CASE WHEN tax_inclusive = 1 THEN tax_amount ELSE 0 END), 0) as tax_included, COALESCE(SUM(service_fee), 0) as service_fee, COALESCE(SUM(rounding), 0) as rounding, COALESCE(SUM(payment_fee), 0) as payment_fee, COALESCE(SUM(gateway_fee), 0) as gateway_fee')
             ->first();
 
         $items = (int) DB::table('order_items')
@@ -65,7 +71,55 @@ class SalesReportService
             'cancelled' => Order::where('status', OrderStatus::Cancelled)
                 ->whereBetween('cancelled_at', [$period->start(), $period->end()])
                 ->count(),
+            'tax' => (int) $totals->tax,
+            'tax_included' => (int) $totals->tax_included,
+            'service_fee' => (int) $totals->service_fee,
+            'rounding' => (int) $totals->rounding,
+            'payment_fee' => (int) $totals->payment_fee,
+            'gateway_fee' => (int) $totals->gateway_fee,
+            'paid' => $revenue + (int) $totals->payment_fee,
+            'net' => $revenue + (int) $totals->payment_fee - (int) $totals->gateway_fee,
+            'net_after_tax' => $revenue + (int) $totals->payment_fee - (int) $totals->gateway_fee - (int) $totals->tax,
         ];
+    }
+
+    /**
+     * Penjualan per metode bayar: dibayar pembeli, biaya transaksi dari pembeli,
+     * perkiraan potongan Midtrans, dan dana bersih.
+     *
+     * @return Collection<int, object{method:?string, label:string, orders:int, paid:int, payment_fee:int, gateway_fee:int, net:int, share:float}>
+     */
+    public function byPaymentMethod(ReportPeriod $period): Collection
+    {
+        $rows = $this->paidOrders($period)
+            ->toBase()
+            ->groupBy('payment_method')
+            ->selectRaw('payment_method, COUNT(*) as orders, SUM(total + payment_fee) as paid, SUM(payment_fee) as payment_fee, SUM(gateway_fee) as gateway_fee')
+            ->orderByDesc('paid')
+            ->get();
+
+        $total = (int) $rows->sum('paid');
+
+        return $rows->map(fn ($row) => (object) [
+            'method' => $row->payment_method,
+            'label' => PaymentMethod::labelFor($row->payment_method) ?? 'Tidak tercatat (pesanan lama)',
+            'orders' => (int) $row->orders,
+            'paid' => (int) $row->paid,
+            'payment_fee' => (int) $row->payment_fee,
+            'gateway_fee' => (int) $row->gateway_fee,
+            'net' => (int) $row->paid - (int) $row->gateway_fee,
+            'share' => $total > 0 ? round($row->paid / $total * 100, 1) : 0.0,
+        ]);
+    }
+
+    /** Pesanan terjual yang dikenai PPN (daftar untuk rekap pajak keluaran). */
+    public function taxedOrders(ReportPeriod $period): Builder
+    {
+        return $this->paidOrders($period)
+            ->where('tax_amount', '>', 0)
+            ->with('user:id,name,email')
+            ->orderBy('paid_at')
+            ->orderBy('orders.id');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Contracts;
 
+use App\Data\PaymentCharge;
 use App\Data\PaymentUpdate;
 use App\Models\Order;
 use App\Models\Payment;
@@ -19,8 +20,9 @@ interface PaymentGateway
     /**
      * Buat tagihan baru untuk pesanan dan simpan sebagai Payment.
      * $expiresAt = batas bayar tagihan ini (biasanya payment_due_at pesanan).
+     * $charge = nominal & metode (biaya transaksi pembeli); null = total pesanan, semua metode.
      */
-    public function createPayment(Order $order, CarbonInterface $expiresAt): Payment;
+    public function createPayment(Order $order, CarbonInterface $expiresAt, ?PaymentCharge $charge = null): Payment;
 
     /**
      * Verifikasi dan terjemahkan notifikasi (webhook). Null bila tanda

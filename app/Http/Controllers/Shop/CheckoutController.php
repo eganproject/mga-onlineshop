@@ -8,6 +8,8 @@ use App\Exceptions\VoucherException;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\Voucher;
+use App\Services\Billing\BillingSettings;
+use App\Services\Billing\FeeCalculator;
 use App\Services\Cart\CartService;
 use App\Services\Orders\CheckoutService;
 use App\Services\Promo\VoucherService;
@@ -15,6 +17,7 @@ use App\Services\Shipping\ShippingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -26,7 +29,7 @@ class CheckoutController extends Controller
         private readonly VoucherService $vouchers,
     ) {}
 
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, FeeCalculator $fees): View|RedirectResponse
     {
         if ($this->cart->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Keranjang belanja masih kosong.');
@@ -49,6 +52,11 @@ class CheckoutController extends Controller
             'addresses' => $addresses,
             'address' => $address,
             'quote' => $address ? $this->quote($address) : ['rates' => [], 'error' => null],
+            'billing' => BillingSettings::current(),
+            'needsMethodChoice' => $fees->requiresMethodChoice(),
+            // Data perusahaan dari pesanan terakhir, supaya tidak perlu diketik ulang.
+            'lastBilling' => $request->user()->orders()->whereNotNull('billing_name')->latest('id')
+                ->first(['billing_name', 'billing_npwp', 'billing_address', 'billing_email']),
         ]);
     }
 
@@ -67,14 +75,31 @@ class CheckoutController extends Controller
 
     public function store(Request $request, CheckoutService $checkout): RedirectResponse
     {
+        if ($request->filled('billing_npwp')) {
+            $request->merge(['billing_npwp' => preg_replace('/\D+/', '', (string) $request->input('billing_npwp'))]);
+        }
+
         $data = $request->validate([
             'address_id' => ['required', 'integer'],
             'shipping' => ['required', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'company_invoice' => ['boolean'],
+            'billing_name' => ['exclude_unless:company_invoice,1', 'required', 'string', 'max:150'],
+            'billing_npwp' => ['exclude_unless:company_invoice,1', 'nullable', 'regex:/^\d{15,16}$/'],
+            'billing_address' => ['exclude_unless:company_invoice,1', 'nullable', 'string', 'max:500'],
+            'billing_email' => ['exclude_unless:company_invoice,1', 'nullable', 'email', 'max:150'],
         ], [
             'address_id.required' => 'Pilih alamat pengiriman terlebih dahulu.',
             'shipping.required' => 'Pilih layanan pengiriman terlebih dahulu.',
+            'billing_name.required' => 'Isi nama perusahaan / instansi untuk invoice.',
+            'billing_npwp.regex' => 'NPWP berisi 15 atau 16 digit angka.',
+        ], [
+            'billing_address' => 'alamat penagihan', 'billing_email' => 'email penagihan',
         ]);
+
+        if (! BillingSettings::current()->buyerTaxInfo()) {
+            $data = Arr::except($data, ['billing_name', 'billing_npwp', 'billing_address', 'billing_email']);
+        }
 
         /** @var Address $address */
         $address = $request->user()->addresses()->findOrFail($data['address_id']);
@@ -91,7 +116,7 @@ class CheckoutController extends Controller
         }
 
         $order = $checkout->placeOrder(
-            $request->user(), $address, $rate, $data['notes'] ?? null, $this->vouchers->appliedCode(),
+            $request->user(), $address, $rate, $data['notes'] ?? null, $this->vouchers->appliedCode(), $data,
         );
 
         return redirect()->route('account.orders.payment', $order)

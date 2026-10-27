@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Billing\InvoiceRenderer;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\PaymentService;
 use App\Services\Shipping\TrackingService;
@@ -103,12 +104,20 @@ class OrderController extends Controller
         ]);
     }
 
-    public function invoice(Request $request, Order $order): View
+    public function invoice(Request $request, Order $order, InvoiceRenderer $invoices): View
     {
         $this->authorizeOwner($request, $order);
         abort_unless($order->paid_at !== null, 404);
 
-        return view('orders.invoice', ['order' => $order->load('items', 'latestPayment')]);
+        return view('orders.invoice', $invoices->data($order) + ['pdfUrl' => route('account.orders.invoice.pdf', $order)]);
+    }
+
+    public function invoicePdf(Request $request, Order $order, InvoiceRenderer $invoices): Response
+    {
+        $this->authorizeOwner($request, $order);
+        abort_unless($order->paid_at !== null, 404);
+
+        return $invoices->pdf($order);
     }
 
     /** Khusus development: tandai pembayaran driver "fake" sebagai berhasil. */

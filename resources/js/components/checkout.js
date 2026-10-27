@@ -18,7 +18,9 @@ export default ({
     voucher = null,
     voucherError = '',
     code = '',
+    billing = {},
 }) => ({
+    billing,
     addressId: addressId ? String(addressId) : '',
     rates,
     error: error || '',
@@ -52,9 +54,43 @@ export default ({
         return cap === null || cap === undefined ? this.shipping : Math.min(cap, this.shipping);
     },
 
-    get total() {
+    // Biaya layanan, PPN & pembulatan: rumus sama dengan App\Services\Billing\PriceCalculator.
+    get serviceFee() {
+        return this.billing.serviceFee || 0;
+    },
+
+    get taxable() {
+        const shipping = this.billing.taxShipping ? Math.max(0, this.shipping - this.shippingDiscount) : 0;
+        return Math.max(0, this.subtotal - this.discount) + this.serviceFee + shipping;
+    },
+
+    get tax() {
+        if (!this.billing.tax || this.taxable <= 0) return 0;
+        const ratio = this.billing.taxDppOther ? 11 / 12 : 1;
+        const rate = this.billing.taxRate;
+        if (this.billing.taxInclusive) {
+            return this.taxable - Math.round(this.taxable / (1 + (rate * ratio) / 100));
+        }
+        return Math.round((Math.round(this.taxable * ratio) * rate) / 100);
+    },
+
+    get beforeRounding() {
         // Sama dengan server: total bayar tidak pernah di bawah MIN_PAYABLE.
-        return Math.max(MIN_PAYABLE, this.subtotal - this.discount + this.shipping - this.shippingDiscount);
+        const tax = this.billing.taxInclusive ? 0 : this.tax;
+        return Math.max(MIN_PAYABLE, this.subtotal - this.discount + this.shipping - this.shippingDiscount + this.serviceFee + tax);
+    },
+
+    get rounding() {
+        const unit = Math.max(1, this.billing.roundingUnit || 1);
+        const amount = this.beforeRounding;
+        const fn = { nearest: Math.round, up: Math.ceil, down: Math.floor }[this.billing.roundingMode];
+        if (!fn) return 0;
+        const rounded = fn(amount / unit) * unit;
+        return rounded > 0 ? rounded - amount : 0;
+    },
+
+    get total() {
+        return this.beforeRounding + this.rounding;
     },
 
     async applyVoucher(code = null) {

@@ -19,6 +19,7 @@
             <x-order-status :status="$order->status" class="px-3 py-1 text-sm" />
             @if ($order->paid_at)
                 <a href="{{ route('account.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Invoice</a>
+                <a href="{{ route('account.orders.invoice.pdf', $order) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4" /> PDF</a>
             @endif
         </div>
     </div>
@@ -51,7 +52,7 @@
                 <div>
                     <p class="flex items-center gap-2 font-bold text-stone-900"><x-icon name="clock" class="size-5 text-amber-600" /> Selesaikan pembayaran</p>
                     <p class="mt-1 text-sm text-stone-600">
-                        Total <span class="font-bold">@rupiah($order->total)</span>
+                        Total <span class="font-bold">@rupiah(\App\Support\OrderSummary::payable($order, $payment?->status === \App\Enums\PaymentStatus::Pending ? $payment : null))</span>
                         · bayar sebelum {{ $order->paymentDeadline()->timezone(config('app.timezone'))->translatedFormat('d M Y, H:i') }}
                     </p>
                     @if ($previousFailed)
@@ -145,10 +146,7 @@
                 @endforeach
             </ul>
             <dl class="space-y-2 border-t border-stone-100 bg-stone-50/50 p-5 text-sm">
-                <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd>@rupiah($order->subtotal)</dd></div>
-                <div class="flex justify-between"><dt class="text-stone-500">Ongkir</dt><dd>@rupiah($order->shipping_cost)</dd></div>
-                <x-order-discounts :order="$order" />
-                <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-bold text-stone-900"><dt>Total</dt><dd>@rupiah($order->total)</dd></div>
+                <x-order-totals :order="$order" />
             </dl>
         </div>
         <div class="space-y-6">
@@ -171,8 +169,11 @@
                     <h2 class="font-bold text-stone-900">Pembayaran</h2>
                     <dl class="mt-3 space-y-2">
                         <div class="flex justify-between"><dt class="text-stone-500">Status</dt><dd class="font-semibold">{{ $payment->status->label() }}</dd></div>
-                        @if ($payment->payment_type)
-                            <div class="flex justify-between"><dt class="text-stone-500">Metode</dt><dd>{{ ucwords(str_replace('_', ' ', $payment->payment_type)) }}</dd></div>
+                        @if ($payment->methodLabel())
+                            <div class="flex justify-between gap-3"><dt class="text-stone-500">Metode</dt><dd class="text-right">{{ $payment->methodLabel() }}</dd></div>
+                        @endif
+                        @if ($order->invoice_number)
+                            <div class="flex justify-between gap-3"><dt class="text-stone-500">No. invoice</dt><dd class="text-right font-mono text-xs font-semibold">{{ $order->invoice_number }}</dd></div>
                         @endif
                         @if ($payment->paid_at)
                             <div class="flex justify-between"><dt class="text-stone-500">Dibayar</dt><dd>{{ $payment->paid_at->translatedFormat('d M Y, H:i') }}</dd></div>

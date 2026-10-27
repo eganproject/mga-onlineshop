@@ -8,9 +8,10 @@
         </style>
     </x-slot:head>
     <div class="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-stone-200 bg-white/90 px-4 py-3 backdrop-blur print:hidden">
-        <p class="text-sm font-semibold text-stone-700">{{ $title }}</p>
-        <div class="flex gap-2">
+        <p class="min-w-0 truncate text-sm font-semibold text-stone-700">{{ $title }}</p>
+        <div class="flex shrink-0 gap-1.5 sm:gap-2">
             <button type="button" onclick="window.close()" class="btn btn-ghost btn-sm">Tutup</button>
+            {{ $actions ?? '' }}
             <button type="button" onclick="window.print()" class="btn btn-primary btn-sm"><x-icon name="printer" class="size-4" /> Cetak</button>
         </div>
     </div>

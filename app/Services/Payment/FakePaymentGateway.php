@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Contracts\PaymentGateway;
+use App\Data\PaymentCharge;
 use App\Data\PaymentUpdate;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
@@ -20,8 +21,10 @@ class FakePaymentGateway implements PaymentGateway
         return 'fake';
     }
 
-    public function createPayment(Order $order, CarbonInterface $expiresAt): Payment
+    public function createPayment(Order $order, CarbonInterface $expiresAt, ?PaymentCharge $charge = null): Payment
     {
+        $charge ??= new PaymentCharge(amount: $order->total);
+
         $attempt = $order->payments()->where('gateway', $this->name())->count() + 1;
         $externalId = 'FAKE-'.$order->code.($attempt > 1 ? '-'.$attempt : '');
 
@@ -30,7 +33,10 @@ class FakePaymentGateway implements PaymentGateway
             'external_id' => $externalId,
             'reference' => $externalId,
             'status' => PaymentStatus::Pending,
-            'amount' => $order->total,
+            'amount' => $charge->amount,
+            'fee' => $charge->fee,
+            'gateway_fee' => $charge->gatewayFee,
+            'method' => $charge->method?->value,
             'expires_at' => $expiresAt,
         ]);
     }

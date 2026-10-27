@@ -139,6 +139,9 @@
                         </p>
                         <p x-show="compareAt" @unless ($product->isOnSale()) x-cloak @endunless class="text-base text-stone-400 line-through" x-text="rupiah(compareAt)">@rupiah($product->compare_at_price)</p>
                     </div>
+                    @if ($taxNote = \App\Services\Billing\BillingSettings::current()->priceNote())
+                        <p class="mt-1 text-xs text-stone-500">{{ $taxNote }}</p>
+                    @endif
 
                     <p class="mt-4 flex items-center gap-2 text-sm">
                         <span class="size-2 rounded-full" :class="stock < 1 ? 'bg-stone-400' : (stock <= {{ $lowStock }} ? 'bg-amber-500' : 'bg-emerald-500')"></span>

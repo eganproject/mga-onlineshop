@@ -9,7 +9,12 @@
         <section class="lg:col-span-3">
             <div class="border border-stone-200 p-5 sm:p-8">
                 <p class="eyebrow text-stone-500">Pembayaran · {{ $order->code }}</p>
-                <p class="display mt-3 text-4xl leading-none sm:text-5xl">@rupiah($order->total)</p>
+                <p class="display mt-3 text-4xl leading-none sm:text-5xl">@rupiah(\App\Support\OrderSummary::payable($order, $payment))</p>
+                @if ($payment?->fee)
+                    <p class="mt-2 text-sm text-stone-500">Termasuk {{ str(config('shop.billing.payment_fee_label') ?: 'biaya transaksi')->lower() }} {{ $payment->methodLabel() }} @rupiah($payment->fee)</p>
+                @elseif ($payment?->method)
+                    <p class="mt-2 text-sm text-stone-500">Metode: {{ $payment->methodLabel() }}</p>
+                @endif
 
                 <div class="mt-5 flex items-start gap-3 bg-sand-50 p-4 text-sm"
                      x-data="{
@@ -39,6 +44,39 @@
                             @endif
                         </div>
                     </div>
+                @endif
+
+                @if ($choosing)
+                    <form method="POST" action="{{ route('account.orders.payment.method', $order) }}" class="mt-6" x-data="{ method: @js(old('method')) }">
+                        @csrf
+                        <h2 class="font-display text-base font-extrabold tracking-tight uppercase">Pilih metode pembayaran</h2>
+                        <p class="mt-1 text-sm text-stone-500">Biaya transaksi berbeda untuk tiap metode. Total akhir terlihat sebelum kamu membayar.</p>
+                        <x-input-error for="method" />
+                        <div class="mt-4 space-y-5">
+                            @foreach ($methodOptions as $group => $options)
+                                <fieldset>
+                                    <legend class="mb-2 text-xs font-bold tracking-wider text-stone-500 uppercase">{{ $group }}</legend>
+                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                        @foreach ($options as $option)
+                                            <label class="flex min-w-0 cursor-pointer items-center gap-3 border p-3 transition"
+                                                   :class="method === '{{ $option['method']->value }}' ? 'border-ink bg-sand-50' : 'border-stone-200 hover:border-stone-300'">
+                                                <input type="radio" name="method" value="{{ $option['method']->value }}" x-model="method" class="text-ink focus:ring-ink/20">
+                                                <x-icon :name="$option['method']->icon()" class="size-5 shrink-0 text-stone-500" />
+                                                <span class="min-w-0 flex-1">
+                                                    <span class="block truncate text-sm font-semibold text-stone-900">{{ $option['method']->label() }}</span>
+                                                    <span class="block text-xs {{ $option['fee'] ? 'text-stone-500' : 'font-semibold text-emerald-700' }}">{{ $option['fee'] ? '+ '.\App\Support\Money::rupiah($option['fee']).' biaya' : 'Tanpa biaya' }}</span>
+                                                </span>
+                                                <span class="shrink-0 text-sm font-bold tabular-nums">@rupiah($option['amount'])</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </fieldset>
+                            @endforeach
+                        </div>
+                        <button class="btn btn-ink btn-pill mt-6 w-full sm:w-auto" :disabled="!method">
+                            <x-icon name="credit-card" class="size-4" /> Lanjut bayar
+                        </button>
+                    </form>
                 @endif
 
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -99,10 +137,10 @@
                     @endforeach
                 </ul>
                 <dl class="space-y-2 border-t border-stone-200 p-5 text-sm">
-                    <div class="flex justify-between"><dt class="text-stone-500">Subtotal</dt><dd>@rupiah($order->subtotal)</dd></div>
-                    <div class="flex justify-between"><dt class="text-stone-500">Ongkir {{ $order->courierLabel() }}</dt><dd>@rupiah($order->shipping_cost)</dd></div>
-                    <x-order-discounts :order="$order" />
-                    <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-bold text-ink"><dt>Total</dt><dd>@rupiah($order->total)</dd></div>
+                    <x-order-totals :order="$order" :payment="$payment" />
+                    @if ($choosing && $methodOptions)
+                        <p class="pt-1 text-xs text-stone-500">Biaya transaksi (bila ada) ditambahkan sesuai metode yang dipilih.</p>
+                    @endif
                 </dl>
             </div>
         </aside>

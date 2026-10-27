@@ -32,6 +32,7 @@
         ],
         'Sistem' => [
             ['Pengaturan Toko', 'admin.store-settings.edit', 'storefront', 'admin.store-settings.*', null],
+            ['Pajak & Biaya', 'admin.billing.edit', 'percent', 'admin.billing.*', null],
             ['Integrasi', 'admin.integrations.index', 'cog', 'admin.integrations.*', null],
             ['Staf', 'admin.staff.index', 'shield', 'admin.staff.*', null],
             ['Log Aktivitas', 'admin.activity.index', 'clock', 'admin.activity.*', null],
