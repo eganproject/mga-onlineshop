@@ -32,7 +32,7 @@ class BillingSettingController extends Controller
         'rounding_mode', 'rounding_unit',
         'invoice_prefix', 'invoice_format', 'invoice_padding', 'invoice_reset', 'invoice_issue_on',
         'company_name', 'company_npwp', 'company_address', 'company_phone', 'company_email',
-        'is_pkp', 'buyer_tax_info', 'invoice_notes', 'invoice_footer', 'signatory_name', 'signatory_title',
+        'is_pkp', 'buyer_tax_info', 'invoice_notes', 'invoice_footer',
     ];
 
     public const BOOLEANS = ['tax_enabled', 'tax_shipping', 'tax_price_note', 'payment_fee_gross_up', 'is_pkp', 'buyer_tax_info'];
@@ -50,7 +50,6 @@ class BillingSettingController extends Controller
         'company_name' => 'Nama penerbit', 'company_npwp' => 'NPWP toko', 'company_address' => 'Alamat penerbit',
         'company_phone' => 'Telepon penerbit', 'company_email' => 'Email penerbit', 'is_pkp' => 'Status PKP',
         'buyer_tax_info' => 'Invoice atas nama perusahaan', 'invoice_notes' => 'Catatan invoice', 'invoice_footer' => 'Kaki invoice',
-        'signatory_name' => 'Nama penanda tangan', 'signatory_title' => 'Jabatan penanda tangan',
     ];
 
     public const ROUNDING_UNITS = [1 => 'Rp1', 100 => 'Rp100', 500 => 'Rp500', 1000 => 'Rp1.000'];
@@ -212,8 +211,6 @@ class BillingSettingController extends Controller
             'buyer_tax_info' => ['boolean'],
             'invoice_notes' => ['nullable', 'string', 'max:1000'],
             'invoice_footer' => ['nullable', 'string', 'max:300'],
-            'signatory_name' => ['nullable', 'string', 'max:80'],
-            'signatory_title' => ['nullable', 'string', 'max:80'],
         ], [
             'invoice_prefix.regex' => 'Awalan hanya boleh huruf, angka, dan tanda hubung.',
             'invoice_format.regex' => 'Format hanya boleh huruf, angka, / - _ . dan token seperti {SEQ}.',

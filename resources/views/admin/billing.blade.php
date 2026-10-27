@@ -260,11 +260,6 @@
                                  placeholder="Mis. Barang yang sudah dibeli dapat ditukar maks. 7 hari dengan menyertakan invoice ini."
                                  tooltip="Tampil di bawah rincian barang, cocok untuk syarat garansi/retur atau info rekening." />
                 <x-form.input name="invoice_footer" label="Kaki invoice" :value="$val('invoice_footer')" maxlength="300" optional />
-                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <x-form.input name="signatory_name" label="Nama penanda tangan" :value="$val('signatory_name')" maxlength="80" optional
-                                  tooltip="Bila diisi, invoice punya kolom “Hormat kami” dengan nama ini. Kosongkan untuk invoice tanpa tanda tangan." />
-                    <x-form.input name="signatory_title" label="Jabatan" :value="$val('signatory_title')" maxlength="80" optional placeholder="Mis. Finance" />
-                </div>
             </section>
         </div>
 
