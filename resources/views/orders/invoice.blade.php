@@ -102,17 +102,6 @@
             </dl>
         </div>
 
-        @if ($signatory)
-            <div class="mt-10 flex justify-end text-center text-sm">
-                <div class="min-w-48">
-                    <p class="text-stone-500">Hormat kami,</p>
-                    <div class="h-16"></div>
-                    <p class="border-t border-stone-300 pt-1 font-semibold">{{ $signatory['name'] ?? $company['name'] }}</p>
-                    @isset($signatory['title'])<p class="text-xs text-stone-500">{{ $signatory['title'] }}</p>@endisset
-                </div>
-            </div>
-        @endif
-
         <footer class="mt-10 border-t border-stone-200 pt-4 text-center text-xs text-stone-400">
             {{ $footer }}
         </footer>

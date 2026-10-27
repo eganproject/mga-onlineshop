@@ -91,8 +91,6 @@ class StoreSettings
         'shop.billing.buyer_tax_info' => 'bool',
         'shop.billing.invoice_notes' => 'string',
         'shop.billing.invoice_footer' => 'string',
-        'shop.billing.signatory_name' => 'string',
-        'shop.billing.signatory_title' => 'string',
 
         // Integrasi (Admin › Integrasi, khusus superadmin).
         'shop.payment.driver' => 'string',

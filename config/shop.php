@@ -186,8 +186,6 @@ return [
         'buyer_tax_info' => true,
         'invoice_notes' => null,
         'invoice_footer' => 'Terima kasih telah berbelanja. Invoice ini dibuat otomatis oleh sistem dan sah tanpa tanda tangan basah.',
-        'signatory_name' => null,
-        'signatory_title' => null,
     ],
 
     'low_stock_threshold' => 5,

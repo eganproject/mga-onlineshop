@@ -44,7 +44,6 @@ class InvoiceRenderer
             },
             'notes' => $settings->get('invoice_notes'),
             'footer' => $settings->get('invoice_footer') ?: 'Terima kasih telah berbelanja di '.config('shop.full_name').'.',
-            'signatory' => array_filter(['name' => $settings->get('signatory_name'), 'title' => $settings->get('signatory_title')]),
         ];
     }
 

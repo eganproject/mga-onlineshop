@@ -146,19 +146,5 @@
             </td>
         </tr>
     </table>
-
-    @if ($signatory)
-        <table style="margin-top: 28px;">
-            <tr>
-                <td style="width: 62%;"></td>
-                <td class="center">
-                    <div class="muted">Hormat kami,</div>
-                    <div style="height: 54px;"></div>
-                    <div class="bold" style="border-top: 1px solid #a8a29e; padding-top: 3px;">{{ $signatory['name'] ?? $company['name'] }}</div>
-                    @isset($signatory['title'])<div class="small muted">{{ $signatory['title'] }}</div>@endisset
-                </td>
-            </tr>
-        </table>
-    @endif
 </body>
 </html>
