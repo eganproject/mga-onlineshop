@@ -66,6 +66,9 @@ class PaymentFlowTest extends TestCase
         [$order] = $this->checkout();
 
         $this->post(route('account.orders.payment.regenerate', $order))->assertSessionHas('success');
+        $this->assertSame([PaymentStatus::Cancelled], $order->payments()->pluck('status')->all());
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'qris']);
 
         $this->assertSame(
             [PaymentStatus::Cancelled, PaymentStatus::Pending],
@@ -85,6 +88,60 @@ class PaymentFlowTest extends TestCase
         $this->assertSame(PaymentStatus::Cancelled, $order->latestPayment->status);
     }
 
+    public function test_payment_page_lists_methods_then_shows_instructions_inline(): void
+    {
+        $product = Product::factory()->create(['stock' => 5]);
+        $customer = User::factory()->create();
+        $address = Address::factory()->for($customer)->create();
+        $this->actingAs($customer)->post(route('cart.store', $product), ['quantity' => 1]);
+        $this->post(route('checkout.store'), ['address_id' => $address->id, 'shipping' => 'jne|REG']);
+        $order = $customer->orders()->firstOrFail();
+
+        $this->assertSame(0, $order->payments()->count(), 'Tagihan dibuat setelah metode dipilih.');
+        $this->get(route('account.orders.payment', $order))
+            ->assertOk()
+            ->assertSee('Pilih metode pembayaran')
+            ->assertSee('BCA Virtual Account')
+            ->assertSee('QRIS')
+            ->assertSee('Tanpa biaya')
+            ->assertDontSee('snap.js', false);
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bni_va']);
+        $payment = $order->latestPayment()->first();
+        $number = $payment->instruction('number');
+        $this->assertNotNull($number);
+
+        $this->get(route('account.orders.payment', $order))
+            ->assertOk()
+            ->assertSee('Nomor Virtual Account BNI')
+            ->assertSee(trim(chunk_split($number, 4, ' ')))
+            ->assertSee('Cara bayar')
+            ->assertSee('Mobile banking BNI')
+            ->assertSee('Ganti metode')
+            ->assertSee('Simulasikan bayar');
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'qris']);
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('FAKE-QRIS-'.$order->code, false)->assertSee('Simpan QR');
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'mandiri_bill']);
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Kode perusahaan')->assertSee('70012');
+    }
+
+    public function test_status_endpoint_reports_payment_for_auto_refresh(): void
+    {
+        [$order] = $this->checkout();
+
+        $this->getJson(route('account.orders.payment.status', $order))->assertOk()->assertJson(['status' => 'pending', 'redirect' => null]);
+
+        $this->post(route('account.orders.simulate-payment', $order));
+
+        $this->getJson(route('account.orders.payment.status', $order))
+            ->assertOk()
+            ->assertJson(['status' => 'paid', 'redirect' => route('account.orders.show', $order)]);
+
+        $this->actingAs(User::factory()->create())->getJson(route('account.orders.payment.status', $order))->assertNotFound();
+    }
+
     /** @return array{Order, User} */
     private function checkout(?Product $product = null, int $quantity = 1): array
     {
@@ -95,6 +152,9 @@ class PaymentFlowTest extends TestCase
         $this->actingAs($customer)->post(route('cart.store', $product), ['quantity' => $quantity]);
         $this->post(route('checkout.store'), ['address_id' => $address->id, 'shipping' => 'jne|REG'])->assertRedirect();
 
-        return [$customer->orders()->latest('id')->firstOrFail(), $customer];
+        $order = $customer->orders()->latest('id')->firstOrFail();
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va'])->assertRedirect(route('account.orders.payment', $order));
+
+        return [$order, $customer];
     }
 }

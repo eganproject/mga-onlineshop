@@ -80,6 +80,85 @@ enum PaymentMethod: string
         };
     }
 
+    public const CHANNEL_VA = 'va';
+
+    public const CHANNEL_BILL = 'bill';
+
+    public const CHANNEL_QR = 'qr';
+
+    public const CHANNEL_APP = 'app';
+
+    public const CHANNEL_STORE = 'store';
+
+    public const CHANNEL_SNAP = 'snap';
+
+    /**
+     * Cara tagihan ditampilkan di halaman bayar: nomor VA, kode bayar
+     * Mandiri, QR, tombol buka aplikasi, kode gerai, atau formulir Midtrans
+     * yang disematkan (kartu & PayLater perlu formulir aman Midtrans).
+     */
+    public function channel(): string
+    {
+        return match ($this) {
+            self::BcaVa, self::BniVa, self::BriVa, self::PermataVa, self::CimbVa => self::CHANNEL_VA,
+            self::MandiriBill => self::CHANNEL_BILL,
+            self::Qris, self::Gopay => self::CHANNEL_QR,
+            self::Shopeepay => self::CHANNEL_APP,
+            self::Indomaret, self::Alfamart => self::CHANNEL_STORE,
+            self::CreditCard, self::Akulaku, self::Kredivo => self::CHANNEL_SNAP,
+        };
+    }
+
+    /** Teks pada lencana metode di daftar pilihan. */
+    public function badge(): string
+    {
+        return match ($this) {
+            self::Qris => 'QRIS',
+            self::Gopay => 'GoPay',
+            self::Shopeepay => 'SPay',
+            self::BcaVa => 'BCA',
+            self::BniVa => 'BNI',
+            self::BriVa => 'BRI',
+            self::PermataVa => 'Permata',
+            self::CimbVa => 'CIMB',
+            self::MandiriBill => 'Mandiri',
+            self::CreditCard => 'Kartu',
+            self::Indomaret => 'Indomaret',
+            self::Alfamart => 'Alfamart',
+            self::Akulaku => 'Akulaku',
+            self::Kredivo => 'Kredivo',
+        };
+    }
+
+    /** Nama bank/aplikasi tanpa kata "Virtual Account". */
+    public function provider(): string
+    {
+        return match ($this) {
+            self::BcaVa => 'BCA',
+            self::BniVa => 'BNI',
+            self::BriVa => 'BRI',
+            self::PermataVa => 'Permata',
+            self::CimbVa => 'CIMB Niaga',
+            self::MandiriBill => 'Mandiri',
+            default => $this->label(),
+        };
+    }
+
+    /** Keterangan singkat di bawah nama metode. */
+    public function hint(): string
+    {
+        return match ($this) {
+            self::Qris => 'Scan dari aplikasi bank atau e-wallet apa pun',
+            self::Gopay => 'Scan QR atau buka aplikasi Gojek/GoPay',
+            self::Shopeepay => 'Dibuka langsung di aplikasi Shopee (dari HP)',
+            self::BcaVa, self::BniVa, self::BriVa, self::PermataVa, self::CimbVa => 'Transfer lewat m-banking, ATM, atau internet banking',
+            self::MandiriBill => "Bayar lewat Livin' by Mandiri atau ATM Mandiri",
+            self::CreditCard => 'Visa, Mastercard, JCB, Amex',
+            self::Indomaret, self::Alfamart => 'Bayar tunai di kasir dengan kode pembayaran',
+            self::Akulaku, self::Kredivo => 'Bayar nanti atau cicil lewat akun '.$this->label(),
+        };
+    }
+
     /** Kode `enabled_payments` Midtrans Snap untuk metode ini. */
     public function snapCode(): string
     {

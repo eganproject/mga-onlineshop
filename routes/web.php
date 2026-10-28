@@ -91,6 +91,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
             Route::get('/', 'show')->name('');
             Route::get('/selesai', 'finish')->name('.finish')->middleware('throttle:20,1');
             Route::post('/cek', 'check')->name('.check')->middleware('throttle:10,1');
+            Route::get('/status', 'status')->name('.status')->middleware('throttle:30,1');
             Route::post('/baru', 'regenerate')->name('.regenerate')->middleware('throttle:5,1');
             Route::post('/metode', 'choose')->name('.method')->middleware('throttle:10,1');
         });

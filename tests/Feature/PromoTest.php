@@ -75,6 +75,7 @@ class PromoTest extends TestCase
         $this->assertSame(200000 - 30000 + $order->shipping_cost, $order->total);
         $this->assertSame($voucher->id, $order->voucher_id);
         $this->assertSame('HEMAT20', $order->voucher_code);
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'qris']);
         $this->assertSame($order->total, $order->latestPayment->amount);
         $this->assertNull(app(VoucherService::class)->appliedCode(), 'Voucher dilepas setelah pesanan dibuat.');
 
@@ -217,7 +218,7 @@ class PromoTest extends TestCase
     public function test_midtrans_items_include_voucher_discount(): void
     {
         config(['shop.payment.driver' => 'midtrans', 'services.midtrans.server_key' => 'SB-Mid-server-test']);
-        Http::fake(['*/snap/v1/transactions' => Http::response(['token' => 'snap-1', 'redirect_url' => 'https://pay.test/1'], 201)]);
+        Http::fake(['*/v2/charge' => Http::response(['status_code' => '201', 'transaction_status' => 'pending', 'va_numbers' => [['bank' => 'bca', 'va_number' => '123']]], 201)]);
 
         Voucher::factory()->create(['code' => 'POTONG', 'value' => 15000]);
         $this->fillCart();
@@ -226,6 +227,7 @@ class PromoTest extends TestCase
 
         $order = Order::first();
         $this->assertSame(15000, $order->discount);
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va'])->assertRedirect(route('account.orders.payment', $order));
 
         Http::assertSent(fn (Request $request) => $request['transaction_details']['gross_amount'] === $order->total
             && array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $request['item_details'])) === $order->total

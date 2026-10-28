@@ -78,28 +78,28 @@ class PaymentService
     }
 
     /**
-     * Tagihan untuk halaman pembayaran: pakai yang aktif, atau buat baru bila
-     * belum ada / sebelumnya gagal / kedaluwarsa. Null bila pembeli harus
-     * memilih metode bayar dulu.
+     * Tagihan aktif untuk halaman pembayaran. Null bila belum ada (atau
+     * sebelumnya gagal/kedaluwarsa): pembeli memilih metode bayar di halaman
+     * toko, lalu tagihan dibuat lewat choose().
      *
      * @throws PaymentUnavailableException
      */
     public function preparePayment(Order $order): ?Payment
     {
-        return $this->withOrderLock($order, function () use ($order) {
-            if ($payment = $this->activePayment($order)) {
-                return $payment;
-            }
+        if ($payment = $this->activePayment($order)) {
+            return $payment;
+        }
 
-            $this->ensureCanCreate($order);
+        $this->ensureCanCreate($order);
 
-            return $this->requiresMethodChoice() ? null : $this->createFor($order);
-        });
+        return null;
     }
 
     /**
      * Pembeli memilih metode bayar di halaman toko: tagihan lama dibatalkan,
      * tagihan baru dibuat khusus metode itu (dengan biaya transaksinya).
+     * Bila gateway menolak, tagihan lama tetap dibatalkan dan pembeli bisa
+     * memilih metode lain.
      *
      * @throws PaymentUnavailableException
      */
@@ -123,9 +123,9 @@ class PaymentService
     }
 
     /**
-     * Buat link pembayaran baru (mis. ingin ganti metode bayar). Tagihan
-     * pending sebelumnya dicek dulu ke gateway, lalu dibatalkan. Null bila
-     * pembeli perlu memilih metode lagi di halaman toko.
+     * Batalkan tagihan pending supaya pembeli bisa memilih metode lain.
+     * Tagihan dicek dulu ke gateway (jangan batalkan yang ternyata sudah
+     * dibayar). Selalu null: tagihan baru dibuat setelah metode dipilih.
      *
      * @throws PaymentUnavailableException
      */
@@ -138,7 +138,7 @@ class PaymentService
             $this->ensureCanCreate($order);
             $this->voidPendingPayments($order);
 
-            return $this->requiresMethodChoice() ? null : $this->createFor($order);
+            return null;
         });
     }
 
