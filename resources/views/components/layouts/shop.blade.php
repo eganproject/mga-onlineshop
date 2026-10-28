@@ -27,7 +27,7 @@
             <div class="shop-container grid h-9 grid-cols-[auto_1fr_auto] items-center gap-3 text-[11px] sm:text-xs">
                 <div class="hidden items-center gap-5 text-white/70 lg:flex">
                     <a href="{{ $user?->isAdmin() ? route('admin.orders.index') : ($user ? route('account.orders.index') : route('login')) }}" class="flex items-center gap-1.5 transition hover:text-white">
-                        <x-icon name="truck" class="size-3.5" /> Lacak pesanan
+                        <x-icon name="truck" class="size-3.5" /> Pesanan saya
                     </a>
                     @if (config('shop.whatsapp'))
                         <a href="https://wa.me/{{ config('shop.whatsapp') }}" target="_blank" rel="noopener" class="flex items-center gap-1.5 transition hover:text-white">
@@ -341,7 +341,7 @@
                         <div>
                             <h3 class="eyebrow text-white/40">Bantuan</h3>
                             <ul class="mt-3 text-sm text-white/80 lg:mt-4 lg:space-y-2.5">
-                                <li><a href="{{ $user?->isAdmin() ? route('admin.orders.index') : ($user ? route('account.orders.index') : route('login')) }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Lacak pesanan</a></li>
+                                <li><a href="{{ $user?->isAdmin() ? route('admin.orders.index') : ($user ? route('account.orders.index') : route('login')) }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Pesanan saya</a></li>
                                 <li><a href="{{ $accountUrl }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Akun saya</a></li>
                                 <li><a href="{{ route('cart.index') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Keranjang</a></li>
                                 <li><a href="{{ route('articles.index') }}" class="inline-flex min-h-11 items-center hover:text-white hover:underline hover:underline-offset-4 lg:min-h-0">Artikel &amp; tips</a></li>

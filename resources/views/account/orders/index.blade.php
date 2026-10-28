@@ -54,7 +54,6 @@
                         <a href="{{ route('account.orders.show', $order) }}" class="btn {{ in_array($order->status, [\App\Enums\OrderStatus::PendingPayment, \App\Enums\OrderStatus::Shipped, \App\Enums\OrderStatus::Delivered], true) ? 'btn-primary' : 'btn-secondary' }}">
                             {{ match ($order->status) {
                                 \App\Enums\OrderStatus::PendingPayment => 'Bayar',
-                                \App\Enums\OrderStatus::Shipped, \App\Enums\OrderStatus::Delivered => 'Lacak',
                                 default => 'Detail',
                             } }}
                         </a>

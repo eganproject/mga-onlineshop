@@ -18,7 +18,7 @@ Nomor resi: **{{ $order->tracking_number }}**
 @endif
 
 <x-mail::button :url="route('account.orders.show', $order)">
-Lacak paket
+Lihat pesanan
 </x-mail::button>
 @break
 @case($S::Delivered)

@@ -1,4 +1,4 @@
-{{-- Hasil lacak resi. Dimuat lewat fetch ke dalam <x-order-tracking-panel>. --}}
+{{-- Hasil lacak resi. Dimuat lewat fetch ke dalam <x-order-tracking-panel> (hanya di admin). --}}
 @if (! $result)
     <div class="flex gap-3 rounded-2xl bg-stone-50 p-4 text-sm text-stone-600">
         <x-icon name="info" class="size-5 shrink-0 text-stone-400" />

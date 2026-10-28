@@ -182,7 +182,6 @@ class OrderManagementTest extends TestCase
 
         $other = User::factory()->create();
         $this->actingAs($other)->post(route('account.orders.complete', $order))->assertNotFound();
-        $this->actingAs($other)->get(route('account.orders.tracking', $order))->assertNotFound();
         $this->actingAs($other)->get(route('account.orders.invoice', $order))->assertNotFound();
     }
 
@@ -204,16 +203,19 @@ class OrderManagementTest extends TestCase
             ->assertSessionHasErrors('reason');
     }
 
-    public function test_customer_order_pages_show_timeline_and_tracking(): void
+    public function test_customer_order_pages_show_timeline_and_tracking_number(): void
     {
         $order = $this->makeOrder(OrderStatus::Shipped, ['tracking_number' => 'JNE555', 'shipped_at' => now()->subHours(6)]);
 
         $this->actingAs($order->user);
-        $this->get(route('account.orders.index'))->assertOk()->assertSee('Lacak')->assertSee('JNE555');
+        $this->get(route('account.orders.index'))->assertOk()->assertSee('JNE555')->assertDontSee('Lacak');
         $this->get(route('account.orders.index', ['q' => $order->code]))->assertOk()->assertSee($order->code);
+        // Pelanggan hanya melihat kurir + nomor resi, tanpa panel lacak paket.
         $this->get(route('account.orders.show', $order))->assertOk()
-            ->assertSee('Riwayat pesanan')->assertSee('Pesanan diterima')->assertSee('Sampai');
-        $this->get(route('account.orders.tracking', $order))->assertOk()->assertSee('Paket diproses di pusat sortir');
+            ->assertSee('Riwayat pesanan')->assertSee('Pesanan diterima')->assertSee('Sampai')
+            ->assertSee('JNE555')->assertSee('Salin resi')
+            ->assertDontSee('Lacak paket')->assertDontSee('/lacak');
+        $this->get("/akun/pesanan/{$order->code}/lacak")->assertNotFound();
         $this->get(route('account.orders.invoice', $order))->assertOk()->assertSee($order->code);
     }
 
@@ -262,7 +264,7 @@ class OrderManagementTest extends TestCase
         $order = $this->makeOrder(OrderStatus::Shipped, ['tracking_number' => 'X1', 'shipped_at' => now()]);
 
         $this->assertNull(app(TrackingService::class)->track($order));
-        $this->actingAs($order->user)->get(route('account.orders.tracking', $order))
+        $this->actingAs($this->admin)->get(route('admin.orders.tracking', $order))
             ->assertOk()->assertSee('Info pelacakan belum tersedia');
     }
 
