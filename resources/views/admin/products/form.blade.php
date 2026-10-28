@@ -229,6 +229,13 @@
                     <p class="text-xs text-stone-400">Foto varian dipilih dari foto yang sudah tersimpan. Harga produk di katalog otomatis memakai varian aktif termurah.</p>
                 </div>
             </div>
+
+            <x-admin.seo-fields :model="$product"
+                :url="url('/produk').'/'.($product->slug ?: 'nama-produk')"
+                :title-fallback="$product->name ?: 'Nama produk'"
+                :description-fallback="$editing ? $product->metaDescription() : 'Kosong = memakai awal deskripsi produk.'"
+                :title-tips="['Mulai dengan kata yang dicari pembeli, lalu ukuran/bahan, mis. “Frame Akrilik A4 Dinding – Bening 3mm”.']"
+                :description-tips="['Sebut keunggulan & alasan beli: harga gudang, bisa grosir, kirim ke seluruh Indonesia.']" />
         </div>
 
         <div class="space-y-6">

@@ -8,7 +8,8 @@
         @csrf
         @if ($editing) @method('PUT') @endif
 
-        <div class="card space-y-5 p-6 lg:col-span-2">
+        <div class="min-w-0 space-y-6 lg:col-span-2">
+        <div class="card space-y-5 p-6">
             <div>
                 <label for="name" class="label">Nama kategori</label>
                 <input id="name" name="name" value="{{ old('name', $category->name) }}" required class="input @error('name') input-error @enderror">
@@ -28,8 +29,16 @@
                 <x-input-error for="slug" />
             </div>
             <x-form.textarea name="description" label="Deskripsi" optional :value="$category->description" rows="4" maxlength="1000"
-                tooltip="Dipakai sebagai deskripsi halaman katalog kategori ini di hasil pencarian Google dan saat link dibagikan."
-                tooltip-tips="1–2 kalimat (±150 karakter) yang menyebut jenis produk & keunggulan toko." />
+                hint="Tampil sebagai teks pengantar di atas daftar produk kategori ini."
+                tooltip="Teks pengantar di halaman kategori. Bila Deskripsi SEO di bawah kosong, kalimat awalnya juga dipakai di hasil pencarian Google."
+                :tooltip-tips="['2–3 kalimat yang menyebut jenis produk, kegunaan, dan keunggulan toko.', 'Tulis untuk pembeli, bukan deretan kata kunci.']" />
+        </div>
+
+        <x-admin.seo-fields :model="$category"
+            :url="url('/produk').'?kategori='.($category->slug ?: 'nama-kategori')"
+            :title-fallback="$category->name ?: 'Nama kategori'"
+            :description-fallback="$editing ? $category->metaDescription() : 'Kosong = memakai deskripsi kategori.'"
+            :title-tips="['Pakai kata yang dicari pembeli, mis. “Tripod Banner & X Banner Murah”.']" />
         </div>
 
         <div class="space-y-6">

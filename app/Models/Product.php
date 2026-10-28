@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'category_id', 'name', 'slug', 'sku', 'description', 'price', 'compare_at_price',
+    'category_id', 'name', 'slug', 'sku', 'description', 'meta_title', 'meta_description', 'price', 'compare_at_price',
     'weight', 'variant_label', 'is_active', 'is_featured',
 ])]
 class Product extends Model
@@ -188,9 +188,19 @@ class Product extends Model
         };
     }
 
+    /** Judul di hasil pencarian Google (diisi admin, atau nama produk). */
+    public function seoTitle(): string
+    {
+        return $this->meta_title ?: $this->name;
+    }
+
     /** Ringkasan singkat untuk meta description / Open Graph. */
     public function metaDescription(): string
     {
+        if (filled($this->meta_description)) {
+            return $this->meta_description;
+        }
+
         $text = trim(preg_replace('/\s+/', ' ', strip_tags((string) $this->description)));
 
         return Str::limit($text ?: $this->name.' original di '.config('shop.full_name').'. '.config('shop.tagline').'.', 155);

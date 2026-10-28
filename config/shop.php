@@ -218,6 +218,13 @@ return [
         'indexing' => (bool) env('SEO_INDEXING', true),
         'description' => env('SEO_DESCRIPTION', 'Belanja perlengkapan promosi & display akrilik: tripod banner, X banner, frame akrilik, tempat brosur, standing sign, light box. Harga gudang, kirim ke seluruh Indonesia.'),
         'default_image' => env('SEO_DEFAULT_IMAGE') ?: 'images/brand/og-default.png',
+        // Judul beranda di hasil Google. Kosong = "Nama lengkap – tagline".
+        'home_title' => env('SEO_HOME_TITLE'),
+        // Kode verifikasi kepemilikan situs (isi "content" dari tag meta).
+        'google_verification' => env('GOOGLE_SITE_VERIFICATION'),
+        'bing_verification' => env('BING_SITE_VERIFICATION'),
+        // Google Analytics 4 (G-XXXXXXX). Hanya dimuat di halaman toko, bukan admin.
+        'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
     ],
 
 ];

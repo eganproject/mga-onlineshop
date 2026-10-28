@@ -25,11 +25,19 @@
     $openParentId = $activeCategory ? ($activeCategory->parent_id ?? $activeCategory->id) : null;
 @endphp
 @php
-    $metaDescription = $activeCategory
-        ? ($activeCategory->description ?: 'Belanja '.$activeCategory->name.' original di '.config('shop.full_name').'. Harga terjangkau, kirim ke seluruh Indonesia.')
-        : null;
+    $listingUrl = $activeCategory ? route('products.index', ['kategori' => $activeCategory->slug]) : route('products.index');
+    $structuredData = \App\Support\StructuredData::script(
+        \App\Support\StructuredData::collection($activeCategory?->seoTitle() ?? 'Semua Produk', $listingUrl, $products->getCollection()),
+        \App\Support\StructuredData::breadcrumbs(array_values(array_filter([
+            ['Beranda', route('home')],
+            ['Produk', route('products.index')],
+            $activeCategory?->parent ? [$activeCategory->parent->name, route('products.index', ['kategori' => $activeCategory->parent->slug])] : null,
+            $activeCategory ? [$activeCategory->name, $listingUrl] : null,
+        ]))),
+    );
 @endphp
-<x-layouts.shop :title="$activeCategory?->name ?? 'Semua Produk'" :description="$metaDescription">
+<x-layouts.shop :title="$activeCategory?->seoTitle() ?? 'Semua Produk'" :description="$activeCategory?->metaDescription()">
+    <x-slot:head>{!! $structuredData !!}</x-slot:head>
     <div x-data="{ filters: false }">
         {{-- Judul --}}
         <section class="border-b border-stone-200 bg-sand-50">
@@ -47,6 +55,9 @@
                     <h1 class="display text-4xl leading-[0.92] break-words sm:text-6xl">{{ $heading }}</h1>
                     <p class="text-sm text-stone-500">{{ $products->total() }} produk</p>
                 </div>
+                @if ($activeCategory?->description && ! request('q'))
+                    <p class="mt-4 max-w-3xl text-sm leading-relaxed whitespace-pre-line text-stone-600 sm:text-[15px]">{{ $activeCategory->description }}</p>
+                @endif
             </div>
         </section>
 

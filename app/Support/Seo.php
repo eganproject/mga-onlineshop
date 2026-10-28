@@ -37,4 +37,21 @@ class Seo
             && ! $request->hasAny(self::FILTER_PARAMS)
             && ! app()->isDownForMaintenance();
     }
+
+    /** Isi <title> beranda: diatur di Admin › SEO, atau "Nama lengkap – tagline". */
+    public static function homeTitle(): string
+    {
+        return config('shop.seo.home_title')
+            ?: trim(config('shop.full_name').(config('shop.tagline') ? ' – '.config('shop.tagline') : ''));
+    }
+
+    /** ID Google Analytics 4 yang valid (G-XXXX), atau null. */
+    public static function analyticsId(): ?string
+    {
+        $id = strtoupper(trim((string) config('shop.seo.analytics_id')));
+
+        return preg_match(self::ANALYTICS_PATTERN, $id) ? $id : null;
+    }
+
+    public const ANALYTICS_PATTERN = '/^G-[A-Z0-9]{4,20}$/';
 }

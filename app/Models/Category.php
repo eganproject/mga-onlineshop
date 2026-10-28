@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-#[Fillable(['parent_id', 'name', 'slug', 'description', 'image_path', 'is_active', 'sort_order'])]
+#[Fillable(['parent_id', 'name', 'slug', 'description', 'meta_title', 'meta_description', 'image_path', 'is_active', 'sort_order'])]
 class Category extends Model
 {
     use HasFactory;
@@ -65,5 +66,20 @@ class Category extends Model
     public function imageUrl(): ?string
     {
         return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
+
+    /** Judul di hasil pencarian Google (diisi admin, atau nama kategori). */
+    public function seoTitle(): string
+    {
+        return $this->meta_title ?: $this->name;
+    }
+
+    /** Deskripsi di hasil pencarian: isian SEO, deskripsi kategori, atau kalimat bawaan. */
+    public function metaDescription(): string
+    {
+        $text = $this->meta_description
+            ?: trim(preg_replace('/\s+/', ' ', strip_tags((string) $this->description)));
+
+        return Str::limit($text ?: 'Belanja '.$this->name.' di '.config('shop.full_name').'. Harga gudang, kirim ke seluruh Indonesia.', 160);
     }
 }
