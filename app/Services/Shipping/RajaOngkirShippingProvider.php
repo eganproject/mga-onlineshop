@@ -52,19 +52,30 @@ class RajaOngkirShippingProvider implements ShippingProvider
             throw new RuntimeException('SHOP_ORIGIN_DISTRICT_ID belum diatur.');
         }
 
+        return $this->quote($this->originId, $districtId, $weight, $this->couriers);
+    }
+
+    /**
+     * Ongkir untuk daftar kurir tertentu (dipakai juga untuk rekomendasi kurir).
+     *
+     * @param  list<string>  $couriers
+     * @return list<ShippingRate>
+     */
+    public function quote(string $origin, string $destination, int $weight, array $couriers): array
+    {
         $data = $this->client()
             ->asForm()
             ->post('/calculate/district/domestic-cost', [
-                'origin' => $this->originId,
-                'destination' => $districtId,
+                'origin' => $origin,
+                'destination' => $destination,
                 'weight' => max(1, $weight),
-                'courier' => implode(':', $this->couriers),
+                'courier' => implode(':', $couriers),
                 'price' => 'lowest',
             ])
             ->throw()
             ->json('data', []);
 
-        return collect($data)
+        return collect(is_array($data) ? $data : [])
             ->filter(fn ($row) => is_array($row) && isset($row['code'], $row['service'], $row['cost']))
             ->map(fn (array $row) => new ShippingRate(
                 courier: mb_strtolower($row['code']),
