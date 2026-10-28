@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\OrderStatus;
 use App\Enums\ReviewStatus;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
+use App\Services\Reviews\DemoRatingBooster;
 use App\Services\Reviews\ReviewService;
+use Database\Seeders\DemoReviewSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -46,6 +50,46 @@ class DemoRatingsCommandTest extends TestCase
         $this->assertSame(1, $real->refresh()->rating);
         $this->assertSame('Ulasan lama', $real->body);
         $this->assertSame(3.0, $product->refresh()->rating_avg);
+
+        // Di situs demo, --all ikut menaikkan ulasan akun lain (mis. akun uji coba).
+        $this->artisan('shop:demo-ratings', ['--all' => true, '--force' => true])->assertSuccessful();
+        $this->assertSame(5, $real->refresh()->rating);
+        $this->assertSame(5.0, $product->refresh()->rating_avg);
+    }
+
+    public function test_seeder_raises_its_own_reviews_from_any_customer(): void
+    {
+        $product = Product::factory()->create();
+        $customer = User::factory()->create(['email' => 'uji@gmail.com']);
+        $order = $customer->orders()->create([
+            'code' => Order::generateCode(),
+            'status' => OrderStatus::Completed,
+            'subtotal' => $product->price,
+            'total' => $product->price,
+            'recipient_name' => $customer->name,
+            'recipient_phone' => '08123',
+            'shipping_address' => 'Jl. Contoh',
+            'completed_at' => now()->subDays(5),
+        ]);
+        $order->items()->create([
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'price' => $product->price,
+            'quantity' => 1,
+            'subtotal' => $product->price,
+        ]);
+
+        // Seeder acak (~45% pembeli mengulas, bintang 4 atau 5): ulangi sampai ada ulasan.
+        for ($i = 0; $i < 100 && ! ProductReview::exists(); $i++) {
+            (new DemoReviewSeeder)->run();
+        }
+        $this->assertTrue(ProductReview::exists());
+        $this->assertSame(5.0, $product->refresh()->rating_avg, 'Satu-satunya ulasan dinaikkan bila bintang 4');
+
+        // Ulasan akun lain yang bukan buatan seeder tidak ikut diubah.
+        $other = $this->review($product, 'asli@gmail.com', 2);
+        app(DemoRatingBooster::class)->boost(4.7, [$product->id], reviewIds: []);
+        $this->assertSame(2, $other->refresh()->rating);
     }
 
     public function test_dry_run_and_settings_are_untouched(): void

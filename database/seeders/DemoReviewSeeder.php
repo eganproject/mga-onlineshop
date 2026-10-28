@@ -50,6 +50,7 @@ class DemoReviewSeeder extends Seeder
             ->get();
 
         $touched = [];
+        $created = [];
         foreach ($items as $i => $item) {
             // Kira-kira 45% pembeli menulis ulasan, satu ulasan per pelanggan per produk.
             if (random_int(1, 100) > 45) {
@@ -78,12 +79,14 @@ class DemoReviewSeeder extends Seeder
             ])->save();
 
             $touched[$item->product_id] = true;
+            $created[] = $review->id;
         }
 
         $reviews = app(ReviewService::class);
         Product::whereKey(array_keys($touched))->get()->each(fn (Product $product) => $reviews->syncSummary($product));
 
-        // Produk dengan sedikit ulasan bisa kebetulan dapat banyak bintang 4.
-        app(DemoRatingBooster::class)->boost(self::MIN_AVERAGE, array_keys($touched));
+        // Produk dengan sedikit ulasan bisa kebetulan dapat banyak bintang 4. Semua
+        // ulasan buatan seeder ini boleh dinaikkan, siapa pun akun pembelinya.
+        app(DemoRatingBooster::class)->boost(self::MIN_AVERAGE, array_keys($touched), reviewIds: $created);
     }
 }
