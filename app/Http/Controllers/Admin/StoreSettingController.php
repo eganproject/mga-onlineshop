@@ -6,7 +6,9 @@ use App\Exceptions\ShippingUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Services\Activity\ActivityLogger;
 use App\Services\Settings\StoreSettings;
+use App\Services\Shipping\CourierRecommender;
 use App\Services\Shipping\ShippingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -69,7 +71,9 @@ class StoreSettingController extends Controller
                     ->map(fn (string $key) => config('shop.shipping.'.$key))->all(),
             'defaults' => collect(self::FORM)->map(fn (string $key) => $this->settings->default($key))->all(),
             'couriers' => StoreSettings::COURIERS,
+            'trackableCouriers' => StoreSettings::TRACKABLE_COURIERS,
             'shippingDriver' => config('shop.shipping.driver'),
+            'canRecommend' => CourierRecommender::available(),
         ]);
     }
 
@@ -136,6 +140,28 @@ class StoreSettingController extends Controller
         }
 
         return back()->with('success', $changes ? 'Pengaturan toko disimpan.' : 'Tidak ada perubahan.');
+    }
+
+    /** Rekomendasi kurir dari RajaOngkir untuk kecamatan asal (terpilih di form atau tersimpan). */
+    public function couriers(Request $request, CourierRecommender $recommender): JsonResponse
+    {
+        $data = $request->validate([
+            'province_id' => ['nullable', 'string', 'max:20', 'regex:/^\d+$/'],
+            'district_id' => ['nullable', 'string', 'max:20', 'regex:/^\d+$/'],
+        ]);
+        $origin = $data['district_id'] ?? null;
+        $province = $origin ? ($data['province_id'] ?? null) : null;
+        $origin = $origin ?: (string) config('shop.shipping.origin_district_id');
+
+        if ($origin === '' && CourierRecommender::available()) {
+            return response()->json(['message' => 'Pilih kecamatan asal dulu.'], 422);
+        }
+
+        try {
+            return response()->json($recommender->recommend($origin, $request->boolean('refresh'), $province));
+        } catch (ShippingUnavailableException $e) {
+            return response()->json(['message' => $e->getMessage()], 503);
+        }
     }
 
     /** @return array<string, string> */

@@ -102,22 +102,54 @@
                 <p x-show="error" x-cloak x-text="error" class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"></p>
                 <p class="hint">Biarkan seperti semula bila kecamatan asal tidak berubah.</p>
 
-                <div>
-                    <div class="label-row">
-                        <p class="label">Kurir yang ditawarkan di checkout</p>
-                        <x-tooltip label="Kurir" text="Hanya kurir yang dicentang yang muncul sebagai pilihan ongkir pelanggan."
-                                   tips="Pilih kurir yang benar-benar melayani pickup/drop-off di dekat gudang. Terlalu banyak pilihan membuat checkout lebih lambat." />
+                <div x-data="courierRecommendation({ url: @js(route('admin.store-settings.couriers')) })">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="label-row">
+                            <p class="label">Kurir yang ditawarkan di checkout</p>
+                            <x-tooltip label="Kurir" text="Hanya kurir yang dicentang yang muncul sebagai pilihan ongkir pelanggan. Daftar ini = semua kurir yang didukung RajaOngkir."
+                                       :tips="['Klik “Cek rekomendasi” untuk melihat kurir yang benar-benar punya tarif dari kecamatan asal (ke sekitar gudang & ke kota besar di provinsi lain).', 'Pilih kurir yang melayani pickup/drop-off di dekat gudang. Terlalu banyak pilihan membuat checkout lebih lambat.']" />
+                        </div>
+                        @if ($canRecommend)
+                            <button type="button" class="btn btn-secondary btn-sm" x-on:click="check()" x-bind:disabled="loading">
+                                <span x-show="!loading"><x-icon name="sparkles" class="size-4" /></span>
+                                <span x-show="loading" x-cloak class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                                <span x-text="loading ? 'Mengecek tarif…' : 'Cek rekomendasi RajaOngkir'">Cek rekomendasi RajaOngkir</span>
+                            </button>
+                        @endif
                     </div>
-                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+
+                    <div x-show="result && result.recommended.length" x-cloak class="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-50 p-3 text-xs text-brand-800">
+                        <p>
+                            <span class="font-semibold" x-text="result ? result.recommended.length + ' kurir direkomendasikan' : ''"></span>
+                            <span x-text="result ? '— punya tarif dari kecamatan asal ke ' + result.destinations.join(' & ') + '. Dicek ' + checkedAt() + '.' : ''"></span>
+                        </p>
+                        <span class="flex gap-2">
+                            <button type="button" class="btn btn-primary btn-sm" x-on:click="applyRecommended()">Pilih yang direkomendasikan</button>
+                            <button type="button" class="btn btn-ghost btn-sm" x-on:click="check(true)" x-bind:disabled="loading">Cek ulang</button>
+                        </span>
+                    </div>
+                    <p x-show="message" x-cloak x-text="message" class="mt-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"></p>
+
+                    <div class="mt-2 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-3">
                         @foreach ($couriers as $code => $label)
-                            <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-stone-200 px-3 py-2.5 text-sm font-semibold text-stone-700 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
-                                <input type="checkbox" name="couriers[]" value="{{ $code }}" class="checkbox" @checked(in_array($code, $selectedCouriers, true))>
-                                {{ $label }}
+                            <label class="flex cursor-pointer items-start gap-2.5 rounded-xl border border-stone-200 px-3 py-2.5 text-sm transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+                                   x-bind:class="info(@js($code)) && !info(@js($code)).available && 'opacity-60'">
+                                <input type="checkbox" name="couriers[]" value="{{ $code }}" class="checkbox mt-0.5" @checked(in_array($code, $selectedCouriers, true))>
+                                <span class="min-w-0">
+                                    <span class="flex flex-wrap items-center gap-1.5 font-semibold text-stone-700">
+                                        {{ $label }}
+                                        <span x-show="isRecommended(@js($code))" x-cloak class="badge bg-accent-100 text-accent-700">Rekomendasi</span>
+                                    </span>
+                                    <span class="block text-[11px] text-stone-400" x-show="!info(@js($code))">{{ in_array($code, $trackableCouriers, true) ? 'Ongkir + lacak resi' : 'Ongkir saja (resi tidak bisa dilacak otomatis)' }}</span>
+                                    <span class="block text-[11px] text-stone-500" x-show="info(@js($code))" x-cloak x-text="summary(@js($code))"></span>
+                                </span>
                             </label>
                         @endforeach
                     </div>
                     @if ($shippingDriver === 'fake')
-                        <p class="mt-1.5 text-xs text-stone-400">Mode simulasi hanya punya tarif contoh JNE, SiCepat, J&T, POS, dan TIKI.</p>
+                        <p class="mt-1.5 text-xs text-stone-400">Mode simulasi hanya punya tarif contoh JNE, SiCepat, J&T, POS, dan TIKI. Rekomendasi kurir aktif setelah RajaOngkir diatur di Admin › Integrasi.</p>
+                    @elseif (! $canRecommend)
+                        <p class="mt-1.5 text-xs text-stone-400">Isi API key RajaOngkir di Admin › Integrasi untuk melihat rekomendasi kurir.</p>
                     @endif
                     <x-input-error for="couriers" />
                 </div>

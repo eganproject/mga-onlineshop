@@ -6,6 +6,7 @@ import cart from './components/cart';
 import productForm from './components/product-form';
 import productPage from './components/product-page';
 import regionPicker from './components/region-picker';
+import courierRecommendation from './components/courier-recommendation';
 import bannerCarousel from './components/banner-carousel';
 import checkout from './components/checkout';
 import wishlistButton from './components/wishlist-button';
@@ -33,6 +34,7 @@ window.rupiah = (value) => 'Rp' + new Intl.NumberFormat('id-ID').format(value ||
 Alpine.data('productForm', productForm);
 Alpine.data('productPage', productPage);
 Alpine.data('regionPicker', regionPicker);
+Alpine.data('courierRecommendation', courierRecommendation);
 Alpine.data('checkout', checkout);
 Alpine.data('bannerCarousel', bannerCarousel);
 Alpine.data('wishlistButton', wishlistButton);

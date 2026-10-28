@@ -115,20 +115,37 @@ class StoreSettings
         'services.firebase.app_id' => 'string',
     ];
 
-    /** Kode kurir RajaOngkir (Komerce) => nama tampilan. */
+    /**
+     * Kode kurir RajaOngkir (Komerce) => nama tampilan. Sesuai daftar resmi
+     * "3PL Availability" (rajaongkir.com/docs/shipping-cost/getting_started/courier_availability);
+     * kode di luar daftar ini ditolak API (422) dan membuat seluruh cek ongkir gagal.
+     */
     public const COURIERS = [
         'jne' => 'JNE',
         'sicepat' => 'SiCepat',
         'jnt' => 'J&T Express',
         'pos' => 'POS Indonesia',
         'tiki' => 'TIKI',
-        'anteraja' => 'AnterAja',
+        'spx' => 'SPX Express',
         'ninja' => 'Ninja Xpress',
         'lion' => 'Lion Parcel',
         'ide' => 'ID Express',
         'sap' => 'SAP Express',
         'wahana' => 'Wahana',
+        'sentral' => 'Sentral Cargo',
+        'rex' => 'Royal Express Asia',
     ];
+
+    /** Kurir yang resinya bisa dilacak lewat RajaOngkir. */
+    public const TRACKABLE_COURIERS = ['jne', 'jnt', 'pos', 'tiki', 'spx', 'ninja', 'lion', 'sap', 'wahana'];
+
+    /** Kurir aktif yang dikenal RajaOngkir (kode lama/tak dikenal dibuang). */
+    public static function activeCouriers(): array
+    {
+        $couriers = array_values(array_intersect((array) config('shop.shipping.couriers'), array_keys(self::COURIERS)));
+
+        return $couriers ?: ['jne'];
+    }
 
     /** Nilai config sebelum ditimpa (= isi .env / config/shop.php). */
     private array $defaults = [];
