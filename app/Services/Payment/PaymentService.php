@@ -228,18 +228,6 @@ class PaymentService
         return $update ? ($this->apply($update) ?? $payment) : $payment;
     }
 
-    /**
-     * Cek status tagihan berdasarkan order_id gateway. Dipakai untuk notifikasi
-     * tanpa tanda tangan valid: isinya tidak dipercaya, status diambil langsung
-     * dari gateway. Null bila tidak ada tagihan dengan order_id tersebut.
-     */
-    public function syncByExternalId(string $externalId): ?Payment
-    {
-        $payment = $this->findPayment($externalId);
-
-        return $payment ? $this->sync($payment) : null;
-    }
-
     /** Cek semua tagihan pending pesanan ke gateway. */
     public function syncPending(Order $order): void
     {
