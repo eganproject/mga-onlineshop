@@ -82,7 +82,6 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::get('/pesanan/{order}', [Account\OrderController::class, 'show'])->name('orders.show');
         Route::post('/pesanan/{order}/batal', [Account\OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/pesanan/{order}/diterima', [Account\OrderController::class, 'complete'])->name('orders.complete');
-        Route::get('/pesanan/{order}/lacak', [Account\OrderController::class, 'tracking'])->name('orders.tracking')->middleware('throttle:30,1');
         Route::get('/pesanan/{order}/invoice', [Account\OrderController::class, 'invoice'])->name('orders.invoice');
         Route::get('/pesanan/{order}/invoice/pdf', [Account\OrderController::class, 'invoicePdf'])->name('orders.invoice.pdf')->middleware('throttle:20,1');
         Route::post('/pesanan/{order}/simulasi-bayar', [Account\OrderController::class, 'simulatePayment'])->name('orders.simulate-payment');

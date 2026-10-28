@@ -152,9 +152,6 @@
             </dl>
         </div>
         <div class="space-y-6">
-            @if ($canTrack)
-                <x-order-tracking-panel :order="$order" :url="route('account.orders.tracking', $order)" />
-            @endif
             <div class="card p-5 text-sm">
                 <h2 class="font-bold text-stone-900">Pengiriman</h2>
                 <dl class="mt-3 space-y-3">
@@ -162,7 +159,16 @@
                     <div><dt class="text-xs text-stone-500">Alamat</dt><dd class="text-stone-700">{{ $order->shipping_address }}</dd></div>
                     <div><dt class="text-xs text-stone-500">Kurir</dt><dd class="text-stone-700">{{ $order->courierLabel() }} @if($order->shipping_etd)<span class="text-stone-500">· {{ $order->shipping_etd }}</span>@endif</dd></div>
                     @if ($order->tracking_number)
-                        <div><dt class="text-xs text-stone-500">No. resi</dt><dd class="font-mono font-semibold text-stone-900">{{ $order->tracking_number }}</dd></div>
+                        <div>
+                            <dt class="text-xs text-stone-500">No. resi</dt>
+                            <dd class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="break-all font-mono font-semibold text-stone-900">{{ $order->tracking_number }}</span>
+                                <button type="button" class="btn btn-ghost btn-sm -my-1" x-data="{ copied: false }"
+                                        @click="navigator.clipboard?.writeText(@js($order->tracking_number)); copied = true; setTimeout(() => copied = false, 1500)">
+                                    <span x-text="copied ? 'Tersalin' : 'Salin resi'">Salin resi</span>
+                                </button>
+                            </dd>
+                        </div>
                     @endif
                 </dl>
             </div>

@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Services\Billing\InvoiceRenderer;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\PaymentService;
-use App\Services\Shipping\TrackingService;
 use App\Support\InfiniteScroll;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,13 +40,12 @@ class OrderController extends Controller
         ]));
     }
 
-    public function show(Request $request, Order $order, TrackingService $tracking): View
+    public function show(Request $request, Order $order): View
     {
         $this->authorizeOwner($request, $order);
 
         return view('account.orders.show', [
             'order' => $order->load('items.product', 'latestPayment', 'statusHistories'),
-            'canTrack' => $tracking->canTrack($order),
         ]);
     }
 
@@ -91,17 +89,6 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Terima kasih! Pesanan ditandai selesai.');
-    }
-
-    public function tracking(Request $request, Order $order, TrackingService $tracking): View
-    {
-        $this->authorizeOwner($request, $order);
-
-        return view('partials.order-tracking', [
-            'order' => $order,
-            'result' => $tracking->track($order),
-            'refreshUrl' => null,
-        ]);
     }
 
     public function invoice(Request $request, Order $order, InvoiceRenderer $invoices): View
