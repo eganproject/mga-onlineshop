@@ -1,5 +1,6 @@
 <x-layouts.admin title="Stok">
     <x-admin.page-header title="Manajemen stok" description="Pantau stok per produk & varian, catat barang masuk, dan lakukan stock opname.">
+        <a href="{{ route('admin.stock.warehouse') }}" class="btn btn-secondary"><x-icon name="refresh" class="size-4" /> Sinkron gudang</a>
         <a href="{{ route('admin.stock.history') }}" class="btn btn-secondary"><x-icon name="clock" class="size-4" /> Riwayat stok</a>
         <a href="{{ route('admin.products.transfer') }}#stok" class="btn btn-secondary"><x-icon name="download" class="size-4 rotate-180" /> Update via file</a>
     </x-admin.page-header>
@@ -40,8 +41,8 @@
                         @foreach ($products as $product)
                             @php
                                 $rows = $product->has_variants
-                                    ? $product->variants->map(fn ($v) => ['variant' => $v, 'name' => $v->name, 'sku' => $v->sku, 'stock' => $v->stock, 'low' => $v->isLowStock(), 'active' => $v->is_active])
-                                    : collect([['variant' => null, 'name' => null, 'sku' => $product->sku, 'stock' => $product->stock, 'low' => $product->isLowStock(), 'active' => true]]);
+                                    ? $product->variants->map(fn ($v) => ['variant' => $v, 'name' => $v->name, 'sku' => $v->sku, 'warehouse_sku' => $v->warehouse_sku, 'stock' => $v->stock, 'low' => $v->isLowStock(), 'active' => $v->is_active])
+                                    : collect([['variant' => null, 'name' => null, 'sku' => $product->sku, 'warehouse_sku' => $product->warehouse_sku, 'stock' => $product->stock, 'low' => $product->isLowStock(), 'active' => true]]);
                             @endphp
                             <tr class="bg-white">
                                 <td @if ($product->has_variants) colspan="2" @endif>

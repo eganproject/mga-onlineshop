@@ -13,10 +13,11 @@
         'midtrans' => ['Midtrans', 'Payment gateway (Snap): transfer bank, e-wallet, kartu kredit, QRIS.', 'credit-card', 'bg-brand-50 text-brand-600'],
         'rajaongkir' => ['RajaOngkir', 'Cek ongkos kirim & lacak resi JNE, SiCepat, J&T, POS, TIKI, dan lainnya.', 'truck', 'bg-sky-50 text-sky-600'],
         'firebase' => ['Login Google (Firebase)', 'Pelanggan masuk/daftar dengan akun Google. Panduan: docs/FIREBASE.md.', 'user', 'bg-amber-50 text-amber-600'],
+        'warehouse' => ['Stok gudang (warehouse29)', 'Stok toko ditarik otomatis dari API stok warehouse29, dicocokkan per SKU.', 'archive', 'bg-teal-50 text-teal-600'],
     ];
 @endphp
 <x-layouts.admin title="Integrasi">
-    <x-admin.page-header title="Integrasi" description="Driver dan kunci API payment gateway, ongkos kirim, dan login Google. Halaman ini hanya bisa dibuka Superadmin." />
+    <x-admin.page-header title="Integrasi" description="Driver dan kunci API payment gateway, ongkos kirim, login Google, dan stok gudang. Halaman ini hanya bisa dibuka Superadmin." />
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="min-w-0 space-y-6 lg:col-span-2">
@@ -110,6 +111,32 @@
                                 <p class="font-semibold text-stone-800">{{ $originLabel ?? 'Belum diatur' }}</p>
                                 <a href="{{ route('admin.store-settings.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-700 underline">Ubah asal & kurir di Pengaturan Toko</a>
                             </div>
+                        @elseif ($key === 'warehouse')
+                            <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
+                                <span>
+                                    <span class="block text-sm font-semibold text-stone-800">Sinkron stok otomatis</span>
+                                    <span class="text-xs text-stone-500">Tarik stok yang berubah sesuai interval, plus tarikan penuh tiap malam pukul 02.40. Butuh cron scheduler di server.</span>
+                                </span>
+                                <input type="hidden" name="warehouse[enabled]" value="0">
+                                <input type="checkbox" name="warehouse[enabled]" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('warehouse.enabled', $value('warehouse', 'enabled')))>
+                            </label>
+                            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                                <div class="sm:col-span-2">
+                                    <x-form.input name="warehouse[base_url]" id="warehouse_base_url" label="URL warehouse29" :value="$value('warehouse', 'base_url')" placeholder="https://gudang.mga-advertising.co.id" :hint="$source('warehouse', 'base_url')" spellcheck="false" inputmode="url"
+                                                  tooltip="Alamat utama aplikasi warehouse29 (tanpa /api/v1). Toko memanggil /api/v1/stocks di alamat ini."
+                                                  :tooltip-tips="['Pakai https:// agar token aman di jalan.', 'IP server toko harus didaftarkan di warehouse29 › Master Data › Akses API.']" />
+                                </div>
+                                <x-form.select name="warehouse[interval]" id="warehouse_interval" label="Interval" :selected="(string) $value('warehouse', 'interval')"
+                                               :search="false" :options="collect($intervals)->mapWithKeys(fn ($m) => [(string) $m => $m === 60 ? 'Tiap 1 jam' : 'Tiap '.$m.' menit'])->all()" :hint="$source('warehouse', 'interval')"
+                                               tooltip="Seberapa sering toko menanyakan stok yang berubah ke gudang. Batas API gudang 60 permintaan per menit, jadi 5 menit sudah aman." />
+                            </div>
+                            @include('admin.partials.secret-input', ['integration' => 'warehouse', 'name' => 'token', 'label' => 'Token API', 'placeholder' => 'Nilai STOCK_API_TOKEN di server warehouse29',
+                                'tooltip' => 'Token Bearer untuk API stok, sama dengan STOCK_API_TOKEN di file .env server warehouse29.',
+                                'tooltipTips' => 'Bila token diganti di gudang, ganti juga di sini lalu tekan Tes koneksi.'])
+                            <div class="rounded-xl bg-stone-50 p-3 text-sm text-stone-600">
+                                Stok toko = stok gudang dikurangi pesanan website yang belum dikirim. Hubungkan SKU gudang ke produk di
+                                <a href="{{ route('admin.stock.warehouse') }}" class="font-semibold text-brand-700 underline">Stok › Sinkron gudang</a>.
+                            </div>
                         @else
                             <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
                                 <span>
@@ -149,7 +176,7 @@
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
                 <x-icon name="lock" class="size-5 shrink-0" />
                 <div class="space-y-2">
-                    <p>Server key & API key disimpan terenkripsi dengan <code class="font-mono">APP_KEY</code> dan tidak pernah ditampilkan utuh. Kosongkan isian untuk tetap memakai kunci lama.</p>
+                    <p>Server key, API key & token gudang disimpan terenkripsi dengan <code class="font-mono">APP_KEY</code> dan tidak pernah ditampilkan utuh. Kosongkan isian untuk tetap memakai kunci lama.</p>
                     <p>Isian yang kosong memakai nilai dari file <code class="font-mono">.env</code> di server. Bila <code class="font-mono">APP_KEY</code> diganti, isi ulang kunci di sini.</p>
                 </div>
             </div>

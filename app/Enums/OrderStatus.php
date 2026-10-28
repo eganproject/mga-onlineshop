@@ -90,6 +90,15 @@ enum OrderStatus: string
         return [self::Paid, self::Processing, self::Shipped, self::Delivered, self::Completed];
     }
 
+    /**
+     * Stoknya sudah dipotong di toko tetapi barangnya belum keluar dari gudang.
+     * Dipakai sinkron warehouse29: stok toko = stok gudang − pesanan ini.
+     */
+    public static function awaitingShipmentStatuses(): array
+    {
+        return [self::PendingPayment, self::Paid, self::Processing];
+    }
+
     /** Sudah diserahkan ke kurir, jadi resinya bisa dilacak. */
     public function isTrackable(): bool
     {

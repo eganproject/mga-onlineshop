@@ -2,6 +2,8 @@
 
 namespace App\Services\Settings;
 
+use App\Services\Warehouse\WarehouseApiException;
+use App\Services\Warehouse\WarehouseClient;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +17,7 @@ use Illuminate\Support\Str;
  */
 class IntegrationTester
 {
-    public const INTEGRATIONS = ['midtrans', 'rajaongkir', 'firebase'];
+    public const INTEGRATIONS = ['midtrans', 'rajaongkir', 'firebase', 'warehouse'];
 
     /** @return Result */
     public function test(string $integration): array
@@ -25,6 +27,7 @@ class IntegrationTester
                 'midtrans' => $this->midtrans(),
                 'rajaongkir' => $this->rajaongkir(),
                 'firebase' => $this->firebase(),
+                'warehouse' => $this->warehouse(),
             };
         } catch (ConnectionException) {
             return $this->result(false, 'Server tidak bisa terhubung ke layanan ini. Cek koneksi internet server lalu coba lagi.');
@@ -168,6 +171,40 @@ class IntegrationTester
         }
 
         return $this->result(true, "API key valid untuk project {$projectId}.", $notes);
+    }
+
+    /**
+     * Panggil /api/v1/health warehouse29: memastikan URL, token, dan allowlist IP benar.
+     *
+     * @return Result
+     */
+    private function warehouse(): array
+    {
+        $client = app(WarehouseClient::class);
+
+        if (! $client->isConfigured()) {
+            return $this->result(false, 'URL dan token warehouse29 wajib diisi.');
+        }
+
+        try {
+            $health = $client->health();
+        } catch (WarehouseApiException $e) {
+            return $this->result(false, $e->getMessage());
+        }
+
+        $notes = [];
+
+        if (! config('services.warehouse.enabled')) {
+            $notes[] = 'Sinkron otomatis sedang dimatikan. Stok tetap bisa ditarik manual di Stok › Sinkron gudang.';
+        }
+
+        if (str_starts_with((string) $client->baseUrl(), 'http://')) {
+            $notes[] = 'URL masih http://. Pakai https:// agar token tidak terkirim tanpa enkripsi.';
+        }
+
+        $code = is_string($health['warehouse_code'] ?? null) ? $health['warehouse_code'] : null;
+
+        return $this->result(true, 'Terhubung ke API stok warehouse29'.($code ? " (gudang {$code})" : '').'.', $notes);
     }
 
     private function apiMessage(Response $response, string $path): string
