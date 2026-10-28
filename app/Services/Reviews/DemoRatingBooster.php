@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\DB;
  * Menaikkan rata-rata rating produk di data demo: ulasan dari akun contoh
  * (email @mga.test) yang bintangnya paling rendah dinaikkan jadi bintang 5
  * (judul & isi ikut diganti supaya sesuai) sampai rata-rata produk mencapai
- * target. Ulasan pelanggan asli tidak pernah diubah. Hanya menyentuh tabel
+ * target. Ulasan akun lain hanya ikut diubah bila diminta (`$anyAuthor`, mis.
+ * akun uji coba di situs demo) atau bila ID-nya diberikan (ulasan yang baru
+ * dibuat seeder). Hanya menyentuh tabel
  * `product_reviews` dan kolom ringkasan `rating_avg`/`review_count` produk.
  */
 class DemoRatingBooster
@@ -35,9 +37,11 @@ class DemoRatingBooster
     /**
      * @param  float  $target  Rata-rata minimal (mentah, sebelum dibulatkan 1 desimal).
      * @param  list<int>|null  $productIds  Batasi ke produk tertentu; null = semua produk berulasan.
+     * @param  bool  $anyAuthor  Ikutkan ulasan dari akun mana pun, bukan hanya akun contoh @mga.test.
+     * @param  list<int>|null  $reviewIds  Hanya ulasan ini yang boleh diubah (dipakai seeder).
      * @return list<array{product: Product, before: float, after: float, changed: int, reached: bool}>
      */
-    public function boost(float $target, ?array $productIds = null, bool $dryRun = false): array
+    public function boost(float $target, ?array $productIds = null, bool $dryRun = false, bool $anyAuthor = false, ?array $reviewIds = null): array
     {
         $products = Product::query()
             ->whereHas('reviews', fn (Builder $q) => $q->approved())
@@ -47,7 +51,7 @@ class DemoRatingBooster
 
         $results = [];
         foreach ($products as $product) {
-            $result = DB::transaction(fn () => $this->boostProduct($product, $target, $dryRun));
+            $result = DB::transaction(fn () => $this->boostProduct($product, $target, $dryRun, $anyAuthor, $reviewIds));
             if ($result !== null) {
                 $results[] = $result;
             }
@@ -57,7 +61,7 @@ class DemoRatingBooster
     }
 
     /** @return array{product: Product, before: float, after: float, changed: int, reached: bool}|null */
-    private function boostProduct(Product $product, float $target, bool $dryRun): ?array
+    private function boostProduct(Product $product, float $target, bool $dryRun, bool $anyAuthor, ?array $reviewIds): ?array
     {
         $approved = $product->reviews()->approved()->lockForUpdate()->get(['id', 'rating', 'user_id']);
         $count = $approved->count();
@@ -68,10 +72,12 @@ class DemoRatingBooster
             return null;
         }
 
-        // Ulasan akun contoh dengan bintang terendah dulu.
+        // Bintang terendah dulu.
         $candidates = $product->reviews()->approved()
             ->where('rating', '<', 5)
-            ->whereHas('user', fn (Builder $q) => $q->where('email', 'like', '%'.self::DEMO_EMAIL_DOMAIN))
+            ->when($reviewIds !== null, fn (Builder $q) => $q->whereKey($reviewIds))
+            ->when($reviewIds === null && ! $anyAuthor, fn (Builder $q) => $q
+                ->whereHas('user', fn (Builder $u) => $u->where('email', 'like', '%'.self::DEMO_EMAIL_DOMAIN)))
             ->orderBy('rating')
             ->orderBy('id')
             ->get();
