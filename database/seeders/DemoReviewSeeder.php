@@ -7,16 +7,21 @@ use App\Enums\ReviewStatus;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductReview;
+use App\Services\Reviews\DemoRatingBooster;
 use App\Services\Reviews\ReviewService;
 use Illuminate\Database\Seeder;
 
 /**
  * Ulasan contoh dari pembeli pesanan contoh yang sudah selesai, supaya bintang
  * & jumlah ulasan terlihat di kartu dan detail produk saat demo. Sebagian
- * pembeli saja yang mengulas (seperti toko sungguhan). Tidak jalan di produksi.
+ * pembeli saja yang mengulas (seperti toko sungguhan). Rata-rata tiap produk
+ * dijaga minimal MIN_AVERAGE (lewat DemoRatingBooster). Tidak jalan di produksi.
  */
 class DemoReviewSeeder extends Seeder
 {
+    /** Rata-rata rating minimal tiap produk di data demo. */
+    public const MIN_AVERAGE = 4.7;
+
     /** @var list<array{0: int, 1: ?string, 2: string}> */
     private const SAMPLES = [
         [5, 'Mantap, sesuai deskripsi', 'Barang sesuai foto, packing rapi pakai bubble wrap dan kardus tebal. Besoknya sudah sampai.'],
@@ -28,7 +33,6 @@ class DemoReviewSeeder extends Seeder
         [4, null, 'Barang bagus, cuma plastik pelindungnya agak susah dilepas. Overall puas.'],
         [4, 'Sesuai harga', 'Ukuran pas dengan deskripsi. Semoga awet dipakai harian di kasir.'],
         [5, 'Akrilik bening', 'Akriliknya bening, tidak buram. Brosur kelihatan jelas dan rapi di meja resepsionis.'],
-        [3, 'Lumayan', 'Fungsinya oke, tapi ada sedikit baret kecil di pinggir. Masih bisa dipakai.'],
         [5, 'Repeat order', 'Beli lagi untuk cabang baru, kualitas tetap konsisten. Harga grosirnya juga bersahabat.'],
         [4, 'Cepat sampai', 'Dikirim di hari yang sama, sampai dalam 2 hari. Barang sesuai pesanan.'],
     ];
@@ -78,5 +82,8 @@ class DemoReviewSeeder extends Seeder
 
         $reviews = app(ReviewService::class);
         Product::whereKey(array_keys($touched))->get()->each(fn (Product $product) => $reviews->syncSummary($product));
+
+        // Produk dengan sedikit ulasan bisa kebetulan dapat banyak bintang 4.
+        app(DemoRatingBooster::class)->boost(self::MIN_AVERAGE, array_keys($touched));
     }
 }
