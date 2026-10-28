@@ -9,6 +9,7 @@ enum StockMovementType: string
     case Adjustment = 'adjustment';
     case Sale = 'sale';
     case Cancellation = 'cancellation';
+    case WarehouseSync = 'warehouse_sync';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum StockMovementType: string
             self::Adjustment => 'Penyesuaian',
             self::Sale => 'Penjualan',
             self::Cancellation => 'Pesanan batal',
+            self::WarehouseSync => 'Sinkron gudang',
         };
     }
 
@@ -34,6 +36,7 @@ enum StockMovementType: string
             self::Adjustment => 'bg-amber-50 text-amber-700 ring-amber-600/20',
             self::Sale => 'bg-sky-50 text-sky-700 ring-sky-600/20',
             self::Cancellation => 'bg-stone-100 text-stone-600 ring-stone-500/20',
+            self::WarehouseSync => 'bg-teal-50 text-teal-700 ring-teal-600/20',
         };
     }
 }

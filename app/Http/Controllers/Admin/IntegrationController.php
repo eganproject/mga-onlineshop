@@ -41,12 +41,21 @@ class IntegrationController extends Controller
             'project_id' => 'services.firebase.project_id',
             'app_id' => 'services.firebase.app_id',
         ],
+        'warehouse' => [
+            'enabled' => 'services.warehouse.enabled',
+            'base_url' => 'services.warehouse.base_url',
+            'token' => 'services.warehouse.token',
+            'interval' => 'services.warehouse.interval',
+        ],
     ];
 
-    /** Kolom rahasia per integrasi: input kosong = tidak diubah. */
-    private const SECRETS = ['midtrans' => ['server_key'], 'rajaongkir' => ['api_key']];
+    /** Pilihan interval sinkron stok gudang (menit). */
+    public const WAREHOUSE_INTERVALS = [5, 10, 15, 30, 60];
 
-    public const NAMES = ['midtrans' => 'Midtrans', 'rajaongkir' => 'RajaOngkir', 'firebase' => 'Login Google (Firebase)'];
+    /** Kolom rahasia per integrasi: input kosong = tidak diubah. */
+    private const SECRETS = ['midtrans' => ['server_key'], 'rajaongkir' => ['api_key'], 'warehouse' => ['token']];
+
+    public const NAMES = ['midtrans' => 'Midtrans', 'rajaongkir' => 'RajaOngkir', 'firebase' => 'Login Google (Firebase)', 'warehouse' => 'Stok gudang (warehouse29)'];
 
     public const LABELS = [
         'shop.payment.driver' => 'Driver pembayaran',
@@ -61,6 +70,10 @@ class IntegrationController extends Controller
         'services.firebase.auth_domain' => 'Auth domain',
         'services.firebase.project_id' => 'Project ID',
         'services.firebase.app_id' => 'App ID',
+        'services.warehouse.enabled' => 'Sinkron stok otomatis',
+        'services.warehouse.base_url' => 'URL warehouse29',
+        'services.warehouse.token' => 'Token API gudang',
+        'services.warehouse.interval' => 'Interval sinkron (menit)',
     ];
 
     public function __construct(private readonly StoreSettings $settings) {}
@@ -89,7 +102,9 @@ class IntegrationController extends Controller
                 'midtrans' => $this->status(config('shop.payment.driver') === 'midtrans', filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key'))),
                 'rajaongkir' => $this->status(config('shop.shipping.driver') === 'rajaongkir', filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_district_id'))),
                 'firebase' => $this->status((bool) config('services.firebase.login_enabled') && (filled(config('services.firebase.api_key')) || filled(config('services.firebase.project_id'))), (bool) config('services.firebase.enabled'), 'Nonaktif'),
+                'warehouse' => $this->status((bool) config('services.warehouse.enabled'), filled(config('services.warehouse.base_url')) && filled(config('services.warehouse.token')), 'Nonaktif'),
             ],
+            'intervals' => self::WAREHOUSE_INTERVALS,
             'originLabel' => config('shop.shipping.origin_label') ?: (config('shop.shipping.origin_district_id') ? 'ID '.config('shop.shipping.origin_district_id') : null),
             'webhook' => route('webhooks.midtrans'),
             'results' => session('integration_test', []),
@@ -102,6 +117,7 @@ class IntegrationController extends Controller
         $attributes = [
             'driver' => 'driver', 'is_production' => 'mode', 'merchant_id' => 'merchant ID', 'client_key' => 'client key',
             'server_key' => 'server key', 'api_key' => 'API key', 'auth_domain' => 'auth domain', 'project_id' => 'project ID', 'app_id' => 'app ID',
+            'base_url' => 'URL', 'token' => 'token', 'interval' => 'interval',
         ];
         $prefix = fn (array $items) => collect($items)->mapWithKeys(fn ($v, string $k) => ["{$integration}.{$k}" => $v])->all();
         $data = $request->validate($prefix($this->rules($integration)), [
@@ -122,7 +138,7 @@ class IntegrationController extends Controller
                 continue;
             }
 
-            $values[$key] = in_array($name, ['is_production', 'login_enabled'], true) ? $request->boolean("{$integration}.{$name}") : ($data[$name] ?? null);
+            $values[$key] = in_array($name, ['is_production', 'login_enabled', 'enabled'], true) ? $request->boolean("{$integration}.{$name}") : ($data[$name] ?? null);
         }
 
         $this->ensureUsable($integration, $values);
@@ -183,6 +199,12 @@ class IntegrationController extends Controller
                 'project_id' => ['nullable', 'string', 'max:63', 'regex:/^[a-z0-9-]+$/'],
                 'app_id' => ['nullable', 'string', 'max:120', 'regex:/^[A-Za-z0-9:._-]+$/'],
             ],
+            'warehouse' => [
+                'enabled' => ['boolean'],
+                'base_url' => ['nullable', 'string', 'max:255', 'url:https,http'],
+                'token' => ['nullable', 'string', 'max:500', 'regex:/^\S+$/'],
+                'interval' => ['required', 'integer', Rule::in(self::WAREHOUSE_INTERVALS)],
+            ],
         };
     }
 
@@ -204,6 +226,10 @@ class IntegrationController extends Controller
             $integration === 'firebase' && $values['services.firebase.login_enabled'] => array_filter([
                 'project_id' => filled($effective('services.firebase.api_key')) && blank($effective('services.firebase.project_id')) ? 'Project ID wajib diisi bila API key diisi.' : null,
                 'api_key' => filled($effective('services.firebase.project_id')) && blank($effective('services.firebase.api_key')) ? 'API key wajib diisi bila Project ID diisi.' : null,
+            ]),
+            $integration === 'warehouse' && $values['services.warehouse.enabled'] => array_filter([
+                'base_url' => blank($effective('services.warehouse.base_url')) ? 'Isi URL warehouse29 sebelum mengaktifkan sinkron.' : null,
+                'token' => blank($effective('services.warehouse.token')) ? 'Isi token API sebelum mengaktifkan sinkron.' : null,
             ]),
             default => [],
         };
@@ -234,7 +260,7 @@ class IntegrationController extends Controller
     {
         return match ($key) {
             'services.midtrans.is_production' => $value ? 'Production' : 'Sandbox',
-            'services.firebase.login_enabled' => $value ? 'Aktif' : 'Nonaktif',
+            'services.firebase.login_enabled', 'services.warehouse.enabled' => $value ? 'Aktif' : 'Nonaktif',
             default => $value,
         };
     }

@@ -62,4 +62,14 @@ return [
         'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
     ],
 
+    // Sinkron stok dari sistem gudang warehouse29 (GET /api/v1/stocks, token
+    // Bearer). Bisa diatur superadmin di Admin › Integrasi.
+    'warehouse' => [
+        'enabled' => (bool) env('WAREHOUSE_SYNC_ENABLED', false),
+        'base_url' => env('WAREHOUSE_API_URL'),
+        'token' => env('WAREHOUSE_API_TOKEN'),
+        'interval' => (int) env('WAREHOUSE_SYNC_INTERVAL', 5),
+        'timeout' => (int) env('WAREHOUSE_API_TIMEOUT', 20),
+    ],
+
 ];

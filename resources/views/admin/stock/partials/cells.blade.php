@@ -1,4 +1,9 @@
-<td class="hidden whitespace-nowrap text-xs text-stone-500 sm:table-cell">{{ $row['sku'] ?? '—' }}</td>
+<td class="hidden whitespace-nowrap text-xs text-stone-500 sm:table-cell">
+    {{ $row['sku'] ?? '—' }}
+    @if ($row['warehouse_sku'] ?? null)
+        <span class="mt-0.5 block text-teal-700" title="Stok mengikuti warehouse29">Gudang: {{ $row['warehouse_sku'] }}</span>
+    @endif
+</td>
 <td>
     <span @class([
         'badge',

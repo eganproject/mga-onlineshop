@@ -150,6 +150,10 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::get('/stock', [Admin\StockController::class, 'index'])->name('stock.index');
         Route::get('/stock/history', [Admin\StockController::class, 'history'])->name('stock.history');
         Route::post('/stock/adjust', [Admin\StockController::class, 'adjust'])->name('stock.adjust');
+        Route::get('/stock/warehouse', [Admin\WarehouseSyncController::class, 'index'])->name('stock.warehouse');
+        Route::post('/stock/warehouse/sync', [Admin\WarehouseSyncController::class, 'sync'])->name('stock.warehouse.sync')->middleware('throttle:6,1');
+        Route::post('/stock/warehouse/link', [Admin\WarehouseSyncController::class, 'link'])->name('stock.warehouse.link');
+        Route::delete('/stock/warehouse/link', [Admin\WarehouseSyncController::class, 'unlink'])->name('stock.warehouse.unlink');
     });
 
     Route::middleware('can:reviews.manage')->group(function () {
@@ -224,8 +228,8 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
     Route::middleware('can:integrations.manage')->group(function () {
         Route::redirect('/settings', '/admin/integrations');
         Route::get('/integrations', [Admin\IntegrationController::class, 'index'])->name('integrations.index');
-        Route::put('/integrations/{integration}', [Admin\IntegrationController::class, 'update'])->name('integrations.update')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase']);
-        Route::post('/integrations/{integration}/test', [Admin\IntegrationController::class, 'test'])->name('integrations.test')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase'])->middleware('throttle:10,1');
+        Route::put('/integrations/{integration}', [Admin\IntegrationController::class, 'update'])->name('integrations.update')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase', 'warehouse']);
+        Route::post('/integrations/{integration}/test', [Admin\IntegrationController::class, 'test'])->name('integrations.test')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase', 'warehouse'])->middleware('throttle:10,1');
     });
 
     Route::middleware('can:staff.manage')->group(function () {

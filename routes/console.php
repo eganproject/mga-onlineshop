@@ -52,3 +52,17 @@ Schedule::command('orders:sync-tracking')
     ->withoutOverlapping()
     ->onOneServer();
 Schedule::command('orders:auto-complete')->hourly()->withoutOverlapping()->onOneServer();
+
+// Stok dari warehouse29: tarik yang berubah sesuai interval (menit), plus
+// tarikan penuh tiap malam sebagai pengaman.
+Schedule::command('warehouse:sync-stock')
+    ->everyMinute()
+    ->when(fn () => config('services.warehouse.enabled')
+        && now()->minute % max(1, min(60, (int) config('services.warehouse.interval', 5))) === 0)
+    ->withoutOverlapping(15)
+    ->onOneServer();
+Schedule::command('warehouse:sync-stock --full')
+    ->dailyAt('02:40')
+    ->when(fn () => config('services.warehouse.enabled'))
+    ->withoutOverlapping(30)
+    ->onOneServer();
