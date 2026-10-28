@@ -202,6 +202,7 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
     Route::middleware('can:settings.manage')->group(function () {
         Route::get('/store-settings', [Admin\StoreSettingController::class, 'edit'])->name('store-settings.edit');
         Route::put('/store-settings', [Admin\StoreSettingController::class, 'update'])->name('store-settings.update');
+        Route::get('/store-settings/couriers', [Admin\StoreSettingController::class, 'couriers'])->name('store-settings.couriers')->middleware('throttle:10,1');
 
         // Data wilayah untuk memilih kecamatan asal pengiriman.
         Route::controller(Account\RegionController::class)->prefix('regions')->name('regions.')->middleware('throttle:120,1')->group(function () {

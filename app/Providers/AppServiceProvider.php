@@ -17,6 +17,7 @@ use App\Services\Customer\WishlistService;
 use App\Services\Payment\FakePaymentGateway;
 use App\Services\Payment\MidtransPaymentGateway;
 use App\Services\Payment\PaymentService;
+use App\Services\Settings\StoreSettings;
 use App\Services\Shipping\FakeShipmentTracker;
 use App\Services\Shipping\FakeShippingProvider;
 use App\Services\Shipping\RajaOngkirShipmentTracker;
@@ -50,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 config('services.rajaongkir.api_key'),
                 config('services.rajaongkir.base_url'),
                 config('shop.shipping.origin_district_id'),
-                config('shop.shipping.couriers'),
+                StoreSettings::activeCouriers(),
             ),
             default => new FakeShippingProvider(config('shop.shipping.origin_district_id')),
         });
