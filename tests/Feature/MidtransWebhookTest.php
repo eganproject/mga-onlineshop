@@ -237,13 +237,18 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame($order->total + $payment->fee, $order->amountPaid());
     }
 
-    public function test_invalid_signature_is_rejected_and_wrong_amount_is_ignored(): void
+    public function test_forged_notification_is_checked_with_midtrans_and_wrong_amount_is_ignored(): void
     {
         $order = $this->checkout();
 
         $payload = $this->payload($order->code, 'settlement');
         $payload['signature_key'] = 'palsu';
-        $this->postJson(route('webhooks.midtrans'), $payload)->assertForbidden();
+        // Tanda tangan salah: dijawab 200, tapi status diambil dari API Midtrans (belum ada transaksi).
+        $this->postJson(route('webhooks.midtrans'), $payload)->assertOk();
+        unset($payload['signature_key']);
+        $this->postJson(route('webhooks.midtrans'), $payload)->assertOk();
+        $this->assertSame(PaymentStatus::Pending, $order->latestPayment()->first()->status);
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/'.$order->code.'/status'));
 
         // Signature valid tapi nominal berbeda dari tagihan: tidak dianggap lunas.
         $this->notify($order->code, 'settlement', gross: '1000.00')->assertOk();
@@ -257,6 +262,22 @@ class MidtransWebhookTest extends TestCase
         // Tombol "Test notification URL" di dashboard Midtrans memakai order_id contoh.
         $this->notify('payment_notif_test_G123456789_abc', 'settlement')->assertOk();
         $this->notify('MGA-TIDAK-ADA', 'pending')->assertOk();
+    }
+
+    public function test_unsigned_notification_applies_status_reported_by_midtrans_api(): void
+    {
+        $order = $this->checkout();
+
+        // Request kosong (mis. dari Postman) tidak lagi 403.
+        $this->postJson(route('webhooks.midtrans'), [])->assertOk();
+        $this->post(route('webhooks.midtrans'))->assertOk();
+
+        $this->statuses[$order->code] = $this->statusResponse($order->code, 'settlement');
+        $this->postJson(route('webhooks.midtrans'), ['order_id' => $order->code, 'transaction_status' => 'settlement'])
+            ->assertOk()
+            ->assertJsonPath('message', 'OK, status dicek ke Midtrans.');
+
+        $this->assertSame(PaymentStatus::Paid, $order->latestPayment()->first()->status);
     }
 
     public function test_notification_is_acknowledged_when_midtrans_driver_is_off(): void
