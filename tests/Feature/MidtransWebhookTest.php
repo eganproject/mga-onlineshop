@@ -22,6 +22,8 @@ class MidtransWebhookTest extends TestCase
 
     private Product $product;
 
+    private bool $rejectCharges = false;
+
     /** Respons status API Midtrans per order_id; default "belum ada transaksi". */
     private array $statuses = [];
 
@@ -44,6 +46,10 @@ class MidtransWebhookTest extends TestCase
                 return Http::response(['token' => "snap-{$tokens}", 'redirect_url' => "https://pay.test/{$tokens}"], 201);
             }
 
+            if (str_ends_with($url, '/v2/charge')) {
+                return Http::response($this->chargeResponse($request->data()), 201);
+            }
+
             if (preg_match('#/v2/([^/]+)/status$#', $url, $m)) {
                 $id = rawurldecode($m[1]);
 
@@ -60,42 +66,110 @@ class MidtransWebhookTest extends TestCase
         });
     }
 
-    public function test_checkout_requests_snap_token_with_expiry_and_finish_url(): void
+    public function test_choosing_va_charges_core_api_with_expiry_and_shows_number_inline(): void
     {
-        $order = $this->checkout();
-        $payment = $order->latestPayment;
+        $order = $this->checkout(method: null);
+        $this->assertSame(0, $order->payments()->count(), 'Checkout belum membuat tagihan.');
+        Http::assertNothingSent();
 
-        $this->assertSame('snap-1', $payment->snap_token);
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Pilih metode pembayaran')->assertDontSee('snap.js', false);
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va'])
+            ->assertRedirect(route('account.orders.payment', $order));
+        $payment = $order->latestPayment()->first();
+
         $this->assertSame($order->code, $payment->external_id);
-        $this->assertNotNull($order->payment_due_at);
+        $this->assertSame('bca_va', $payment->method);
+        $this->assertSame('8808123456789', $payment->instruction('number'));
+        $this->assertNull($payment->snap_token);
         $this->assertEqualsWithDelta($order->payment_due_at->timestamp, $payment->expires_at->timestamp, 60);
 
         Http::assertSent(function (Request $request) use ($order) {
-            return str_contains($request->url(), '/snap/v1/transactions')
+            return str_ends_with($request->url(), 'api.sandbox.midtrans.com/v2/charge')
+                && $request['payment_type'] === 'bank_transfer'
+                && $request['bank_transfer']['bank'] === 'bca'
                 && $request['transaction_details']['order_id'] === $order->code
                 && $request['transaction_details']['gross_amount'] === $order->total
                 && array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $request['item_details'])) === $order->total
-                && $request['expiry']['unit'] === 'minutes'
-                && $request['expiry']['duration'] === 24 * 60
-                && str_ends_with($request['expiry']['start_time'], '+0700')
-                && $request['callbacks']['finish'] === route('account.orders.payment.finish', $order);
+                && $request['custom_expiry']['unit'] === 'minute'
+                && $request['custom_expiry']['expiry_duration'] === 24 * 60
+                && str_ends_with($request['custom_expiry']['order_time'], '+0700');
         });
-    }
 
-    public function test_payment_page_shows_snap_and_reuses_active_token(): void
-    {
-        $order = $this->checkout();
-
+        // Halaman bayar menampilkan nomor VA langsung (tanpa popup) dan tidak membuat tagihan lagi.
         $this->get(route('account.orders.payment', $order))
             ->assertOk()
-            ->assertSee('Bayar sekarang')
-            ->assertSee('snap-1', false)
-            ->assertSee('snap.js', false)
-            ->assertSee('SB-Mid-client-test', false);
-
+            ->assertSee('Nomor Virtual Account BCA')
+            ->assertSee('8808 1234 5678 9')
+            ->assertSee('BCA mobile (m-BCA)')
+            ->assertDontSee('snap.js', false);
         $this->get(route('account.orders.payment', $order))->assertOk();
         $this->assertSame(1, $order->payments()->count());
         Http::assertSentCount(1);
+    }
+
+    public function test_each_method_sends_its_core_api_parameters(): void
+    {
+        $order = $this->checkout(method: null);
+
+        foreach (['qris' => 'qris', 'gopay' => 'gopay', 'shopeepay' => 'shopeepay', 'mandiri_bill' => 'echannel', 'permata_va' => 'bank_transfer', 'alfamart' => 'cstore'] as $method => $type) {
+            $this->post(route('account.orders.payment.method', $order), ['method' => $method])->assertRedirect(route('account.orders.payment', $order));
+            Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/charge') && $r['payment_type'] === $type);
+        }
+
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/charge') && ($r['qris']['acquirer'] ?? null) === 'gopay');
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/charge') && ($r['cstore']['store'] ?? null) === 'alfamart');
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/charge') && ($r['gopay']['callback_url'] ?? null) === route('account.orders.payment.finish', $order));
+
+        // Tagihan terakhir (Alfamart) tampil sebagai kode pembayaran; yang lain sudah dibatalkan.
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Kode pembayaran Alfamart')->assertSee('ALFA 1234');
+        $this->assertSame(1, $order->payments()->where('status', PaymentStatus::Pending)->count());
+    }
+
+    public function test_qris_and_gopay_show_qr_and_app_button(): void
+    {
+        $order = $this->checkout(method: 'gopay');
+
+        $this->get(route('account.orders.payment', $order))
+            ->assertOk()
+            ->assertSee('https://api.sandbox.midtrans.com/v2/gopay/qr', false)
+            ->assertSee('gojek://gopay/merchanttransfer', false)
+            ->assertSee('Buka aplikasi GoPay');
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'qris']);
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('00020101021226', false)->assertSee('Simpan QR');
+    }
+
+    public function test_card_uses_embedded_snap_limited_to_card(): void
+    {
+        $order = $this->checkout(method: 'credit_card');
+        $payment = $order->latestPayment()->first();
+
+        $this->assertSame('snap-1', $payment->snap_token);
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/snap/v1/transactions')
+            && $r['enabled_payments'] === ['credit_card']
+            && $r['expiry']['unit'] === 'minutes'
+            && $r['callbacks']['finish'] === route('account.orders.payment.finish', $order));
+
+        $this->get(route('account.orders.payment', $order))
+            ->assertOk()
+            ->assertSee('snap-container', false)
+            ->assertSee('snap-1', false)
+            ->assertSee('snap.js', false)
+            ->assertSee('SB-Mid-client-test', false);
+    }
+
+    public function test_rejected_charge_lets_customer_pick_another_method(): void
+    {
+        $order = $this->checkout(method: null);
+        $this->rejectCharges = true;
+
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bri_va'])
+            ->assertRedirect(route('account.orders.payment', $order))
+            ->assertSessionHas('error', 'BRI Virtual Account sedang tidak bisa dipakai. Silakan coba lagi atau pilih metode lain.');
+
+        $this->assertSame(0, $order->payments()->count());
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Pilih metode pembayaran');
     }
 
     public function test_settlement_marks_order_paid_and_duplicates_are_ignored(): void
@@ -137,17 +211,17 @@ class MidtransWebhookTest extends TestCase
         $this->assertNotNull($order->invoice_number);
     }
 
-    public function test_buyer_fee_is_sent_as_fee_item_and_snap_is_limited_to_chosen_method(): void
+    public function test_buyer_fee_is_sent_as_fee_item_for_chosen_method(): void
     {
         config(['shop.billing.payment_methods' => ['qris' => ['percent' => 0.7, 'charge_to' => 'buyer']]]);
-        $order = $this->checkout();
+        $order = $this->checkout(method: null);
         Http::assertNothingSent();
 
         $this->post(route('account.orders.payment.method', $order), ['method' => 'qris'])->assertRedirect();
         $payment = $order->latestPayment()->first();
 
-        Http::assertSent(fn (Request $request) => str_contains($request->url(), '/snap/v1/transactions')
-            && $request['enabled_payments'] === ['other_qris']
+        Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/v2/charge')
+            && $request['payment_type'] === 'qris'
             && $request['transaction_details']['gross_amount'] === $payment->amount
             && collect($request['item_details'])->firstWhere('id', 'FEE')['price'] === $payment->fee
             && array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $request['item_details'])) === $payment->amount);
@@ -203,8 +277,9 @@ class MidtransWebhookTest extends TestCase
 
         $this->get(route('account.orders.show', $order))->assertSee('Bayar ulang');
 
-        // Membuka halaman bayar membuat tagihan baru dengan order_id berbeda.
-        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('snap-2', false);
+        // Halaman bayar menampilkan pilihan metode lagi; tagihan baru memakai order_id berbeda.
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Pilih metode pembayaran');
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va']);
         $new = $order->refresh()->latestPayment;
         $this->assertSame($order->code.'-2', $new->external_id);
 
@@ -221,7 +296,7 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame(OrderStatus::PendingPayment, $order->refresh()->status);
         $this->assertSame(PaymentStatus::Expired, $order->latestPayment->status);
 
-        $this->get(route('account.orders.payment', $order))->assertOk();
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va']);
         $this->travel(25)->hours();
         $this->notify($order->code.'-2', 'expire')->assertOk();
 
@@ -293,9 +368,12 @@ class MidtransWebhookTest extends TestCase
         $this->post(route('account.orders.payment.regenerate', $order))
             ->assertRedirect(route('account.orders.payment', $order));
 
+        $this->assertSame([PaymentStatus::Cancelled], $order->payments()->pluck('status')->all());
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bni_va']);
+
         $payments = $order->payments()->orderBy('id')->get();
         $this->assertSame([PaymentStatus::Cancelled, PaymentStatus::Pending], $payments->pluck('status')->all());
-        $this->assertSame('snap-2', $payments[1]->snap_token);
+        $this->assertSame($order->code.'-2', $payments[1]->external_id);
         Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v2/'.$order->code.'/cancel'));
 
         // Notifikasi "cancel" untuk link lama tidak membatalkan pesanan.
@@ -344,7 +422,7 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame(OrderStatus::Paid, $order->refresh()->status);
     }
 
-    private function checkout(): Order
+    private function checkout(?string $method = 'bca_va'): Order
     {
         $this->product ??= Product::factory()->create(['price' => 20000, 'stock' => 5, 'weight' => 300]);
         $customer = User::factory()->create();
@@ -355,7 +433,37 @@ class MidtransWebhookTest extends TestCase
 
         $order = $customer->orders()->latest('id')->firstOrFail();
 
+        if ($method) {
+            $this->post(route('account.orders.payment.method', $order), ['method' => $method])
+                ->assertRedirect(route('account.orders.payment', $order));
+        }
+
         return $order;
+    }
+
+    /** Respons Core API /v2/charge per metode (contoh dari dokumentasi Midtrans). */
+    private function chargeResponse(array $body): array
+    {
+        if ($this->rejectCharges) {
+            return ['status_code' => '402', 'status_message' => 'Payment channel is not activated.'];
+        }
+
+        $id = $body['transaction_details']['order_id'];
+        $base = ['status_code' => '201', 'transaction_status' => 'pending', 'transaction_id' => 'trx-'.$id, 'order_id' => $id, 'payment_type' => $body['payment_type']];
+
+        return $base + match ($body['payment_type']) {
+            'bank_transfer' => ($body['bank_transfer']['bank'] === 'permata')
+                ? ['permata_va_number' => '8562000123456']
+                : ['va_numbers' => [['bank' => $body['bank_transfer']['bank'], 'va_number' => '8808123456789']]],
+            'echannel' => ['biller_code' => '70012', 'bill_key' => '990000000260'],
+            'qris' => ['qr_string' => '00020101021226620014COM.GO-JEK.WWW', 'actions' => [['name' => 'generate-qr-code', 'url' => 'https://api.sandbox.midtrans.com/v2/qris/'.$id.'/qr-code']]],
+            'gopay' => ['actions' => [
+                ['name' => 'generate-qr-code', 'url' => 'https://api.sandbox.midtrans.com/v2/gopay/qr'],
+                ['name' => 'deeplink-redirect', 'url' => 'gojek://gopay/merchanttransfer?tref=1'],
+            ]],
+            'shopeepay' => ['actions' => [['name' => 'deeplink-redirect', 'url' => 'https://wsa.wallet.airpay.co.id/universal-link/1']]],
+            'cstore' => ['payment_code' => 'ALFA12345678', 'store' => $body['cstore']['store']],
+        };
     }
 
     private function notify(string $orderId, string $status, ?string $fraud = null, ?string $gross = null)

@@ -87,7 +87,8 @@ export default function dialogs(Alpine) {
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        const method = (form.querySelector('input[name="_method"]')?.value ?? form.method ?? '').toUpperCase();
+        // getAttribute: form.method tertimpa bila ada isian bernama "method".
+        const method = String(form.querySelector('input[name="_method"]')?.value ?? form.getAttribute('method') ?? '').toUpperCase();
         const tone = source.dataset.confirmTone ?? (method === 'DELETE' ? 'danger' : 'primary');
 
         window.confirmDialog({

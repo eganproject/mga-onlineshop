@@ -163,9 +163,11 @@ class ShopTest extends TestCase
         $this->assertSame(111000, $order->total);
         $this->assertSame(3, $product->refresh()->stock);
         $this->assertNull(session('cart'));
-        $this->assertSame(PaymentStatus::Pending, $order->latestPayment->status);
 
         $this->get(route('account.orders.show', $order))->assertOk()->assertSee('Bayar sekarang');
+        $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Pilih metode pembayaran');
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va']);
+        $this->assertSame(PaymentStatus::Pending, $order->latestPayment->status);
         $this->get(route('account.orders.payment', $order))->assertOk()->assertSee('Simulasikan bayar');
 
         $this->post(route('account.orders.simulate-payment', $order))->assertRedirect();

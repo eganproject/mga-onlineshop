@@ -15,18 +15,15 @@ use App\Models\Voucher;
 use App\Services\Billing\PriceCalculator;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\StockService;
-use App\Services\Payment\PaymentService;
 use App\Services\Promo\VoucherService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Throwable;
 
 class CheckoutService
 {
     public function __construct(
         private readonly CartService $cart,
-        private readonly PaymentService $payments,
         private readonly StockService $stock,
         private readonly VoucherService $vouchers,
         private readonly PriceCalculator $prices,
@@ -137,15 +134,7 @@ class CheckoutService
         $this->cart->clear();
         $this->vouchers->forget();
 
-        try {
-            // Bila pembeli harus memilih metode (ada biaya transaksi), tagihan dibuat di halaman bayar.
-            if (! $this->payments->requiresMethodChoice()) {
-                $this->payments->createFor($order);
-            }
-        } catch (Throwable $e) {
-            // Pesanan tetap tersimpan; tagihan dibuat ulang saat halaman bayar dibuka.
-            report($e);
-        }
+        // Tagihan dibuat di halaman bayar, setelah pembeli memilih metode.
 
         return $order;
     }

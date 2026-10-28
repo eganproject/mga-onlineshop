@@ -137,7 +137,9 @@ class BillingTest extends TestCase
         $this->assertSame('PT Maju Jaya', $order->billing_name);
         $this->assertSame('012345678901234', $order->billing_npwp);
         $this->assertSame('01.234.567.8-901.234', BillingSettings::formatNpwp($order->billing_npwp));
-        $this->assertSame($order->total, $order->latestPayment->amount);
+        $this->assertSame(0, $order->payments()->count(), 'Tagihan dibuat setelah metode dipilih.');
+        $this->post(route('account.orders.payment.method', $order), ['method' => 'bca_va']);
+        $this->assertSame($order->total, $order->refresh()->latestPayment->amount);
     }
 
     public function test_company_fields_are_ignored_when_checkbox_is_off(): void
@@ -328,7 +330,8 @@ class BillingTest extends TestCase
     {
         config(['shop.billing.tax_enabled' => true, 'shop.billing.tax_rate' => 11]);
         [$order, $customer] = $this->checkout(extra: ['company_invoice' => '1', 'billing_name' => 'CV Laporan']);
-        $this->actingAs($customer)->post(route('account.orders.simulate-payment', $order));
+        $this->actingAs($customer)->post(route('account.orders.payment.method', $order), ['method' => 'bca_va']);
+        $this->post(route('account.orders.simulate-payment', $order));
         $order->refresh();
         $admin = User::factory()->admin()->create();
 
