@@ -24,7 +24,9 @@ class StructuredData
                 'highPrice' => $variants->max('price'),
                 'offerCount' => $variants->count(),
                 'availability' => $availability,
+                'itemCondition' => 'https://schema.org/NewCondition',
                 'url' => $url,
+                'seller' => ['@id' => route('home').'#organization', '@type' => 'Organization', 'name' => config('shop.full_name')],
             ]
             : [
                 '@type' => 'Offer',
@@ -33,7 +35,7 @@ class StructuredData
                 'availability' => $availability,
                 'itemCondition' => 'https://schema.org/NewCondition',
                 'url' => $url,
-                'seller' => ['@type' => 'Organization', 'name' => config('shop.full_name')],
+                'seller' => ['@id' => route('home').'#organization', '@type' => 'Organization', 'name' => config('shop.full_name')],
             ];
 
         $data = [
@@ -44,6 +46,7 @@ class StructuredData
             'url' => $url,
             'image' => $product->images->map->url()->values()->all() ?: null,
             'sku' => $product->sku,
+            'brand' => ['@type' => 'Brand', 'name' => config('shop.name')],
             'category' => $product->category?->name,
             'offers' => $offers,
         ];
@@ -96,6 +99,28 @@ class StructuredData
             'inLanguage' => 'id-ID',
             'url' => $url,
         ]);
+    }
+
+    /** Halaman daftar produk (katalog/kategori): CollectionPage berisi produk di halaman ini. */
+    public static function collection(string $name, string $url, Collection $products): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $name,
+            'url' => $url,
+            'inLanguage' => 'id-ID',
+            'mainEntity' => [
+                '@type' => 'ItemList',
+                'numberOfItems' => $products->count(),
+                'itemListElement' => $products->values()->map(fn (Product $product, int $i) => [
+                    '@type' => 'ListItem',
+                    'position' => $i + 1,
+                    'url' => route('products.show', $product),
+                    'name' => $product->name,
+                ])->all(),
+            ],
+        ];
     }
 
     /** @param  array<int, array{0: string, 1: string}>  $items  [nama, url] */

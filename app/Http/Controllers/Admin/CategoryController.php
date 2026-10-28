@@ -101,13 +101,15 @@ class CategoryController extends Controller
                 Rule::notIn(array_filter([$category?->id])),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
+            'meta_title' => ['nullable', 'string', 'max:70'],
+            'meta_description' => ['nullable', 'string', 'max:160'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['sometimes', 'boolean'],
         ], [
             'parent_id.exists' => 'Induk harus kategori level atas (maksimal 2 tingkat).',
             'parent_id.not_in' => 'Kategori tidak bisa menjadi induk dirinya sendiri.',
-        ], ['name' => 'nama kategori', 'image' => 'gambar', 'parent_id' => 'induk kategori']);
+        ], ['name' => 'nama kategori', 'image' => 'gambar', 'parent_id' => 'induk kategori', 'meta_title' => 'judul SEO', 'meta_description' => 'deskripsi SEO']);
 
         // Kategori yang punya subkategori tidak boleh dijadikan subkategori (maks 2 tingkat).
         if (($data['parent_id'] ?? null) && $category?->children()->exists()) {

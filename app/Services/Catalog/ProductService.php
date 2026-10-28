@@ -28,7 +28,7 @@ class ProductService
             $isNew = ! $product->exists;
             $hasVariants = (bool) ($data['has_variants'] ?? false);
 
-            $product->fill(Arr::only($data, ['category_id', 'name', 'sku', 'description', 'weight']));
+            $product->fill(Arr::only($data, ['category_id', 'name', 'sku', 'description', 'meta_title', 'meta_description', 'weight']));
             $product->slug = ($data['slug'] ?? null) ?: $this->uniqueSlug($data['name'], $product);
             $product->is_active = (bool) ($data['is_active'] ?? false);
             $product->is_featured = (bool) ($data['is_featured'] ?? false);

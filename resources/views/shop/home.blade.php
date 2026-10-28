@@ -5,7 +5,7 @@
     $byPrice = $bestSellers->sortBy('price')->pluck('id')->flip();
     $last = $bestSellers->count() - 1;
 @endphp
-<x-layouts.shop>
+<x-layouts.shop :seo-title="\App\Support\Seo::homeTitle()">
     <x-slot:head>
         {!! \App\Support\StructuredData::script(\App\Support\StructuredData::website()) !!}
         <link rel="preload" as="image" href="{{ $hero['image'] }}" @if ($hero['mobile_image']) media="(min-width: 768px)" @endif>

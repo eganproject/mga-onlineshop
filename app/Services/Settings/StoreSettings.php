@@ -61,6 +61,14 @@ class StoreSettings
         'shop.storefront.best_seller_products' => 'array',
         'shop.storefront.best_seller_fill' => 'bool',
 
+        // SEO & analitik (Admin › SEO).
+        'shop.seo.home_title' => 'string',
+        'shop.seo.description' => 'string',
+        'shop.seo.default_image' => 'string',
+        'shop.seo.google_verification' => 'string',
+        'shop.seo.bing_verification' => 'string',
+        'shop.seo.analytics_id' => 'string',
+
         // Pajak, biaya & invoice (Admin › Pajak & Biaya).
         'shop.billing.tax_enabled' => 'bool',
         'shop.billing.tax_label' => 'string',

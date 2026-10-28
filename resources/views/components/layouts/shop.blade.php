@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false, 'bottomNav' => true, 'whatsappContext' => null])
+@props(['title' => null, 'seoTitle' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => 'website', 'noindex' => false, 'bottomNav' => true, 'whatsappContext' => null])
 @php
     $user = auth()->user();
     $announcements = \App\Support\Storefront::announcements();
@@ -9,7 +9,7 @@
     $articleNav = ['label' => 'Artikel', 'url' => route('articles.index'), 'active' => request()->routeIs('articles.*')];
     $accountUrl = $user ? $user->homeRoute() : route('login');
 @endphp
-<x-layouts.base :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" :viewport-fit="true" body-class="bg-white text-ink" data-cart-count="{{ $cartCount }}">
+<x-layouts.base :title="$title" :seo-title="$seoTitle" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :noindex="$noindex" :viewport-fit="true" body-class="bg-white text-ink" data-cart-count="{{ $cartCount }}">
     @isset($head)
         <x-slot:head>{{ $head }}</x-slot:head>
     @endisset
