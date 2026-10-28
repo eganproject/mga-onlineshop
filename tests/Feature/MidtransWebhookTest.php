@@ -237,7 +237,7 @@ class MidtransWebhookTest extends TestCase
         $this->assertSame($order->total + $payment->fee, $order->amountPaid());
     }
 
-    public function test_invalid_signature_unknown_order_and_wrong_amount_are_rejected(): void
+    public function test_invalid_signature_is_rejected_and_wrong_amount_is_ignored(): void
     {
         $order = $this->checkout();
 
@@ -245,13 +245,27 @@ class MidtransWebhookTest extends TestCase
         $payload['signature_key'] = 'palsu';
         $this->postJson(route('webhooks.midtrans'), $payload)->assertForbidden();
 
-        $this->notify('MGA-TIDAK-ADA', 'settlement')->assertNotFound();
-
         // Signature valid tapi nominal berbeda dari tagihan: tidak dianggap lunas.
         $this->notify($order->code, 'settlement', gross: '1000.00')->assertOk();
 
         $this->assertSame(OrderStatus::PendingPayment, $order->refresh()->status);
         $this->assertSame(PaymentStatus::Pending, $order->latestPayment->status);
+    }
+
+    public function test_dashboard_test_notification_with_unknown_order_gets_200(): void
+    {
+        // Tombol "Test notification URL" di dashboard Midtrans memakai order_id contoh.
+        $this->notify('payment_notif_test_G123456789_abc', 'settlement')->assertOk();
+        $this->notify('MGA-TIDAK-ADA', 'pending')->assertOk();
+    }
+
+    public function test_notification_is_acknowledged_when_midtrans_driver_is_off(): void
+    {
+        config(['shop.payment.driver' => 'fake']);
+
+        $this->notify('payment_notif_test_G123456789_abc', 'settlement')
+            ->assertOk()
+            ->assertJsonPath('message', 'Midtrans belum diaktifkan di toko, notifikasi diabaikan.');
     }
 
     public function test_challenged_card_payment_stays_pending(): void
