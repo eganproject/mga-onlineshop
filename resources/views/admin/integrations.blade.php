@@ -23,15 +23,15 @@
         <div class="min-w-0 space-y-6 lg:col-span-2">
             @foreach ($cards as $key => [$name, $description, $icon, $iconClass])
                 <section id="{{ $key }}" class="card min-w-0 scroll-mt-24 p-6">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex min-w-0 items-center gap-3">
-                            <span class="grid size-10 shrink-0 place-items-center rounded-xl {{ $iconClass }}"><x-icon :name="$icon" /></span>
-                            <div>
+                    <div class="flex items-start gap-3">
+                        <span class="grid size-10 shrink-0 place-items-center rounded-xl {{ $iconClass }}"><x-icon :name="$icon" /></span>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <h2 class="font-bold text-stone-900">{{ $name }}</h2>
-                                <p class="text-xs text-stone-500">{{ $description }}</p>
+                                <span class="badge shrink-0 {{ $status[$key]['class'] }}">{{ $status[$key]['label'] }}</span>
                             </div>
+                            <p class="mt-0.5 text-xs text-stone-500">{{ $description }}</p>
                         </div>
-                        <span class="badge shrink-0 {{ $status[$key]['class'] }}">{{ $status[$key]['label'] }}</span>
                     </div>
 
                     @if ($result = $results[$key] ?? null)
@@ -112,14 +112,8 @@
                                 <a href="{{ route('admin.store-settings.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-700 underline">Ubah asal & kurir di Pengaturan Toko</a>
                             </div>
                         @elseif ($key === 'warehouse')
-                            <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                                <span>
-                                    <span class="block text-sm font-semibold text-stone-800">Sinkron stok otomatis</span>
-                                    <span class="text-xs text-stone-500">Tarik stok yang berubah sesuai interval, plus tarikan penuh tiap malam pukul 02.40. Butuh cron scheduler di server.</span>
-                                </span>
-                                <input type="hidden" name="warehouse[enabled]" value="0">
-                                <input type="checkbox" name="warehouse[enabled]" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('warehouse.enabled', $value('warehouse', 'enabled')))>
-                            </label>
+                            <x-form.switch card name="warehouse[enabled]" label="Sinkron stok otomatis" :checked="$value('warehouse', 'enabled')"
+                                           description="Tarik stok yang berubah sesuai interval, plus tarikan penuh tiap malam pukul 02.40. Butuh cron scheduler di server." />
                             <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                                 <div class="sm:col-span-2">
                                     <x-form.input name="warehouse[base_url]" id="warehouse_base_url" label="URL warehouse29" :value="$value('warehouse', 'base_url')" placeholder="https://gudang.mga-advertising.co.id" :hint="$source('warehouse', 'base_url')" spellcheck="false" inputmode="url"
@@ -138,14 +132,8 @@
                                 <a href="{{ route('admin.stock.warehouse') }}" class="font-semibold text-brand-700 underline">Stok › Sinkron gudang</a>.
                             </div>
                         @else
-                            <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                                <span>
-                                    <span class="block text-sm font-semibold text-stone-800">Tampilkan tombol "Lanjutkan dengan Google"</span>
-                                    <span class="text-xs text-stone-500">Di halaman masuk & daftar pelanggan. Butuh API key dan Project ID.</span>
-                                </span>
-                                <input type="hidden" name="firebase[login_enabled]" value="0">
-                                <input type="checkbox" name="firebase[login_enabled]" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('firebase.login_enabled', $value('firebase', 'login_enabled')))>
-                            </label>
+                            <x-form.switch card name="firebase[login_enabled]" label="Tampilkan tombol “Lanjutkan dengan Google”" :checked="$value('firebase', 'login_enabled')"
+                                           description="Di halaman masuk & daftar pelanggan. Butuh API key dan Project ID." />
                             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <x-form.input name="firebase[api_key]" id="firebase_api_key" label="API key (apiKey)" :value="$value('firebase', 'api_key')" placeholder="AIza..." :hint="$source('firebase', 'api_key')" spellcheck="false"
                                               tooltip="Nilai apiKey dari Firebase Console › Project settings › Your apps (Web app). Bukan kunci rahasia." />

@@ -6,13 +6,27 @@ export default (config) => ({
     hasVariants: Boolean(config.hasVariants),
     images: config.images, // [{ id, url, removed }]
     uploads: [], // [{ url, name }]
-    variants: config.variants.map((v) => ({ uid: crypto.randomUUID?.() ?? Math.random(), ...v })),
+    // Error validasi ikut objek varian, jadi tetap di baris yang benar saat baris lain dihapus.
+    variants: config.variants.map((v, i) => ({
+        uid: crypto.randomUUID?.() ?? Math.random(),
+        ...v,
+        errors: config.variantErrors?.[i] ?? [],
+    })),
     bulkPrice: '',
     bulkStock: '',
     maxImages: config.maxImages,
 
     get activeImages() {
         return this.images.filter((image) => !image.removed);
+    },
+
+    rowErrors(index) {
+        return this.variants[index]?.errors ?? [];
+    },
+
+    variantImage(variant) {
+        if (!variant.image_id) return this.activeImages[0] ?? null;
+        return this.activeImages.find((image) => String(image.id) === String(variant.image_id)) ?? null;
     },
 
     get remainingSlots() {
@@ -58,8 +72,13 @@ export default (config) => ({
             weight: '',
             image_id: '',
             is_active: true,
+            errors: [],
         });
-        this.$nextTick(() => this.$refs.variantRows?.querySelector('tr:last-child input')?.focus());
+        this.$nextTick(() => {
+            const row = this.$refs.variantRows?.querySelector('[data-variant-row]:last-of-type');
+            row?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            row?.querySelector('input:not([type=hidden])')?.focus({ preventScroll: true });
+        });
     },
 
     removeVariant(index) {

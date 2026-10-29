@@ -22,6 +22,11 @@
         'variants' => $variantRows,
         'defaultPrice' => old('price', $product->price),
         'maxImages' => \App\Http\Requests\Admin\ProductRequest::MAX_IMAGES,
+        // Pesan error per baris varian: [index => [pesan, ...]].
+        'variantErrors' => collect($errors->getMessages())
+            ->filter(fn ($m, $key) => preg_match('/^variants\.\d+\./', $key))
+            ->groupBy(fn ($m, $key) => (int) explode('.', $key)[1], preserveKeys: true)
+            ->map(fn ($group) => $group->flatten()->unique()->values()),
     ];
 @endphp
 <x-layouts.admin :title="$editing ? 'Edit Produk' : 'Tambah Produk'">
@@ -123,12 +128,8 @@
                         <h2 class="font-bold text-stone-900">Harga, stok & varian</h2>
                         <p class="text-xs text-stone-500">Aktifkan varian bila produk punya pilihan warna, tipe HP, ukuran, dll.</p>
                     </div>
-                    <label class="flex items-center gap-2 text-sm font-semibold text-stone-700">
-                        <input type="hidden" name="has_variants" value="0">
-                        <input type="checkbox" name="has_variants" value="1" x-model="hasVariants" @change="toggleVariants()" class="checkbox size-5">
-                        Produk punya varian
-                        <x-tooltip label="Produk punya varian" text="Aktifkan bila satu produk punya beberapa pilihan, mis. warna atau tipe HP. Tiap varian punya harga, stok, SKU, berat, dan foto sendiri; pelanggan wajib memilih sebelum membeli." />
-                    </label>
+                    <x-form.switch name="has_variants" label="Produk punya varian" x-model="hasVariants" @change="toggleVariants()" :checked="old('has_variants', $product->has_variants)"
+                                   tooltip="Aktifkan bila satu produk punya beberapa pilihan, mis. warna atau tipe HP. Tiap varian punya harga, stok, SKU, berat, dan foto sendiri; pelanggan wajib memilih sebelum membeli." />
                 </div>
 
                 {{-- Tanpa varian --}}
@@ -171,57 +172,68 @@
                     </div>
 
                     <x-input-error for="variants" />
-                    <div class="-mx-6 overflow-x-auto">
-                        <table class="table-base min-w-[940px]">
-                            <thead class="bg-stone-50/70">
-                                <tr>
-                                    <th class="w-8"></th><th>Nama varian</th>
-                                    <th><span class="inline-flex items-center gap-1">SKU <x-tooltip label="SKU varian" text="Kode unik tiap varian, dipakai untuk update stok massal lewat Excel. Boleh kosong." /></span></th>
-                                    <th>Harga</th><th>Harga coret</th><th>Stok</th>
-                                    <th><span class="inline-flex items-center gap-1">Berat (gr) <x-tooltip label="Berat varian" text="Isi bila berat varian ini berbeda. Kosongkan untuk memakai berat produk di samping." /></span></th>
-                                    <th><span class="inline-flex items-center gap-1">Foto <x-tooltip label="Foto varian" text="Foto yang ditampilkan saat pelanggan memilih varian ini. Pilihan diambil dari foto yang sudah tersimpan, jadi simpan dulu foto baru." /></span></th>
-                                    <th class="text-center"><span class="inline-flex items-center gap-1">Aktif <x-tooltip label="Varian aktif" text="Varian nonaktif tidak bisa dipilih pelanggan dan tidak dihitung di harga termurah maupun total stok." /></span></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-stone-100" x-ref="variantRows">
-                                <template x-for="(variant, index) in variants" :key="variant.uid">
-                                    <tr class="align-top">
-                                        <td class="pt-5 text-xs font-semibold text-stone-400" x-text="index + 1"></td>
-                                        <td>
-                                            <input type="hidden" :name="`variants[${index}][id]`" :value="variant.id ?? ''" :disabled="!hasVariants">
-                                            <input type="hidden" :name="`variants[${index}][stock_original]`" :value="variant.stock_original ?? ''" :disabled="!hasVariants">
-                                            <input :name="`variants[${index}][name]`" x-model="variant.name" required maxlength="100" placeholder="Hitam" :disabled="!hasVariants" class="input min-w-36">
-                                        </td>
-                                        <td><input :name="`variants[${index}][sku]`" x-model="variant.sku" maxlength="64" :disabled="!hasVariants" class="input min-w-28"></td>
-                                        <td><div class="relative"><span class="input-addon left-3">Rp</span><input :name="`variants[${index}][price]`" x-model="variant.price" x-money required :disabled="!hasVariants" class="input min-w-32 pl-9 tabular-nums"></div></td>
-                                        <td><div class="relative"><span class="input-addon left-3">Rp</span><input :name="`variants[${index}][compare_at_price]`" x-model="variant.compare_at_price" x-money :disabled="!hasVariants" class="input min-w-32 pl-9 tabular-nums"></div></td>
-                                        <td>
-                                            <x-form.number wrapper-class="w-32" min="0" x-bind:name="`variants[${index}][stock]`" x-model="variant.stock" required x-bind:disabled="!hasVariants" />
-                                        </td>
-                                        <td><input type="number" min="1" :name="`variants[${index}][weight]`" x-model="variant.weight" placeholder="Ikut produk" :disabled="!hasVariants" class="input w-28"></td>
-                                        <td>
-                                            <select :name="`variants[${index}][image_id]`" x-model="variant.image_id" :disabled="!hasVariants" class="input min-w-28">
+                    {{-- Tiap varian = kartu. Kolom menyesuaikan lebar kartu (container query), jadi tidak perlu geser ke samping. --}}
+                    <div class="space-y-3" x-ref="variantRows">
+                        <template x-for="(variant, index) in variants" :key="variant.uid">
+                            <div class="@container rounded-2xl border p-3 transition sm:p-4"
+                                 :class="[variant.is_active ? 'border-stone-200 bg-white' : 'border-dashed border-stone-200 bg-stone-50/70', rowErrors(index).length && 'border-rose-300 ring-4 ring-rose-500/10']"
+                                 data-variant-row>
+                                <input type="hidden" :name="`variants[${index}][id]`" :value="variant.id ?? ''" :disabled="!hasVariants">
+                                <input type="hidden" :name="`variants[${index}][stock_original]`" :value="variant.stock_original ?? ''" :disabled="!hasVariants">
+
+                                <div class="flex flex-wrap items-center gap-2 @md:flex-nowrap @md:gap-3">
+                                    <span class="inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 px-2 text-xs font-bold whitespace-nowrap text-stone-500"><span class="@md:hidden">Varian&nbsp;</span><span x-text="index + 1"></span></span>
+                                    <label class="sr-only" :for="`variant-${variant.uid}-name`">Nama varian</label>
+                                    <input :id="`variant-${variant.uid}-name`" :name="`variants[${index}][name]`" x-model="variant.name" required maxlength="100"
+                                           placeholder="Nama varian, mis. Hitam" :disabled="!hasVariants" class="input order-last min-w-0 basis-full font-semibold @md:order-none @md:basis-auto @md:flex-1">
+                                    <label class="ml-auto flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-1.5 py-2 text-xs font-semibold text-stone-600 @md:ml-0 @md:px-2" :title="variant.is_active ? 'Varian aktif' : 'Varian nonaktif'">
+                                        <span x-text="variant.is_active ? 'Aktif' : 'Nonaktif'"></span>
+                                        <input type="checkbox" role="switch" value="1" :name="`variants[${index}][is_active]`" x-model="variant.is_active" :disabled="!hasVariants" class="switch">
+                                    </label>
+                                    <button type="button" @click="removeVariant(index)" class="btn btn-ghost btn-sm shrink-0 px-2 text-rose-600 hover:bg-rose-50" :aria-label="`Hapus varian ${variant.name || index + 1}`" title="Hapus varian"><x-icon name="trash" class="size-4" /></button>
+                                </div>
+
+                                <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 @xl:grid-cols-3 @4xl:grid-cols-6">
+                                    <div class="min-w-0">
+                                        <label class="mb-1 block text-xs font-semibold text-stone-500" :for="`variant-${variant.uid}-price`">Harga</label>
+                                        <div class="relative"><span class="input-addon left-3">Rp</span><input :id="`variant-${variant.uid}-price`" :name="`variants[${index}][price]`" x-model="variant.price" x-money required :disabled="!hasVariants" class="input pl-9 tabular-nums"></div>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <label class="mb-1 block text-xs font-semibold text-stone-500" :for="`variant-${variant.uid}-compare`">Harga coret</label>
+                                        <div class="relative"><span class="input-addon left-3">Rp</span><input :id="`variant-${variant.uid}-compare`" :name="`variants[${index}][compare_at_price]`" x-model="variant.compare_at_price" x-money placeholder="Opsional" :disabled="!hasVariants" class="input pl-9 tabular-nums"></div>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="mb-1 block text-xs font-semibold text-stone-500">Stok</span>
+                                        <x-form.number min="0" x-bind:name="`variants[${index}][stock]`" x-model="variant.stock" required x-bind:disabled="!hasVariants" aria-label="Stok" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <label class="mb-1 flex items-center gap-1 text-xs font-semibold text-stone-500" :for="`variant-${variant.uid}-sku`">SKU <x-tooltip label="SKU varian" text="Kode unik tiap varian, dipakai untuk update stok massal lewat Excel. Boleh kosong." /></label>
+                                        <input :id="`variant-${variant.uid}-sku`" :name="`variants[${index}][sku]`" x-model="variant.sku" maxlength="64" placeholder="Opsional" :disabled="!hasVariants" class="input">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <label class="mb-1 flex items-center gap-1 text-xs font-semibold text-stone-500" :for="`variant-${variant.uid}-weight`">Berat (gram) <x-tooltip label="Berat varian" text="Isi bila berat varian ini berbeda. Kosongkan untuk memakai berat produk." /></label>
+                                        <input :id="`variant-${variant.uid}-weight`" type="number" min="1" inputmode="numeric" :name="`variants[${index}][weight]`" x-model="variant.weight" placeholder="Ikut produk" :disabled="!hasVariants" class="input tabular-nums">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <label class="mb-1 flex items-center gap-1 text-xs font-semibold text-stone-500" :for="`variant-${variant.uid}-image`">Foto <x-tooltip label="Foto varian" text="Foto yang ditampilkan saat pelanggan memilih varian ini. Pilihan diambil dari foto yang sudah tersimpan, jadi simpan dulu foto baru." /></label>
+                                        <div class="flex items-center gap-2">
+                                            <img x-show="variantImage(variant)" :src="variantImage(variant)?.url" alt="" class="size-10 shrink-0 rounded-lg border border-stone-200 object-cover">
+                                            <select :id="`variant-${variant.uid}-image`" :name="`variants[${index}][image_id]`" x-model="variant.image_id" :disabled="!hasVariants" class="input min-w-0">
                                                 <option value="">Sampul</option>
                                                 <template x-for="(image, i) in activeImages" :key="image.id">
                                                     <option :value="String(image.id)" x-text="`Foto ${i + 1}`" :selected="String(image.id) === String(variant.image_id)"></option>
                                                 </template>
                                             </select>
-                                        </td>
-                                        <td class="pt-4 text-center">
-                                            <input type="checkbox" value="1" :name="`variants[${index}][is_active]`" x-model="variant.is_active" :disabled="!hasVariants" class="checkbox size-5">
-                                        </td>
-                                        <td class="pt-3">
-                                            <button type="button" @click="removeVariant(index)" class="btn btn-ghost btn-sm text-rose-600 hover:bg-rose-50" title="Hapus varian"><x-icon name="trash" class="size-4" /></button>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <template x-for="message in rowErrors(index)" :key="message">
+                                    <p class="mt-2 text-xs font-medium text-rose-600" x-text="message"></p>
                                 </template>
-                            </tbody>
-                        </table>
+                            </div>
+                        </template>
                     </div>
-                    @foreach ($errors->get('variants.*') as $messages)
-                        <p class="text-xs font-medium text-rose-600">{{ $messages[0] }}</p>
-                    @endforeach
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <button type="button" @click="addVariant()" class="btn btn-secondary"><x-icon name="plus" class="size-4" /> Tambah varian</button>
                         <p class="text-sm text-stone-500">Total stok aktif: <span class="font-bold text-stone-900" x-text="totalStock"></span></p>
@@ -241,14 +253,9 @@
         <div class="space-y-6">
             <div class="card space-y-4 p-6">
                 <h2 class="font-bold text-stone-900">Visibilitas</h2>
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="block text-sm font-semibold text-stone-800">Aktif</span><span class="text-xs text-stone-500">Tampil dan bisa dibeli</span></span>
-                    <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $product->is_active))>
-                </label>
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="flex items-center gap-1 text-sm font-semibold text-stone-800">Produk unggulan <x-tooltip label="Produk unggulan" text="Dipakai melengkapi tab Best Seller di beranda (mode Otomatis) saat data penjualan belum cukup, didahulukan sebelum produk terbaru." /></span><span class="text-xs text-stone-500">Tampil di beranda</span></span>
-                    <input type="checkbox" name="is_featured" value="1" class="checkbox size-5" @checked(old('is_featured', $product->is_featured))>
-                </label>
+                <x-form.switch name="is_active" label="Aktif" description="Tampil di toko dan bisa dibeli. Matikan untuk menyembunyikan." :checked="$product->is_active" />
+                <x-form.switch name="is_featured" label="Produk unggulan" description="Diprioritaskan di tab Best Seller beranda." :checked="$product->is_featured"
+                               tooltip="Dipakai melengkapi tab Best Seller di beranda (mode Otomatis) saat data penjualan belum cukup, didahulukan sebelum produk terbaru." />
             </div>
 
             <div class="card p-6">
@@ -258,13 +265,13 @@
                                :tooltip-tips="['Isi berat setelah dikemas (produk + kardus/bubble wrap), bukan berat bersih.', 'Berat terlalu kecil membuat ongkir yang dibayar pelanggan kurang dari tagihan kurir.']" />
             </div>
 
-            <div class="lg:sticky lg:top-24">
+            <x-admin.save-bar class="lg:sticky lg:top-24">
                 <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan produk' }}</button>
-                @if ($editing)
-                    {{-- Form hapus ada di luar form utama (form tidak boleh bersarang). --}}
-                    <button form="delete-product-form" class="btn btn-ghost mt-3 w-full text-rose-600 hover:bg-rose-50"><x-icon name="trash" class="size-4" /> Hapus produk</button>
-                @endif
-            </div>
+            </x-admin.save-bar>
+            @if ($editing)
+                {{-- Form hapus ada di luar form utama (form tidak boleh bersarang). --}}
+                <button form="delete-product-form" class="btn btn-ghost w-full text-rose-600 hover:bg-rose-50 lg:-mt-3"><x-icon name="trash" class="size-4" /> Hapus produk</button>
+            @endif
         </div>
     </form>
 

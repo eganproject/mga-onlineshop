@@ -112,14 +112,9 @@
 
         <div class="space-y-6">
             <div class="card space-y-5 p-6">
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="block text-sm font-semibold text-stone-800">Aktif</span><span class="text-xs text-stone-500">Nonaktifkan untuk menghentikan sementara</span></span>
-                    <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $voucher->is_active))>
-                </label>
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="flex items-center gap-1 text-sm font-semibold text-stone-800">Tampilkan di checkout <x-tooltip label="Tampilkan di checkout" text="Bila mati, voucher tersembunyi: hanya bisa dipakai dengan mengetik kodenya. Cocok untuk kode khusus reseller, member, atau influencer." /></span><span class="text-xs text-stone-500">Pelanggan bisa memilih tanpa mengetik kode</span></span>
-                    <input type="checkbox" name="is_public" value="1" class="checkbox size-5" @checked(old('is_public', $voucher->is_public))>
-                </label>
+                <x-form.switch name="is_active" label="Aktif" description="Matikan untuk menghentikan voucher sementara." :checked="$voucher->is_active" />
+                <x-form.switch name="is_public" label="Tampilkan di checkout" description="Pelanggan bisa memilih tanpa mengetik kode." :checked="$voucher->is_public"
+                               tooltip="Bila mati, voucher tersembunyi: hanya bisa dipakai dengan mengetik kodenya. Cocok untuk kode khusus reseller, member, atau influencer." />
             </div>
             <div class="rounded-2xl bg-sand-100/70 p-5 text-xs leading-relaxed text-stone-600">
                 <p class="font-semibold text-stone-800">Cara kerja</p>
@@ -129,7 +124,9 @@
                     <li>Kuota terpakai saat pesanan dibuat dan kembali bila pesanan dibatalkan/kedaluwarsa.</li>
                 </ul>
             </div>
-            <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan voucher' }}</button>
+            <x-admin.save-bar>
+                <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan voucher' }}</button>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>

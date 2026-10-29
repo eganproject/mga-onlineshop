@@ -18,7 +18,7 @@
                 <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Item pesanan</h2></div>
                 <ul class="divide-y divide-stone-100">
                     @foreach ($order->items as $item)
-                        <li class="flex items-center gap-4 p-5">
+                        <li class="flex items-start gap-3 p-4 sm:items-center sm:gap-4 sm:p-5">
                             @if ($item->product)
                                 <x-product-image :product="$item->product" class="size-14 shrink-0 rounded-xl" />
                             @else
@@ -28,8 +28,9 @@
                                 <p class="font-semibold text-stone-900">{{ $item->product_name }}</p>
                                 @if ($item->variant_name)<p class="text-xs font-medium text-brand-700">{{ $item->variant_name }}</p>@endif
                                 <p class="text-xs text-stone-500">{{ $item->sku ?? 'Tanpa SKU' }} · {{ $item->quantity }} × @rupiah($item->price)</p>
+                                <p class="mt-1 font-semibold text-stone-900 sm:hidden">@rupiah($item->subtotal)</p>
                             </div>
-                            <p class="font-semibold text-stone-900">@rupiah($item->subtotal)</p>
+                            <p class="hidden shrink-0 font-semibold whitespace-nowrap text-stone-900 sm:block">@rupiah($item->subtotal)</p>
                         </li>
                     @endforeach
                 </ul>

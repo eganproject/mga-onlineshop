@@ -120,12 +120,8 @@
             </fieldset>
 
             <div x-show="mode === 'manual'" x-cloak class="space-y-5">
-                <label class="flex items-start gap-3 text-sm text-stone-700">
-                    <input type="hidden" name="best_seller_fill" value="0">
-                    <input type="checkbox" name="best_seller_fill" value="1" @checked(old('best_seller_fill', $bestSeller['fill'])) class="mt-0.5 rounded text-brand-600 focus:ring-brand-500">
-                    <span>Lengkapi otomatis bila pilihan kurang dari {{ \App\Services\Storefront\BestSellers::LIMIT }}
-                        <span class="block text-xs text-stone-500">Sisa tempat diisi produk terlaris (otomatis) setelah pilihan Anda.</span></span>
-                </label>
+                <x-form.switch card name="best_seller_fill" :label="'Lengkapi otomatis bila pilihan kurang dari '.\App\Services\Storefront\BestSellers::LIMIT" :checked="$bestSeller['fill']"
+                               description="Sisa tempat diisi produk terlaris (otomatis) setelah pilihan Anda." />
 
                 {{-- Pencarian produk --}}
                 <div class="relative" @click.outside="open = false" @keydown.escape.window="open = false">

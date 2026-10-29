@@ -26,14 +26,8 @@
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Pajak (PPN)</h2><p class="text-xs text-stone-500">Dihitung di checkout, ditampilkan di invoice, dan dikirim ke Midtrans sebagai rincian tagihan.</p></div>
                 </div>
 
-                <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                    <span>
-                        <span class="block text-sm font-semibold text-stone-800">Kenakan PPN pada penjualan</span>
-                        <span class="text-xs text-stone-500">Aktifkan bila toko sudah dikukuhkan sebagai Pengusaha Kena Pajak (PKP).</span>
-                    </span>
-                    <input type="hidden" name="tax_enabled" value="0">
-                    <input type="checkbox" name="tax_enabled" value="1" x-model="tax" class="checkbox mt-0.5 size-5 shrink-0" @checked($val('tax_enabled'))>
-                </label>
+                <x-form.switch name="tax_enabled" label="Kenakan PPN pada penjualan" card x-model="tax" :checked="$val('tax_enabled')"
+                               description="Aktifkan bila toko sudah dikukuhkan sebagai Pengusaha Kena Pajak (PKP)." />
 
                 <div x-show="tax" @unless ($val('tax_enabled')) x-cloak @endunless class="space-y-5">
                     @unless ($val('is_pkp'))
@@ -60,7 +54,7 @@
                             @foreach (['full' => ['Harga jual', 'DPP = harga setelah diskon'], 'other' => ['Nilai lain 11/12', 'DPP = 11/12 × harga jual']] as $value => [$title, $text])
                                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 p-3 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                                     <input type="radio" name="tax_dpp" value="{{ $value }}" x-model="dpp" class="mt-0.5" @checked($val('tax_dpp') === $value)>
-                                    <span><span class="block text-sm font-semibold text-stone-800">{{ $title }}</span><span class="text-xs text-stone-500">{{ $text }}</span></span>
+                                    <span><span class="block text-sm font-semibold text-stone-800">{{ $title }}</span><span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ $text }}</span></span>
                                 </label>
                             @endforeach
                         </div>
@@ -79,7 +73,7 @@
                             ] as $value => [$title, $text])
                                 <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 p-3 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                                     <input type="radio" name="tax_mode" value="{{ $value }}" class="mt-0.5" @checked($val('tax_mode') === $value)>
-                                    <span><span class="block text-sm font-semibold text-stone-800">{{ $title }}</span><span class="text-xs text-stone-500">{{ $text }}</span></span>
+                                    <span><span class="block text-sm font-semibold text-stone-800">{{ $title }}</span><span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ $text }}</span></span>
                                 </label>
                             @endforeach
                         </div>
@@ -90,11 +84,7 @@
                             $toggle('tax_shipping', 'PPN juga atas ongkir', 'Ongkir (setelah potongan) ikut dikenai PPN. Umumnya tidak, karena ongkir diteruskan ke kurir.'),
                             $toggle('tax_price_note', 'Tampilkan catatan di harga', 'Mis. “Harga belum termasuk PPN 11%” di halaman produk & keranjang.'),
                         ] as $item)
-                            <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                                <span><span class="block text-sm font-semibold text-stone-800">{{ $item['title'] }}</span><span class="text-xs text-stone-500">{{ $item['text'] }}</span></span>
-                                <input type="hidden" name="{{ $item['name'] }}" value="0">
-                                <input type="checkbox" name="{{ $item['name'] }}" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked($item['checked'])>
-                            </label>
+                            <x-form.switch card :name="$item['name']" :label="$item['title']" :description="$item['text']" :checked="$item['checked']" />
                         @endforeach
                     </div>
                 </div>
@@ -137,65 +127,58 @@
                     <x-form.number name="payment_fee_vat" label="PPN atas biaya Midtrans" :value="$val('payment_fee_vat')" min="0" max="100" step="0.01" suffix="%"
                                    tooltip="Midtrans menagih PPN atas biayanya. Isi 11 bila tarif di bawah belum termasuk PPN, supaya perkiraan potongan & biaya pembeli akurat."
                                    hint="Isi 0 bila tarif sudah termasuk PPN." />
-                    <label class="flex items-start justify-between gap-3 rounded-xl border border-stone-200 p-3 sm:mt-6 sm:self-start">
-                        <span><span class="flex items-center gap-1 text-sm font-semibold text-stone-800">Toko terima utuh <x-tooltip label="Toko terima utuh" text="Untuk metode yang ditanggung pembeli: biaya dihitung dari total yang sudah termasuk biaya itu sendiri, jadi setelah dipotong Midtrans dana toko tetap sama dengan total pesanan." /></span>
-                            <span class="text-xs text-stone-500">Hitung biaya persen secara gross-up.</span></span>
-                        <input type="hidden" name="payment_fee_gross_up" value="0">
-                        <input type="checkbox" name="payment_fee_gross_up" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked($val('payment_fee_gross_up'))>
-                    </label>
+                    <x-form.switch name="payment_fee_gross_up" label="Toko terima utuh" card wrapper-class="sm:mt-6 sm:self-start" :checked="$val('payment_fee_gross_up')"
+                                   description="Hitung biaya persen secara gross-up."
+                                   tooltip="Untuk metode yang ditanggung pembeli: biaya dihitung dari total yang sudah termasuk biaya itu sendiri, jadi setelah dipotong Midtrans dana toko tetap sama dengan total pesanan." />
                 </div>
 
                 <x-input-error for="methods" />
-                <div class="-mx-6 overflow-x-auto">
-                    <table class="table-base min-w-[640px] text-sm">
-                        <thead>
-                            <tr>
-                                <th class="pl-6">Metode</th>
-                                <th class="w-28">Persen</th>
-                                <th class="w-36">Biaya tetap</th>
-                                <th class="w-44">Ditanggung oleh</th>
-                                <th class="w-16 pr-6 text-center">Aktif</th>
-                            </tr>
-                        </thead>
-                        @foreach ($groups as $group => $items)
-                            <tbody>
-                                <tr><td colspan="5" class="bg-stone-50 pl-6 text-xs font-bold tracking-wider text-stone-500 uppercase">{{ $group }}</td></tr>
-                                @foreach ($items as $method)
-                                    @php
-                                        $key = $method->value;
-                                        $rate = old("methods.{$key}") ? array_replace($methods[$key], old("methods.{$key}")) : $methods[$key];
-                                    @endphp
-                                    <tr>
-                                        <td class="pl-6">
-                                            <span class="flex items-center gap-2 font-semibold text-stone-800"><x-icon :name="$method->icon()" class="size-4 text-stone-400" /> {{ $method->label() }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="relative">
-                                                <input type="number" name="methods[{{ $key }}][percent]" value="{{ $rate['percent'] }}" min="0" max="50" step="0.01" aria-label="Persen {{ $method->label() }}" class="input pr-7">
-                                                <span class="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-xs text-stone-400">%</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="relative">
-                                                <span class="input-addon">Rp</span>
-                                                <input type="text" x-money inputmode="numeric" name="methods[{{ $key }}][flat]" value="{{ \App\Support\FormField::thousands($rate['flat']) }}" aria-label="Biaya tetap {{ $method->label() }}" class="input pl-10">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <select name="methods[{{ $key }}][charge_to]" class="input" aria-label="Penanggung biaya {{ $method->label() }}">
-                                                <option value="store" @selected($rate['charge_to'] === 'store')>Toko</option>
-                                                <option value="buyer" @selected($rate['charge_to'] === 'buyer')>Pembeli</option>
-                                            </select>
-                                        </td>
-                                        <td class="pr-6 text-center">
-                                            <input type="hidden" name="methods[{{ $key }}][enabled]" value="0">
-                                            <input type="checkbox" name="methods[{{ $key }}][enabled]" value="1" class="checkbox size-5" aria-label="Aktifkan {{ $method->label() }}" @checked($rate['enabled'])>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        @endforeach
-                    </table>
+                {{-- Tiap metode = satu baris. Lebar cukup: tampil seperti tabel; sempit (HP): label di atas tiap isian. --}}
+                <div class="@container -mx-6 border-t border-stone-100">
+                    <div class="hidden grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_8rem_3.5rem] items-center gap-3 bg-stone-50/70 px-6 py-2.5 text-xs font-semibold tracking-wide text-stone-500 uppercase @2xl:grid">
+                        <span>Metode</span><span>Persen</span><span>Biaya tetap</span><span>Ditanggung</span><span class="text-center">Aktif</span>
+                    </div>
+                    @foreach ($groups as $group => $items)
+                        <p class="bg-stone-50 px-6 py-2 text-xs font-bold tracking-wider text-stone-500 uppercase">{{ $group }}</p>
+                        <div class="divide-y divide-stone-100">
+                            @foreach ($items as $method)
+                                @php
+                                    $key = $method->value;
+                                    $rate = old("methods.{$key}") ? array_replace($methods[$key], old("methods.{$key}")) : $methods[$key];
+                                    $field = "method-{$key}";
+                                @endphp
+                                <div class="grid grid-cols-2 items-end gap-x-3 gap-y-2 px-6 py-3 @md:grid-cols-3 @2xl:grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_8rem_3.5rem] @2xl:items-center">
+                                    <span class="order-1 flex min-w-0 items-center gap-2 self-center text-sm font-semibold text-stone-800 @md:col-span-2 @2xl:col-span-1"><x-icon :name="$method->icon()" class="size-4 shrink-0 text-stone-400" /> {{ $method->label() }}</span>
+                                    <span class="order-2 flex items-center justify-end gap-2 self-center @2xl:order-last @2xl:justify-center">
+                                        <label for="{{ $field }}-enabled" class="text-xs font-semibold text-stone-500 @2xl:sr-only">Aktif</label>
+                                        <input type="hidden" name="methods[{{ $key }}][enabled]" value="0">
+                                        <input type="checkbox" role="switch" id="{{ $field }}-enabled" name="methods[{{ $key }}][enabled]" value="1" class="switch" @checked($rate['enabled'])>
+                                    </span>
+                                    <div class="order-3 min-w-0">
+                                        <label for="{{ $field }}-percent" class="mb-1 block text-xs font-semibold text-stone-500 @2xl:sr-only">Persen</label>
+                                        <div class="relative">
+                                            <input type="number" id="{{ $field }}-percent" name="methods[{{ $key }}][percent]" value="{{ $rate['percent'] }}" min="0" max="50" step="0.01" inputmode="decimal" class="input pr-7 tabular-nums">
+                                            <span class="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-xs text-stone-400">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="order-3 min-w-0">
+                                        <label for="{{ $field }}-flat" class="mb-1 block text-xs font-semibold text-stone-500 @2xl:sr-only">Biaya tetap</label>
+                                        <div class="relative">
+                                            <span class="input-addon">Rp</span>
+                                            <input type="text" id="{{ $field }}-flat" x-money inputmode="numeric" name="methods[{{ $key }}][flat]" value="{{ \App\Support\FormField::thousands($rate['flat']) }}" class="input pl-10 tabular-nums">
+                                        </div>
+                                    </div>
+                                    <div class="order-3 col-span-2 min-w-0 @md:col-span-1">
+                                        <label for="{{ $field }}-charge" class="mb-1 block text-xs font-semibold text-stone-500 @2xl:sr-only">Ditanggung</label>
+                                        <select id="{{ $field }}-charge" name="methods[{{ $key }}][charge_to]" class="input">
+                                            <option value="store" @selected($rate['charge_to'] === 'store')>Toko</option>
+                                            <option value="buyer" @selected($rate['charge_to'] === 'buyer')>Pembeli</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
                 @if ($paymentDriver !== 'midtrans')
                     <p class="text-xs text-stone-400">Driver pembayaran saat ini “{{ $paymentDriver }}” (simulasi). Tarif tetap dipakai untuk perhitungan & pilihan metode.</p>
@@ -222,11 +205,7 @@
                         $toggle('is_pkp', 'Pengusaha Kena Pajak (PKP)', 'Tanda “PKP” tampil di samping NPWP pada invoice.'),
                         $toggle('buyer_tax_info', 'Pembeli boleh minta invoice perusahaan', 'Checkout menampilkan isian nama perusahaan & NPWP pembeli.'),
                     ] as $item)
-                        <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                            <span><span class="block text-sm font-semibold text-stone-800">{{ $item['title'] }}</span><span class="text-xs text-stone-500">{{ $item['text'] }}</span></span>
-                            <input type="hidden" name="{{ $item['name'] }}" value="0">
-                            <input type="checkbox" name="{{ $item['name'] }}" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked($item['checked'])>
-                        </label>
+                        <x-form.switch card :name="$item['name']" :label="$item['title']" :description="$item['text']" :checked="$item['checked']" />
                     @endforeach
                 </div>
             </section>
@@ -290,21 +269,25 @@
                         </dl>
                         <div>
                             <p class="mb-1.5 text-xs font-bold tracking-wider text-stone-500 uppercase">Per metode bayar</p>
-                            <div class="-mx-5 overflow-x-auto">
-                                <table class="w-full min-w-[300px] text-xs">
-                                    <thead class="text-stone-400"><tr><th class="py-1 pl-5 text-left font-semibold">Metode</th><th class="py-1 text-right font-semibold">Pembeli +</th><th class="py-1 text-right font-semibold">Midtrans −</th><th class="py-1 pr-5 text-right font-semibold">Bersih</th></tr></thead>
-                                    <tbody class="divide-y divide-stone-100">
-                                        <template x-for="m in preview.methods" :key="m.label">
-                                            <tr><td class="py-1.5 pl-5 font-medium text-stone-700" x-text="m.label"></td><td class="py-1.5 text-right tabular-nums" x-text="m.buyer"></td><td class="py-1.5 text-right tabular-nums text-rose-600" x-text="m.gateway"></td><td class="py-1.5 pr-5 text-right font-semibold tabular-nums" x-text="m.net"></td></tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <ul class="divide-y divide-stone-100 text-xs">
+                                <template x-for="m in preview.methods" :key="m.label">
+                                    <li class="flex items-start justify-between gap-3 py-1.5">
+                                        <span class="min-w-0 font-medium text-stone-700" x-text="m.label"></span>
+                                        <span class="shrink-0 text-right tabular-nums">
+                                            <span class="block font-semibold text-stone-900" x-text="m.net"></span>
+                                            <span class="block text-[11px] text-stone-500"><span x-show="m.buyer !== '—'">pembeli +<span x-text="m.buyer"></span> · </span>Midtrans <span class="text-rose-600">−<span x-text="m.gateway"></span></span></span>
+                                        </span>
+                                    </li>
+                                </template>
+                            </ul>
+                            <p class="mt-1.5 text-[11px] text-stone-400">Angka tebal = dana bersih yang diterima toko.</p>
                             <p x-show="preview.choice" class="mt-2 text-xs text-stone-500">Ada biaya untuk pembeli: pembeli memilih metode di halaman bayar sebelum diarahkan ke Midtrans.</p>
                         </div>
                     </div>
                 </template>
-                <button class="btn btn-primary w-full">Simpan pengaturan</button>
+                <x-admin.save-bar>
+                    <button class="btn btn-primary w-full">Simpan pengaturan</button>
+                </x-admin.save-bar>
             </div>
         </div>
     </form>

@@ -310,4 +310,36 @@ class CatalogTest extends TestCase
         $this->get(route('admin.products.index', ['status' => 'stok-menipis']))->assertOk();
         $this->get(route('admin.products.index'))->assertOk()->assertSee('1 varian');
     }
+
+    public function test_variant_errors_are_shown_next_to_their_row(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->from(route('admin.products.create'))
+            ->post(route('admin.products.store'), $this->variantPayload(['variants' => [
+                ['name' => 'Hitam', 'price' => 1000, 'stock' => 1],
+                ['name' => 'hitam', 'price' => 1000, 'stock' => 1],
+            ]]))
+            ->assertRedirect(route('admin.products.create'));
+
+        // Error dikirim ke editor varian per baris (kedua baris kembar ditandai), bukan daftar terpisah di bawah.
+        $html = $this->get(route('admin.products.create'))->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('/variantErrors.{0,40}Nama varian tidak boleh sama/', $html);
+        $this->assertStringContainsString('data-variant-row', $html);
+    }
+
+    public function test_switch_sends_zero_so_unchecked_state_survives_validation_errors(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'is_featured' => true]);
+        $this->actingAs($this->admin);
+
+        $this->from(route('admin.products.edit', $product))
+            ->put(route('admin.products.update', $product), ['name' => '', 'is_active' => '0', 'is_featured' => '0', 'has_variants' => '0'])
+            ->assertSessionHasErrors('name');
+
+        $html = $this->get(route('admin.products.edit', $product))->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('/role="switch" id="is_featured"\s+name="is_featured"\s+value="1"\s+class/', $html);
+        $this->assertDoesNotMatchRegularExpression('/role="switch" id="is_active"\s+name="is_active"\s+value="1"\s+checked/', $html);
+        $this->assertMatchesRegularExpression('/<input type="hidden" name="is_active" value="0"/', $html);
+    }
 }

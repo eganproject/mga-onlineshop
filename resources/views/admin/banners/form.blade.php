@@ -60,21 +60,18 @@
 
         <div class="space-y-6">
             <div class="card space-y-5 p-6">
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="block text-sm font-semibold text-stone-800">Tampilkan di beranda</span><span class="text-xs text-stone-500">Nonaktifkan untuk menyembunyikan</span></span>
-                    <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $banner->is_active))>
-                </label>
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="flex items-center gap-1 text-sm font-semibold text-stone-800">Tampilkan teks di atas gambar <x-tooltip label="Tampilkan teks di atas gambar" text="Judul, subjudul, dan tombol ditulis di atas gambar dengan lapisan gelap tipis supaya terbaca. Matikan bila desain gambar sudah berisi tulisan." /></span><span class="text-xs text-stone-500">Matikan bila tulisan sudah ada di gambar</span></span>
-                    <input type="checkbox" name="show_text" value="1" class="checkbox size-5" @checked(old('show_text', $banner->show_text))>
-                </label>
+                <x-form.switch name="is_active" label="Tampilkan di beranda" description="Matikan untuk menyembunyikan banner tanpa menghapusnya." :checked="$banner->is_active" />
+                <x-form.switch name="show_text" label="Tampilkan teks di atas gambar" description="Matikan bila tulisan sudah ada di gambar." :checked="$banner->show_text"
+                               tooltip="Judul, subjudul, dan tombol ditulis di atas gambar dengan lapisan gelap tipis supaya terbaca. Matikan bila desain gambar sudah berisi tulisan." />
                 <x-form.number name="sort_order" label="Urutan tampil" :value="$banner->sort_order ?? 0" min="0"
                     tooltip="Angka lebih kecil tampil lebih dulu di slider. Banner pertama juga dimuat paling cepat, jadi taruh promo terpenting di urutan 0." />
                 <x-form.date name="starts_at" label="Mulai tayang" optional time :value="$banner->starts_at"
                     tooltip="Banner tampil dan hilang otomatis sesuai jadwal ini (selama aktif). Kosongkan untuk langsung/selalu tampil." />
                 <x-form.date name="ends_at" label="Berakhir" optional time :value="$banner->ends_at" />
             </div>
-            <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan banner' }}</button>
+            <x-admin.save-bar>
+                <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan banner' }}</button>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>
