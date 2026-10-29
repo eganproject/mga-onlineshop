@@ -33,14 +33,16 @@
                             <input type="radio" name="staff_role" value="{{ $role->value }}" class="mt-0.5 text-brand-600 focus:ring-brand-500/30" @checked($currentRole === $role->value)>
                             <span>
                                 <span class="block text-sm font-semibold text-stone-800">{{ $role->label() }}</span>
-                                <span class="text-xs text-stone-500">{{ $role->description() }}</span>
+                                <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ $role->description() }}</span>
                             </span>
                         </label>
                     @endforeach
                 </div>
                 <x-input-error for="staff_role" />
             </div>
-            <button class="btn btn-primary w-full">{{ $editing ? 'Simpan perubahan' : 'Buat akun staf' }}</button>
+            <x-admin.save-bar>
+                <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Buat akun staf' }}</button>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>

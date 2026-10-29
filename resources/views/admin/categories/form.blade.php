@@ -43,10 +43,7 @@
 
         <div class="space-y-6">
             <div class="card space-y-5 p-6">
-                <label class="flex items-center justify-between gap-3">
-                    <span><span class="block text-sm font-semibold text-stone-800">Tampilkan di toko</span><span class="text-xs text-stone-500">Nonaktifkan untuk menyembunyikan</span></span>
-                    <input type="checkbox" name="is_active" value="1" class="checkbox size-5" @checked(old('is_active', $category->is_active))>
-                </label>
+                <x-form.switch name="is_active" label="Tampilkan di toko" description="Matikan untuk menyembunyikan kategori dari menu toko." :checked="$category->is_active" />
                 <x-form.number name="sort_order" label="Urutan tampil" :value="$category->sort_order ?? 0" min="0"
                     tooltip="Angka lebih kecil tampil lebih dulu di menu dan tab Kategori beranda. Urutan sama diurutkan menurut nama."
                     tooltip-tips="Beri jarak 10, 20, 30... supaya mudah menyisipkan kategori baru di tengah." />
@@ -54,7 +51,9 @@
                     tooltip="Tampil sebagai kotak persegi di tab Kategori beranda, dengan nama kategori di bawahnya. Tanpa gambar, tampil logo MGA dengan nama kategori."
                     :tooltip-tips="['Rasio 1:1, min. 600×600 px.', 'Satu objek di tengah dengan latar polos; tidak perlu menulis nama kategori di gambar.', 'Pakai gaya foto yang seragam antar kategori supaya tab terlihat rapi.']" />
             </div>
-            <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan kategori' }}</button>
+            <x-admin.save-bar>
+                <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Simpan kategori' }}</button>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>

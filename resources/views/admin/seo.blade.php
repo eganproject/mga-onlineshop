@@ -114,9 +114,9 @@
                 @endcan
             </section>
 
-            <div class="card sticky top-20 p-4">
+            <x-admin.save-bar class="lg:sticky lg:top-20 lg:rounded-2xl lg:border lg:border-stone-200/70 lg:bg-white lg:p-4 lg:shadow-xs">
                 <button class="btn btn-primary w-full">Simpan pengaturan SEO</button>
-            </div>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>

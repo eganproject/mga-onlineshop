@@ -171,7 +171,7 @@
                     <img src="{{ $image }}" alt="" loading="lazy" class="absolute inset-0 size-full object-cover opacity-90">
                 @else
                     <div class="absolute inset-0 grid place-items-center">
-                        <span class="font-display text-[9rem] leading-none font-black tracking-[-0.06em] text-white/10 uppercase sm:text-[13rem]">{{ config('shop.name') }}</span>
+                        <span class="font-display text-[7rem] leading-none min-[360px]:text-[9rem] font-black tracking-[-0.06em] text-white/10 uppercase sm:text-[13rem]">{{ config('shop.name') }}</span>
                     </div>
                 @endif
             </div>

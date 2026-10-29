@@ -49,14 +49,8 @@
                     <x-form.input name="tiktok" label="TikTok" prefix="@" :value="$values['tiktok']" placeholder="username" optional />
                     <x-form.input type="url" name="facebook" label="Halaman Facebook" icon="external" :value="$values['facebook']" placeholder="https://facebook.com/namatoko" optional wrapper-class="sm:col-span-2" />
                 </div>
-                <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                    <span>
-                        <span class="block text-sm font-semibold text-stone-800">Tombol WhatsApp melayang</span>
-                        <span class="text-xs text-stone-500">Tombol chat di pojok kanan bawah halaman toko, langsung ke nomor WhatsApp di atas. Tidak tampil bila nomor kosong.</span>
-                    </span>
-                    <input type="hidden" name="whatsapp_button" value="0">
-                    <input type="checkbox" name="whatsapp_button" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('whatsapp_button', $values['whatsapp_button']))>
-                </label>
+                <x-form.switch card name="whatsapp_button" label="Tombol WhatsApp melayang" :checked="$values['whatsapp_button']"
+                               description="Tombol chat di pojok kanan bawah halaman toko, langsung ke nomor WhatsApp di atas. Tidak tampil bila nomor kosong." />
                 <x-form.textarea name="whatsapp_message" label="Pesan pembuka chat" :value="$values['whatsapp_message']" rows="2" maxlength="300" optional
                                  placeholder="Halo, saya mau tanya tentang produk di toko online."
                                  hint="Otomatis terisi saat pelanggan membuka chat. Di halaman produk, nama & link produk ikut ditambahkan."
@@ -154,14 +148,8 @@
                     <x-input-error for="couriers" />
                 </div>
 
-                <label class="flex items-start justify-between gap-4 rounded-xl border border-stone-200 p-4">
-                    <span>
-                        <span class="block text-sm font-semibold text-stone-800">Cek resi otomatis</span>
-                        <span class="text-xs text-stone-500">Setiap 3 jam status resi pesanan "Dikirim" dicek ke kurir; yang sudah sampai ditandai otomatis. Butuh cron scheduler aktif.</span>
-                    </span>
-                    <input type="hidden" name="tracking_sync" value="0">
-                    <input type="checkbox" name="tracking_sync" value="1" class="checkbox mt-0.5 size-5 shrink-0" @checked(old('tracking_sync', $values['tracking_sync']))>
-                </label>
+                <x-form.switch card name="tracking_sync" label="Cek resi otomatis" :checked="$values['tracking_sync']"
+                               description="Setiap 3 jam status resi pesanan “Dikirim” dicek ke kurir; yang sudah sampai ditandai otomatis. Butuh cron scheduler aktif." />
             </section>
         </div>
 
@@ -190,9 +178,9 @@
                 @endcan
             </div>
 
-            <div class="card sticky top-20 p-4">
+            <x-admin.save-bar class="lg:sticky lg:top-20 lg:rounded-2xl lg:border lg:border-stone-200/70 lg:bg-white lg:p-4 lg:shadow-xs">
                 <button class="btn btn-primary w-full">Simpan pengaturan</button>
-            </div>
+            </x-admin.save-bar>
         </div>
     </form>
 </x-layouts.admin>

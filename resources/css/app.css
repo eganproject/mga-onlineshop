@@ -131,11 +131,15 @@
         @apply inline-flex shrink-0 align-middle;
     }
     /* Label + ikon tooltip sebaris (dipakai x-form.field & label manual). */
+    /* Label + ikon (?): ikon ikut di ujung teks label, juga saat label turun ke baris kedua di HP. */
     .label-row {
-        @apply mb-1.5 flex items-center gap-1;
+        @apply mb-1.5 block;
     }
     .label-row > .label {
-        @apply mb-0;
+        @apply mb-0 inline;
+    }
+    .label-row > .tip {
+        @apply ml-1 align-middle;
     }
     .tip-trigger {
         @apply relative -my-1 inline-grid size-6 cursor-help place-items-center rounded-full text-stone-400 transition-colors hover:text-brand-600 focus-visible:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 aria-expanded:text-brand-600;
@@ -273,6 +277,40 @@
     }
     .checkbox {
         @apply size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500/30;
+    }
+    /* Saklar on/off (x-form.switch). Tetap <input type="checkbox">, jadi form & x-model bekerja seperti biasa. */
+    .switch {
+        @apply relative inline-block h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full border-0 bg-stone-300 bg-none p-0 transition-colors duration-200 focus:ring-4 focus:ring-brand-500/20 focus:ring-offset-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .switch::before {
+        content: '';
+        @apply absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform duration-200;
+    }
+    .switch:checked {
+        @apply bg-brand-600 bg-none;
+    }
+    .switch:checked::before {
+        @apply translate-x-5;
+    }
+    .switch:checked:hover,
+    .switch:checked:focus {
+        @apply bg-brand-600 bg-none;
+    }
+
+    /* Bar simpan form admin (x-admin.save-bar): menempel di bawah layar di HP, normal di desktop. */
+    .save-bar {
+        @apply fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-stone-200 bg-white/95 px-4 pt-3 backdrop-blur lg:static lg:z-auto lg:block lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none;
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 16px rgb(0 0 0 / 0.06);
+    }
+    .save-bar > * {
+        @apply max-lg:my-0 max-lg:flex-1;
+    }
+    @media (min-width: 64rem) {
+        .save-bar {
+            padding-bottom: 0;
+            box-shadow: none;
+        }
     }
 
     .card {
