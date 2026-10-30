@@ -53,6 +53,8 @@
                     ? \App\Services\Catalog\Wholesale::tiers($product)
                     : (($v = $variants->sortBy('price')->first(fn ($v) => \App\Services\Catalog\Wholesale::tiers($product, $v) !== [])) ? \App\Services\Catalog\Wholesale::tiers($product, $v) : []),
                 'minQty' => min($product->minOrderQty(), max(1, $product->stock)),
+                'inCart' => app(\App\Services\Cart\CartService::class)->productQuantity($product->id),
+                'nudgeWithin' => \App\Services\Catalog\Wholesale::NUDGE_WITHIN,
                 // Pilih otomatis bila hanya ada satu varian yang tersedia.
                 'selectedId' => old('variant_id') ? (int) old('variant_id') : ($variants->where('stock', '>', 0)->count() === 1 ? $variants->firstWhere('stock', '>', 0)->id : null),
                 'price' => $product->price,
@@ -235,6 +237,15 @@
                                 Harga grosir <span class="font-semibold" x-text="rupiah(unitPrice)"></span>/pcs ·
                                 total <span class="font-semibold" x-text="rupiah(unitPrice * qty)"></span>
                             </p>
+                            {{-- Muncul hanya saat sudah dekat tingkat grosir berikutnya (kurang ≤ 3 pcs). --}}
+                            <button type="button" x-show="nudge" x-cloak @click="setQty(qty + nudge.need)" data-wholesale-nudge
+                                    class="mt-2 flex items-center gap-1.5 text-left text-sm font-medium text-accent-700 hover:underline">
+                                <x-icon name="tag" class="size-4 shrink-0" />
+                                <span x-text="nudge ? `Tambah ${nudge.need} pcs lagi, jadi ${rupiah(nudge.price)}/pcs` : ''"></span>
+                            </button>
+                            @if ($inCart = app(\App\Services\Cart\CartService::class)->productQuantity($product->id))
+                                <p class="mt-1 text-xs text-stone-500">Sudah ada {{ $inCart }} pcs produk ini di keranjang, ikut dihitung untuk harga grosir.</p>
+                            @endif
                             <p x-ref="variantHint" x-show="needsVariant" class="mt-4 hidden text-sm font-medium text-brand-700">Pilih {{ mb_strtolower($product->variant_label ?: 'varian') }} terlebih dahulu.</p>
                             <div class="mt-6 grid gap-3">
                                 <button class="btn btn-ink btn-pill w-full py-4 text-[15px]">Tambah ke keranjang</button>

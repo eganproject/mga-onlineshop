@@ -65,9 +65,22 @@ export default (config) => ({
         return (this.selected ? this.selected.tiers : config.tiers) ?? [];
     },
 
-    /** Tingkat grosir yang berlaku untuk jumlah di form (null = harga normal). */
+    /** Jumlah gabungan: yang akan ditambahkan + produk ini yang sudah ada di keranjang. */
+    get totalQty() {
+        return (Number(this.qty) || 0) + (config.inCart ?? 0);
+    },
+
+    /** Tingkat grosir yang berlaku untuk jumlah gabungan (null = harga normal). */
     get activeTier() {
-        return this.tiers.filter((tier) => this.qty >= tier.min_qty).pop() ?? null;
+        return this.tiers.filter((tier) => this.totalQty >= tier.min_qty).pop() ?? null;
+    },
+
+    /** Ajakan "tambah X pcs lagi": hanya bila tingkat berikutnya kurang ≤ nudgeWithin pcs. */
+    get nudge() {
+        const next = this.tiers.find((tier) => this.totalQty < tier.min_qty);
+        if (!next) return null;
+        const need = next.min_qty - this.totalQty;
+        return need <= (config.nudgeWithin ?? 3) ? { ...next, need } : null;
     },
 
     get unitPrice() {
@@ -84,7 +97,7 @@ export default (config) => ({
                 ...row,
                 label: next ? `${row.min_qty}–${next - 1} pcs` : `≥ ${row.min_qty} pcs`,
                 save: i && this.price ? Math.round(100 - (row.price / this.price) * 100) : 0,
-                active: this.qty >= row.min_qty && (!next || this.qty < next),
+                active: this.totalQty >= row.min_qty && (!next || this.totalQty < next),
             };
         });
     },

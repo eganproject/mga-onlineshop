@@ -106,6 +106,21 @@ class WholesaleTest extends TestCase
         $this->get(route('account.orders.invoice.pdf', $order))->assertOk();
     }
 
+    public function test_nudge_only_shows_when_close_to_next_tier(): void
+    {
+        $product = $this->wholesaleProduct();
+        $this->actingAs($this->customer)->post(route('cart.store', $product), ['quantity' => 6]);
+        $this->get(route('cart.index'))->assertOk()->assertDontSee('data-wholesale-nudge', false);
+
+        $this->post(route('cart.store', $product), ['quantity' => 1]); // 7 pcs, kurang 3
+        $this->get(route('cart.index'))->assertOk()->assertSee('Tambah 3 pcs lagi, jadi Rp65.000/pcs', false);
+
+        // Halaman produk tahu jumlah di keranjang (dasar ajakan & tingkat aktif).
+        $this->get(route('products.show', $product))->assertOk()
+            ->assertSee('Sudah ada 7 pcs produk ini di keranjang')
+            ->assertSee('data-wholesale-nudge', false);
+    }
+
     public function test_variant_quantities_are_combined_for_tiers(): void
     {
         [$product, $black, $white] = $this->variantProduct();

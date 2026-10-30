@@ -67,12 +67,16 @@ final readonly class CartLine
         return $this->wholesaleTier() !== null;
     }
 
-    /** Tingkat grosir berikutnya + kekurangan pcs-nya, untuk ajakan di keranjang. */
+    /**
+     * Tingkat grosir berikutnya + kekurangan pcs-nya, untuk ajakan di keranjang.
+     * Hanya bila kekurangannya ≤ Wholesale::NUDGE_WITHIN pcs (sudah dekat).
+     */
     public function nextWholesaleTier(): ?array
     {
         $next = Wholesale::nextTier($this->wholesaleTiers(), $this->productQuantity());
+        $need = $next ? $next['min_qty'] - $this->productQuantity() : null;
 
-        return $next ? [...$next, 'need' => $next['min_qty'] - $this->productQuantity()] : null;
+        return $next && $need <= Wholesale::NUDGE_WITHIN ? [...$next, 'need' => $need] : null;
     }
 
     /** Hemat karena harga grosir untuk baris ini. */
