@@ -184,8 +184,13 @@ class WholesaleTest extends TestCase
         $product = $this->wholesaleProduct(['name' => 'Tripod Banner Grosir']);
         $plain = Product::factory()->create(['name' => 'Frame Eceran']);
 
+        // Jumlah 1, tingkat pertama 10 pcs → kotak grosir disembunyikan dulu (x-cloak).
         $this->get(route('products.show', $product))->assertOk()
-            ->assertSee('data-wholesale-table', false)
+            ->assertSee('x-show="showTiers"  x-cloak  data-wholesale-table', false);
+
+        $near = $this->wholesaleProduct(['name' => 'Tripod Dekat', 'wholesale_tiers' => [['min_qty' => 3, 'price' => 65000]]]);
+        $this->get(route('products.show', $near))->assertOk()
+            ->assertDontSee('x-cloak  data-wholesale-table', false)
             ->assertSee('Harga grosir');
 
         $this->get(route('products.index', ['grosir' => 1]))->assertOk()
