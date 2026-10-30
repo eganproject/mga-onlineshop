@@ -18,6 +18,7 @@ import billingPreview from './components/billing-preview';
 import tooltip from './components/tooltip';
 import infiniteScroll from './components/infinite-scroll';
 import paymentPage from './components/payment-page';
+import fitViewport from './components/fit-viewport';
 
 window.Alpine = Alpine;
 
@@ -25,6 +26,7 @@ Alpine.plugin(morph);
 Alpine.plugin(forms);
 Alpine.plugin(dialogs);
 Alpine.plugin(cart);
+Alpine.plugin(fitViewport);
 
 // Tooltip bantuan <x-tooltip> (event delegation, tanpa Alpine).
 tooltip();

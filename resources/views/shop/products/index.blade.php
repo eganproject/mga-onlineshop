@@ -90,8 +90,8 @@
             {{-- Filter: sidebar di desktop, drawer di mobile --}}
             <div x-show="filters" x-cloak x-transition.opacity @click="filters = false" class="fixed inset-0 z-50 bg-ink/40 lg:hidden"></div>
             <aside :class="{ 'max-lg:-translate-x-full': ! filters }"
-                   class="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-white transition-transform duration-300 max-lg:-translate-x-full lg:sticky lg:top-[152px] lg:z-auto lg:max-h-[calc(100dvh-168px)] lg:overflow-y-auto lg:overscroll-contain lg:-mx-1 lg:px-1 lg:pb-4 lg:[scrollbar-width:thin] lg:w-auto lg:max-w-none lg:self-start lg:bg-transparent lg:transition-none"
-                   aria-label="Filter produk">
+                   class="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-white transition-transform duration-300 max-lg:-translate-x-full lg:sticky lg:top-[152px] lg:z-auto lg:max-h-[calc(100dvh-168px)] lg:overflow-y-auto lg:-mx-1 lg:pl-1 lg:pr-3 thin-scrollbar lg:w-auto lg:max-w-none lg:self-start lg:bg-transparent lg:transition-none"
+                   x-fit-viewport aria-label="Filter produk">
                 <div class="flex h-16 items-center justify-between border-b border-stone-200 px-5 lg:hidden">
                     <p class="display text-xl">Filter</p>
                     <button type="button" @click="filters = false" class="-mr-2 grid size-10 place-items-center rounded-full hover:bg-sand-100" aria-label="Tutup filter"><x-icon name="x" /></button>
@@ -188,7 +188,7 @@
                         </div>
                     </div>
 
-                    <div class="sticky bottom-0 grid grid-cols-2 gap-2 border-t border-stone-200 bg-white p-5 lg:static lg:mt-2 lg:border-0 lg:bg-transparent lg:p-0">
+                    <div class="sticky bottom-0 grid grid-cols-2 gap-2 border-t border-stone-200 bg-white p-5 lg:px-0 lg:pt-3 lg:pb-1">
                         <a href="{{ route('products.index', \Illuminate\Support\Arr::only($baseQuery, ['q', 'urut'])) }}" class="btn btn-outline rounded-full py-2.5">Reset</a>
                         <button class="btn btn-ink rounded-full py-2.5">Terapkan</button>
                     </div>
