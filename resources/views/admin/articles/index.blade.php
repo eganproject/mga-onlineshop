@@ -6,7 +6,7 @@
 
     @php($filters = array_filter(request()->only(['q', 'kategori', 'sort'])))
     <div class="card overflow-hidden">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:items-center">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:flex-wrap lg:items-center">
             @if ($state) <input type="hidden" name="status" value="{{ $state }}"> @endif
             <div class="relative flex-1 lg:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -16,7 +16,7 @@
                 <x-form.select name="kategori" :options="$categories" :selected="request('kategori')" placeholder="Semua kategori" wrapper-class="lg:w-56" x-on:change="$el.form.submit()" />
             @endif
             <x-admin.sort-select class="lg:w-48" :options="['-diubah' => 'Terakhir diubah', '-terbit' => 'Tanggal terbit', 'judul' => 'Judul A–Z']" />
-            <div class="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 lg:ml-auto">
+            <div class="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 lg:ml-auto lg:shrink-0">
                 <a href="{{ route('admin.articles.index', $filters) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => ! $state, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state])>Semua</a>
                 @foreach ($states as $key => $label)
                     <a href="{{ route('admin.articles.index', $filters + ['status' => $key]) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => $state === $key, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state !== $key])>{{ $label }}</a>

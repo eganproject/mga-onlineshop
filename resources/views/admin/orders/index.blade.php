@@ -2,8 +2,8 @@
     <x-admin.page-header title="Pesanan" description="Pantau dan proses pesanan pelanggan." />
 
     {{-- Tab status --}}
-    <div class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <div class="inline-flex gap-1 rounded-2xl bg-white p-1 ring-1 ring-stone-200/70">
+    <div class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:overflow-visible">
+        <div class="inline-flex gap-1 rounded-2xl bg-white p-1 ring-1 ring-stone-200/70 lg:flex-wrap">
             <a href="{{ route('admin.orders.index', request()->except('status', 'page')) }}"
                @class(['whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition', 'bg-stone-900 text-white' => ! $status, 'text-stone-600 hover:bg-stone-50' => $status])>
                 Semua <span class="ml-1 opacity-60">{{ $counts->sum() }}</span>
@@ -61,7 +61,7 @@
                         <th class="w-10"><input type="checkbox" class="checkbox" aria-label="Pilih semua"
                             :checked="selected.length && selected.length === $root.querySelectorAll('input[name=\'orders[]\']').length"
                             @change="selected = $event.target.checked ? [...$root.querySelectorAll('input[name=\'orders[]\']')].map(i => i.value) : []"></th>
-                        <th><x-admin.sort-link column="tanggal" desc>Pesanan</x-admin.sort-link></th><th class="hidden md:table-cell">Pelanggan</th><th class="hidden lg:table-cell">Item</th><th class="hidden sm:table-cell"><x-admin.sort-link column="total" desc>Total</x-admin.sort-link></th><th class="hidden lg:table-cell">Pengiriman</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th>
+                        <th><x-admin.sort-link column="tanggal" desc>Pesanan</x-admin.sort-link></th><th class="hidden md:table-cell">Pelanggan</th><th class="hidden xl:table-cell">Item</th><th class="hidden sm:table-cell"><x-admin.sort-link column="total" desc>Total</x-admin.sort-link></th><th class="hidden lg:table-cell">Pengiriman</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th>
                     </tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($orders as $order)
@@ -75,7 +75,7 @@
                                     <div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div>
                                 </td>
                                 <td class="hidden md:table-cell"><p class="font-medium text-stone-800">{{ $order->user->name }}</p><p class="text-xs text-stone-500">{{ $order->user->email }}</p></td>
-                                <td class="hidden lg:table-cell">{{ $order->items_count }}</td>
+                                <td class="hidden xl:table-cell">{{ $order->items_count }}</td>
                                 <td class="hidden whitespace-nowrap font-semibold sm:table-cell">@rupiah($order->total)</td>
                                 <td class="hidden whitespace-nowrap text-xs lg:table-cell">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>
                                 <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>

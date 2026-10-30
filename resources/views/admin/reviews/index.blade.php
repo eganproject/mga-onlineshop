@@ -6,8 +6,8 @@
     <x-admin.page-header title="Ulasan produk" description="Moderasi ulasan pelanggan sebelum tayang di halaman produk." />
 
     <div class="card overflow-hidden">
-        <div class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:items-center lg:justify-between">
-            <nav class="no-scrollbar -mx-1 flex gap-1 overflow-x-auto px-1" aria-label="Filter status">
+        <div class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
+            <nav class="no-scrollbar -mx-1 flex gap-1 overflow-x-auto px-1 lg:shrink-0" aria-label="Filter status">
                 @foreach ($tabs as $value => $label)
                     @php
                         $active = ($activeStatus?->value ?? null) === ($value ?: null);

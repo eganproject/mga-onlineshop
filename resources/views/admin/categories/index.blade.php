@@ -61,8 +61,8 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                                        <x-confirm-delete :action="route('admin.categories.destroy', $category)" title="Hapus kategori {{ $category->name }}?" message="Produk & subkategori di dalamnya tidak ikut terhapus, hanya jadi tanpa kategori induk." />
+                                        <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-ghost btn-sm" title="Edit"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only lg:sr-only 2xl:not-sr-only">Edit</span></a>
+                                        <x-confirm-delete compact :action="route('admin.categories.destroy', $category)" title="Hapus kategori {{ $category->name }}?" message="Produk & subkategori di dalamnya tidak ikut terhapus, hanya jadi tanpa kategori induk." />
                                     </div>
                                 </td>
                             </tr>
