@@ -14,7 +14,7 @@
     $pageTitle = $seoTitle ?: ($title ? $title.' · ' : '').config('shop.name').' - '.config('shop.full_name');
     $shareTitle = $seoTitle ?: ($title ?: config('shop.full_name'));
     $metaDescription = \Illuminate\Support\Str::limit($description ?: config('shop.seo.description'), 160);
-    $canonicalUrl = $canonical ?: \App\Support\Seo::canonical(request());
+    $canonicalUrl = $canonical ? \App\Support\Seo::onCanonicalHost($canonical) : \App\Support\Seo::canonical(request());
     $index = ! $noindex && \App\Support\Seo::shouldIndex(request());
     $ogImage = $image ?: \App\Support\Storefront::url(config('shop.seo.default_image'));
     $isAdminPage = request()->routeIs('admin.*');
@@ -57,6 +57,8 @@
 
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="48x48">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    {{-- PNG kelipatan 48px untuk ikon situs di hasil Google. --}}
+    <link rel="icon" href="{{ asset('images/brand/icon-192.png') }}" type="image/png" sizes="192x192">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
