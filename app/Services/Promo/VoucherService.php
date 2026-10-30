@@ -57,6 +57,11 @@ class VoucherService
             throw new VoucherException('Masa berlaku voucher sudah berakhir.');
         }
 
+        if ($subtotal <= 0) {
+            // Hanya terjadi bila semua barang berharga grosir & voucher tidak boleh digabung grosir.
+            throw new VoucherException('Voucher tidak berlaku untuk produk dengan harga grosir.');
+        }
+
         if ($subtotal < $voucher->min_spend) {
             throw new VoucherException(sprintf(
                 'Voucher berlaku untuk belanja minimal %s. Tambah %s lagi untuk memakainya.',

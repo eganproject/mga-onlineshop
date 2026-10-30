@@ -40,6 +40,7 @@ class ProductController extends Controller
             ->when($category, fn ($q) => $q->whereIn('category_id', $category->familyIds()))
             ->when($request->boolean('tersedia'), fn ($q) => $q->where('stock', '>', 0))
             ->when($request->boolean('promo'), fn ($q) => $q->onSale())
+            ->when($request->boolean('grosir'), fn ($q) => $q->wholesale())
             ->when($minPrice, fn ($q) => $q->where('price', '>=', $minPrice))
             ->when($maxPrice, fn ($q) => $q->where('price', '<=', $maxPrice))
             ->when($sort === 'terbaru', fn ($q) => $q->latest())

@@ -46,6 +46,7 @@ class StoreSettings
         'shop.shipping.tracking_sync' => 'bool',
         'shop.payment.expiry_hours' => 'int',
         'shop.orders.auto_complete_days' => 'int',
+        'shop.wholesale.voucher_combinable' => 'bool',
         'shop.storefront.hero_image' => 'string',
         'shop.storefront.hero_image_mobile' => 'string',
         'shop.storefront.hero_eyebrow' => 'string',

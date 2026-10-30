@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\Cart\CartService;
+use App\Services\Catalog\Wholesale;
+use App\Support\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,8 +67,14 @@ class CartController extends Controller
         [$type, $message] = match (true) {
             $added === 0 => ['warning', "Stok {$name} hanya {$quantity} pcs dan semuanya sudah ada di keranjang."],
             $added < $requested => ['warning', "Hanya {$added} pcs {$name} yang bisa ditambahkan karena stok terbatas.{$total}"],
+            $added > $requested => ['success', "{$added} pcs {$name} ditambahkan ke keranjang (minimal pembelian {$product->minOrderQty()} pcs).{$total}"],
             default => ['success', "{$added} pcs {$name} ditambahkan ke keranjang.{$total}"],
         };
+
+        $tier = Wholesale::tierFor(Wholesale::tiers($product, $variant), $this->cart->productQuantity($product->id));
+        if ($added > 0 && $tier) {
+            $message .= ' Harga grosir '.Money::rupiah($tier['price']).'/pcs berlaku.';
+        }
 
         return $this->respond($request, $type, $message, ['added' => $added, 'quantity' => $quantity]);
     }
@@ -133,6 +141,8 @@ class CartController extends Controller
             'adjustments' => $this->cart->adjustments(),
             'subtotal' => $this->cart->subtotal(),
             'weight' => $this->cart->totalWeight(),
+            'wholesaleSavings' => $this->cart->wholesaleSavings(),
+            'belowMinimum' => $this->cart->belowMinimum(),
         ];
     }
 

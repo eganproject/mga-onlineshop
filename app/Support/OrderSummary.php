@@ -23,6 +23,12 @@ class OrderSummary
 
         $rows[] = ['label' => 'Subtotal'.($quantity ? " ({$quantity} item)" : ''), 'amount' => (int) $order->subtotal, 'tone' => 'normal'];
 
+        // Hemat harga grosir sudah termasuk di subtotal (hanya keterangan).
+        $wholesale = $order->relationLoaded('items') ? (int) $order->items->sum(fn ($item) => $item->wholesaleSavings()) : 0;
+        if ($wholesale > 0) {
+            $rows[] = ['label' => 'Termasuk hemat harga grosir', 'amount' => $wholesale, 'tone' => 'info'];
+        }
+
         if ($order->courier || $order->shipping_cost > 0) {
             $rows[] = ['label' => trim('Ongkir '.$order->courierLabel()), 'amount' => (int) $order->shipping_cost, 'tone' => 'normal'];
         }

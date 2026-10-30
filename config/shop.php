@@ -127,6 +127,14 @@ return [
     |
     */
 
+    /*
+    | Grosir: voucher_combinable = voucher boleh dipakai untuk barang berharga grosir
+    | (Admin › Pengaturan Toko). Bila false, barang berharga grosir tidak ikut dihitung voucher.
+    */
+    'wholesale' => [
+        'voucher_combinable' => (bool) env('SHOP_WHOLESALE_VOUCHER', true),
+    ],
+
     'payment' => [
         'driver' => env('PAYMENT_DRIVER', 'fake'),
         'expiry_hours' => (int) env('PAYMENT_EXPIRY_HOURS', 24),

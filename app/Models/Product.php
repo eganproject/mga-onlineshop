@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Catalog\Wholesale;
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -11,16 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 #[Fillable([
     'category_id', 'name', 'slug', 'sku', 'description', 'meta_title', 'meta_description', 'price', 'compare_at_price',
-    'weight', 'variant_label', 'is_active', 'is_featured',
+    'weight', 'variant_label', 'is_active', 'is_featured', 'wholesale_tiers', 'min_order_qty',
 ])]
 class Product extends Model
 {
     use HasFactory;
 
+    // `wholesale_min_qty` adalah ringkasan (syncWholesaleSummary), tidak mass-assignable.
     // `stock`, `has_variants`, `rating_avg`, `review_count`, `sold_count` sengaja tidak mass-assignable. Stok diubah lewat
     // StockService (tercatat di riwayat), ringkasan varian lewat syncVariantSummary(),
     // ringkasan rating lewat ReviewService::syncSummary(), jumlah terjual lewat SoldCountService.
@@ -33,6 +36,9 @@ class Product extends Model
         return [
             'price' => 'integer',
             'compare_at_price' => 'integer',
+            'wholesale_tiers' => 'array',
+            'wholesale_min_qty' => 'integer',
+            'min_order_qty' => 'integer',
             'stock' => 'integer',
             'weight' => 'integer',
             'is_active' => 'boolean',
@@ -42,6 +48,23 @@ class Product extends Model
             'review_count' => 'integer',
             'sold_count' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Tingkat grosir selalu dirapikan; ringkasan produk tanpa varian dihitung di sini,
+        // produk bervarian lewat syncVariantSummary().
+        static::saving(function (Product $product) {
+            if ($product->has_variants) {
+                $product->wholesale_tiers = null;
+
+                return;
+            }
+
+            $tiers = Wholesale::normalize($product->wholesale_tiers, $product->price);
+            $product->wholesale_tiers = $tiers ?: null;
+            $product->wholesale_min_qty = $tiers[0]['min_qty'] ?? null;
+        });
     }
 
     public function getRouteKeyName(): string
@@ -105,6 +128,12 @@ class Product extends Model
     }
 
     #[Scope]
+    protected function wholesale(Builder $query): void
+    {
+        $query->whereNotNull('wholesale_min_qty');
+    }
+
+    #[Scope]
     protected function onSale(Builder $query): void
     {
         $query->whereNotNull('compare_at_price')->whereColumn('compare_at_price', '>', 'price');
@@ -145,8 +174,39 @@ class Product extends Model
             }
         }
 
+        $this->wholesale_min_qty = $this->computeWholesaleMinQty($active);
         $this->save();
         $this->unsetRelation('variants');
+    }
+
+    /**
+     * Jumlah terkecil yang mendapat harga grosir (null = tanpa grosir), untuk badge & filter katalog.
+     *
+     * @param  Collection<int, ProductVariant>|null  $activeVariants
+     */
+    public function computeWholesaleMinQty($activeVariants = null): ?int
+    {
+        if ($this->has_variants) {
+            $activeVariants ??= $this->variants()->where('is_active', true)->get();
+            $min = $activeVariants
+                ->map(fn (ProductVariant $v) => Wholesale::tiers($this, $v)[0]['min_qty'] ?? null)
+                ->filter()->min();
+
+            return $min ? (int) $min : null;
+        }
+
+        return Wholesale::tiers($this)[0]['min_qty'] ?? null;
+    }
+
+    public function hasWholesale(): bool
+    {
+        return $this->wholesale_min_qty !== null;
+    }
+
+    /** Minimal pembelian (gabungan semua varian), minimal 1. */
+    public function minOrderQty(): int
+    {
+        return max(1, (int) $this->min_order_qty);
     }
 
     public function formattedPrice(): string

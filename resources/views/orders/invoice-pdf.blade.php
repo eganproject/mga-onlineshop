@@ -112,7 +112,11 @@
                         @if ($item->variant_name || $item->sku)<div class="small muted">{{ collect([$item->variant_name, $item->sku])->filter()->implode(' · ') }}</div>@endif
                     </td>
                     <td class="center">{{ $item->quantity }}</td>
-                    <td class="right">{{ Money::rupiah($item->price) }}</td>
+                    <td class="right">{{ Money::rupiah($item->price) }}
+                        @if ($item->isWholesale())
+                            <div class="small muted">Harga grosir (normal {{ Money::rupiah($item->regular_price) }})</div>
+                        @endif
+                    </td>
                     <td class="right bold">{{ Money::rupiah($item->subtotal) }}</td>
                 </tr>
             @endforeach

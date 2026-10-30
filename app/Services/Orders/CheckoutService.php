@@ -15,6 +15,7 @@ use App\Models\Voucher;
 use App\Services\Billing\PriceCalculator;
 use App\Services\Cart\CartService;
 use App\Services\Catalog\StockService;
+use App\Services\Catalog\Wholesale;
 use App\Services\Promo\VoucherService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,19 @@ class CheckoutService
             $subtotal = 0;
             $weight = 0;
             $items = [];
+            $voucherSubtotal = 0;
+            // Jumlah gabungan per produk: dasar tingkat harga grosir & minimal pembelian.
+            $productTotals = $lines->groupBy(fn ($line) => $line->product->id)->map->sum('quantity');
+
+            foreach ($productTotals as $productId => $total) {
+                $product = $products->get($productId);
+
+                if ($product && $total < $product->minOrderQty()) {
+                    throw ValidationException::withMessages([
+                        'cart' => "Minimal pembelian {$product->name} {$product->minOrderQty()} pcs. Silakan perbarui keranjang.",
+                    ]);
+                }
+            }
 
             foreach ($lines as $line) {
                 $product = $products->get($line->product->id);
@@ -67,10 +81,16 @@ class CheckoutService
                     ]);
                 }
 
-                $price = $variant?->price ?? $product->price;
+                $regularPrice = Wholesale::regularPrice($product, $variant);
+                $price = Wholesale::unitPrice($product, $variant, (int) $productTotals[$product->id]);
+                $isWholesale = $price < $regularPrice;
                 $unitWeight = $variant?->weight ?: $product->weight;
                 $lineSubtotal = $price * $line->quantity;
                 $subtotal += $lineSubtotal;
+
+                if (! $isWholesale || Wholesale::voucherCombinable()) {
+                    $voucherSubtotal += $lineSubtotal;
+                }
                 $weight += $unitWeight * $line->quantity;
 
                 $items[] = [
@@ -84,6 +104,7 @@ class CheckoutService
                         'variant_name' => $variant?->name,
                         'sku' => $variant?->sku ?: $product->sku,
                         'price' => $price,
+                        'regular_price' => $isWholesale ? $regularPrice : null,
                         'quantity' => $line->quantity,
                         'weight' => $unitWeight,
                         'subtotal' => $lineSubtotal,
@@ -91,7 +112,7 @@ class CheckoutService
                 ];
             }
 
-            [$voucher, $discounts] = $this->applyVoucher($voucherCode, $user, $subtotal, $rate->cost);
+            [$voucher, $discounts] = $this->applyVoucher($voucherCode, $user, $voucherSubtotal, $rate->cost);
 
             // Biaya layanan, PPN & pembulatan sesuai Admin › Pajak & Biaya (disalin ke pesanan).
             $charges = $this->prices->calculate($subtotal, $discounts['discount'], $rate->cost, $discounts['shipping_discount']);

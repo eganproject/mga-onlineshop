@@ -3,12 +3,14 @@
 namespace App\Services\Catalog\Transfer;
 
 use App\Enums\StockMovementType;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImport;
 use App\Models\ProductVariant;
 use App\Services\Catalog\ProductService;
 use App\Services\Catalog\StockService;
+use App\Services\Catalog\Wholesale;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -28,6 +30,7 @@ class ProductImporter extends Importer
         'slug', 'nama_produk', 'kategori', 'deskripsi', 'sku_produk', 'aktif', 'unggulan',
         'label_varian', 'nama_varian', 'sku_varian', 'varian_aktif',
         'harga', 'harga_coret', 'berat_gram', 'stok', 'url_gambar',
+        'harga_grosir', 'minimal_beli',
     ];
 
     public const MAX_VARIANTS = 50;
@@ -54,6 +57,9 @@ class ProductImporter extends Importer
             'harga_normal' => 'harga_coret',
             'stock' => 'stok',
             'status' => 'aktif',
+            'grosir' => 'harga_grosir',
+            'min_beli' => 'minimal_beli',
+            'minimal_pembelian' => 'minimal_beli',
         ];
     }
 
@@ -288,6 +294,8 @@ class ProductImporter extends Importer
             'compare_at_price' => null,
             'stock' => null,
             'variants' => [],
+            'wholesale_tiers' => null,
+            'min_order_qty' => $read($firstLine, fn () => CellValue::integer($first('minimal_beli'), 'Minimal beli', 1, 999)),
         ];
 
         if ($product && $product->has_variants !== $isVariant) {
@@ -310,6 +318,7 @@ class ProductImporter extends Importer
             $plan['compare_at_price'] = $read($firstLine, fn () => CellValue::integer($row['harga_coret'] ?? null, 'Harga coret', 0, 1_000_000_000_000));
             $plan['weight'] = $read($firstLine, fn () => CellValue::integer($row['berat_gram'] ?? null, 'Berat', 1, 100_000));
             $plan['stock'] = $read($firstLine, fn () => CellValue::integer($row['stok'] ?? null, 'Stok', 0, 1_000_000));
+            $plan['wholesale_tiers'] = $read($firstLine, fn () => self::tiers($row['harga_grosir'] ?? null, $plan['price'] ?? $product?->price));
 
             if (! $product && $plan['price'] === null) {
                 $errors[] = self::error($firstLine, 'Harga wajib diisi untuk produk baru.');
@@ -374,6 +383,7 @@ class ProductImporter extends Importer
                 'stock' => $read($line, fn () => CellValue::integer($row['stok'] ?? null, 'Stok', 0, 1_000_000)),
                 'is_active' => $read($line, fn () => CellValue::boolean($row['varian_aktif'] ?? null, 'Varian aktif')),
             ];
+            $variant['wholesale_tiers'] = $read($line, fn () => self::tiers($row['harga_grosir'] ?? null, $variant['price'] ?? $match?->price));
 
             if (! $match && $variant['price'] === null) {
                 $errors[] = self::error($line, 'Harga wajib diisi untuk varian baru.');
@@ -472,7 +482,7 @@ class ProductImporter extends Importer
                 : $this->products->uniqueSlug($plan['name'], $product);
         }
 
-        foreach (['name', 'sku', 'description', 'is_active', 'is_featured', 'weight'] as $field) {
+        foreach (['name', 'sku', 'description', 'is_active', 'is_featured', 'weight', 'min_order_qty'] as $field) {
             if ($plan[$field] !== null) {
                 $product->{$field} = $plan[$field];
             }
@@ -490,6 +500,9 @@ class ProductImporter extends Importer
             }
             if ($plan['compare_at_price'] !== null) {
                 $product->compare_at_price = $plan['compare_at_price'] ?: null;
+            }
+            if ($plan['wholesale_tiers'] !== null) {
+                $product->wholesale_tiers = $plan['wholesale_tiers'];
             }
         } else {
             $product->price ??= (int) collect($plan['variants'])->min('price');
@@ -526,6 +539,9 @@ class ProductImporter extends Importer
             if ($row['compare_at_price'] !== null) {
                 $variant->compare_at_price = $row['compare_at_price'] ?: null;
             }
+            if ($row['wholesale_tiers'] !== null) {
+                $variant->wholesale_tiers = $row['wholesale_tiers'];
+            }
 
             $variant->save();
             $variant->setRelation('product', $product);
@@ -538,6 +554,36 @@ class ProductImporter extends Importer
         }
 
         $product->syncVariantSummary();
+    }
+
+    /**
+     * Kolom harga_grosir: "10=65000; 50=60000". Kosong = tidak diubah, 0/- = hapus grosir.
+     *
+     * @return list<array{min_qty: int, price: int}>|null
+     */
+    private static function tiers(mixed $value, ?int $regularPrice): ?array
+    {
+        $text = trim((string) $value);
+
+        if ($text === '') {
+            return null;
+        }
+
+        if (in_array(mb_strtolower($text), ['0', '-', 'tidak', 'hapus'], true)) {
+            return [];
+        }
+
+        $tiers = Wholesale::fromText($text) ?? throw new InvalidCell('Harga grosir harus berformat "10=65000; 50=60000" (jumlah=harga per pcs).');
+
+        if (count($tiers) > Wholesale::MAX_TIERS) {
+            throw new InvalidCell('Harga grosir maksimal '.Wholesale::MAX_TIERS.' tingkat.');
+        }
+
+        if ($problem = ProductRequest::tierProblem($tiers, $regularPrice ?? PHP_INT_MAX)) {
+            throw new InvalidCell("Harga grosir: {$problem}");
+        }
+
+        return $tiers;
     }
 
     private function resolveCategory(array $category, array &$cache, array &$result): int

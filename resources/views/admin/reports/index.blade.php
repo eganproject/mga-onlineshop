@@ -114,6 +114,32 @@
                 </div>
             </div>
 
+            @if ($wholesale && $wholesale['wholesale']['quantity'] > 0)
+                <div class="card mt-6 p-5" data-report-wholesale>
+                    <div class="label-row">
+                        <h2 class="font-bold text-stone-900">Grosir vs eceran</h2>
+                        <x-tooltip label="Grosir vs eceran" text="Baris pesanan yang dibeli dengan harga grosir dibanding harga normal. Hemat pembeli = selisih harga normal dan harga grosir." />
+                    </div>
+                    <dl class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="rounded-xl bg-accent-50/60 p-4">
+                            <dt class="text-xs font-semibold text-accent-700">Penjualan grosir</dt>
+                            <dd class="mt-1 text-lg font-bold tabular-nums">@rupiah($wholesale['wholesale']['revenue'])</dd>
+                            <dd class="text-xs text-stone-500">{{ $fmt($wholesale['wholesale']['quantity']) }} pcs · {{ $fmt($wholesale['wholesale']['orders']) }} pesanan · {{ round($wholesale['wholesale']['revenue'] / max(1, $wholesale['wholesale']['revenue'] + $wholesale['retail']['revenue']) * 100) }}%</dd>
+                        </div>
+                        <div class="rounded-xl bg-stone-50 p-4">
+                            <dt class="text-xs font-semibold text-stone-600">Penjualan eceran</dt>
+                            <dd class="mt-1 text-lg font-bold tabular-nums">@rupiah($wholesale['retail']['revenue'])</dd>
+                            <dd class="text-xs text-stone-500">{{ $fmt($wholesale['retail']['quantity']) }} pcs · {{ $fmt($wholesale['retail']['orders']) }} pesanan</dd>
+                        </div>
+                        <div class="rounded-xl bg-stone-50 p-4">
+                            <dt class="text-xs font-semibold text-stone-600">Potongan harga grosir</dt>
+                            <dd class="mt-1 text-lg font-bold tabular-nums text-emerald-700">−@rupiah($wholesale['wholesale']['savings'])</dd>
+                            <dd class="text-xs text-stone-500">Selisih dari harga normal</dd>
+                        </div>
+                    </dl>
+                </div>
+            @endif
+
             @if ($vouchers->isNotEmpty())
                 <div class="card mt-6 overflow-hidden">
                     <div class="p-5">

@@ -192,7 +192,11 @@
                                 <div class="min-w-0 flex-1 text-sm">
                                     <p class="truncate font-medium text-stone-800">{{ $line->product->name }}</p>
                                     @if ($line->variant)<p class="truncate text-xs text-stone-500">{{ $line->variant->name }}</p>@endif
-                                    <p class="text-xs text-stone-500">{{ $line->quantity }} × @rupiah($line->unitPrice())</p>
+                                    <p class="text-xs text-stone-500">{{ $line->quantity }} × @rupiah($line->unitPrice())
+                                        @if ($line->isWholesale())
+                                            <span class="ml-1 text-stone-400 line-through">{{ \App\Support\Money::rupiah($line->regularPrice()) }}</span> <span class="badge bg-accent-50 text-accent-700">Grosir</span>
+                                        @endif
+                                    </p>
                                 </div>
                                 <p class="text-sm font-semibold">@rupiah($line->subtotal())</p>
                             </li>
@@ -201,6 +205,9 @@
                     {{-- Voucher --}}
                     <div class="mt-4 border-t border-stone-100 pt-4" aria-live="polite">
                         <p class="flex items-center gap-2 text-sm font-semibold text-stone-900"><x-icon name="ticket" class="size-4" /> Voucher</p>
+                        @if ($voucherSubtotal < $subtotal)
+                            <p class="mt-1 text-xs text-stone-500">Produk berharga grosir tidak ikut dihitung voucher{{ $voucherSubtotal > 0 ? ' (dasar voucher '.\App\Support\Money::rupiah($voucherSubtotal).')' : '' }}.</p>
+                        @endif
 
                         <div x-show="voucher" @if (! $voucher) x-cloak @endif class="mt-3 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/70 p-3">
                             <x-icon name="check-circle" class="size-5 shrink-0 text-emerald-600" />
@@ -243,6 +250,9 @@
 
                     <dl class="mt-4 space-y-2 border-t border-stone-100 pt-4 text-sm">
                         <div class="flex justify-between"><dt class="text-stone-500">Subtotal ({{ $lines->sum('quantity') }} item)</dt><dd>@rupiah($subtotal)</dd></div>
+                        @if ($wholesaleSavings > 0)
+                            <div class="flex justify-between text-xs text-accent-700"><dt>Sudah termasuk hemat harga grosir</dt><dd>@rupiah($wholesaleSavings)</dd></div>
+                        @endif
                         <div class="flex justify-between gap-3">
                             <dt class="text-stone-500">Ongkir <span x-show="rate" x-cloak class="text-xs" x-text="rate ? `(${rate.courier_name} ${rate.service})` : ''"></span></dt>
                             <dd x-text="rate ? rupiah(shipping) : '—'">@rupiah($initialShipping)</dd>

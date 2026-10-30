@@ -36,6 +36,7 @@ class StoreSettingController extends Controller
         'tracking_sync' => 'shop.shipping.tracking_sync',
         'payment_expiry_hours' => 'shop.payment.expiry_hours',
         'auto_complete_days' => 'shop.orders.auto_complete_days',
+        'wholesale_voucher' => 'shop.wholesale.voucher_combinable',
     ];
 
     /** Label kunci config untuk log aktivitas. */
@@ -58,6 +59,7 @@ class StoreSettingController extends Controller
         'shop.shipping.couriers' => 'Kurir aktif',
         'shop.shipping.tracking_sync' => 'Cek resi otomatis',
         'shop.payment.expiry_hours' => 'Batas waktu bayar (jam)',
+        'shop.wholesale.voucher_combinable' => 'Voucher untuk harga grosir',
         'shop.orders.auto_complete_days' => 'Selesai otomatis (hari)',
     ];
 
@@ -105,6 +107,7 @@ class StoreSettingController extends Controller
             'tracking_sync' => ['boolean'],
             'payment_expiry_hours' => ['required', 'integer', 'min:1', 'max:168'],
             'auto_complete_days' => ['required', 'integer', 'min:1', 'max:30'],
+            'wholesale_voucher' => ['boolean'],
         ], [
             'whatsapp.regex' => 'Nomor WhatsApp tidak valid. Contoh: 081234567890.',
             'instagram.regex' => 'Isi username saja, tanpa spasi. Contoh: mga.official.',
@@ -120,6 +123,7 @@ class StoreSettingController extends Controller
             ->mapWithKeys(fn (string $key, string $field) => [$key => $data[$field] ?? null])
             ->put('shop.shipping.tracking_sync', $request->boolean('tracking_sync'))
             ->put('shop.whatsapp_button', $request->boolean('whatsapp_button'))
+            ->put('shop.wholesale.voucher_combinable', $request->boolean('wholesale_voucher'))
             ->all();
 
         // Kecamatan asal (hanya bila dipilih lengkap): nama wilayah dicocokkan ke

@@ -9,6 +9,9 @@
             @if ($product->isOnSale())
                 <span class="bg-accent-500 px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase">-{{ $product->discountPercent() }}%</span>
             @endif
+            @if ($product->hasWholesale() && $product->inStock())
+                <span class="bg-ink px-2 py-1 text-[10px] font-bold tracking-wider text-white uppercase" title="Harga grosir mulai {{ $product->wholesale_min_qty }} pcs">Grosir</span>
+            @endif
             @if (! $available)
                 <span class="bg-white px-2 py-1 text-[10px] font-bold tracking-wider text-ink uppercase">Tidak dijual lagi</span>
             @elseif (! $product->inStock())

@@ -4,6 +4,7 @@ namespace App\Services\Cart;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\Catalog\Wholesale;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Collection;
 
@@ -82,6 +83,10 @@ class CartService
             }
         }
 
+        // Harga grosir dihitung dari jumlah gabungan semua varian produk yang sama.
+        $totals = $lines->groupBy(fn (CartLine $line) => $line->product->id)->map->sum('quantity');
+        $lines = $lines->map(fn (CartLine $line) => new CartLine($line->product, $line->quantity, $line->variant, $totals[$line->product->id]));
+
         if ($clean != $raw) {
             $this->session->put(self::KEY, $clean);
         }
@@ -98,8 +103,15 @@ class CartService
     {
         $key = self::key($product->id, $variant?->id);
         $current = $this->raw()[$key] ?? 0;
+        $quantity = max(1, $quantity);
 
-        return $this->set($key, min($current + max(1, $quantity), $variant?->stock ?? $product->stock));
+        // Produk tanpa varian yang belum ada di keranjang langsung dibulatkan ke minimal pembelian.
+        // Produk bervarian tidak, karena minimalnya boleh dipenuhi campuran varian (diingatkan di keranjang).
+        if (! $product->has_variants && $this->productQuantity($product->id) === 0) {
+            $quantity = max($quantity, $product->minOrderQty());
+        }
+
+        return $this->set($key, min($current + $quantity, $variant?->stock ?? $product->stock));
     }
 
     /** Ubah jumlah sebuah baris. Mengembalikan jumlah akhir (dibatasi stok). */
@@ -123,6 +135,51 @@ class CartService
     public function quantity(string $key): int
     {
         return (int) ($this->raw()[$key] ?? 0);
+    }
+
+    /** Jumlah gabungan semua varian sebuah produk di keranjang (dari session). */
+    public function productQuantity(int $productId): int
+    {
+        return (int) collect($this->raw())
+            ->filter(fn ($qty, $key) => self::parseKey((string) $key)[0] === $productId)
+            ->sum();
+    }
+
+    /**
+     * Produk yang jumlahnya di keranjang masih di bawah minimal pembelian.
+     *
+     * @return list<array{product: Product, quantity: int, min: int, message: string}>
+     */
+    public function belowMinimum(): array
+    {
+        return $this->lines()
+            ->groupBy(fn (CartLine $line) => $line->product->id)
+            ->map(fn (Collection $group) => [
+                'product' => $group->first()->product,
+                'quantity' => $group->first()->productQuantity(),
+                'min' => $group->first()->product->minOrderQty(),
+            ])
+            ->filter(fn ($row) => $row['quantity'] < $row['min'])
+            ->map(fn ($row) => [...$row, 'message' => "Minimal pembelian {$row['product']->name} {$row['min']} pcs (gabungan semua varian). Tambah ".($row['min'] - $row['quantity']).' lagi.'])
+            ->values()
+            ->all();
+    }
+
+    /** Total hemat dari harga grosir. */
+    public function wholesaleSavings(): int
+    {
+        return $this->lines()->sum(fn (CartLine $line) => $line->wholesaleSavings());
+    }
+
+    /**
+     * Subtotal yang dihitung untuk voucher. Bila voucher tidak boleh digabung dengan
+     * harga grosir (Pengaturan Toko), baris berharga grosir tidak ikut dihitung.
+     */
+    public function voucherSubtotal(): int
+    {
+        return Wholesale::voucherCombinable()
+            ? $this->subtotal()
+            : $this->lines()->reject(fn (CartLine $line) => $line->isWholesale())->sum(fn (CartLine $line) => $line->subtotal());
     }
 
     public function find(string $key): ?CartLine

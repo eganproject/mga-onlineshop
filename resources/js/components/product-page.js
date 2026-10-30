@@ -31,7 +31,8 @@ export default (config) => ({
     active: 0,
     variants: config.variants, // [{ id, name, price, compare_at_price, stock, image_id }]
     selectedId: config.selectedId ?? null,
-    qty: 1,
+    minQty: config.minQty ?? 1,
+    qty: config.minQty ?? 1,
     lightboxOpening: false,
 
     get selected() {
@@ -57,6 +58,39 @@ export default (config) => ({
 
     get discount() {
         return this.compareAt ? Math.round(100 - (this.price / this.compareAt) * 100) : 0;
+    },
+
+    /** Tingkat harga grosir varian terpilih / produk: [{ min_qty, price }]. */
+    get tiers() {
+        return (this.selected ? this.selected.tiers : config.tiers) ?? [];
+    },
+
+    /** Tingkat grosir yang berlaku untuk jumlah di form (null = harga normal). */
+    get activeTier() {
+        return this.tiers.filter((tier) => this.qty >= tier.min_qty).pop() ?? null;
+    },
+
+    get unitPrice() {
+        return this.activeTier ? this.activeTier.price : this.price;
+    },
+
+    /** Baris tabel grosir: harga normal lalu tiap tingkat, dengan rentang jumlahnya. */
+    get tierRows() {
+        if (!this.tiers.length) return [];
+        const rows = [{ min_qty: 1, price: this.price }, ...this.tiers];
+        return rows.map((row, i) => {
+            const next = rows[i + 1]?.min_qty;
+            return {
+                ...row,
+                label: next ? `${row.min_qty}–${next - 1} pcs` : `≥ ${row.min_qty} pcs`,
+                save: i && this.price ? Math.round(100 - (row.price / this.price) * 100) : 0,
+                active: this.qty >= row.min_qty && (!next || this.qty < next),
+            };
+        });
+    },
+
+    setQty(value) {
+        this.qty = Math.min(this.max, Math.max(1, value));
     },
 
     get needsVariant() {

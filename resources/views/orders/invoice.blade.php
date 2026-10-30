@@ -77,7 +77,11 @@
                                 <p class="text-xs text-stone-500">{{ collect([$item->variant_name, $item->sku])->filter()->implode(' · ') }}</p>
                             </td>
                             <td class="py-3 text-center">{{ $item->quantity }}</td>
-                            <td class="py-3 pl-3 text-right whitespace-nowrap">@rupiah($item->price)</td>
+                            <td class="py-3 pl-3 text-right whitespace-nowrap">{{ \App\Support\Money::rupiah($item->price) }}
+                                @if ($item->isWholesale())
+                                    <span class="block text-[11px] text-stone-500">Grosir · normal <span class="line-through">{{ \App\Support\Money::rupiah($item->regular_price) }}</span></span>
+                                @endif
+                            </td>
                             <td class="py-3 pl-3 text-right font-semibold whitespace-nowrap">@rupiah($item->subtotal)</td>
                         </tr>
                     @endforeach

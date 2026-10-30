@@ -141,7 +141,11 @@
                         <div class="min-w-0 flex-1">
                             <p class="font-semibold text-stone-900">{{ $item->product_name }}</p>
                             @if ($item->variant_name)<p class="text-xs text-stone-500">{{ $item->variant_name }}</p>@endif
-                            <p class="text-sm text-stone-500">{{ $item->quantity }} × @rupiah($item->price)</p>
+                            <p class="text-sm text-stone-500">{{ $item->quantity }} × {{ \App\Support\Money::rupiah($item->price) }}
+                                @if ($item->isWholesale())
+                                    <span class="badge bg-accent-50 text-accent-700">Harga grosir</span>
+                                @endif
+                            </p>
                         </div>
                         <p class="font-semibold">@rupiah($item->subtotal)</p>
                     </li>
