@@ -12,6 +12,8 @@
     ])->filter(fn ($m) => is_string($m[1]) && $m[1] !== '')->values();
 
     // Error validasi: ingatkan walau field yang salah ada di bawah layar.
+    // $errors bisa tidak ada di halaman tanpa middleware web (mis. URL yang tidak terdaftar).
+    $errors ??= new \Illuminate\Support\ViewErrorBag;
     if ($errors->any() && ! session('error')) {
         $messages->push(['error', $errors->count() > 1 ? 'Ada '.$errors->count().' isian yang perlu diperbaiki. Cek yang ditandai merah.' : $errors->first()]);
     }

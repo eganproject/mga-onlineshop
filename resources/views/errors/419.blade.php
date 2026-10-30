@@ -1,9 +1,11 @@
-<x-layouts.base :noindex="true" title="Sesi kedaluwarsa">
-    <div class="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <a href="{{ route('home') }}"><x-wordmark /></a>
-        <p class="mt-10 text-7xl font-extrabold tracking-tight text-ink font-display">419</p>
-        <h1 class="mt-3 text-2xl font-bold text-stone-900">Sesi kedaluwarsa</h1>
-        <p class="mt-2 max-w-md text-stone-500">Silakan muat ulang halaman lalu coba lagi.</p>
-        <a href="{{ url('/') }}" class="btn btn-ink btn-pill mt-8">Kembali ke beranda</a>
+<x-layouts.error code="419" title="Sesi sudah kedaluwarsa" icon="clock" tone="accent"
+                 message="Halaman terlalu lama dibuka sehingga sesi keamanannya habis. Muat ulang halaman sebelumnya lalu kirim lagi formulirnya.">
+    <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+        <a href="{{ url()->previous(url('/')) }}" class="btn btn-ink btn-pill">
+            <x-icon name="refresh" class="size-4" /> Kembali &amp; muat ulang
+        </a>
+        <a href="{{ url('/') }}" class="btn btn-outline btn-pill">
+            <x-icon name="home" class="size-4" /> Ke beranda
+        </a>
     </div>
-</x-layouts.base>
+</x-layouts.error>

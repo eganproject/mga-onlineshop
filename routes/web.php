@@ -251,3 +251,12 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
 */
 
 Route::post('/webhooks/midtrans', Webhooks\MidtransController::class)->name('webhooks.midtrans')->middleware('throttle:120,1');
+
+/*
+|--------------------------------------------------------------------------
+| URL lama (situs WordPress sebelumnya) → halaman baru; selain itu 404
+|--------------------------------------------------------------------------
+| Harus paling akhir. Lewat middleware web, jadi halaman 404 tahu sesi pengguna.
+*/
+
+Route::fallback(Shop\LegacyRedirectController::class)->middleware('throttle:120,1');

@@ -142,8 +142,15 @@ class Product extends Model
     #[Scope]
     protected function search(Builder $query, ?string $term): void
     {
-        $query->when($term, fn (Builder $q) => $q->where(function (Builder $q) use ($term) {
-            $q->where('name', 'like', "%{$term}%")
+        // Nama: semua kata harus ada (urutan bebas), jadi "banner x 60x160" tetap ketemu.
+        $words = array_slice(preg_split('/\s+/', trim((string) $term), -1, PREG_SPLIT_NO_EMPTY), 0, 8);
+
+        $query->when($term, fn (Builder $q) => $q->where(function (Builder $q) use ($term, $words) {
+            $q->where(function (Builder $name) use ($words) {
+                foreach ($words as $word) {
+                    $name->where('name', 'like', "%{$word}%");
+                }
+            })
                 ->orWhere('sku', 'like', "%{$term}%")
                 ->orWhereHas('variants', fn (Builder $v) => $v->where('sku', 'like', "%{$term}%"));
         }));

@@ -1,9 +1,11 @@
-<x-layouts.base :noindex="true" title="Terjadi kesalahan">
-    <div class="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <a href="{{ route('home') }}"><x-wordmark /></a>
-        <p class="mt-10 text-7xl font-extrabold tracking-tight text-ink font-display">500</p>
-        <h1 class="mt-3 text-2xl font-bold text-stone-900">Terjadi kesalahan</h1>
-        <p class="mt-2 max-w-md text-stone-500">Ada masalah di server kami. Coba beberapa saat lagi.</p>
-        <a href="{{ url('/') }}" class="btn btn-ink btn-pill mt-8">Kembali ke beranda</a>
+<x-layouts.error code="500" title="Ada kendala di server kami" icon="warning" tone="accent"
+                 message="Maaf, terjadi kesalahan saat memuat halaman ini. Tim kami sudah mendapat catatannya. Coba muat ulang beberapa saat lagi.">
+    <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+        <a href="{{ url()->current() }}" class="btn btn-ink btn-pill">
+            <x-icon name="refresh" class="size-4" /> Coba lagi
+        </a>
+        <a href="{{ url('/') }}" class="btn btn-outline btn-pill">
+            <x-icon name="home" class="size-4" /> Ke beranda
+        </a>
     </div>
-</x-layouts.base>
+</x-layouts.error>
