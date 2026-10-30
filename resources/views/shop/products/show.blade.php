@@ -163,7 +163,12 @@
 
                     {{-- Harga grosir bertingkat: baris aktif mengikuti jumlah; klik baris = isi jumlahnya. --}}
                     @if ($product->hasWholesale())
-                        <div class="mt-5 rounded-2xl border border-accent-200 bg-accent-50/50 p-4" x-show="tiers.length" data-wholesale-table>
+                        @php
+                            // Kotak grosir baru tampil saat jumlah (+ isi keranjang) kurang ≤ 3 pcs dari tingkat pertama atau sudah grosir.
+                            $firstTier = $pageConfig['tiers'][0]['min_qty'] ?? null;
+                            $showTiers = $firstTier && $firstTier - ($pageConfig['minQty'] + $pageConfig['inCart']) <= \App\Services\Catalog\Wholesale::NUDGE_WITHIN;
+                        @endphp
+                        <div class="mt-5 rounded-2xl border border-accent-200 bg-accent-50/50 p-4" x-show="showTiers" @unless ($showTiers) x-cloak @endunless data-wholesale-table>
                             <p class="flex items-center gap-2 text-sm font-semibold text-ink">
                                 <x-icon name="tag" class="size-4 text-accent-600" /> Harga grosir
                                 @if ($variants->isNotEmpty())<span class="text-xs font-normal text-stone-500" x-text="selected ? selected.name : 'boleh campur varian'"></span>@endif

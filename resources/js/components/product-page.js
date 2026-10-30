@@ -75,6 +75,11 @@ export default (config) => ({
         return this.tiers.filter((tier) => this.totalQty >= tier.min_qty).pop() ?? null;
     },
 
+    /** Kotak harga grosir: tampil bila sudah grosir atau kurang ≤ nudgeWithin pcs dari tingkat pertama. */
+    get showTiers() {
+        return this.tiers.length > 0 && (this.activeTier !== null || this.nudge !== null);
+    },
+
     /** Ajakan "tambah X pcs lagi": hanya bila tingkat berikutnya kurang ≤ nudgeWithin pcs. */
     get nudge() {
         const next = this.tiers.find((tier) => this.totalQty < tier.min_qty);
