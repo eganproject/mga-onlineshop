@@ -65,8 +65,8 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.vouchers.edit', $voucher) }}" class="btn btn-ghost btn-sm"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only">Edit</span></a>
-                                        <x-confirm-delete :action="route('admin.vouchers.destroy', $voucher)" title="Hapus voucher {{ $voucher->code }}?" message="Voucher tidak bisa dipakai lagi. Pesanan yang sudah memakainya tidak berubah." />
+                                        <a href="{{ route('admin.vouchers.edit', $voucher) }}" class="btn btn-ghost btn-sm" title="Edit"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only lg:sr-only 2xl:not-sr-only">Edit</span></a>
+                                        <x-confirm-delete compact :action="route('admin.vouchers.destroy', $voucher)" title="Hapus voucher {{ $voucher->code }}?" message="Voucher tidak bisa dipakai lagi. Pesanan yang sudah memakainya tidak berubah." />
                                     </div>
                                 </td>
                             </tr>
