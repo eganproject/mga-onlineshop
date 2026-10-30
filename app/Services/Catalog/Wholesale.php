@@ -19,6 +19,9 @@ final class Wholesale
     /** Batas jumlah tingkat per produk/varian. */
     public const MAX_TIERS = 5;
 
+    /** Ajakan "tambah X pcs lagi" baru tampil bila kekurangannya paling banyak sekian pcs. */
+    public const NUDGE_WITHIN = 3;
+
     /**
      * Rapikan isian tingkat: buang baris kosong/tidak valid, urutkan dari jumlah terkecil,
      * dan hanya simpan harga yang lebih murah dari harga normal & tingkat sebelumnya.
