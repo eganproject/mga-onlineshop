@@ -408,6 +408,11 @@
     .no-scrollbar {
         scrollbar-width: none;
     }
+    /* Scrollbar tipis tapi tetap terlihat (sidebar filter katalog). */
+    .thin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-stone-300) transparent;
+    }
     /* Kerangka saat memuat (infinite scroll). */
     .skeleton {
         @apply bg-sand-100 motion-safe:animate-pulse;
