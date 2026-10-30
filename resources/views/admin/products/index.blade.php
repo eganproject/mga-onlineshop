@@ -68,6 +68,7 @@
                                             <p class="text-xs text-stone-500">
                                                 {{ $product->sku ?? 'Tanpa SKU' }} · {{ $product->weight }} gr
                                                 @if ($product->variants_count) · <span class="font-semibold text-brand-700">{{ $product->variants_count }} varian</span>@endif
+                                                @if ($product->hasWholesale()) · <span class="font-semibold text-accent-700" title="Harga grosir mulai {{ $product->wholesale_min_qty }} pcs">Grosir {{ $product->wholesale_min_qty }}+</span>@endif
                                             </p>
                                             {{-- HP: harga & stok di bawah nama (kolomnya disembunyikan) --}}
                                             <p class="mt-0.5 text-xs sm:hidden">

@@ -29,6 +29,7 @@ class ProductService
             $hasVariants = (bool) ($data['has_variants'] ?? false);
 
             $product->fill(Arr::only($data, ['category_id', 'name', 'sku', 'description', 'meta_title', 'meta_description', 'weight']));
+            $product->min_order_qty = max(1, (int) ($data['min_order_qty'] ?? 1));
             $product->slug = ($data['slug'] ?? null) ?: $this->uniqueSlug($data['name'], $product);
             $product->is_active = (bool) ($data['is_active'] ?? false);
             $product->is_featured = (bool) ($data['is_featured'] ?? false);
@@ -40,6 +41,7 @@ class ProductService
             } else {
                 $product->price = $data['price'];
                 $product->compare_at_price = $data['compare_at_price'] ?? null;
+                $product->wholesale_tiers = $data['wholesale_tiers'] ?? [];
             }
 
             $product->save();
@@ -112,6 +114,7 @@ class ProductService
                 'weight' => filled($row['weight'] ?? null) ? (int) $row['weight'] : null,
                 'product_image_id' => $imageIds->contains((int) ($row['image_id'] ?? 0)) ? (int) $row['image_id'] : null,
                 'is_active' => (bool) ($row['is_active'] ?? false),
+                'wholesale_tiers' => $row['wholesale_tiers'] ?? [],
                 'sort_order' => $position,
             ]);
             $variant->save();

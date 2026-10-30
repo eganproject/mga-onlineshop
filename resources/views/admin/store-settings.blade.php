@@ -169,6 +169,18 @@
                                tooltip="Pesanan berstatus “Sampai Tujuan” otomatis menjadi Selesai setelah sekian hari. Pesanan Selesai tidak bisa diubah lagi." />
             </section>
 
+            {{-- Grosir --}}
+            <section class="card space-y-5 p-6">
+                <div class="flex items-center gap-3">
+                    <span class="grid size-10 place-items-center rounded-xl bg-accent-50 text-accent-600"><x-icon name="tag" /></span>
+                    <div><h2 class="font-bold text-stone-900">Grosir</h2><p class="text-xs text-stone-500">Harga grosir diatur per produk di form produk.</p></div>
+                </div>
+                <x-form.switch card name="wholesale_voucher" label="Voucher berlaku untuk harga grosir" :checked="$values['wholesale_voucher']"
+                               description="Matikan bila voucher hanya untuk barang berharga normal."
+                               tooltip="Aktif: potongan voucher dihitung dari semua barang. Nonaktif: barang yang sudah dapat harga grosir tidak ikut dihitung (termasuk syarat minimal belanja), dan voucher ditolak bila semua barang berharga grosir."
+                               :tooltip-tips="['Matikan supaya margin tidak tergerus dua kali (harga grosir + voucher).']" />
+            </section>
+
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
                 <x-icon name="info" class="size-5 shrink-0" />
                 @can('integrations.manage')

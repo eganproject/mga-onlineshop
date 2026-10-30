@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Catalog\Wholesale;
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'product_id', 'product_image_id', 'name', 'sku', 'price', 'compare_at_price',
+    'product_id', 'product_image_id', 'name', 'sku', 'price', 'compare_at_price', 'wholesale_tiers',
     'weight', 'is_active', 'sort_order',
 ])]
 class ProductVariant extends Model
@@ -23,11 +24,19 @@ class ProductVariant extends Model
         return [
             'price' => 'integer',
             'compare_at_price' => 'integer',
+            'wholesale_tiers' => 'array',
             'stock' => 'integer',
             'weight' => 'integer',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (ProductVariant $variant) {
+            $variant->wholesale_tiers = Wholesale::normalize($variant->wholesale_tiers, $variant->price) ?: null;
+        });
     }
 
     public function product(): BelongsTo

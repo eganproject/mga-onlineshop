@@ -1,5 +1,5 @@
 @php
-    $heading = request('q') ? 'Hasil untuk "'.request('q').'"' : ($activeCategory?->name ?? (request()->boolean('promo') ? 'Promo' : 'Semua produk'));
+    $heading = request('q') ? 'Hasil untuk "'.request('q').'"' : ($activeCategory?->name ?? (request()->boolean('promo') ? 'Promo' : (request()->boolean('grosir') ? 'Harga grosir' : 'Semua produk')));
     $baseQuery = request()->except('page');
     $pricePresets = [
         ['Di bawah 50rb', null, 50000],
@@ -14,6 +14,7 @@
         'kategori' => $activeCategory ? 'Kategori: '.$activeCategory->name : null,
         'tersedia' => request()->boolean('tersedia') ? 'Tersedia' : null,
         'promo' => request()->boolean('promo') ? 'Sedang diskon' : null,
+        'grosir' => request()->boolean('grosir') ? 'Bisa grosir' : null,
         'harga' => ($minPrice || $maxPrice)
             ? 'Harga: '.($minPrice ? \App\Support\Money::rupiah($minPrice) : 'Rp0').' – '.($maxPrice ? \App\Support\Money::rupiah($maxPrice) : '∞')
             : null,
@@ -159,6 +160,10 @@
                                 <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm lg:min-h-0">
                                     <input type="checkbox" name="promo" value="1" class="size-4 rounded-none border-stone-400 text-ink focus:ring-ink/20" @checked(request()->boolean('promo'))>
                                     Sedang diskon
+                                </label>
+                                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm lg:min-h-0">
+                                    <input type="checkbox" name="grosir" value="1" class="size-4 rounded-none border-stone-400 text-ink focus:ring-ink/20" @checked(request()->boolean('grosir'))>
+                                    Bisa grosir
                                 </label>
                             </div>
                         </div>

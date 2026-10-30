@@ -38,13 +38,20 @@ class CheckoutController extends Controller
         $addresses = $request->user()->addresses()->orderByDesc('is_default')->latest()->get();
         $address = $addresses->firstWhere('id', (int) $request->query('alamat', old('address_id'))) ?? $addresses->first();
 
-        $subtotal = $this->cart->subtotal();
+        if ($this->cart->belowMinimum() !== []) {
+            return redirect()->route('cart.index')->with('error', $this->cart->belowMinimum()[0]['message']);
+        }
+
+        // Voucher dihitung dari subtotal yang boleh memakai voucher (lihat Pengaturan Toko › Grosir).
+        $subtotal = $this->cart->voucherSubtotal();
         [$voucher, $voucherError] = $this->appliedVoucher($request, $subtotal);
 
         return view('shop.checkout', [
             'lines' => $this->cart->lines(),
             'adjustments' => $this->cart->adjustments(),
-            'subtotal' => $subtotal,
+            'subtotal' => $this->cart->subtotal(),
+            'voucherSubtotal' => $subtotal,
+            'wholesaleSavings' => $this->cart->wholesaleSavings(),
             'voucher' => $voucher ? $this->vouchers->payload($voucher, $subtotal) : null,
             'voucherError' => $voucherError,
             'suggestions' => $this->vouchers->suggestions($request->user(), $subtotal),
@@ -134,7 +141,7 @@ class CheckoutController extends Controller
             return $this->voucherError($request, 'Keranjang belanja masih kosong.');
         }
 
-        $subtotal = $this->cart->subtotal();
+        $subtotal = $this->cart->voucherSubtotal();
 
         try {
             $voucher = $this->vouchers->resolve($data['code'], $request->user(), $subtotal);

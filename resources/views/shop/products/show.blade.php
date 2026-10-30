@@ -46,7 +46,13 @@
                 'variants' => $variants->map(fn ($v) => [
                     'id' => $v->id, 'name' => $v->name, 'price' => $v->price, 'compare_at_price' => $v->compare_at_price,
                     'stock' => $v->stock, 'image_id' => $v->product_image_id, 'sku' => $v->sku,
+                    'tiers' => \App\Services\Catalog\Wholesale::tiers($product, $v),
                 ])->values(),
+                // Sebelum varian dipilih, tabel grosir memakai varian termurah yang punya grosir.
+                'tiers' => $variants->isEmpty()
+                    ? \App\Services\Catalog\Wholesale::tiers($product)
+                    : (($v = $variants->sortBy('price')->first(fn ($v) => \App\Services\Catalog\Wholesale::tiers($product, $v) !== [])) ? \App\Services\Catalog\Wholesale::tiers($product, $v) : []),
+                'minQty' => min($product->minOrderQty(), max(1, $product->stock)),
                 // Pilih otomatis bila hanya ada satu varian yang tersedia.
                 'selectedId' => old('variant_id') ? (int) old('variant_id') : ($variants->where('stock', '>', 0)->count() === 1 ? $variants->firstWhere('stock', '>', 0)->id : null),
                 'price' => $product->price,
@@ -153,6 +159,30 @@
                         <p class="mt-1 text-xs text-stone-500">{{ $taxNote }}</p>
                     @endif
 
+                    {{-- Harga grosir bertingkat: baris aktif mengikuti jumlah; klik baris = isi jumlahnya. --}}
+                    @if ($product->hasWholesale())
+                        <div class="mt-5 rounded-2xl border border-accent-200 bg-accent-50/50 p-4" x-show="tiers.length" data-wholesale-table>
+                            <p class="flex items-center gap-2 text-sm font-semibold text-ink">
+                                <x-icon name="tag" class="size-4 text-accent-600" /> Harga grosir
+                                @if ($variants->isNotEmpty())<span class="text-xs font-normal text-stone-500" x-text="selected ? selected.name : 'boleh campur varian'"></span>@endif
+                            </p>
+                            <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4" role="list">
+                                <template x-for="row in tierRows" :key="row.min_qty">
+                                    <button type="button" role="listitem" @click="setQty(row.min_qty)"
+                                            class="rounded-xl border bg-white px-3 py-2 text-left transition"
+                                            :class="row.active ? 'border-accent-500 ring-2 ring-accent-500/20' : 'border-stone-200 hover:border-stone-400'">
+                                        <span class="block text-xs text-stone-500" x-text="row.label"></span>
+                                        <span class="block text-sm font-semibold tabular-nums" x-text="rupiah(row.price)"></span>
+                                        <span x-show="row.save > 0" class="block text-[11px] font-semibold text-accent-700" x-text="`Hemat ${row.save}%`"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            @if ($variants->isNotEmpty())
+                                <p class="mt-2 text-xs text-stone-500">Jumlah dihitung gabungan semua {{ mb_strtolower($product->variant_label ?: 'varian') }} produk ini di keranjang.</p>
+                            @endif
+                        </div>
+                    @endif
+
                     <p class="mt-4 flex items-center gap-2 text-sm">
                         <span class="size-2 rounded-full" :class="stock < 1 ? 'bg-stone-400' : (stock <= {{ $lowStock }} ? 'bg-amber-500' : 'bg-emerald-500')"></span>
                         <span x-text="stock < 1 ? 'Stok habis' : (stock <= {{ $lowStock }} ? `Stok terbatas, sisa ${stock}` : 'Stok tersedia, siap dikirim')">
@@ -193,11 +223,18 @@
                             @endif
                             <p class="eyebrow text-stone-500">Jumlah</p>
                             <div class="mt-3 inline-flex items-center rounded-full border border-stone-300">
-                                <button type="button" @click="qty = Math.max(1, qty - 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Kurangi"><x-icon name="minus" class="size-4" /></button>
-                                <input type="number" name="quantity" x-model.number="qty" min="1" :max="max" value="1" aria-label="Jumlah"
-                                       class="w-12 border-0 bg-transparent p-0 text-center text-base font-semibold lg:text-sm focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
-                                <button type="button" @click="qty = Math.min(max, qty + 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Tambah"><x-icon name="plus" class="size-4" /></button>
+                                <button type="button" @click="setQty(qty - 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Kurangi"><x-icon name="minus" class="size-4" /></button>
+                                <input type="number" name="quantity" x-model.number="qty" min="1" :max="max" value="{{ min($product->minOrderQty(), max(1, $product->stock)) }}" aria-label="Jumlah"
+                                       class="w-14 border-0 bg-transparent p-0 text-center text-base font-semibold lg:text-sm focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                                <button type="button" @click="setQty(qty + 1)" class="grid size-11 place-items-center rounded-full hover:bg-sand-100" aria-label="Tambah"><x-icon name="plus" class="size-4" /></button>
                             </div>
+                            @if ($product->minOrderQty() > 1)
+                                <p class="mt-2 text-xs text-stone-500">Minimal pembelian {{ $product->minOrderQty() }} pcs{{ $variants->isNotEmpty() ? ' (boleh campur varian)' : '' }}.</p>
+                            @endif
+                            <p x-show="activeTier" x-cloak class="mt-2 text-sm text-accent-700" aria-live="polite">
+                                Harga grosir <span class="font-semibold" x-text="rupiah(unitPrice)"></span>/pcs ·
+                                total <span class="font-semibold" x-text="rupiah(unitPrice * qty)"></span>
+                            </p>
                             <p x-ref="variantHint" x-show="needsVariant" class="mt-4 hidden text-sm font-medium text-brand-700">Pilih {{ mb_strtolower($product->variant_label ?: 'varian') }} terlebih dahulu.</p>
                             <div class="mt-6 grid gap-3">
                                 <button class="btn btn-ink btn-pill w-full py-4 text-[15px]">Tambah ke keranjang</button>
@@ -214,6 +251,18 @@
                     @endif
 
                     <x-wishlist-button :product="$product" variant="button" class="mt-3" />
+
+                    @if (config('shop.whatsapp') && $product->inStock())
+                        @php
+                            $lastTier = $product->hasWholesale() ? collect($pageConfig['tiers'])->last() : null;
+                        @endphp
+                        <p class="mt-4 text-sm text-stone-600" data-wholesale-whatsapp>
+                            {{ $lastTier ? 'Butuh lebih dari '.$lastTier['min_qty'].' pcs?' : 'Beli dalam jumlah banyak?' }}
+                            <a href="https://wa.me/{{ config('shop.whatsapp') }}?text={{ urlencode('Halo, saya ingin beli '.$product->name.' dalam jumlah banyak. Bisa minta harga khusus?') }}"
+                               x-bind:href="'https://wa.me/{{ config('shop.whatsapp') }}?text=' + encodeURIComponent('Halo, saya ingin beli ' + @js($product->name) + (selected ? ' (' + selected.name + ')' : '') + ' sebanyak ' + qty + ' pcs. Bisa minta harga khusus?')"
+                               target="_blank" rel="noopener" class="link-underline font-semibold text-ink">Minta harga khusus</a>
+                        </p>
+                    @endif
 
                     <ul class="mt-8 grid grid-cols-3 gap-2 border-y border-stone-200 py-5 text-center text-xs font-medium text-stone-600">
                         @foreach ([['shield', 'Original'], ['truck', 'Kirim se-Indonesia'], ['refresh', 'Garansi tukar']] as [$icon, $label])

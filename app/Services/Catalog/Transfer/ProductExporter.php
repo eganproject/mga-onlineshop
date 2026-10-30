@@ -4,6 +4,7 @@ namespace App\Services\Catalog\Transfer;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\Catalog\Wholesale;
 use Generator;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -70,7 +71,8 @@ class ProductExporter
             ];
 
             if (! $product->has_variants) {
-                yield [...$base, '', '', '', $product->price, $product->compare_at_price ?? '', $product->weight, $product->stock, $images];
+                yield [...$base, '', '', '', $product->price, $product->compare_at_price ?? '', $product->weight, $product->stock, $images,
+                    Wholesale::toText($product->wholesale_tiers ?? []), $product->minOrderQty()];
 
                 continue;
             }
@@ -86,6 +88,8 @@ class ProductExporter
                     $variant->weight ?? '',
                     $variant->stock,
                     $i === 0 ? $images : '',
+                    Wholesale::toText($variant->wholesale_tiers ?? []),
+                    $i === 0 ? $product->minOrderQty() : '',
                 ];
             }
         }
@@ -128,6 +132,8 @@ class ProductExporter
             ['berat_gram', 'Berat dalam gram untuk hitung ongkir. Kosong = 100 gram untuk produk baru.'],
             ['stok', 'Stok saat ini. Perubahan stok tercatat di riwayat stok. Kosong = stok produk lama tidak berubah.'],
             ['url_gambar', 'Opsional. Satu atau beberapa URL foto (pisahkan dengan |). Hanya diunduh bila produk belum punya foto.'],
+            ['harga_grosir', 'Opsional. Tingkat harga grosir per pcs, format jumlah=harga dipisah titik koma, mis. "10=65000; 50=60000". Produk bervarian: per baris varian (jumlah dihitung gabungan semua varian). Kosong = tidak diubah, 0 = hapus grosir.'],
+            ['minimal_beli', 'Opsional. Minimal pembelian per pesanan (gabungan semua varian). 1 = bisa beli satuan.'],
             ['', ''],
             ['Catatan', 'Hanya sheet pertama yang dibaca. Kolom kosong pada produk lama tidak mengubah data. Produk yang salah satu barisnya error akan dilewati seluruhnya.'],
         ];

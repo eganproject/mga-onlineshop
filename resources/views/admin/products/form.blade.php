@@ -11,16 +11,22 @@
         'weight' => $v->weight,
         'image_id' => $v->product_image_id,
         'is_active' => $v->is_active,
+        'wholesale_tiers' => $v->wholesale_tiers ?? [],
     ])->values()->all();
     $variantRows = collect($variantRows)->map(fn ($v) => array_merge([
         'id' => null, 'name' => '', 'sku' => '', 'price' => '', 'compare_at_price' => '', 'stock' => 0,
         'stock_original' => null, 'weight' => '', 'image_id' => '', 'is_active' => false,
-    ], $v, ['is_active' => (bool) ($v['is_active'] ?? false), 'image_id' => (string) ($v['image_id'] ?? '')]))->values();
+    ], $v, [
+        'is_active' => (bool) ($v['is_active'] ?? false),
+        'image_id' => (string) ($v['image_id'] ?? ''),
+        'tiers' => array_values((array) ($v['wholesale_tiers'] ?? [])),
+    ]))->values();
     $formConfig = [
         'hasVariants' => (bool) old('has_variants', $product->has_variants),
         'images' => $product->images->map(fn ($i) => ['id' => $i->id, 'url' => $i->url(), 'removed' => false])->values(),
         'variants' => $variantRows,
         'defaultPrice' => old('price', $product->price),
+        'tiers' => array_values((array) old('wholesale_tiers', $product->has_variants ? [] : ($product->wholesale_tiers ?? []))),
         'maxImages' => \App\Http\Requests\Admin\ProductRequest::MAX_IMAGES,
         // Pesan error per baris varian: [index => [pesan, ...]].
         'variantErrors' => collect($errors->getMessages())
@@ -134,7 +140,7 @@
 
                 {{-- Tanpa varian --}}
                 <div x-show="!hasVariants" class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <x-form.money name="price" label="Harga jual" :value="$product->price" x-bind:required="!hasVariants" x-bind:disabled="hasVariants" />
+                    <x-form.money name="price" label="Harga jual" :value="$product->price" x-bind:required="!hasVariants" x-bind:disabled="hasVariants" x-on:input="basePrice = $event.target.value" />
                     <x-form.money name="compare_at_price" label="Harga coret" optional :value="$product->compare_at_price" x-bind:disabled="hasVariants"
                                   hint="Harga sebelum diskon, tampil dicoret."
                                   tooltip="Bila lebih tinggi dari harga jual, kartu produk menampilkan harga ini dicoret plus label diskon oranye, mis. -20%."
@@ -228,6 +234,18 @@
                                     </div>
                                 </div>
 
+                                <details class="group/tiers mt-3 rounded-xl border border-stone-200 bg-stone-50/60 px-3 py-2" :open="variant.tiers.length > 0">
+                                    <summary class="flex cursor-pointer list-none items-center justify-between gap-2 py-1 text-xs font-semibold text-stone-600">
+                                        <span class="flex items-center gap-1.5"><x-icon name="tag" class="size-3.5 text-accent-600" /> Harga grosir
+                                            <span class="font-normal text-stone-400" x-text="variant.tiers.length ? `(${variant.tiers.length} tingkat)` : '(belum ada)'"></span></span>
+                                        <x-icon name="chevron-down" class="size-4 transition group-open/tiers:rotate-180" />
+                                    </summary>
+                                    <div class="mt-2 pb-1">
+                                        <x-admin.wholesale-tiers list="variant.tiers" name="`variants[${index}][wholesale_tiers]`" base="variant.price" disabled="!hasVariants" />
+                                        <button type="button" x-show="variants.length > 1" @click="copyTiers(index)" class="mt-2 text-xs font-semibold text-brand-700 hover:underline">Salin ke semua varian</button>
+                                    </div>
+                                </details>
+
                                 <template x-for="message in rowErrors(index)" :key="message">
                                     <p class="mt-2 text-xs font-medium text-rose-600" x-text="message"></p>
                                 </template>
@@ -240,6 +258,33 @@
                     </div>
                     <p class="text-xs text-stone-400">Foto varian dipilih dari foto yang sudah tersimpan. Harga produk di katalog otomatis memakai varian aktif termurah.</p>
                 </div>
+            </div>
+
+            {{-- Grosir & minimal pembelian --}}
+            <div class="card space-y-5 p-6">
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h2 class="font-bold text-stone-900">Harga grosir & minimal pembelian</h2>
+                        <x-tooltip label="Harga grosir" text="Harga per pcs otomatis turun saat jumlah di keranjang mencapai tingkat tertentu. Jumlah dihitung gabungan semua varian produk ini (5 Hitam + 5 Putih = 10 pcs)."
+                                   :tips="['Buat 2–3 tingkat yang mudah diingat, mis. 10, 50, 100 pcs.', 'Harga tiap tingkat harus lebih murah dari tingkat sebelumnya.', 'Pembeli yang butuh lebih banyak bisa minta harga khusus lewat tombol WhatsApp di halaman produk.']" />
+                    </div>
+                    <p class="text-xs text-stone-500">Tampil sebagai tabel harga di halaman produk dan label “Grosir” di katalog.</p>
+                </div>
+
+                <div x-show="!hasVariants">
+                    <x-admin.wholesale-tiers list="tiers" name="'wholesale_tiers'" base="basePrice" disabled="hasVariants" />
+                </div>
+                <p x-show="hasVariants" x-cloak class="rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-600">
+                    Produk ini punya varian: atur harga grosir di tiap kartu varian di atas (bagian “Harga grosir”), lalu pakai “Salin ke semua varian” bila sama.
+                </p>
+                @foreach ($errors->get('wholesale_tiers*') as $messages)
+                    <p class="text-xs font-medium text-rose-600">{{ $messages[0] }}</p>
+                @endforeach
+
+                <x-form.number name="min_order_qty" label="Minimal pembelian" :value="$product->min_order_qty ?? 1" min="1" max="999" suffix="pcs" wrapper-class="sm:max-w-xs"
+                               hint="1 = bisa beli satuan."
+                               tooltip="Jumlah paling sedikit per pesanan untuk produk ini (gabungan semua varian). Keranjang menolak checkout bila kurang."
+                               :tooltip-tips="['Biarkan 1 bila produk juga dijual eceran.', 'Untuk produk khusus grosir, samakan dengan tingkat grosir pertama.']" />
             </div>
 
             <x-admin.seo-fields :model="$product"

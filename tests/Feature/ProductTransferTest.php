@@ -242,6 +242,31 @@ class ProductTransferTest extends TestCase
         $this->assertStringContainsString('Impor produk', $movement->note);
     }
 
+    public function test_import_sets_wholesale_tiers_and_minimum(): void
+    {
+        $product = Product::factory()->create(['slug' => 'tripod-1-sisi', 'price' => 70000, 'stock' => 10]);
+        $header = [...self::HEADER, 'harga_grosir', 'minimal_beli'];
+
+        $import = $this->upload([
+            $header,
+            [...$this->row(['slug' => 'tripod-1-sisi']), '10=65.000; 50=60000', '2'],
+            [...$this->row(['nama_produk' => 'Frame Salah', 'harga' => '50000']), '10=55000', ''],
+        ]);
+        $this->assertSame(1, $import->summary['update']);
+        $this->assertStringContainsString('harga harus lebih murah dari harga normal', json_encode($import->errors));
+
+        $this->commit($import);
+        $product->refresh();
+        $this->assertSame([['min_qty' => 10, 'price' => 65000], ['min_qty' => 50, 'price' => 60000]], $product->wholesale_tiers);
+        $this->assertSame(10, $product->wholesale_min_qty);
+        $this->assertSame(2, $product->min_order_qty);
+
+        // 0 = hapus grosir.
+        $this->commit($this->upload([$header, [...$this->row(['slug' => 'tripod-1-sisi']), '0', '']]));
+        $this->assertNull($product->refresh()->wholesale_min_qty);
+        $this->assertSame(2, $product->min_order_qty, 'Kolom kosong tidak mengubah minimal beli.');
+    }
+
     public function test_variant_rows_update_existing_variants_and_add_new_ones(): void
     {
         $product = Product::factory()->create(['slug' => 'casing-a']);

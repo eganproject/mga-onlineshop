@@ -38,6 +38,7 @@ class ReportController extends Controller
             'series' => $tab === 'penjualan' ? $this->reports->timeseries($period) : collect(),
             'statuses' => $tab === 'penjualan' ? $this->reports->statusBreakdown($period) : collect(),
             'vouchers' => $tab === 'penjualan' ? $this->reports->byVoucher($period) : collect(),
+            'wholesale' => $tab === 'penjualan' ? $this->reports->wholesaleBreakdown($period) : null,
             'products' => $tab === 'produk' ? $this->reports->byProduct($period) : collect(),
             'categories' => $tab === 'kategori' ? $this->reports->byCategory($period) : collect(),
             'methods' => $tab === 'keuangan' ? $this->reports->byPaymentMethod($period) : collect(),

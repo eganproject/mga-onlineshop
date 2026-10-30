@@ -4,6 +4,7 @@ namespace App\Services\Cart;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\Catalog\Wholesale;
 
 final readonly class CartLine
 {
@@ -11,6 +12,8 @@ final readonly class CartLine
         public Product $product,
         public int $quantity,
         public ?ProductVariant $variant = null,
+        // Jumlah gabungan semua baris produk yang sama (dasar tingkat harga grosir).
+        public ?int $productQuantity = null,
     ) {}
 
     /** Kunci baris di session: "12" untuk produk biasa, "12-5" untuk varian. */
@@ -30,9 +33,52 @@ final readonly class CartLine
         return $this->availableStock() <= config('shop.low_stock_threshold');
     }
 
+    /** Harga per pcs yang dibayar (harga grosir bila jumlah gabungan mencapai tingkatnya). */
     public function unitPrice(): int
     {
-        return $this->variant?->price ?? $this->product->price;
+        return $this->wholesaleTier()['price'] ?? $this->regularPrice();
+    }
+
+    /** Harga normal per pcs (tanpa grosir). */
+    public function regularPrice(): int
+    {
+        return Wholesale::regularPrice($this->product, $this->variant);
+    }
+
+    public function productQuantity(): int
+    {
+        return $this->productQuantity ?? $this->quantity;
+    }
+
+    /** @return list<array{min_qty: int, price: int}> */
+    public function wholesaleTiers(): array
+    {
+        return Wholesale::tiers($this->product, $this->variant);
+    }
+
+    /** @return array{min_qty: int, price: int}|null */
+    public function wholesaleTier(): ?array
+    {
+        return Wholesale::tierFor($this->wholesaleTiers(), $this->productQuantity());
+    }
+
+    public function isWholesale(): bool
+    {
+        return $this->wholesaleTier() !== null;
+    }
+
+    /** Tingkat grosir berikutnya + kekurangan pcs-nya, untuk ajakan di keranjang. */
+    public function nextWholesaleTier(): ?array
+    {
+        $next = Wholesale::nextTier($this->wholesaleTiers(), $this->productQuantity());
+
+        return $next ? [...$next, 'need' => $next['min_qty'] - $this->productQuantity()] : null;
+    }
+
+    /** Hemat karena harga grosir untuk baris ini. */
+    public function wholesaleSavings(): int
+    {
+        return ($this->regularPrice() - $this->unitPrice()) * $this->quantity;
     }
 
     public function compareAtPrice(): ?int

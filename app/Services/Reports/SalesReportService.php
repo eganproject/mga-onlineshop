@@ -295,6 +295,34 @@ class SalesReportService
             ]);
     }
 
+    /**
+     * Penjualan grosir vs eceran (per baris pesanan: grosir = memakai harga grosir).
+     *
+     * @return array{wholesale: array{quantity:int, revenue:int, orders:int, savings:int}, retail: array{quantity:int, revenue:int, orders:int, savings:int}}
+     */
+    public function wholesaleBreakdown(ReportPeriod $period): array
+    {
+        $rows = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereIn('orders.status', self::revenueStatuses())
+            ->whereBetween('orders.paid_at', [$period->start(), $period->end()])
+            ->selectRaw('CASE WHEN order_items.regular_price IS NOT NULL AND order_items.regular_price > order_items.price THEN 1 ELSE 0 END as is_wholesale')
+            ->selectRaw('SUM(order_items.quantity) as quantity, SUM(order_items.subtotal) as revenue, COUNT(DISTINCT order_items.order_id) as orders')
+            ->selectRaw('COALESCE(SUM(CASE WHEN order_items.regular_price > order_items.price THEN (order_items.regular_price - order_items.price) * order_items.quantity ELSE 0 END), 0) as savings')
+            ->groupBy('is_wholesale')
+            ->get()
+            ->keyBy('is_wholesale');
+
+        $pick = fn ($row) => [
+            'quantity' => (int) ($row->quantity ?? 0),
+            'revenue' => (int) ($row->revenue ?? 0),
+            'orders' => (int) ($row->orders ?? 0),
+            'savings' => (int) ($row->savings ?? 0),
+        ];
+
+        return ['wholesale' => $pick($rows->get(1)), 'retail' => $pick($rows->get(0))];
+    }
+
     /** Pesanan terjual dalam periode, untuk ekspor detail. */
     public function orders(ReportPeriod $period): Builder
     {
