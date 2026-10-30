@@ -27,7 +27,25 @@ class Seo
             ARRAY_FILTER_USE_BOTH,
         );
 
-        return $request->url().($query ? '?'.http_build_query($query) : '');
+        return self::onCanonicalHost($request->url().($query ? '?'.http_build_query($query) : ''));
+    }
+
+    /**
+     * Ganti domain URL dengan domain utama (APP_URL), supaya situs yang bisa dibuka dari
+     * beberapa domain (mis. mga-advertising.co.id & prod.mga-advertising.co.id) tetap
+     * menunjuk satu alamat resmi di Google.
+     */
+    public static function onCanonicalHost(string $url): string
+    {
+        $root = parse_url((string) config('app.url'));
+
+        if (empty($root['host']) || ! preg_match('#^https?://[^/]+#i', $url)) {
+            return $url;
+        }
+
+        $origin = ($root['scheme'] ?? 'https').'://'.$root['host'].(isset($root['port']) ? ':'.$root['port'] : '');
+
+        return preg_replace('#^https?://[^/]+#i', $origin, $url);
     }
 
     public static function shouldIndex(Request $request): bool

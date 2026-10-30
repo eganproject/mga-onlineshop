@@ -165,4 +165,18 @@ class SeoTest extends TestCase
         $this->actingAs(User::factory()->staff(StaffRole::Warehouse)->create())
             ->get(route('admin.seo.edit'))->assertForbidden();
     }
+
+    public function test_canonical_and_favicon_use_main_domain(): void
+    {
+        config(['app.url' => 'https://prod.mga-advertising.co.id']);
+        $category = Category::factory()->create(['slug' => 'tripod']);
+
+        $this->get('http://mga-advertising.co.id/produk?kategori=tripod&urut=termurah')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="https://prod.mga-advertising.co.id/produk?kategori=tripod">', false)
+            ->assertSee('type="image/png" sizes="192x192"', false);
+
+        $this->get('http://mga-advertising.co.id/')
+            ->assertSee('<link rel="canonical" href="https://prod.mga-advertising.co.id">', false);
+    }
 }
