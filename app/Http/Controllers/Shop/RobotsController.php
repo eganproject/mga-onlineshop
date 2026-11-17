@@ -8,7 +8,7 @@ use Illuminate\Http\Response;
 class RobotsController extends Controller
 {
     /** Halaman privat yang tidak perlu dirayapi mesin pencari. */
-    private const PRIVATE_PATHS = ['/admin', '/akun', '/keranjang', '/checkout', '/email', '/wishlist', '/masuk', '/daftar', '/lupa-password', '/reset-password'];
+    private const PRIVATE_PATHS = ['/admin', '/akun', '/keranjang', '/checkout', '/email', '/wishlist', '/masuk', '/daftar', '/lupa-password', '/reset-password', '/tagihan'];
 
     public function __invoke(): Response
     {

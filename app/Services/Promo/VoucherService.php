@@ -42,8 +42,12 @@ class VoucherService
         return $voucher;
     }
 
-    /** @throws VoucherException bila voucher tidak bisa dipakai pelanggan ini. */
-    public function check(Voucher $voucher, User $user, int $subtotal): void
+    /**
+     * @param  ?User  $user  null = penjualan manual tanpa akun (batas per pelanggan tidak dicek)
+     *
+     * @throws VoucherException bila voucher tidak bisa dipakai pelanggan ini.
+     */
+    public function check(Voucher $voucher, ?User $user, int $subtotal): void
     {
         if (! $voucher->is_active) {
             throw new VoucherException('Voucher ini sedang tidak aktif.');
@@ -73,7 +77,7 @@ class VoucherService
             throw new VoucherException('Kuota voucher sudah habis.');
         }
 
-        if ($voucher->per_user_limit !== null
+        if ($user && $voucher->per_user_limit !== null
             && $voucher->redemptions()->where('user_id', $user->id)->count() >= $voucher->per_user_limit) {
             throw new VoucherException($voucher->per_user_limit === 1
                 ? 'Kamu sudah pernah memakai voucher ini.'

@@ -1,5 +1,9 @@
 <x-layouts.admin title="Pesanan">
-    <x-admin.page-header title="Pesanan" description="Pantau dan proses pesanan pelanggan." />
+    <x-admin.page-header title="Pesanan" description="Pantau dan proses pesanan pelanggan.">
+        @can('orders.create')
+            <a href="{{ route('admin.orders.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Penjualan manual</a>
+        @endcan
+    </x-admin.page-header>
 
     {{-- Tab status --}}
     <div class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:overflow-visible">
@@ -28,6 +32,11 @@
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex">
                 <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()"
                                    placeholder="Semua tanggal" wrapper-class="col-span-2 lg:w-64" aria-label="Rentang tanggal" />
+                <select name="source" class="input lg:w-40" aria-label="Sumber pesanan">
+                    <option value="">Semua sumber</option>
+                    <option value="website" @selected(request('source') === 'website')>Website</option>
+                    <option value="manual" @selected(request('source') === 'manual')>Manual</option>
+                </select>
                 <select name="courier" class="input lg:w-44" x-data x-searchable aria-label="Kurir">
                     <option value="">Semua kurir</option>
                     @foreach ($couriers as $courier)
@@ -36,7 +45,7 @@
                 </select>
                 <div class="flex gap-2">
                     <button class="btn btn-dark flex-1"><x-icon name="filter" class="size-4" /> Saring</button>
-                    @if (request()->hasAny(['q', 'from', 'to', 'courier']))
+                    @if (request()->hasAny(['q', 'from', 'to', 'courier', 'source']))
                         <a href="{{ route('admin.orders.index', array_filter(['status' => $status?->value])) }}" class="btn btn-ghost" title="Hapus filter"><x-icon name="x" class="size-4" /></a>
                     @endif
                 </div>
@@ -69,12 +78,12 @@
                                 <td><input type="checkbox" name="orders[]" value="{{ $order->id }}" x-model="selected" class="checkbox" aria-label="Pilih {{ $order->code }}"></td>
                                 <td class="whitespace-nowrap">
                                     <a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a>
-                                    <p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
-                                    <p class="mt-1 text-xs text-stone-600 md:hidden">{{ $order->user->name }}</p>
+                                    <p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y, H:i') }}@if ($order->isManual()) <span class="badge bg-violet-50 text-violet-700 ring-violet-600/20">Manual</span>@endif</p>
+                                    <p class="mt-1 text-xs text-stone-600 md:hidden">{{ $order->customerName() }}</p>
                                     <p class="mt-0.5 text-sm font-semibold text-stone-900 sm:hidden">@rupiah($order->total)</p>
                                     <div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div>
                                 </td>
-                                <td class="hidden md:table-cell"><p class="font-medium text-stone-800">{{ $order->user->name }}</p><p class="text-xs text-stone-500">{{ $order->user->email }}</p></td>
+                                <td class="hidden md:table-cell"><p class="line-clamp-2 font-medium text-stone-800">{{ $order->customerName() }}</p><p class="text-xs text-stone-500">{{ $order->customerEmail() ?? $order->recipient_phone }}</p></td>
                                 <td class="hidden xl:table-cell">{{ $order->items_count }}</td>
                                 <td class="hidden whitespace-nowrap font-semibold sm:table-cell">@rupiah($order->total)</td>
                                 <td class="hidden whitespace-nowrap text-xs lg:table-cell">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>

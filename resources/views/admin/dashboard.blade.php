@@ -181,8 +181,8 @@
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($recentOrders as $order)
                             <tr class="hover:bg-stone-50/50">
-                                <td class="whitespace-nowrap"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}<span class="sm:hidden"> · {{ $order->user->name }}</span></p><div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div></td>
-                                <td class="hidden sm:table-cell">{{ $order->user->name }}</td>
+                                <td class="whitespace-nowrap"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}<span class="sm:hidden"> · {{ $order->customerName() }}</span></p><div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div></td>
+                                <td class="hidden sm:table-cell">{{ $order->customerName() }}</td>
                                 <td class="font-semibold whitespace-nowrap tabular-nums">@rupiah($order->total)</td>
                                 <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>
                                 <td class="hidden text-right sm:table-cell"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a></td>

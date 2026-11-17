@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Billing\FeeCalculator;
 use App\Services\Billing\InvoiceRenderer;
 use App\Services\Orders\OrderService;
+use App\Services\Payment\PaymentService;
 use App\Services\Shipping\TrackingService;
 use App\Support\AdminList;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,11 +50,25 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders', 'status', 'counts', 'couriers'));
     }
 
-    public function show(Order $order, TrackingService $tracking): View
+    public function show(Request $request, Order $order, TrackingService $tracking, PaymentService $payments, FeeCalculator $fees): View
     {
+        $billing = null;
+
+        // Tagihan QRIS/VA dari admin (penjualan manual atau membantu pembeli).
+        if ($request->user()->can('orders.create') && $order->status === OrderStatus::PendingPayment) {
+            $billing = [
+                'payment' => $payments->activePayment($order),
+                'canCreate' => $payments->canCreatePayment($order),
+                'options' => collect(OrderPaymentController::methods())
+                    ->map(fn ($method) => ['method' => $method, 'fee' => $fees->buyerFee($method, $order->total)])
+                    ->groupBy(fn ($option) => $option['method']->group()),
+            ];
+        }
+
         return view('admin.orders.show', [
-            'order' => $order->load('items.product', 'user', 'payments', 'statusHistories.user'),
+            'order' => $order->load('items.product', 'user', 'creator', 'payments', 'statusHistories.user'),
             'canTrack' => $tracking->canTrack($order),
+            'billing' => $billing,
         ]);
     }
 
@@ -171,6 +187,7 @@ class OrderController extends Controller
                     ->orWhere('tracking_number', 'like', "%{$term}%")
                     ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$term}%")));
             })
+            ->when(in_array($request->query('source'), [Order::SOURCE_WEBSITE, Order::SOURCE_MANUAL], true), fn ($q) => $q->where('source', $request->query('source')))
             ->when($request->filled('courier'), fn ($q) => $q->where('courier', $request->string('courier')->value()))
             ->when($from, fn ($q) => $q->where('created_at', '>=', $from->startOfDay()))
             ->when($to, fn ($q) => $q->where('created_at', '<=', $to->endOfDay()));

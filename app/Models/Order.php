@@ -16,10 +16,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'code', 'user_id', 'status', 'subtotal', 'shipping_cost', 'discount', 'shipping_discount', 'total', 'total_weight',
+    'code', 'user_id', 'status', 'source', 'subtotal', 'shipping_cost', 'discount', 'shipping_discount', 'manual_discount', 'total', 'total_weight',
     'voucher_id', 'voucher_code',
     'service_fee', 'tax_label', 'tax_rate', 'tax_inclusive', 'tax_dpp_other', 'tax_base', 'tax_amount', 'rounding',
     'payment_method', 'payment_fee', 'gateway_fee',
@@ -34,7 +35,7 @@ class Order extends Model
     use HasFactory;
 
     /** Sama dengan default kolom, supaya status langsung terisi saat dibuat. */
-    protected $attributes = ['status' => 'pending_payment'];
+    protected $attributes = ['status' => 'pending_payment', 'source' => 'website'];
 
     /** Catatan untuk riwayat status berikutnya (tidak disimpan di tabel orders). */
     public ?string $statusNote = null;
@@ -116,6 +117,7 @@ class Order extends Model
             'shipping_cost' => 'integer',
             'discount' => 'integer',
             'shipping_discount' => 'integer',
+            'manual_discount' => 'integer',
             'total' => 'integer',
             'total_weight' => 'integer',
             'service_fee' => 'integer',
@@ -154,6 +156,54 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Staf yang membuat penjualan manual. */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public const SOURCE_WEBSITE = 'website';
+
+    public const SOURCE_MANUAL = 'manual';
+
+    public function isManual(): bool
+    {
+        return $this->source === self::SOURCE_MANUAL;
+    }
+
+    public function sourceLabel(): string
+    {
+        return $this->isManual() ? 'Manual' : 'Website';
+    }
+
+    /** Nama pembeli: akun pelanggan bila ada, selain itu penerima (penjualan manual tanpa akun). */
+    public function customerName(): string
+    {
+        return $this->user?->name ?? $this->recipient_name;
+    }
+
+    public function customerEmail(): ?string
+    {
+        return $this->user?->email ?? $this->billing_email;
+    }
+
+    /**
+     * Link tagihan untuk dibagikan ke pembeli (tanpa login). Ditandatangani,
+     * berlaku sampai 30 hari setelah batas bayar supaya bukti lunas tetap bisa dibuka.
+     */
+    public function billUrl(): string
+    {
+        return URL::signedRoute('bill.show', $this, $this->paymentDeadline()->copy()->addDays(30));
+    }
+
+    /** Ke mana pembeli diarahkan setelah membayar di halaman Midtrans. */
+    public function paymentFinishUrl(): string
+    {
+        return $this->user_id
+            ? route('account.orders.payment.finish', $this)
+            : $this->billUrl();
     }
 
     public function voucher(): BelongsTo

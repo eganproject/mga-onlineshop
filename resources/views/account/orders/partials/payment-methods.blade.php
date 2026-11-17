@@ -1,9 +1,9 @@
 {{--
     Pilihan metode bayar langsung di halaman. Dipakai saat belum ada tagihan,
     atau saat pembeli mengganti metode (tagihan lama dibatalkan setelah konfirmasi).
-    Variabel: $order, $methodOptions, $replacing (bool).
+    Variabel: $order, $methodOptions, $replacing (bool), opsional $methodAction (URL kirim).
 --}}
-<form method="POST" action="{{ route('account.orders.payment.method', $order) }}"
+<form method="POST" action="{{ $methodAction ?? route('account.orders.payment.method', $order) }}"
       @if ($replacing)
           data-confirm-title="Ganti metode pembayaran?" data-confirm-ok="Ya, ganti"
           data-confirm="Nomor VA / kode bayar yang sekarang tidak berlaku lagi setelah kamu memilih metode baru."

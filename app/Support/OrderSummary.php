@@ -41,6 +41,10 @@ class OrderSummary
             $rows[] = ['label' => 'Potongan ongkir', 'amount' => -$order->shipping_discount, 'tone' => 'discount', 'note' => $order->discount ? null : $order->voucher_code];
         }
 
+        if ($order->manual_discount > 0) {
+            $rows[] = ['label' => 'Diskon khusus', 'amount' => -$order->manual_discount, 'tone' => 'discount'];
+        }
+
         if ($order->service_fee > 0) {
             $rows[] = ['label' => config('shop.billing.service_fee_label') ?: 'Biaya layanan', 'amount' => (int) $order->service_fee, 'tone' => 'normal'];
         }

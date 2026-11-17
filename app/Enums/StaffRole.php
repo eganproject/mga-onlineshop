@@ -26,7 +26,7 @@ enum StaffRole: string
             self::Owner => 'Akses penuh, termasuk akun staf dan kunci API integrasi (Midtrans, RajaOngkir, Firebase).',
             self::Admin => 'Semua menu toko kecuali akun staf dan integrasi.',
             self::Warehouse => 'Memproses & mengirim pesanan, input resi, dan mengelola stok.',
-            self::CustomerService => 'Melihat pesanan & pelanggan, serta memoderasi ulasan.',
+            self::CustomerService => 'Melihat pesanan & pelanggan, membuat penjualan manual beserta tagihannya, serta memoderasi ulasan.',
         };
     }
 
@@ -37,7 +37,7 @@ enum StaffRole: string
             self::Owner => Permission::cases(),
             self::Admin => array_values(array_filter(Permission::cases(), fn (Permission $p) => ! in_array($p, [Permission::StaffManage, Permission::IntegrationsManage], true))),
             self::Warehouse => [Permission::OrdersView, Permission::OrdersManage, Permission::StockManage],
-            self::CustomerService => [Permission::OrdersView, Permission::CustomersView, Permission::ReviewsManage],
+            self::CustomerService => [Permission::OrdersView, Permission::OrdersCreate, Permission::CustomersView, Permission::ReviewsManage],
         };
     }
 

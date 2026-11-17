@@ -48,11 +48,11 @@ class MidtransPaymentGateway implements PaymentGateway
         $externalId = $order->code.($attempt > 1 ? '-'.$attempt : '');
 
         $items = self::itemDetails($order, $charge);
-        $customer = [
+        $customer = array_filter([
             'first_name' => mb_substr($order->recipient_name, 0, 255),
-            'email' => $order->user->email,
+            'email' => $order->customerEmail(),
             'phone' => $order->recipient_phone,
-        ];
+        ]);
 
         // Tanpa waktu mulai, Midtrans menghitung kedaluwarsa sejak pelanggan memilih
         // metode bayar, sehingga bisa melewati batas bayar pesanan.
@@ -98,7 +98,7 @@ class MidtransPaymentGateway implements PaymentGateway
                     'duration' => $minutes,
                 ],
                 'callbacks' => [
-                    'finish' => route('account.orders.payment.finish', $order),
+                    'finish' => $order->paymentFinishUrl(),
                 ],
             ])
             ->throw();
@@ -124,7 +124,7 @@ class MidtransPaymentGateway implements PaymentGateway
     private function chargeCore(Order $order, PaymentCharge $charge, string $externalId, array $items, array $customer, CarbonInterface $start, int $minutes): array
     {
         $method = $charge->method;
-        $finish = route('account.orders.payment.finish', $order);
+        $finish = $order->paymentFinishUrl();
 
         $body = [
             'transaction_details' => [
@@ -207,6 +207,7 @@ class MidtransPaymentGateway implements PaymentGateway
         $extra = [
             'SHIPPING' => [$order->shipping_cost, 'Ongkir '.$order->courierLabel()],
             'VOUCHER' => [-$order->discountTotal(), 'Voucher '.$order->voucher_code],
+            'DISCOUNT' => [-(int) $order->manual_discount, 'Diskon khusus'],
             'SERVICE' => [(int) $order->service_fee, config('shop.billing.service_fee_label') ?: 'Biaya layanan'],
             'TAX' => [$order->tax_inclusive ? 0 : (int) $order->tax_amount, $order->taxLabel()],
             'ROUNDING' => [(int) $order->rounding, 'Pembulatan'],
