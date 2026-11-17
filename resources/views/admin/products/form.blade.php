@@ -39,7 +39,7 @@
     <x-admin.page-header :title="$editing ? 'Edit produk' : 'Tambah produk'" :back="route('admin.products.index')">
         @if ($editing)
             <a href="{{ route('products.show', $product) }}" target="_blank" class="btn btn-secondary"><x-icon name="eye" class="size-4" /> Lihat di toko</a>
-            <a href="{{ route('admin.stock.history', ['produk' => $product->id]) }}" class="btn btn-secondary"><x-icon name="clock" class="size-4" /> Riwayat stok</a>
+            @can('stock.manage')<a href="{{ route('admin.stock.history', ['produk' => $product->id]) }}" class="btn btn-secondary"><x-icon name="clock" class="size-4" /> Riwayat stok</a>@endcan
         @endif
     </x-admin.page-header>
 

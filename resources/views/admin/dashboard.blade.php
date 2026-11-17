@@ -49,6 +49,7 @@
         @endcan
 
         {{-- Pesanan berjalan --}}
+        @can('orders.view')
         <div class="card min-w-0 p-5">
             <div class="flex items-center justify-between">
                 <h2 class="font-bold text-stone-900">Pesanan berjalan</h2>
@@ -80,6 +81,7 @@
                 </div>
             </div>
         </div>
+        @endcan
     @can('reports.view')
     </div>
 
@@ -167,6 +169,7 @@
     </div>
 
     {{-- Pesanan terbaru --}}
+    @can('orders.view')
     <div class="card mt-6 overflow-hidden">
         <div class="flex items-center justify-between p-5">
             <h2 class="font-bold text-stone-900">Pesanan terbaru</h2>
@@ -193,4 +196,13 @@
             </div>
         @endif
     </div>
+    @endcan
+
+    {{-- Jabatan tanpa pesanan, laporan & stok (mis. Marketing): arahkan ke menu samping. --}}
+    @unless (auth()->user()->canAny(['orders.view', 'reports.view', 'stock.manage']))
+        <div class="card mt-6 flex items-start gap-3 p-5 text-sm text-stone-600">
+            <x-icon name="info" class="mt-0.5 size-5 shrink-0 text-brand-600" />
+            <p>Pilih menu di samping untuk mulai bekerja. Menu yang tampil sesuai hak akses jabatan Anda ({{ auth()->user()->staffRole()?->label() }}).</p>
+        </div>
+    @endunless
 </x-layouts.admin>

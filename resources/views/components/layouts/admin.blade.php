@@ -36,6 +36,7 @@
             ['Pajak & Biaya', 'admin.billing.edit', 'percent', 'admin.billing.*', null],
             ['Integrasi', 'admin.integrations.index', 'cog', 'admin.integrations.*', null],
             ['Staf', 'admin.staff.index', 'shield', 'admin.staff.*', null],
+            ['Jabatan & Akses', 'admin.roles.index', 'lock', 'admin.roles.*', null],
             ['Log Aktivitas', 'admin.activity.index', 'clock', 'admin.activity.*', null],
         ],
     ];

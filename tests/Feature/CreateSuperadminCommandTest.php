@@ -24,7 +24,7 @@ class CreateSuperadminCommandTest extends TestCase
 
         $user = User::where('email', 'owner@toko.com')->firstOrFail();
         $this->assertSame(UserRole::Admin, $user->role);
-        $this->assertSame(StaffRole::Owner, $user->staff_role);
+        $this->assertSame(StaffRole::Owner->value, $user->staff_role);
         $this->assertTrue($user->is_active);
         $this->assertNotNull($user->email_verified_at);
         $this->assertTrue(Hash::check('rahasiaKuat2026', $user->password));
@@ -73,7 +73,7 @@ class CreateSuperadminCommandTest extends TestCase
             ->expectsQuestion('Ulangi password', 'rahasiaKuat2026')
             ->assertSuccessful();
 
-        $this->assertSame(StaffRole::Owner, $user->fresh()->staff_role);
+        $this->assertSame(StaffRole::Owner->value, $user->fresh()->staff_role);
     }
 
     public function test_demo_seeder_is_skipped_in_production(): void

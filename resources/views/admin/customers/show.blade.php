@@ -57,7 +57,7 @@
                                     <td><p class="font-semibold text-stone-900">{{ $order->code }}</p><p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y') }}</p></td>
                                     <td class="font-semibold">@rupiah($order->total)</td>
                                     <td><x-order-status :status="$order->status" /></td>
-                                    <td class="text-right"><a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a></td>
+                                    <td class="text-right">@can('orders.view')<a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a>@endcan</td>
                                 </tr>
                             @endforeach
                         </tbody>

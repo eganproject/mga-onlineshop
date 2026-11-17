@@ -31,6 +31,7 @@ class ActivityLogController extends Controller
         'settings' => 'Pengaturan',
         'integrations' => 'Integrasi',
         'staff' => 'Staf',
+        'roles' => 'Jabatan & hak akses',
         'profile' => 'Profil',
     ];
 

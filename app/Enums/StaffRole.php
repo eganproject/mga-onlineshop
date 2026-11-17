@@ -2,7 +2,11 @@
 
 namespace App\Enums;
 
-/** Jabatan akun staf (users.role = admin). Menentukan menu & aksi yang boleh diakses. */
+/**
+ * Jabatan bawaan (isi awal tabel staff_roles). Hak akses yang berlaku dibaca
+ * dari database (App\Models\Role) dan bisa diubah di Admin › Jabatan & Hak Akses;
+ * enum ini dipakai seeder, factory & tes sebagai nama key jabatan bawaan.
+ */
 enum StaffRole: string
 {
     case Owner = 'owner';

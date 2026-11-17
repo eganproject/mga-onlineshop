@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Enums\Permission;
-use App\Enums\StaffRole;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -20,7 +20,7 @@ use App\Notifications\VerifyEmailNotification;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'phone', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'staffRoleRecord'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -37,7 +37,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
-            'staff_role' => StaffRole::class,
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
         ];
@@ -49,22 +48,46 @@ class User extends Authenticatable implements MustVerifyEmail
         $query->where('role', UserRole::Admin);
     }
 
+    /** Isi users.staff_role: key jabatan (string). Menerima juga enum StaffRole / model Role. */
+    public function setStaffRoleAttribute(mixed $value): void
+    {
+        $this->attributes['staff_role'] = match (true) {
+            $value instanceof \BackedEnum => $value->value,
+            $value instanceof Role => $value->key,
+            blank($value) => null,
+            default => (string) $value,
+        };
+    }
+
+    public function staffRoleRecord(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'staff_role', 'key');
+    }
+
     /**
-     * Jabatan staf. Admin lama/tanpa jabatan dianggap Owner (hanya bisa dibuat
-     * lewat seeder/tinker; form staf selalu mengisi jabatan).
+     * Jabatan staf (Admin › Jabatan & Hak Akses). Admin lama/tanpa jabatan dianggap
+     * Superadmin (hanya bisa dibuat lewat seeder/tinker; form staf selalu mengisi jabatan).
      */
-    public function staffRole(): ?StaffRole
+    public function staffRole(): ?Role
     {
         if (! $this->isAdmin()) {
             return null;
         }
 
-        return $this->staff_role ?? StaffRole::Owner;
+        $key = $this->staff_role ?: Role::OWNER;
+        $role = $this->relationLoaded('staffRoleRecord') ? $this->getRelation('staffRoleRecord') : null;
+
+        if (! $role || $role->key !== $key) {
+            $role = Role::findByKey($key) ?? ($key === Role::OWNER ? Role::ownerFallback() : null);
+            $this->setRelation('staffRoleRecord', $role);
+        }
+
+        return $role;
     }
 
     public function isOwner(): bool
     {
-        return $this->staffRole() === StaffRole::Owner;
+        return (bool) $this->staffRole()?->isOwner();
     }
 
     public function hasPermission(Permission|string $permission): bool
