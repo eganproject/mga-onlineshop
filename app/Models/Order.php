@@ -130,6 +130,8 @@ class Order extends Model
             'payment_fee' => 'integer',
             'gateway_fee' => 'integer',
             'invoice_issued_at' => 'datetime',
+            'warehouse_outbound_sent_at' => 'datetime',
+            'warehouse_outbound_approved_at' => 'datetime',
             'payment_due_at' => 'datetime',
             'paid_at' => 'datetime',
             'shipped_at' => 'datetime',
@@ -176,6 +178,30 @@ class Order extends Model
     public function sourceLabel(): string
     {
         return $this->isManual() ? 'Manual' : 'Website';
+    }
+
+    // Status outbound manual di warehouse29 (kolom tidak mass-assignable, ubah lewat WarehouseOutbound).
+    public const OUTBOUND_QUEUED = 'queued';
+
+    public const OUTBOUND_PENDING = 'pending';
+
+    public const OUTBOUND_APPROVED = 'approved';
+
+    public const OUTBOUND_FAILED = 'failed';
+
+    public const OUTBOUND_DELETED = 'deleted';
+
+    /** @return array{0: string, 1: string} [label, warna badge] */
+    public function outboundStatusLabel(): array
+    {
+        return match ($this->warehouse_outbound_status) {
+            self::OUTBOUND_QUEUED => ['Antre dikirim', 'bg-stone-100 text-stone-700 ring-stone-500/20'],
+            self::OUTBOUND_PENDING => ['Menunggu approve gudang', 'bg-amber-50 text-amber-700 ring-amber-600/20'],
+            self::OUTBOUND_APPROVED => ['Disetujui gudang', 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'],
+            self::OUTBOUND_FAILED => ['Gagal dikirim', 'bg-rose-50 text-rose-700 ring-rose-600/20'],
+            self::OUTBOUND_DELETED => ['Dihapus di gudang', 'bg-rose-50 text-rose-700 ring-rose-600/20'],
+            default => ['Belum dikirim', 'bg-stone-100 text-stone-600 ring-stone-500/20'],
+        };
     }
 
     /** Nama pembeli: akun pelanggan bila ada, selain itu penerima (penjualan manual tanpa akun). */

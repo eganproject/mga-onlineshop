@@ -115,6 +115,7 @@ class StoreSettings
         'services.firebase.project_id' => 'string',
         'services.firebase.app_id' => 'string',
         'services.warehouse.enabled' => 'bool',
+        'services.warehouse.outbound_enabled' => 'bool',
         'services.warehouse.base_url' => 'string',
         'services.warehouse.token' => 'secret',
         'services.warehouse.interval' => 'int',

@@ -47,6 +47,54 @@ class WarehouseClient
         return ['meta' => $body['meta'], 'data' => array_values($body['data'])];
     }
 
+    /**
+     * Buat outbound manual (docs Panduan Integrasi API Outbound Manual).
+     * Respons mentah dikembalikan supaya 409 DUPLICATE_REF_NO / 422 bisa dibaca.
+     *
+     * @throws WarehouseApiException koneksi gagal / belum diatur
+     */
+    public function createOutbound(array $payload): Response
+    {
+        return $this->send(fn (PendingRequest $http) => $http->asJson()->post('/outbound-manuals', $payload));
+    }
+
+    /** Detail outbound manual berdasarkan kode WMS atau ref_no. */
+    public function outbound(string $codeOrRef): Response
+    {
+        return $this->send(fn (PendingRequest $http) => $http->get('/outbound-manuals/'.rawurlencode($codeOrRef)));
+    }
+
+    /** Pesan error yang ramah dari respons gagal. */
+    public function describe(Response $response): string
+    {
+        return $this->errorMessage($response);
+    }
+
+    private function send(callable $call, bool $retry = true): Response
+    {
+        if (! $this->isConfigured()) {
+            throw new WarehouseApiException('URL atau token warehouse29 belum diisi (Admin › Integrasi).');
+        }
+
+        try {
+            $response = $call($this->request());
+        } catch (ConnectionException) {
+            throw new WarehouseApiException('Server toko tidak bisa terhubung ke '.$this->host().'. Cek URL dan koneksi server.');
+        }
+
+        if ($response->status() === 429 && $retry) {
+            $wait = (int) $response->header('Retry-After');
+
+            if ($wait > 0 && $wait <= self::MAX_RETRY_WAIT) {
+                sleep($wait);
+
+                return $this->send($call, false);
+            }
+        }
+
+        return $response;
+    }
+
     /** "https://gudang.example.com/" atau ".../api/v1" → "https://gudang.example.com/api/v1". */
     public function baseUrl(): ?string
     {

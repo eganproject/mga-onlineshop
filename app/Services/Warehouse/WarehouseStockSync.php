@@ -4,6 +4,7 @@ namespace App\Services\Warehouse;
 
 use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -182,7 +183,8 @@ class WarehouseStockSync
     }
 
     /**
-     * Jumlah per produk/varian di pesanan website yang belum dikirim.
+     * Jumlah per produk/varian di pesanan (website & manual) yang belum dikirim
+     * dan belum tercatat keluar di gudang.
      *
      * @return array<string, int> "p{product_id}" / "v{variant_id}" => qty
      */
@@ -191,6 +193,8 @@ class WarehouseStockSync
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('orders.status', array_map(fn (OrderStatus $s) => $s->value, OrderStatus::awaitingShipmentStatuses()))
+            // Outbound yang sudah disetujui gudang sudah memotong stok gudang; jangan dikurangi dua kali.
+            ->where(fn ($q) => $q->whereNull('orders.warehouse_outbound_status')->orWhere('orders.warehouse_outbound_status', '!=', Order::OUTBOUND_APPROVED))
             ->whereNotNull('order_items.product_id')
             ->groupBy('order_items.product_id', 'order_items.product_variant_id')
             ->get([
