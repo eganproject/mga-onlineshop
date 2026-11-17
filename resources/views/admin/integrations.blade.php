@@ -132,7 +132,7 @@
                                 'tooltipTips' => 'Bila token diganti di gudang, ganti juga di sini lalu tekan Tes koneksi.'])
                             <div class="rounded-xl bg-stone-50 p-3 text-sm text-stone-600">
                                 Stok toko = stok gudang dikurangi pesanan website yang belum dikirim. Hubungkan SKU gudang ke produk di
-                                <a href="{{ route('admin.stock.warehouse') }}" class="font-semibold text-brand-700 underline">Stok › Sinkron gudang</a>.
+                                @can('stock.manage')<a href="{{ route('admin.stock.warehouse') }}" class="font-semibold text-brand-700 underline">Stok › Sinkron gudang</a>@else<strong>Stok › Sinkron gudang</strong>@endcan.
                             </div>
                         @else
                             <x-form.switch card name="firebase[login_enabled]" label="Tampilkan tombol “Lanjutkan dengan Google”" :checked="$value('firebase', 'login_enabled')"

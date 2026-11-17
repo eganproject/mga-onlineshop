@@ -1,6 +1,6 @@
 @php
     $editing = $member->exists;
-    $currentRole = old('staff_role', $member->staffRole()?->value ?? \App\Enums\StaffRole::Warehouse->value);
+    $currentRole = old('staff_role', $member->staffRole()?->key ?? ($roles->firstWhere('key', 'warehouse') ?? $roles->last())?->key);
 @endphp
 <x-layouts.admin :title="$editing ? 'Ubah Staf' : 'Tambah Staf'">
     <x-admin.page-header :title="$editing ? 'Ubah akun staf' : 'Tambah akun staf'" :back="route('admin.staff.index')" />
@@ -30,15 +30,18 @@
                 <div class="grid gap-2">
                     @foreach ($roles as $role)
                         <label class="flex cursor-pointer gap-3 rounded-xl border border-stone-200 p-3 transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
-                            <input type="radio" name="staff_role" value="{{ $role->value }}" class="mt-0.5 text-brand-600 focus:ring-brand-500/30" @checked($currentRole === $role->value)>
+                            <input type="radio" name="staff_role" value="{{ $role->key }}" class="mt-0.5 text-brand-600 focus:ring-brand-500/30" @checked($currentRole === $role->key)>
                             <span>
                                 <span class="block text-sm font-semibold text-stone-800">{{ $role->label() }}</span>
-                                <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ $role->description() }}</span>
+                                <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ $role->description() ?: count($role->permissionList()).' hak akses' }}</span>
                             </span>
                         </label>
                     @endforeach
                 </div>
                 <x-input-error for="staff_role" />
+                @can('roles.manage')
+                    <a href="{{ route('admin.roles.index') }}" class="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">Atur hak akses jabatan <x-icon name="arrow-right" class="size-4" /></a>
+                @endcan
             </div>
             <x-admin.save-bar>
                 <button class="btn btn-primary w-full py-3">{{ $editing ? 'Simpan perubahan' : 'Buat akun staf' }}</button>

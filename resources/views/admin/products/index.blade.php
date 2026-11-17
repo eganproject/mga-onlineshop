@@ -1,6 +1,8 @@
 <x-layouts.admin title="Produk">
     <x-admin.page-header title="Produk" description="Kelola katalog, foto, varian, harga, dan stok produk.">
-        <a href="{{ route('admin.stock.index') }}" class="btn btn-secondary"><x-icon name="archive" class="size-4" /> Kelola stok</a>
+        @can('stock.manage')
+            <a href="{{ route('admin.stock.index') }}" class="btn btn-secondary"><x-icon name="archive" class="size-4" /> Kelola stok</a>
+        @endcan
         <a href="{{ route('admin.products.transfer') }}" class="btn btn-secondary"><x-icon name="download" class="size-4" /> Impor / ekspor</a>
         <a href="{{ route('admin.products.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4" /> Tambah produk</a>
     </x-admin.page-header>

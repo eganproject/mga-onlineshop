@@ -98,7 +98,7 @@ class StaffAccessTest extends TestCase
 
         $staff = User::where('email', 'rudi@mga.test')->firstOrFail();
         $this->assertSame(UserRole::Admin, $staff->role);
-        $this->assertSame(StaffRole::Warehouse, $staff->staff_role);
+        $this->assertSame(StaffRole::Warehouse->value, $staff->staff_role);
         $this->assertTrue($staff->is_active);
         $this->assertNotNull($staff->email_verified_at);
 
@@ -136,7 +136,7 @@ class StaffAccessTest extends TestCase
         ])->assertRedirect(route('admin.staff.index'));
 
         $staff->refresh();
-        $this->assertSame(StaffRole::Admin, $staff->staff_role);
+        $this->assertSame(StaffRole::Admin->value, $staff->staff_role);
         $this->assertTrue(password_verify('passwordbaru1', $staff->password));
         $log = $staff->morphMany(\App\Models\ActivityLog::class, 'subject')->where('action', 'staff.update')->firstOrFail();
         $this->assertSame(['dari' => 'Customer Service', 'menjadi' => 'Admin'], $log->properties['jabatan']);
@@ -151,7 +151,7 @@ class StaffAccessTest extends TestCase
         $this->actingAs($owner)->put(route('admin.staff.update', $owner), [
             'name' => $owner->name, 'email' => $owner->email, 'staff_role' => StaffRole::Admin->value,
         ])->assertSessionHasErrors('staff_role');
-        $this->assertSame(StaffRole::Owner, $owner->fresh()->staff_role);
+        $this->assertSame(StaffRole::Owner->value, $owner->fresh()->staff_role);
 
         $this->patch(route('admin.staff.toggle', $owner))->assertSessionHasErrors('staff');
         $this->assertTrue($owner->fresh()->is_active);

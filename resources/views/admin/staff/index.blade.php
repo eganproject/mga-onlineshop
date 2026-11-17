@@ -16,7 +16,7 @@
             <select name="jabatan" class="input sm:w-52" x-data x-searchable aria-label="Filter jabatan">
                 <option value="">Semua jabatan</option>
                 @foreach ($roles as $role)
-                    <option value="{{ $role->value }}" @selected(request('jabatan') === $role->value)>{{ $role->label() }}</option>
+                    <option value="{{ $role->key }}" @selected(request('jabatan') === $role->key)>{{ $role->label() }}</option>
                 @endforeach
             </select>
         </form>
@@ -40,7 +40,13 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge {{ $role->badgeClass() }}">{{ $role->label() }}</span></td>
+                                <td>
+                                    @if ($role)
+                                        <span class="badge {{ $role->badgeClass() }}">{{ $role->label() }}</span>
+                                    @else
+                                        <span class="badge bg-rose-50 text-rose-700 ring-rose-600/20" title="Jabatan sudah tidak ada; akun ini tidak punya akses">Tanpa jabatan</span>
+                                    @endif
+                                </td>
                                 <td class="whitespace-nowrap text-sm text-stone-600">{{ $member->last_login_at?->diffForHumans() ?? 'Belum pernah' }}</td>
                                 <td>
                                     @if ($member->is_active)
@@ -51,6 +57,9 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-end gap-2">
+                                        @if ($member->isOwner() && ! auth()->user()->isOwner())
+                                            <span class="text-xs text-stone-400">Hanya Superadmin</span>
+                                        @else
                                         <a href="{{ route('admin.staff.edit', $member) }}" class="btn btn-secondary btn-sm">Ubah</a>
                                         @unless ($member->is(auth()->user()))
                                             <form method="POST" action="{{ route('admin.staff.toggle', $member) }}"
@@ -65,6 +74,7 @@
                                                 </button>
                                             </form>
                                         @endunless
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -77,7 +87,12 @@
     </div>
 
     {{-- Ringkasan hak akses tiap jabatan --}}
-    <h2 class="mt-8 mb-3 font-bold text-stone-900">Hak akses per jabatan</h2>
+    <div class="mt-8 mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 class="font-bold text-stone-900">Hak akses per jabatan</h2>
+        @can('roles.manage')
+            <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary btn-sm"><x-icon name="lock" class="size-4" /> Atur jabatan & hak akses</a>
+        @endcan
+    </div>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ($roles as $role)
             <div class="card p-5">

@@ -3,6 +3,7 @@
 - Laravel 13, PHP 8.3+, MySQL (test pakai SQLite in-memory), Tailwind v4 + Alpine.js, Blade (tanpa Livewire/Inertia).
 - Bahasa UI: Indonesia. Locale `id`, timezone `Asia/Jakarta`.
 - Peran user: `App\Enums\UserRole` (admin/customer). Route dilindungi middleware `role:admin` / `role:customer`.
+- Jabatan staf = tabel `staff_roles` (`App\Models\Role`, `users.staff_role` berisi `key`), diatur di Admin › Jabatan & Akses (`Admin\RoleController`, Gate `roles.manage` = khusus Superadmin). Izin = `App\Enums\Permission` (nama Gate, `requires()` otomatis ikut). Superadmin (`owner`) selalu semua izin & tak bisa dihapus; non-Superadmin dengan `staff.manage` tidak bisa menyentuh akun/jabatan Superadmin. Enum `StaffRole` = key jabatan bawaan (seeder/tes). Karena kombinasi izin bebas, link ke menu lain wajib dibungkus `@can` (termasuk dashboard).
 - Kolom `role` dan `is_active` sengaja tidak mass-assignable; ubah dengan `forceFill`.
 - Pembayaran & ongkir lewat interface `App\Contracts\PaymentGateway` dan `App\Contracts\ShippingProvider`; driver dipilih di `AppServiceProvider` dari `config/shop.php`.
 - Perubahan status pesanan lewat `App\Services\Orders\OrderService` (aturan transisi ada di `OrderStatus::nextStatuses()`).

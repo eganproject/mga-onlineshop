@@ -122,7 +122,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// Akses per menu memakai Gate dari App\Enums\Permission (lihat StaffRole::permissions()).
+// Akses per menu memakai Gate dari App\Enums\Permission; izin tiap jabatan diatur di Admin › Jabatan & Hak Akses (App\Models\Role).
 // Menu sidebar ikut menyembunyikan route yang middleware `can:`-nya ditolak.
 Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
@@ -258,6 +258,9 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::put('/integrations/{integration}', [Admin\IntegrationController::class, 'update'])->name('integrations.update')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase', 'warehouse']);
         Route::post('/integrations/{integration}/test', [Admin\IntegrationController::class, 'test'])->name('integrations.test')->whereIn('integration', ['midtrans', 'rajaongkir', 'firebase', 'warehouse'])->middleware('throttle:10,1');
     });
+
+    // Jabatan & hak akses: selalu khusus Superadmin.
+    Route::resource('roles', Admin\RoleController::class)->except('show')->middleware('can:roles.manage');
 
     Route::middleware('can:staff.manage')->group(function () {
         Route::patch('/staff/{staff}/toggle', [Admin\StaffController::class, 'toggle'])->name('staff.toggle');

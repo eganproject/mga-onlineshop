@@ -54,7 +54,11 @@
                                 <td class="text-right font-semibold text-stone-900">{{ $movement->stock_after }}</td>
                                 <td class="text-xs text-stone-500">
                                     @if ($movement->order)
-                                        <a href="{{ route('admin.orders.show', $movement->order) }}" class="font-semibold text-brand-700 hover:underline">{{ $movement->order->code }}</a>
+                                        @can('orders.view')
+                                            <a href="{{ route('admin.orders.show', $movement->order) }}" class="font-semibold text-brand-700 hover:underline">{{ $movement->order->code }}</a>
+                                        @else
+                                            <span class="font-semibold text-stone-700">{{ $movement->order->code }}</span>
+                                        @endcan
                                     @endif
                                     {{ $movement->note }}
                                     @if ($movement->user)<span class="block text-stone-400">oleh {{ $movement->user->name }}</span>@endif

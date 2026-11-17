@@ -31,6 +31,9 @@ class AccessServiceProvider extends ServiceProvider
             Gate::define($permission->value, fn (User $user) => $user->hasPermission($permission));
         }
 
+        // Atur jabatan & hak akses: selalu khusus Superadmin, supaya jabatan lain tidak bisa menaikkan aksesnya sendiri.
+        Gate::define('roles.manage', fn (User $user) => $user->is_active && $user->isOwner());
+
         Event::listen(function (Login $event) {
             if (! $event->user instanceof User || ! $event->user->isAdmin()) {
                 return;
