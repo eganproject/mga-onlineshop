@@ -7,6 +7,7 @@ use App\Enums\StaffRole;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Orders\OrderService;
 use App\Services\Warehouse\WarehouseStockSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
@@ -74,7 +75,7 @@ class WarehouseOutboundTest extends TestCase
         $this->get(route('admin.orders.show', $order))->assertOk()->assertSee('Menunggu approve gudang');
     }
 
-    public function test_duplicate_ref_no_counts_as_recorded_and_website_orders_are_not_sent(): void
+    public function test_duplicate_ref_no_counts_as_recorded(): void
     {
         Http::fake(['gudang.test/*' => Http::response(['success' => false, 'error' => ['code' => 'DUPLICATE_REF_NO', 'message' => 'sudah ada']] + $this->outboundResponse(), 409)]);
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
@@ -82,11 +83,46 @@ class WarehouseOutboundTest extends TestCase
         $this->post(route('admin.orders.payment.paid', $order));
 
         $this->assertSame(Order::OUTBOUND_PENDING, $order->refresh()->warehouse_outbound_status);
-
-        $website = Order::factory()->create(['status' => OrderStatus::PendingPayment]);
-        $website->update(['paid_at' => now(), 'status' => OrderStatus::Paid]);
-        $this->assertNull($website->refresh()->warehouse_outbound_status);
         Http::assertSentCount(1);
+    }
+
+    public function test_paid_website_order_is_also_sent(): void
+    {
+        Http::fake(['gudang.test/api/v1/outbound-manuals' => Http::response($this->outboundResponse(), 201)]);
+        $product = Product::factory()->create(['price' => 10_000, 'stock' => 10, 'sku' => 'TOKO-9']);
+        $website = Order::factory()->unpaid()->create();
+        $website->items()->create([
+            'product_id' => $product->id, 'product_name' => $product->name,
+            'price' => 10_000, 'quantity' => 2, 'subtotal' => 20_000,
+        ]);
+
+        Http::assertNothingSent();
+        app(OrderService::class)->transition($website, OrderStatus::Paid);
+
+        Http::assertSent(fn (Request $request) => $request['ref_no'] === $website->code
+            && $request['items'] === [['sku' => 'TOKO-9', 'qty' => 2]]
+            && str_contains($request['note'], 'Pesanan website'));
+        $this->assertSame(Order::OUTBOUND_PENDING, $website->refresh()->warehouse_outbound_status);
+
+        $this->actingAs(User::factory()->staff(StaffRole::CustomerService)->create());
+        $this->get(route('admin.orders.show', $website))->assertOk()->assertSee('Menunggu approve gudang');
+    }
+
+    public function test_order_paid_before_switch_on_can_be_sent_manually(): void
+    {
+        Http::fake(['gudang.test/api/v1/outbound-manuals' => Http::response($this->outboundResponse(), 201)]);
+        $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
+        $website = Order::factory()->create(); // sudah lunas, tidak lewat hook
+        $website->items()->create([
+            'product_id' => $product->id, 'product_name' => $product->name,
+            'price' => 10_000, 'quantity' => 1, 'subtotal' => 10_000,
+        ]);
+        Http::assertNothingSent();
+
+        $this->actingAs(User::factory()->staff(StaffRole::CustomerService)->create());
+        $this->get(route('admin.orders.show', $website))->assertSee('Kirim ke gudang');
+        $this->post(route('admin.orders.warehouse.send', $website))->assertSessionHas('success');
+        $this->assertSame(Order::OUTBOUND_PENDING, $website->refresh()->warehouse_outbound_status);
     }
 
     public function test_validation_error_marks_failed_and_can_be_resent(): void

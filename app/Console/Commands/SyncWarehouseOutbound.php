@@ -12,12 +12,12 @@ class SyncWarehouseOutbound extends Command
 {
     protected $signature = 'warehouse:sync-outbound';
 
-    protected $description = 'Perbarui status outbound penjualan manual dari warehouse29';
+    protected $description = 'Perbarui status outbound pesanan dari warehouse29';
 
     public function handle(WarehouseOutbound $outbound): int
     {
         if (! $outbound->enabled()) {
-            $this->info('Kirim penjualan manual ke gudang tidak aktif.');
+            $this->info('Kirim pesanan ke gudang tidak aktif.');
 
             return self::SUCCESS;
         }

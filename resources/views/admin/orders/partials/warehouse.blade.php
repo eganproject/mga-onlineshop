@@ -1,10 +1,10 @@
-{{-- Status outbound manual di warehouse29 untuk penjualan manual. Variabel: $order. --}}
+{{-- Status outbound manual di warehouse29 (pesanan website & penjualan manual). Variabel: $order. --}}
 @php([$label, $badge] = $order->outboundStatusLabel())
 <div class="card p-5 text-sm">
     <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-1.5">
             <h2 class="font-bold text-stone-900">Gudang</h2>
-            <x-tooltip label="Gudang" text="Penjualan manual yang sudah lunas dikirim ke warehouse29 sebagai Outbound Manual. Stok gudang terpotong setelah admin gudang menyetujuinya." />
+            <x-tooltip label="Gudang" text="Pesanan yang sudah lunas (website & penjualan manual) dikirim ke warehouse29 sebagai Outbound Manual. Stok gudang terpotong setelah admin gudang menyetujuinya." />
         </div>
         <span class="badge {{ $badge }}">{{ $label }}</span>
     </div>

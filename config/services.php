@@ -66,7 +66,7 @@ return [
     // Bearer). Bisa diatur superadmin di Admin › Integrasi.
     'warehouse' => [
         'enabled' => (bool) env('WAREHOUSE_SYNC_ENABLED', false),
-        // Penjualan manual yang sudah lunas dikirim sebagai outbound manual
+        // Pesanan lunas (website & penjualan manual) dikirim sebagai outbound manual
         // (POST /api/v1/outbound-manuals), lalu disetujui admin gudang.
         'outbound_enabled' => (bool) env('WAREHOUSE_OUTBOUND_ENABLED', false),
         'base_url' => env('WAREHOUSE_API_URL'),
