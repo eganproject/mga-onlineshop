@@ -179,6 +179,29 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::resource('article-categories', Admin\ArticleCategoryController::class)->except(['show', 'create']);
     });
 
+    // Penjualan manual & tagihan dari admin (sebelum /orders/{order} supaya "create" tidak dianggap kode pesanan).
+    Route::middleware('can:orders.create')->prefix('orders')->name('orders.')->group(function () {
+        Route::controller(Admin\ManualOrderController::class)->group(function () {
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/manual/products', 'products')->name('manual.products')->middleware('throttle:120,1');
+            Route::get('/manual/rates', 'rates')->name('manual.rates')->middleware('throttle:60,1');
+            Route::post('/manual/quote', 'quote')->name('manual.quote')->middleware('throttle:240,1');
+        });
+        Route::controller(Admin\OrderPaymentController::class)->prefix('/{order}/payment')->name('payment.')->group(function () {
+            Route::post('/', 'choose')->name('choose')->middleware('throttle:20,1');
+            Route::post('/check', 'check')->name('check')->middleware('throttle:20,1');
+            Route::post('/reset', 'reset')->name('reset')->middleware('throttle:10,1');
+            Route::post('/paid', 'markPaid')->name('paid');
+        });
+        // Wilayah tujuan untuk cek ongkir.
+        Route::controller(Account\RegionController::class)->prefix('manual/regions')->name('manual.regions.')->middleware('throttle:120,1')->group(function () {
+            Route::get('/provinces', 'provinces')->name('provinces');
+            Route::get('/provinces/{province}/cities', 'cities')->name('cities');
+            Route::get('/cities/{city}/districts', 'districts')->name('districts');
+        });
+    });
+
     Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->middleware('can:orders.view')->group(function () {
         Route::get('/', 'index')->name('index');
         // Cetak packing slip cukup orders.view; aksi "proses" dicek lagi di controller.
@@ -249,6 +272,18 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
 | Webhook payment gateway
 |--------------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| Link tagihan penjualan manual (tanpa login, URL bertanda tangan)
+|--------------------------------------------------------------------------
+*/
+
+Route::controller(Shop\BillController::class)->prefix('tagihan/{order}')->name('bill.')->middleware('signed')->group(function () {
+    Route::get('/', 'show')->name('show')->middleware('throttle:60,1');
+    Route::post('/metode', 'choose')->name('method')->middleware('throttle:10,1');
+    Route::get('/status', 'status')->name('status')->middleware('throttle:30,1');
+});
 
 Route::post('/webhooks/midtrans', Webhooks\MidtransController::class)->name('webhooks.midtrans')->middleware('throttle:120,1');
 

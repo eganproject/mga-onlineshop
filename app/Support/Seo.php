@@ -10,7 +10,7 @@ class Seo
     /** Halaman privat / transaksi yang tidak boleh diindeks. */
     public const PRIVATE_ROUTES = [
         'admin.*', 'account.*', 'cart.*', 'checkout.*', 'verification.*',
-        'login', 'register', 'password.*',
+        'login', 'register', 'password.*', 'bill.*',
     ];
 
     /** Parameter yang membuat halaman unik (dipertahankan di canonical). */

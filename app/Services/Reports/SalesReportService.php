@@ -48,7 +48,7 @@ class SalesReportService
     {
         $totals = $this->paidOrders($period)
             ->toBase()
-            ->selectRaw('COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue, COALESCE(SUM(subtotal), 0) as product_sales, COALESCE(SUM(shipping_cost), 0) as shipping, COALESCE(SUM(discount + shipping_discount), 0) as discount, COUNT(DISTINCT user_id) as customers')
+            ->selectRaw('COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue, COALESCE(SUM(subtotal), 0) as product_sales, COALESCE(SUM(shipping_cost), 0) as shipping, COALESCE(SUM(discount + shipping_discount + manual_discount), 0) as discount, COUNT(DISTINCT user_id) as customers')
             ->selectRaw('COALESCE(SUM(tax_amount), 0) as tax, COALESCE(SUM(CASE WHEN tax_inclusive = 1 THEN tax_amount ELSE 0 END), 0) as tax_included, COALESCE(SUM(service_fee), 0) as service_fee, COALESCE(SUM(rounding), 0) as rounding, COALESCE(SUM(payment_fee), 0) as payment_fee, COALESCE(SUM(gateway_fee), 0) as gateway_fee')
             ->first();
 

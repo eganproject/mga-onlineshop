@@ -92,7 +92,7 @@ class ReportController extends Controller
                 break;
 
             case 'pesanan':
-                yield ['Kode pesanan', 'No. invoice', 'Tanggal bayar', 'Status', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Voucher', 'Diskon (Rp)', 'Biaya layanan (Rp)', 'PPN (Rp)', 'Pembulatan (Rp)', 'Total pesanan (Rp)', 'Metode bayar', 'Biaya transaksi pembeli (Rp)', 'Dibayar pelanggan (Rp)', 'Potongan Midtrans (Rp)', 'Bersih diterima (Rp)', 'Kurir'];
+                yield ['Kode pesanan', 'No. invoice', 'Tanggal bayar', 'Status', 'Sumber', 'Pelanggan', 'Email', 'Jumlah barang', 'Subtotal (Rp)', 'Ongkir (Rp)', 'Voucher', 'Diskon (Rp)', 'Biaya layanan (Rp)', 'PPN (Rp)', 'Pembulatan (Rp)', 'Total pesanan (Rp)', 'Metode bayar', 'Biaya transaksi pembeli (Rp)', 'Dibayar pelanggan (Rp)', 'Potongan Midtrans (Rp)', 'Bersih diterima (Rp)', 'Kurir'];
                 foreach ($this->reports->orders($period)->lazy(500) as $order) {
                     /** @var Order $order */
                     yield [
@@ -100,13 +100,14 @@ class ReportController extends Controller
                         $order->invoice_number,
                         $order->paid_at?->format('Y-m-d H:i'),
                         $order->status->label(),
-                        $order->user?->name,
-                        $order->user?->email,
+                        $order->sourceLabel(),
+                        $order->customerName(),
+                        $order->customerEmail(),
                         (int) $order->items_quantity,
                         $order->subtotal,
                         $order->shipping_cost,
                         $order->voucher_code,
-                        $order->discountTotal(),
+                        $order->discountTotal() + (int) $order->manual_discount,
                         $order->service_fee,
                         $order->tax_amount,
                         $order->rounding,

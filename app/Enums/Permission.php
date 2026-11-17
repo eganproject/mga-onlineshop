@@ -10,6 +10,7 @@ enum Permission: string
 {
     case OrdersView = 'orders.view';
     case OrdersManage = 'orders.manage';
+    case OrdersCreate = 'orders.create';
     case CatalogManage = 'catalog.manage';
     case StockManage = 'stock.manage';
     case PromosManage = 'promos.manage';
@@ -29,6 +30,7 @@ enum Permission: string
         return match ($this) {
             self::OrdersView => 'Lihat pesanan, invoice & packing slip',
             self::OrdersManage => 'Proses pesanan (status & resi)',
+            self::OrdersCreate => 'Buat penjualan manual & tagihan pembayaran (QRIS/VA)',
             self::CatalogManage => 'Kelola produk & kategori',
             self::StockManage => 'Kelola stok',
             self::PromosManage => 'Kelola promo, voucher & banner',

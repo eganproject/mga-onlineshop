@@ -1,6 +1,9 @@
 <x-layouts.admin :title="'Pesanan '.$order->code">
     <x-admin.page-header :title="$order->code" :description="'Dipesan '.$order->created_at->translatedFormat('d F Y, H:i')" :back="route('admin.orders.index')">
         <x-order-status :status="$order->status" class="px-3 py-1 text-sm" />
+        @if ($order->isManual())
+            <span class="badge bg-violet-50 px-3 py-1 text-sm text-violet-700 ring-violet-600/20">Manual</span>
+        @endif
         <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> {{ $order->paid_at ? 'Invoice' : 'Tagihan' }}</a>
         <a href="{{ route('admin.orders.invoice.pdf', $order) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4" /> PDF</a>
         <a href="{{ route('admin.orders.packing-slip', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Packing slip</a>
@@ -13,7 +16,11 @@
     @endif
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="space-y-6 lg:col-span-2">
+        <div class="min-w-0 space-y-6 lg:col-span-2">
+            @if ($billing)
+                @include('admin.orders.partials.billing')
+            @endif
+
             <div class="card overflow-hidden">
                 <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Item pesanan</h2></div>
                 <ul class="divide-y divide-stone-100">
@@ -129,12 +136,22 @@
 
             <div class="card p-5">
                 <h2 class="font-bold text-stone-900">Pelanggan</h2>
-                @php($customerTag = auth()->user()->can('customers.view') ? 'a' : 'div')
-                <{{ $customerTag }} @if ($customerTag === 'a') href="{{ route('admin.customers.show', $order->user) }}" @endif
-                    @class(['mt-3 flex items-center gap-3 rounded-xl p-2 -m-2', 'hover:bg-stone-50' => $customerTag === 'a'])>
-                    <span class="grid size-10 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">{{ $order->user->initials() }}</span>
-                    <span class="min-w-0"><span class="block truncate font-semibold text-stone-800">{{ $order->user->name }}</span><span class="block truncate text-xs text-stone-500">{{ $order->user->email }}</span></span>
-                </{{ $customerTag }}>
+                @if ($order->user)
+                    @php($customerTag = auth()->user()->can('customers.view') ? 'a' : 'div')
+                    <{{ $customerTag }} @if ($customerTag === 'a') href="{{ route('admin.customers.show', $order->user) }}" @endif
+                        @class(['mt-3 flex items-center gap-3 rounded-xl p-2 -m-2', 'hover:bg-stone-50' => $customerTag === 'a'])>
+                        <span class="grid size-10 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">{{ $order->user->initials() }}</span>
+                        <span class="min-w-0"><span class="block truncate font-semibold text-stone-800">{{ $order->user->name }}</span><span class="block truncate text-xs text-stone-500">{{ $order->user->email }}</span></span>
+                    </{{ $customerTag }}>
+                @else
+                    <div class="mt-3 flex items-center gap-3">
+                        <span class="grid size-10 place-items-center rounded-full bg-stone-100 text-stone-500"><x-icon name="user" class="size-5" /></span>
+                        <span class="min-w-0"><span class="block truncate font-semibold text-stone-800">{{ $order->recipient_name }}</span><span class="block truncate text-xs text-stone-500">{{ $order->billing_email ?: 'Tanpa akun' }} · {{ $order->recipient_phone }}</span></span>
+                    </div>
+                @endif
+                @if ($order->isManual())
+                    <p class="mt-3 border-t border-stone-100 pt-3 text-xs text-stone-500">Penjualan manual oleh {{ $order->creator?->name ?? 'staf' }}</p>
+                @endif
             </div>
 
             <div class="card p-5 text-sm">
@@ -153,7 +170,7 @@
                         <div><dt class="text-xs text-stone-500">Alasan batal</dt><dd class="rounded-xl bg-rose-50 p-3 text-rose-800">{{ $order->cancellation_reason }}</dd></div>
                     @endif
                     @if ($order->notes)
-                        <div><dt class="text-xs text-stone-500">Catatan pembeli</dt><dd class="rounded-xl bg-amber-50 p-3 text-amber-800">{{ $order->notes }}</dd></div>
+                        <div><dt class="text-xs text-stone-500">{{ $order->isManual() ? 'Catatan' : 'Catatan pembeli' }}</dt><dd class="rounded-xl bg-amber-50 p-3 text-amber-800">{{ $order->notes }}</dd></div>
                     @endif
                 </dl>
             </div>
