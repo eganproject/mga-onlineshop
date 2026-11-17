@@ -10,7 +10,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Str;
 use Throwable;
 
-/** Kirim penjualan manual yang lunas ke warehouse29 (Outbound Manual), dengan retry bertahap. */
+/** Kirim pesanan lunas (website & manual) ke warehouse29 (Outbound Manual), dengan retry bertahap. */
 class SendWarehouseOutbound implements ShouldQueue
 {
     use Queueable;

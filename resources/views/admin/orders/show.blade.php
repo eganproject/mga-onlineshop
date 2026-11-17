@@ -76,7 +76,7 @@
         <div class="space-y-6">
             @include('admin.orders.partials.finance')
 
-            @if ($order->isManual() && ($order->warehouse_outbound_status || config('services.warehouse.outbound_enabled')))
+            @if ($order->warehouse_outbound_status || config('services.warehouse.outbound_enabled'))
                 @include('admin.orders.partials.warehouse')
             @endif
 

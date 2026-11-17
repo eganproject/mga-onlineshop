@@ -72,7 +72,7 @@ class IntegrationController extends Controller
         'services.firebase.project_id' => 'Project ID',
         'services.firebase.app_id' => 'App ID',
         'services.warehouse.enabled' => 'Sinkron stok otomatis',
-        'services.warehouse.outbound_enabled' => 'Kirim penjualan manual ke gudang',
+        'services.warehouse.outbound_enabled' => 'Kirim pesanan lunas ke gudang',
         'services.warehouse.base_url' => 'URL warehouse29',
         'services.warehouse.token' => 'Token API gudang',
         'services.warehouse.interval' => 'Interval sinkron (menit)',

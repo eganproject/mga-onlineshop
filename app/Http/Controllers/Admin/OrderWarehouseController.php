@@ -16,8 +16,8 @@ class OrderWarehouseController extends Controller
 
     public function send(Order $order, ActivityLogger $activity): RedirectResponse
     {
-        if (! $order->isManual() || ! $order->paid_at) {
-            return back()->with('error', 'Hanya penjualan manual yang sudah lunas yang dikirim ke gudang.');
+        if (! $order->paid_at) {
+            return back()->with('error', 'Hanya pesanan yang sudah lunas yang dikirim ke gudang.');
         }
 
         if (! $this->outbound->shouldSend($order)) {

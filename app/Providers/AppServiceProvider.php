@@ -86,8 +86,8 @@ class AppServiceProvider extends ServiceProvider
                 DB::afterCommit(fn () => app(PaymentService::class)->voidPendingPayments($order));
             }
 
-            // Penjualan manual lunas → kirim ke warehouse29 sebagai outbound manual.
-            if ($order->wasChanged('paid_at') && $order->paid_at && $order->isManual()) {
+            // Pesanan lunas (website & penjualan manual) → kirim ke warehouse29 sebagai outbound manual.
+            if ($order->wasChanged('paid_at') && $order->paid_at) {
                 $outbound = app(WarehouseOutbound::class);
 
                 if ($outbound->enabled() && $outbound->shouldSend($order)) {

@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Kirim penjualan manual yang sudah lunas ke warehouse29 sebagai Outbound
- * Manual (status pending → disetujui admin gudang → stok gudang terpotong),
- * lalu pantau statusnya. ref_no = kode pesanan, jadi kirim ulang aman
- * (409 DUPLICATE_REF_NO = sudah tercatat).
+ * Kirim pesanan yang sudah lunas (website & penjualan manual) ke warehouse29
+ * sebagai Outbound Manual (status pending → disetujui admin gudang → stok
+ * gudang terpotong), lalu pantau statusnya. ref_no = kode pesanan, jadi kirim
+ * ulang aman (409 DUPLICATE_REF_NO = sudah tercatat).
  */
 class WarehouseOutbound
 {
@@ -23,11 +23,10 @@ class WarehouseOutbound
         return (bool) config('services.warehouse.outbound_enabled') && $this->client->isConfigured();
     }
 
-    /** Pesanan ini perlu dikirim ke gudang (manual, lunas, belum tercatat di gudang). */
+    /** Pesanan ini perlu dikirim ke gudang (lunas, belum tercatat di gudang). */
     public function shouldSend(Order $order): bool
     {
-        return $order->isManual()
-            && $order->paid_at !== null
+        return $order->paid_at !== null
             && ! in_array($order->warehouse_outbound_status, [Order::OUTBOUND_PENDING, Order::OUTBOUND_APPROVED], true);
     }
 
@@ -153,7 +152,7 @@ class WarehouseOutbound
     private function note(Order $order): string
     {
         return Str::limit(collect([
-            'Penjualan manual '.config('shop.name').' '.$order->code,
+            ($order->isManual() ? 'Penjualan manual ' : 'Pesanan website ').config('shop.name').' '.$order->code,
             $order->recipient_name.' '.$order->recipient_phone,
             $order->courierLabel() ?? ($order->shipping_address === 'Ambil di toko' ? 'Ambil di toko' : null),
             $order->notes,
