@@ -6,6 +6,7 @@ use App\Contracts\PaymentGateway;
 use App\Contracts\ShipmentTracker;
 use App\Contracts\ShippingProvider;
 use App\Enums\OrderStatus;
+use App\Jobs\SendWarehouseOutbound;
 use App\Models\Category;
 use App\Models\Order;
 use App\Services\Auth\FirebaseTokenVerifier;
@@ -22,6 +23,7 @@ use App\Services\Shipping\FakeShipmentTracker;
 use App\Services\Shipping\FakeShippingProvider;
 use App\Services\Shipping\RajaOngkirShipmentTracker;
 use App\Services\Shipping\RajaOngkirShippingProvider;
+use App\Services\Warehouse\WarehouseOutbound;
 use App\Support\Money;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +84,16 @@ class AppServiceProvider extends ServiceProvider
 
             if ($order->wasChanged('status') && $order->status === OrderStatus::Cancelled) {
                 DB::afterCommit(fn () => app(PaymentService::class)->voidPendingPayments($order));
+            }
+
+            // Penjualan manual lunas → kirim ke warehouse29 sebagai outbound manual.
+            if ($order->wasChanged('paid_at') && $order->paid_at && $order->isManual()) {
+                $outbound = app(WarehouseOutbound::class);
+
+                if ($outbound->enabled() && $outbound->shouldSend($order)) {
+                    $outbound->markQueued($order);
+                    SendWarehouseOutbound::dispatch($order)->afterCommit();
+                }
             }
 
             // Jumlah terjual produk ikut berubah saat pesanan masuk/keluar status pendapatan

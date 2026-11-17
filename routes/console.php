@@ -66,3 +66,10 @@ Schedule::command('warehouse:sync-stock --full')
     ->when(fn () => config('services.warehouse.enabled'))
     ->withoutOverlapping(30)
     ->onOneServer();
+
+// Penjualan manual yang dikirim ke warehouse29: cek apakah sudah disetujui gudang.
+Schedule::command('warehouse:sync-outbound')
+    ->everyTenMinutes()
+    ->when(fn () => config('services.warehouse.outbound_enabled'))
+    ->withoutOverlapping(15)
+    ->onOneServer();

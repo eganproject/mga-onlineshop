@@ -114,6 +114,9 @@
                         @elseif ($key === 'warehouse')
                             <x-form.switch card name="warehouse[enabled]" label="Sinkron stok otomatis" :checked="$value('warehouse', 'enabled')"
                                            description="Tarik stok yang berubah sesuai interval, plus tarikan penuh tiap malam pukul 02.40. Butuh cron scheduler di server." />
+                            <x-form.switch card name="warehouse[outbound_enabled]" label="Kirim penjualan manual ke gudang" :checked="$value('warehouse', 'outbound_enabled')"
+                                           description="Penjualan manual yang sudah lunas otomatis dikirim sebagai Outbound Manual (status pending) ke warehouse29, lalu disetujui admin gudang. Status persetujuan dicek tiap 10 menit."
+                                           tooltip="Memakai URL & token yang sama. Pastikan fitur outbound manual via API aktif di warehouse29 dan SKU produk sudah terhubung ke SKU gudang." />
                             <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                                 <div class="sm:col-span-2">
                                     <x-form.input name="warehouse[base_url]" id="warehouse_base_url" label="URL warehouse29" :value="$value('warehouse', 'base_url')" placeholder="https://gudang.mga-advertising.co.id" :hint="$source('warehouse', 'base_url')" spellcheck="false" inputmode="url"

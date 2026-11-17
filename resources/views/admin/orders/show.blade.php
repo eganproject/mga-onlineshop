@@ -76,6 +76,10 @@
         <div class="space-y-6">
             @include('admin.orders.partials.finance')
 
+            @if ($order->isManual() && ($order->warehouse_outbound_status || config('services.warehouse.outbound_enabled')))
+                @include('admin.orders.partials.warehouse')
+            @endif
+
             {{-- Update status --}}
             @if (auth()->user()->can('orders.manage') && ($next = $order->status->nextStatuses()))
                 <div class="card p-5" x-data="{ status: @js(old('status', $next[0]->value)) }">

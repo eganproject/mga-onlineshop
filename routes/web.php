@@ -194,6 +194,10 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
             Route::post('/reset', 'reset')->name('reset')->middleware('throttle:10,1');
             Route::post('/paid', 'markPaid')->name('paid');
         });
+        Route::controller(Admin\OrderWarehouseController::class)->prefix('/{order}/warehouse')->name('warehouse.')->middleware('throttle:20,1')->group(function () {
+            Route::post('/', 'send')->name('send');
+            Route::post('/refresh', 'refresh')->name('refresh');
+        });
         // Wilayah tujuan untuk cek ongkir.
         Route::controller(Account\RegionController::class)->prefix('manual/regions')->name('manual.regions.')->middleware('throttle:120,1')->group(function () {
             Route::get('/provinces', 'provinces')->name('provinces');

@@ -43,6 +43,7 @@ class IntegrationController extends Controller
         ],
         'warehouse' => [
             'enabled' => 'services.warehouse.enabled',
+            'outbound_enabled' => 'services.warehouse.outbound_enabled',
             'base_url' => 'services.warehouse.base_url',
             'token' => 'services.warehouse.token',
             'interval' => 'services.warehouse.interval',
@@ -71,6 +72,7 @@ class IntegrationController extends Controller
         'services.firebase.project_id' => 'Project ID',
         'services.firebase.app_id' => 'App ID',
         'services.warehouse.enabled' => 'Sinkron stok otomatis',
+        'services.warehouse.outbound_enabled' => 'Kirim penjualan manual ke gudang',
         'services.warehouse.base_url' => 'URL warehouse29',
         'services.warehouse.token' => 'Token API gudang',
         'services.warehouse.interval' => 'Interval sinkron (menit)',
@@ -138,7 +140,7 @@ class IntegrationController extends Controller
                 continue;
             }
 
-            $values[$key] = in_array($name, ['is_production', 'login_enabled', 'enabled'], true) ? $request->boolean("{$integration}.{$name}") : ($data[$name] ?? null);
+            $values[$key] = in_array($name, ['is_production', 'login_enabled', 'enabled', 'outbound_enabled'], true) ? $request->boolean("{$integration}.{$name}") : ($data[$name] ?? null);
         }
 
         $this->ensureUsable($integration, $values);
@@ -201,6 +203,7 @@ class IntegrationController extends Controller
             ],
             'warehouse' => [
                 'enabled' => ['boolean'],
+                'outbound_enabled' => ['boolean'],
                 'base_url' => ['nullable', 'string', 'max:255', 'url:https,http'],
                 'token' => ['nullable', 'string', 'max:500', 'regex:/^\S+$/'],
                 'interval' => ['required', 'integer', Rule::in(self::WAREHOUSE_INTERVALS)],
