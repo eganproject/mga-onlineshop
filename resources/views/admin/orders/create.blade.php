@@ -52,55 +52,78 @@
 
                 <p x-show="!lines.length" class="mt-4 rounded-xl border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500">Belum ada produk. Cari lalu pilih produk di atas.</p>
 
-                <ul class="mt-4 divide-y divide-stone-100" x-show="lines.length" x-cloak>
+                <ul class="@container mt-4 space-y-3" x-show="lines.length" x-cloak>
                     <template x-for="(line, index) in lines" x-bind:key="line.key">
-                        <li class="py-3">
+                        <li class="rounded-2xl border border-stone-200 p-3 @lg:p-4" x-bind:class="problem(index) && 'border-rose-200 bg-rose-50/30'">
                             <input type="hidden" x-bind:name="`items[${index}][product_id]`" x-bind:value="line.product.id">
                             <input type="hidden" x-bind:name="`items[${index}][variant_id]`" x-bind:value="line.variantId">
+
+                            {{-- Produk: foto, nama, info stok/harga, varian --}}
                             <div class="flex items-start gap-3">
-                                <img x-show="line.product.image" x-bind:src="line.product.image" alt="" class="size-12 shrink-0 rounded-lg object-cover">
+                                <img x-show="line.product.image" x-bind:src="line.product.image" alt="" class="size-12 shrink-0 rounded-xl object-cover">
                                 <div class="min-w-0 flex-1">
                                     <p class="line-clamp-2 text-sm font-semibold text-stone-900" x-text="line.product.name"></p>
-                                    <template x-if="line.product.has_variants">
-                                        <select x-model="line.variantId" class="input mt-2 py-1.5 text-sm" aria-label="Varian">
+                                    <p class="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-xs text-stone-500">
+                                        <span>Stok <span x-text="stockOf(line)"></span></span>
+                                        <template x-if="linePrice(index)">
+                                            <span>· Harga web <span class="tabular-nums" x-text="rupiah(linePrice(index).web_price)"></span></span>
+                                        </template>
+                                        <span x-show="linePrice(index)?.regular_price" class="ml-1 badge bg-accent-50 text-accent-700">Grosir</span>
+                                        <span x-show="linePrice(index)?.custom" class="ml-1 badge bg-brand-50 text-brand-700">Harga diubah</span>
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-ghost btn-sm -mt-1 -mr-1 shrink-0 p-2 text-stone-400 hover:text-rose-600" x-on:click="remove(index)" title="Hapus produk">
+                                    <x-icon name="trash" class="size-4" /><span class="sr-only">Hapus produk</span>
+                                </button>
+                            </div>
+
+                            {{-- Varian, harga, jumlah, subtotal: kolom sejajar dengan label --}}
+                            <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 @lg:grid-cols-[10rem_9rem_minmax(0,1fr)]"
+                                 x-bind:class="line.product.has_variants && '@3xl:grid-cols-[minmax(0,1fr)_10rem_9rem_minmax(0,8rem)]'">
+                                <template x-if="line.product.has_variants">
+                                    <label class="col-span-2 block min-w-0 @lg:col-span-3 @3xl:col-span-1">
+                                        <span class="mb-1 block text-xs font-semibold text-stone-600">Varian</span>
+                                        <select x-model="line.variantId" class="input h-10 py-0 text-sm">
                                             <option value="">Pilih varian</option>
                                             <template x-for="variant in line.product.variants" x-bind:key="variant.id">
                                                 <option x-bind:value="String(variant.id)" x-bind:selected="String(variant.id) === line.variantId"
                                                         x-text="`${variant.name} · ${variant.price_label} · stok ${variant.stock}${variant.active ? '' : ' (nonaktif)'}`"></option>
                                             </template>
                                         </select>
-                                    </template>
-                                    <p class="mt-1 text-xs text-stone-500">
-                                        Stok <span x-text="stockOf(line)"></span>
-                                        <template x-if="linePrice(index)">
-                                            <span>· harga web <span x-text="rupiah(linePrice(index).web_price)" x-bind:class="linePrice(index).custom && 'line-through'"></span>/pcs
-                                                <span x-show="linePrice(index).regular_price" class="font-semibold text-accent-700">grosir</span>
-                                                <span x-show="linePrice(index).custom" class="font-semibold text-brand-700">· harga diubah</span>
-                                            </span>
-                                        </template>
-                                    </p>
-                                    <p x-show="problem(index)" x-text="problem(index)" class="mt-1 text-xs font-semibold text-rose-600"></p>
-                                </div>
-                                <div class="flex shrink-0 flex-col items-end gap-2">
-                                    <div class="flex items-center gap-1">
-                                        <input type="number" min="1" x-model.number="line.quantity" x-bind:name="`items[${index}][quantity]`"
-                                               class="input w-20 py-1.5 text-center text-sm" aria-label="Jumlah">
-                                        <button type="button" class="btn btn-ghost btn-sm p-2 text-stone-400 hover:text-rose-600" x-on:click="remove(index)" title="Hapus"><x-icon name="trash" class="size-4" /><span class="sr-only">Hapus</span></button>
+                                    </label>
+                                </template>
+
+                                <div class="min-w-0">
+                                    <label x-bind:for="`price-${line.key}`" class="mb-1 block text-xs font-semibold text-stone-600">Harga / pcs</label>
+                                    <div class="relative">
+                                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-stone-400">Rp</span>
+                                        <input x-bind:id="`price-${line.key}`" type="number" min="1" step="1" inputmode="numeric" x-model="line.price" x-bind:name="`items[${index}][price]`"
+                                               x-bind:placeholder="linePrice(index) ? linePrice(index).web_price : ''"
+                                               class="input h-10 py-0 pl-9 text-sm tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
                                     </div>
-                                    <p class="text-sm font-semibold text-stone-900 tabular-nums" x-text="linePrice(index) ? rupiah(linePrice(index).subtotal) : '—'"></p>
+                                    <p class="mt-1 text-[11px] leading-4 text-stone-500">
+                                        <span x-show="!(line.price !== '' && line.price !== null)">Kosong = harga web</span>
+                                        <button type="button" x-show="line.price !== '' && line.price !== null" x-on:click="line.price = ''" class="link-underline font-semibold text-brand-700 hover:text-ink">Pakai harga web</button>
+                                    </p>
+                                </div>
+
+                                <div class="min-w-0">
+                                    <label x-bind:for="`qty-${line.key}`" class="mb-1 block text-xs font-semibold text-stone-600">Jumlah</label>
+                                    <div class="flex h-10 items-stretch overflow-hidden rounded-xl border border-stone-300 bg-white focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20">
+                                        <button type="button" class="grid w-9 shrink-0 place-items-center text-stone-500 hover:bg-stone-50 hover:text-ink disabled:opacity-40" x-on:click="line.quantity = Math.max(1, (Number(line.quantity) || 1) - 1)" x-bind:disabled="Number(line.quantity) <= 1" aria-label="Kurangi"><x-icon name="minus" class="size-4" /></button>
+                                        <input x-bind:id="`qty-${line.key}`" type="number" min="1" x-model.number="line.quantity" x-bind:name="`items[${index}][quantity]`"
+                                               class="w-full min-w-0 border-0 bg-transparent p-0 text-center text-sm font-semibold tabular-nums focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+                                        <button type="button" class="grid w-9 shrink-0 place-items-center text-stone-500 hover:bg-stone-50 hover:text-ink" x-on:click="line.quantity = (Number(line.quantity) || 0) + 1" aria-label="Tambah"><x-icon name="plus" class="size-4" /></button>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-2 flex items-center justify-between border-t border-stone-100 pt-3 @lg:col-span-1 @lg:block @lg:border-0 @lg:pt-0 @lg:text-right">
+                                    <span class="block text-xs font-semibold text-stone-600 @lg:mb-1">Subtotal</span>
+                                    <span class="block text-sm font-bold text-stone-900 tabular-nums @lg:flex @lg:h-10 @lg:items-center @lg:justify-end" x-text="linePrice(index) ? rupiah(linePrice(index).subtotal) : '—'"></span>
                                 </div>
                             </div>
-                            <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1" x-bind:class="line.product.image && 'sm:pl-15'">
-                                <label class="relative block w-44">
-                                    <span class="sr-only">Harga per pcs</span>
-                                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-stone-400">Rp</span>
-                                    <input type="number" min="1" step="1" inputmode="numeric" x-model="line.price" x-bind:name="`items[${index}][price]`"
-                                           x-bind:placeholder="linePrice(index) ? linePrice(index).web_price : 'Harga web'"
-                                           class="input appearance-none py-1.5 pl-9 text-sm tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]" aria-label="Harga per pcs">
-                                </label>
-                                <span class="text-xs text-stone-500">/pcs · kosongkan = harga web</span>
-                                <button type="button" x-show="line.price !== '' && line.price !== null" x-on:click="line.price = ''" class="link-underline text-xs font-semibold text-stone-500 hover:text-ink">Pakai harga web</button>
-                            </div>
+
+                            <p x-show="problem(index)" x-text="problem(index)" class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-rose-600"></p>
                         </li>
                     </template>
                 </ul>
