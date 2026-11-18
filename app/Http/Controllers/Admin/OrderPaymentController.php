@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Activity\ActivityLogger;
 use App\Services\Billing\BillingSettings;
-use App\Services\Orders\OrderService;
 use App\Services\Payment\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,31 +82,6 @@ class OrderPaymentController extends Controller
         }
 
         return back()->with('success', 'Tagihan lama dibatalkan. Pilih metode bayar yang baru.')->withFragment('tagihan');
-    }
-
-    /** Pembeli membayar tunai / transfer langsung (tanpa Midtrans). */
-    public function markPaid(Request $request, Order $order, OrderService $orders): RedirectResponse
-    {
-        $data = $request->validate(['note' => ['nullable', 'string', 'max:250']]);
-
-        if ($order->status !== OrderStatus::PendingPayment) {
-            return back()->with('error', 'Pesanan ini sudah tidak menunggu pembayaran.');
-        }
-
-        // Jangan sampai dicatat tunai padahal sudah lunas lewat Midtrans.
-        try {
-            $this->payments->syncPending($order);
-        } catch (Throwable $e) {
-            report($e);
-        }
-
-        if ($order->refresh()->status !== OrderStatus::PendingPayment) {
-            return back()->with('info', 'Ternyata pembayaran lewat Midtrans sudah masuk.');
-        }
-
-        $orders->transition($order, OrderStatus::Paid, note: filled($data['note'] ?? null) ? trim($data['note']) : 'Dibayar tunai / transfer langsung (dicatat staf).');
-
-        return back()->with('success', "Pesanan {$order->code} ditandai lunas.");
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\CrawlsLinks;
 use Tests\TestCase;
@@ -22,6 +23,11 @@ use Tests\TestCase;
  */
 class LinkCrawlTest extends TestCase
 {
+    private function cashPayment(array $overrides = []): array
+    {
+        return $overrides + ['method' => 'cash', 'paid_at' => now()->format('Y-m-d\\TH:i')];
+    }
+
     use CrawlsLinks;
     use RefreshDatabase;
 
@@ -59,7 +65,7 @@ class LinkCrawlTest extends TestCase
 
         [$guest, $linked] = Order::where('source', 'manual')->orderBy('id')->take(2)->get()->all();
         $this->post(route('admin.orders.payment.choose', $guest), ['method' => 'qris'])->assertSessionHasNoErrors();
-        $this->post(route('admin.orders.payment.paid', $linked))->assertSessionHasNoErrors();
+        $this->post(route('admin.orders.offline-payment', $linked), $this->cashPayment(['method' => 'bank_transfer', 'reference' => 'REF-123', 'proof' => UploadedFile::fake()->create('bukti.pdf', 20, 'application/pdf')]))->assertSessionHasNoErrors();
 
         $this->manualBillUrl = $guest->refresh()->billUrl();
         auth()->logout();

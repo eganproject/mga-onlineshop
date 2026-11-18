@@ -13,12 +13,19 @@ use App\Models\User;
 use App\Models\Voucher;
 use App\Services\Payment\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 /** Penjualan manual dari admin: input pesanan, cek ongkir, tagihan QRIS/VA, link tagihan. */
 class ManualOrderTest extends TestCase
 {
+    private function cashPayment(array $overrides = []): array
+    {
+        return $overrides + ['method' => 'cash', 'paid_at' => now()->format('Y-m-d\\TH:i')];
+    }
+
     use RefreshDatabase;
 
     private function staff(StaffRole $role = StaffRole::CustomerService): User
@@ -255,6 +262,59 @@ class ManualOrderTest extends TestCase
         $this->post(route('bill.method', $order), ['method' => 'qris'])->assertForbidden();
     }
 
+    public function test_record_bank_transfer_with_proof_and_past_date(): void
+    {
+        Storage::fake('local');
+        $product = Product::factory()->create(['price' => 30_000, 'stock' => 5]);
+        $staff = $this->staff();
+        $this->actingAs($staff)->post(route('admin.orders.store'), $this->payload($product));
+        $order = Order::sole();
+
+        $this->get(route('admin.orders.show', $order))->assertSee('Catat pembayaran di luar Midtrans');
+
+        // Transfer wajib referensi; tanggal tidak boleh di masa depan.
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment(['method' => 'bank_transfer']))->assertSessionHasErrors('reference');
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment(['method' => 'cash', 'paid_at' => now()->addDay()->format('Y-m-d\\TH:i')]))->assertSessionHasErrors('paid_at');
+        $this->assertSame(OrderStatus::PendingPayment, $order->refresh()->status);
+
+        $paidAt = now()->subMinutes(30)->startOfMinute();
+        $this->post(route('admin.orders.offline-payment', $order), [
+            'method' => 'bank_transfer',
+            'paid_at' => $paidAt->copy()->timezone(config('app.timezone'))->format('Y-m-d\\TH:i'),
+            'reference' => 'BCA a.n. Budi 123',
+            'note' => 'Transfer ke rekening toko',
+            'proof' => UploadedFile::fake()->create('bukti.pdf', 50, 'application/pdf'),
+        ])->assertSessionHasNoErrors()->assertSessionHas('success');
+
+        $order->refresh();
+        $this->assertSame(OrderStatus::Paid, $order->status);
+        $this->assertSame('bank_transfer', $order->payment_method);
+        $this->assertTrue($order->paid_at->equalTo($paidAt));
+        $this->assertSame('BCA a.n. Budi 123', $order->payment_reference);
+        $this->assertSame($staff->id, $order->payment_recorded_by);
+        $this->assertNotNull($order->invoice_number);
+        Storage::disk('local')->assertExists($order->payment_proof);
+        $this->assertDatabaseHas('activity_logs', ['action' => 'order.payment_recorded']);
+
+        $this->get(route('admin.orders.show', $order))->assertOk()->assertSee('Transfer bank langsung')->assertSee('BCA a.n. Budi 123')->assertSee('Lihat bukti bayar');
+        $this->get(route('admin.orders.payment-proof', $order))->assertOk();
+
+        // Sudah lunas: tidak bisa dicatat lagi.
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment())->assertSessionHas('error');
+    }
+
+    public function test_recording_payment_needs_its_own_permission(): void
+    {
+        $product = Product::factory()->create(['price' => 30_000, 'stock' => 5]);
+        $this->actingAs($this->staff())->post(route('admin.orders.store'), $this->payload($product));
+        $order = Order::sole();
+
+        $warehouse = $this->staff(StaffRole::Warehouse);
+        $this->actingAs($warehouse)->get(route('admin.orders.show', $order))->assertOk()->assertDontSee('Catat pembayaran di luar Midtrans');
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment())->assertForbidden();
+        $this->assertSame(OrderStatus::PendingPayment, $order->refresh()->status);
+    }
+
     public function test_mark_paid_cash_and_cancel_restores_stock(): void
     {
         $product = Product::factory()->create(['price' => 30_000, 'stock' => 5]);
@@ -263,11 +323,12 @@ class ManualOrderTest extends TestCase
         $order = Order::sole();
         $this->post(route('admin.orders.payment.choose', $order), ['method' => 'bni_va']);
 
-        $this->post(route('admin.orders.payment.paid', $order))->assertSessionHas('success');
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment())->assertSessionHas('success');
 
         $order->refresh();
         $this->assertSame(OrderStatus::Paid, $order->status);
-        $this->assertSame('manual', $order->payment_method);
+        $this->assertSame('cash', $order->payment_method);
+        $this->assertSame('Tunai', $order->paymentMethodLabel());
         $this->assertSame(0, $order->gateway_fee);
         $this->assertSame(PaymentStatus::Paid, $order->payments()->sole()->status);
 

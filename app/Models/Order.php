@@ -23,7 +23,7 @@ use Illuminate\Support\Str;
     'code', 'user_id', 'status', 'source', 'subtotal', 'shipping_cost', 'discount', 'shipping_discount', 'manual_discount', 'total', 'total_weight',
     'voucher_id', 'voucher_code',
     'service_fee', 'tax_label', 'tax_rate', 'tax_inclusive', 'tax_dpp_other', 'tax_base', 'tax_amount', 'rounding',
-    'payment_method', 'payment_fee', 'gateway_fee',
+    'payment_method', 'payment_fee', 'gateway_fee', 'payment_reference',
     'billing_name', 'billing_npwp', 'billing_address', 'billing_email',
     'recipient_name', 'recipient_phone', 'shipping_address', 'destination_id',
     'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes', 'payment_due_at',
@@ -164,6 +164,26 @@ class Order extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Staf yang mencatat pembayaran di luar Midtrans. */
+    public function paymentRecorder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'payment_recorded_by');
+    }
+
+    /** Cara bayar di luar Midtrans yang bisa dicatat staf (nilai orders.payment_method). */
+    public const OFFLINE_METHODS = [
+        'cash' => 'Tunai',
+        'bank_transfer' => 'Transfer bank langsung',
+        'edc' => 'Kartu via EDC',
+        'other' => 'Lainnya',
+    ];
+
+    /** Lunas lewat pembayaran yang dicatat staf (bukan Midtrans). */
+    public function isOfflinePaid(): bool
+    {
+        return $this->paid_at !== null && ($this->payment_method === 'manual' || array_key_exists((string) $this->payment_method, self::OFFLINE_METHODS));
     }
 
     public const SOURCE_WEBSITE = 'website';

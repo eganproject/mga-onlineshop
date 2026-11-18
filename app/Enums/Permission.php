@@ -11,6 +11,7 @@ enum Permission: string
     case OrdersView = 'orders.view';
     case OrdersManage = 'orders.manage';
     case OrdersCreate = 'orders.create';
+    case PaymentsRecord = 'payments.record';
     case CatalogManage = 'catalog.manage';
     case StockManage = 'stock.manage';
     case PromosManage = 'promos.manage';
@@ -31,6 +32,7 @@ enum Permission: string
             self::OrdersView => 'Lihat pesanan, invoice & packing slip',
             self::OrdersManage => 'Proses pesanan (status & resi)',
             self::OrdersCreate => 'Buat penjualan manual & tagihan pembayaran (QRIS/VA)',
+            self::PaymentsRecord => 'Catat pembayaran di luar Midtrans (tunai, transfer, EDC)',
             self::CatalogManage => 'Kelola produk & kategori',
             self::StockManage => 'Kelola stok',
             self::PromosManage => 'Kelola promo, voucher & banner',
@@ -51,7 +53,7 @@ enum Permission: string
     public function group(): string
     {
         return match ($this) {
-            self::OrdersView, self::OrdersManage, self::OrdersCreate => 'Pesanan',
+            self::OrdersView, self::OrdersManage, self::OrdersCreate, self::PaymentsRecord => 'Pesanan',
             self::CatalogManage, self::StockManage, self::ReviewsManage => 'Katalog & stok',
             self::PromosManage, self::ArticlesManage => 'Promosi & konten',
             self::CustomersView, self::CustomersManage => 'Pelanggan',
@@ -67,6 +69,7 @@ enum Permission: string
             self::OrdersView => 'Menu Pesanan: daftar & detail pesanan, cetak invoice dan packing slip.',
             self::OrdersManage => 'Ubah status pesanan dan input nomor resi.',
             self::OrdersCreate => 'Penjualan manual, kartu tagihan QRIS/VA dan tombol kirim ke gudang di detail pesanan.',
+            self::PaymentsRecord => 'Kartu “Catat pembayaran” di detail pesanan: tandai lunas bila pembeli membayar tunai, transfer langsung ke rekening toko, EDC, dll.',
             self::CatalogManage => 'Menu Produk & Kategori, termasuk impor/ekspor produk.',
             self::StockManage => 'Menu Stok: ubah stok, impor stok massal, sinkron gudang.',
             self::PromosManage => 'Menu Voucher, Banner & Tampilan Beranda.',
@@ -98,7 +101,7 @@ enum Permission: string
     public function requires(): array
     {
         return match ($this) {
-            self::OrdersManage, self::OrdersCreate => [self::OrdersView],
+            self::OrdersManage, self::OrdersCreate, self::PaymentsRecord => [self::OrdersView],
             self::CustomersManage => [self::CustomersView],
             default => [],
         };

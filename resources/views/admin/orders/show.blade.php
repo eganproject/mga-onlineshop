@@ -20,6 +20,11 @@
             @if ($billing)
                 @include('admin.orders.partials.billing')
             @endif
+            @if ($order->status === \App\Enums\OrderStatus::PendingPayment)
+                @can('payments.record')
+                    @include('admin.orders.partials.offline-payment')
+                @endcan
+            @endif
 
             <div class="card overflow-hidden">
                 <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Item pesanan</h2></div>
@@ -55,6 +60,25 @@
 
             <div class="card overflow-hidden">
                 <div class="border-b border-stone-100 p-5"><h2 class="font-bold text-stone-900">Riwayat pembayaran</h2></div>
+                @if ($order->isOfflinePaid())
+                    <div class="flex flex-wrap items-start justify-between gap-3 border-b border-stone-100 bg-emerald-50/40 p-5 text-sm">
+                        <div class="min-w-0">
+                            <p class="font-semibold text-stone-800">{{ $order->paymentMethodLabel() }} <span class="font-normal text-stone-500">· dicatat staf</span></p>
+                            <p class="text-xs text-stone-500">
+                                {{ $order->paid_at->timezone(config('app.timezone'))->translatedFormat('d M Y, H:i') }}
+                                @if ($order->payment_reference) · ref. {{ $order->payment_reference }} @endif
+                                @if ($order->paymentRecorder) · oleh {{ $order->paymentRecorder->name }} @endif
+                            </p>
+                            @if ($order->payment_proof)
+                                <a href="{{ route('admin.orders.payment-proof', $order) }}" target="_blank" rel="noopener" class="link-underline mt-1 inline-flex items-center gap-1 text-xs font-semibold text-brand-700"><x-icon name="photo" class="size-3.5" /> Lihat bukti bayar</a>
+                            @endif
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold">@rupiah($order->total)</p>
+                            <p class="text-xs text-emerald-700">Lunas</p>
+                        </div>
+                    </div>
+                @endif
                 @forelse ($order->payments as $payment)
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 p-5 last:border-0 text-sm">
                         <div>
@@ -67,7 +91,9 @@
                         </div>
                     </div>
                 @empty
-                    <p class="p-5 text-sm text-stone-500">Belum ada pembayaran.</p>
+                    @unless ($order->isOfflinePaid())
+                        <p class="p-5 text-sm text-stone-500">Belum ada pembayaran.</p>
+                    @endunless
                 @endforelse
             </div>
 

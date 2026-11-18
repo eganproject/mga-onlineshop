@@ -17,6 +17,11 @@ use Tests\TestCase;
 /** Penjualan manual lunas → Outbound Manual di warehouse29 (POST /api/v1/outbound-manuals). */
 class WarehouseOutboundTest extends TestCase
 {
+    private function cashPayment(array $overrides = []): array
+    {
+        return $overrides + ['method' => 'cash', 'paid_at' => now()->format('Y-m-d\\TH:i')];
+    }
+
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -57,7 +62,7 @@ class WarehouseOutboundTest extends TestCase
 
         Http::assertNothingSent(); // belum lunas
 
-        $this->post(route('admin.orders.payment.paid', $order))->assertSessionHas('success');
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment())->assertSessionHas('success');
 
         Http::assertSent(function (Request $request) use ($order) {
             return $request->method() === 'POST'
@@ -80,7 +85,7 @@ class WarehouseOutboundTest extends TestCase
         Http::fake(['gudang.test/*' => Http::response(['success' => false, 'error' => ['code' => 'DUPLICATE_REF_NO', 'message' => 'sudah ada']] + $this->outboundResponse(), 409)]);
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
         $order = $this->manualOrder($product);
-        $this->post(route('admin.orders.payment.paid', $order));
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment());
 
         $this->assertSame(Order::OUTBOUND_PENDING, $order->refresh()->warehouse_outbound_status);
         Http::assertSentCount(1);
@@ -132,7 +137,7 @@ class WarehouseOutboundTest extends TestCase
             ->push($this->outboundResponse(), 201);
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
         $order = $this->manualOrder($product);
-        $this->post(route('admin.orders.payment.paid', $order));
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment());
 
         $order->refresh();
         $this->assertSame(Order::OUTBOUND_FAILED, $order->warehouse_outbound_status);
@@ -148,7 +153,7 @@ class WarehouseOutboundTest extends TestCase
         Http::fake(['gudang.test/api/v1/outbound-manuals' => Http::response($this->outboundResponse(), 201)]);
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
         $order = $this->manualOrder($product, 4);
-        $this->post(route('admin.orders.payment.paid', $order));
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment());
 
         $sync = app(WarehouseStockSync::class);
         $this->assertSame(4, $sync->reservedQuantities()['p'.$product->id] ?? 0);
@@ -167,7 +172,7 @@ class WarehouseOutboundTest extends TestCase
         Http::fake(['gudang.test/api/v1/outbound-manuals' => Http::response($this->outboundResponse(), 201)]);
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10]);
         $order = $this->manualOrder($product);
-        $this->post(route('admin.orders.payment.paid', $order));
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment());
 
         Http::fake(['gudang.test/api/v1/outbound-manuals/*' => Http::response(['success' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'x']], 404)]);
         $this->post(route('admin.orders.warehouse.refresh', $order))->assertSessionHas('success');
@@ -175,7 +180,7 @@ class WarehouseOutboundTest extends TestCase
 
         config(['services.warehouse.outbound_enabled' => false]);
         $other = $this->manualOrder($product);
-        $this->post(route('admin.orders.payment.paid', $other));
+        $this->post(route('admin.orders.offline-payment', $other), $this->cashPayment());
         $this->assertNull($other->refresh()->warehouse_outbound_status);
     }
 
@@ -184,7 +189,7 @@ class WarehouseOutboundTest extends TestCase
         Http::fake();
         $product = Product::factory()->create(['price' => 10_000, 'stock' => 10, 'sku' => null]);
         $order = $this->manualOrder($product);
-        $this->post(route('admin.orders.payment.paid', $order));
+        $this->post(route('admin.orders.offline-payment', $order), $this->cashPayment());
 
         $order->refresh();
         $this->assertSame(Order::OUTBOUND_FAILED, $order->warehouse_outbound_status);
