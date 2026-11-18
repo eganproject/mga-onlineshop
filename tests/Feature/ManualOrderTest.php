@@ -118,6 +118,45 @@ class ManualOrderTest extends TestCase
         $this->assertSame(1, $product->refresh()->stock);
     }
 
+    public function test_staff_can_override_unit_price_per_line(): void
+    {
+        $product = Product::factory()->create(['price' => 20_000, 'stock' => 100, 'sku' => 'NEGO-1', 'wholesale_tiers' => [['min_qty' => 10, 'price' => 15_000]]]);
+        $other = Product::factory()->create(['price' => 30_000, 'stock' => 10]);
+        $this->actingAs($this->staff());
+
+        $items = [
+            ['product_id' => $product->id, 'quantity' => 10, 'price' => 12_500],
+            ['product_id' => $other->id, 'quantity' => 1, 'price' => null],
+        ];
+
+        $quote = $this->postJson(route('admin.orders.manual.quote'), ['items' => $items, 'shipping_mode' => 'pickup'])->assertOk()->json();
+        $this->assertSame(12_500, $quote['lines'][0]['price']);
+        $this->assertSame(15_000, $quote['lines'][0]['web_price']);
+        $this->assertTrue($quote['lines'][0]['custom']);
+        $this->assertNull($quote['lines'][0]['regular_price']);
+        $this->assertFalse($quote['lines'][1]['custom']);
+        $this->assertSame(125_000 + 30_000, $quote['total']);
+
+        $this->post(route('admin.orders.store'), $this->payload($product, ['items' => $items]))->assertSessionHasNoErrors();
+
+        $order = Order::sole();
+        $this->assertSame(155_000, $order->subtotal);
+        $this->assertSame(155_000, $order->total);
+        $line = $order->items->firstWhere('product_id', $product->id);
+        $this->assertSame(12_500, $line->price);
+        $this->assertSame(125_000, $line->subtotal);
+        $this->assertSame(15_000, $line->list_price);
+        $this->assertTrue($line->hasCustomPrice());
+        $this->assertFalse($line->isWholesale());
+        $this->assertSame(-25_000, $line->customPriceDifference());
+        $this->assertNull($order->items->firstWhere('product_id', $other->id)->list_price);
+
+        $this->get(route('admin.orders.show', $order))->assertOk()->assertSee('Harga diubah');
+
+        $this->post(route('admin.orders.store'), $this->payload($product, ['items' => [['product_id' => $product->id, 'quantity' => 1, 'price' => 0]]]))
+            ->assertSessionHasErrors('items.0.price');
+    }
+
     public function test_quote_previews_wholesale_voucher_and_problems(): void
     {
         $product = Product::factory()->create(['price' => 20_000, 'stock' => 100, 'wholesale_tiers' => [['min_qty' => 10, 'price' => 15_000]]]);

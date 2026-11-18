@@ -31,7 +31,7 @@ use Illuminate\Validation\ValidationException;
  * dipotong dan kembali otomatis bila pesanan batal/kedaluwarsa.
  *
  * Data masukan (sudah divalidasi Admin\ManualOrderController):
- *   items[]: product_id, variant_id?, quantity
+ *   items[]: product_id, variant_id?, quantity, price? (kosong = harga web)
  *   customer_name, customer_phone, customer_email?
  *   shipping_mode: courier | custom | pickup
  *     courier: province_id, city_id, district_id, postal_code?, address_line, rate (mis. "jne|REG")
@@ -244,8 +244,12 @@ class ManualOrderService
             }
 
             $regularPrice = Wholesale::regularPrice($product, $variant);
-            $price = Wholesale::unitPrice($product, $variant, (int) $productTotals[$product->id]);
-            $isWholesale = $price < $regularPrice;
+            $webPrice = Wholesale::unitPrice($product, $variant, (int) $productTotals[$product->id]);
+            $custom = filled($item['price'] ?? null) && (int) $item['price'] > 0 && (int) $item['price'] !== $webPrice;
+            // Harga diubah staf: berlaku apa adanya (bukan grosir), harga web disimpan untuk laporan.
+            $price = $custom ? (int) $item['price'] : $webPrice;
+            $listPrice = $custom ? $webPrice : null;
+            $isWholesale = ! $custom && $price < $regularPrice;
             $unitWeight = $variant?->weight ?: $product->weight;
             $lineSubtotal = $price * $quantity;
 
@@ -255,7 +259,7 @@ class ManualOrderService
                 $voucherSubtotal += $lineSubtotal;
             }
 
-            $lines[$index] = ['price' => $price, 'regular_price' => $isWholesale ? $regularPrice : null, 'subtotal' => $lineSubtotal];
+            $lines[$index] = ['price' => $price, 'web_price' => $webPrice, 'custom' => $custom, 'regular_price' => $isWholesale ? $regularPrice : null, 'subtotal' => $lineSubtotal];
             $rows[] = [
                 'product' => $product,
                 'variant' => $variant,
@@ -268,6 +272,7 @@ class ManualOrderService
                     'sku' => $variant?->sku ?: $product->sku,
                     'price' => $price,
                     'regular_price' => $isWholesale ? $regularPrice : null,
+                    'list_price' => $listPrice,
                     'quantity' => $quantity,
                     'weight' => $unitWeight,
                     'subtotal' => $lineSubtotal,

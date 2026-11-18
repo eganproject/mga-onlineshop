@@ -127,6 +127,7 @@ class ManualOrderController extends Controller
             'items.*.product_id' => ['required', 'integer'],
             'items.*.variant_id' => ['nullable', 'integer'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
+            'items.*.price' => ['nullable', 'integer', 'min:1', 'max:10000000000'],
             'customer_name' => [$required, 'string', 'max:255'],
             'customer_phone' => [$required, 'string', 'max:20'],
             'customer_email' => ['nullable', 'email', 'max:255'],
@@ -149,6 +150,8 @@ class ManualOrderController extends Controller
     {
         return [
             'items.required' => 'Tambahkan minimal satu produk.',
+            'items.*.price.min' => 'Harga minimal Rp1. Kosongkan untuk memakai harga web.',
+            'items.*.price.integer' => 'Harga harus berupa angka.',
             'customer_name.required' => 'Isi nama pembeli.',
             'customer_phone.required' => 'Isi nomor HP pembeli.',
             'district_id.required_if' => 'Pilih kecamatan tujuan.',
