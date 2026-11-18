@@ -32,8 +32,12 @@ class StockController extends Controller
 
         $query = Product::with(['variants', 'category'])
             ->search($request->string('q')->trim()->value() ?: null)
-            ->when($status === 'menipis', fn ($q) => $stockFilter($q, '<=', $threshold))
-            ->when($status === 'habis', fn ($q) => $stockFilter($q, '=', 0));
+            // Menipis/habis hanya produk aktif, sama dengan angka di kartu ringkasan.
+            ->when($status === 'menipis', fn ($q) => $stockFilter($q->where('is_active', true), '<=', $threshold))
+            ->when($status === 'habis', fn ($q) => $stockFilter($q->where('is_active', true), '=', 0))
+            ->when($status === 'nonaktif', fn ($q) => $q->where('is_active', false))
+            // Produk nonaktif (mis. katalog tanpa harga) di bawah supaya tidak menutupi yang dijual.
+            ->orderByDesc('is_active');
 
         AdminList::sort($query, $request, [
             'stok' => fn ($q, $dir) => $q->orderBy('stock', $dir)->orderBy('name'),

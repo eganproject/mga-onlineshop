@@ -119,6 +119,19 @@ class ProductRequest extends FormRequest
                 $validator->errors()->add('images', 'Maksimal '.self::MAX_IMAGES.' foto per produk.');
             }
 
+            // Produk aktif harus punya harga, supaya tidak bisa dibeli gratis (Rp0).
+            if ($this->boolean('is_active')) {
+                if (! $this->boolean('has_variants') && (int) $this->input('price') < 1) {
+                    $validator->errors()->add('price', 'Isi harga jual dulu, atau matikan "Aktif" bila produk belum dijual.');
+                }
+
+                foreach ($this->boolean('has_variants') ? $this->input('variants', []) : [] as $i => $variant) {
+                    if (filter_var($variant['is_active'] ?? false, FILTER_VALIDATE_BOOL) && (int) ($variant['price'] ?? 0) < 1) {
+                        $validator->errors()->add("variants.{$i}.price", "Isi harga varian {$variant['name']}, atau nonaktifkan variannya.");
+                    }
+                }
+            }
+
             if (! $this->boolean('has_variants') && ($problem = self::tierProblem($this->input('wholesale_tiers', []), (int) $this->input('price')))) {
                 $validator->errors()->add('wholesale_tiers', "Harga grosir: {$problem}");
             }

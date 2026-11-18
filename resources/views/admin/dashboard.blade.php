@@ -11,7 +11,8 @@
             <h1 class="text-2xl font-extrabold tracking-tight text-stone-900">Halo, {{ \Illuminate\Support\Str::words(auth()->user()->name, 1, '') }}! ☕</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            @if ($user->can('reports.view') || $user->can('orders.view'))
+            {{-- Periode hanya mengubah angka penjualan, jadi tanpa akses laporan tidak ditampilkan. --}}
+            @if ($user->can('reports.view'))
             <nav class="inline-flex rounded-xl border border-stone-200 bg-white p-1 text-xs font-semibold" aria-label="Periode dashboard">
                 @foreach (\App\Http\Controllers\Admin\DashboardController::RANGES as $key => $label)
                     <a href="{{ route('admin.dashboard', ['range' => $key]) }}" @if ($range === $key) aria-current="page" @endif
@@ -79,7 +80,7 @@
                     <p class="font-bold text-stone-900 tabular-nums">{{ $fmt($customers['total']) }}</p>
                 </div>
                 <div>
-                    <p class="text-xs text-stone-500">Pelanggan baru</p>
+                    <p class="text-xs text-stone-500">Pelanggan baru ({{ $period->days() }} hari)</p>
                     <p class="font-bold text-stone-900 tabular-nums">+{{ $fmt($customers['new']) }}</p>
                 </div>
             </div>
@@ -187,7 +188,7 @@
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($recentOrders as $order)
                             <tr class="hover:bg-stone-50/50">
-                                <td class="whitespace-nowrap"><a href="{{ route('admin.orders.show', $order) }}" class="font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}<span class="sm:hidden"> · {{ $order->customerName() }}</span></p><div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div></td>
+                                <td class="sm:whitespace-nowrap"><a href="{{ route('admin.orders.show', $order) }}" class="whitespace-nowrap font-semibold text-stone-900 hover:text-brand-700">{{ $order->code }}</a><p class="text-xs text-stone-500">{{ $order->created_at->diffForHumans() }}<span class="sm:hidden"> · {{ $order->customerName() }}</span></p><div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div></td>
                                 <td class="hidden sm:table-cell">{{ $order->customerName() }}</td>
                                 <td class="font-semibold whitespace-nowrap tabular-nums">@rupiah($order->total)</td>
                                 <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>

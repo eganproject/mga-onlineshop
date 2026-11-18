@@ -95,6 +95,64 @@ class AdminPanelTest extends TestCase
         $this->assertModelMissing($product);
     }
 
+    public function test_active_product_needs_a_price(): void
+    {
+        $product = Product::factory()->create(['is_active' => false]);
+
+        $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+            'name' => $product->name, 'price' => 0, 'stock' => 3, 'weight' => 10, 'is_active' => 1,
+        ])->assertSessionHasErrors('price');
+        $this->assertFalse($product->refresh()->is_active);
+
+        // Nonaktif tanpa harga tetap boleh disimpan (katalog yang belum dijual).
+        $this->put(route('admin.products.update', $product), [
+            'name' => 'Belum dijual', 'price' => 0, 'stock' => 3, 'weight' => 10, 'is_active' => 0,
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('Belum dijual', $product->refresh()->name);
+    }
+
+    public function test_active_variant_needs_a_price(): void
+    {
+        $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'name' => 'Kotak Varian', 'weight' => 100, 'is_active' => 1, 'has_variants' => 1,
+            'variants' => [
+                ['name' => 'Kecil', 'price' => '10.000', 'stock' => 1, 'is_active' => 1],
+                ['name' => 'Besar', 'price' => '0', 'stock' => 1, 'is_active' => 1],
+                ['name' => 'Jumbo', 'price' => '0', 'stock' => 1],
+            ],
+        ])->assertSessionHasErrors('variants.1.price')->assertSessionDoesntHaveErrors('variants.2.price');
+    }
+
+    public function test_bulk_activate_skips_products_without_price(): void
+    {
+        $priced = Product::factory()->create(['is_active' => false, 'price' => 5000]);
+        $free = Product::factory()->create(['is_active' => false, 'price' => 0]);
+
+        $this->actingAs($this->admin)->post(route('admin.products.bulk'), ['action' => 'activate', 'ids' => [$priced->id, $free->id]])
+            ->assertSessionHas('success', '1 produk diaktifkan.')
+            ->assertSessionHas('warning');
+
+        $this->assertTrue($priced->refresh()->is_active);
+        $this->assertFalse($free->refresh()->is_active);
+    }
+
+    public function test_stock_low_filter_matches_summary_and_ignores_inactive_products(): void
+    {
+        Product::factory()->create(['name' => 'Habis Aktif', 'stock' => 0, 'is_active' => true]);
+        Product::factory()->create(['name' => 'Katalog Nonaktif', 'stock' => 0, 'is_active' => false]);
+
+        $this->actingAs($this->admin)->get(route('admin.stock.index', ['status' => 'habis']))
+            ->assertOk()->assertSee('Habis Aktif')->assertDontSee('Katalog Nonaktif');
+        $this->get(route('admin.stock.index', ['status' => 'nonaktif']))
+            ->assertOk()->assertSee('Katalog Nonaktif')->assertDontSee('Habis Aktif');
+    }
+
+    public function test_validation_messages_start_with_capital_letter(): void
+    {
+        $this->actingAs($this->admin)->post(route('admin.categories.store'), [])
+            ->assertSessionHasErrors(['name' => 'Nama kategori wajib diisi.']);
+    }
+
     public function test_admin_can_manage_categories(): void
     {
         $this->actingAs($this->admin)->post(route('admin.categories.store'), [

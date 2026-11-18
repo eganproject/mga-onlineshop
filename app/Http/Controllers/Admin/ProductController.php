@@ -100,6 +100,10 @@ class ProductController extends Controller
 
         $products = Product::whereKey($data['ids'])->get();
 
+        // Produk tanpa harga (Rp0) tidak ikut diaktifkan supaya tidak bisa dibeli gratis.
+        $skipped = $data['action'] === 'activate' ? $products->filter(fn (Product $p) => $p->price < 1) : collect();
+        $products = $products->diff($skipped);
+
         match ($data['action']) {
             'activate' => Product::whereKey($products->modelKeys())->update(['is_active' => true]),
             'deactivate' => Product::whereKey($products->modelKeys())->update(['is_active' => false]),
@@ -108,7 +112,20 @@ class ProductController extends Controller
             'delete' => $products->each(fn (Product $p) => $this->products->delete($p)),
         };
 
-        return back()->with('success', "{$products->count()} produk diperbarui.");
+        $verb = match ($data['action']) {
+            'activate' => 'diaktifkan',
+            'deactivate' => 'dinonaktifkan',
+            'feature' => 'dijadikan unggulan',
+            'unfeature' => 'dihapus dari unggulan',
+            'delete' => 'dihapus',
+        };
+        $redirect = back();
+
+        if ($skipped->isNotEmpty()) {
+            $redirect->with('warning', "{$skipped->count()} produk belum punya harga, jadi tidak diaktifkan: ".$skipped->pluck('name')->take(3)->implode(', ').($skipped->count() > 3 ? ', …' : '').'.');
+        }
+
+        return $products->isEmpty() ? $redirect : $redirect->with('success', "{$products->count()} produk {$verb}.");
     }
 
     /** Kategori induk diikuti subkategorinya, untuk dropdown. */

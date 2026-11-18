@@ -43,6 +43,8 @@ class ActivityLogController extends Controller
 
         return view('admin.activity.index', [
             'logs' => AdminList::paginate(ActivityLog::query()
+                // Baris lama dari pratinjau hitungan (bukan perubahan data) tidak ditampilkan.
+                ->whereNotIn('action', ['billing.preview', 'orders.manual.quote'])
                 ->with('user:id,name,staff_role,role')
                 ->when($request->filled('staf'), fn ($q) => $q->where('user_id', $request->integer('staf')))
                 ->when(is_string($group) && array_key_exists($group, self::GROUPS), fn ($q) => $q->where('action', 'like', "{$group}.%"))

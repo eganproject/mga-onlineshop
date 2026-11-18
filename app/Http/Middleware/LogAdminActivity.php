@@ -53,6 +53,23 @@ class LogAdminActivity
         'admin.integrations.test' => 'Tes koneksi integrasi',
         'admin.profile.update' => 'Mengubah profil sendiri',
         'admin.profile.password' => 'Mengganti password sendiri',
+        'admin.articles.images' => 'Mengunggah gambar artikel',
+        'admin.imports.store' => 'Mengunggah file impor',
+        'admin.imports.commit' => 'Menjalankan impor',
+        'admin.imports.destroy' => 'Membatalkan impor',
+        'admin.storefront.update' => 'Mengubah tampilan beranda',
+        'admin.storefront.best-sellers' => 'Mengatur produk Best Seller',
+        'admin.orders.payment.check' => 'Cek status tagihan',
+        'admin.orders.warehouse.refresh' => 'Cek status kiriman gudang',
+    ];
+
+    /**
+     * Route POST yang hanya menghitung/menampilkan (tidak mengubah data). Tanpa ini log
+     * penuh baris teknis seperti "billing.preview" tiap kali staf mengetik di form.
+     */
+    private const READ_ONLY = [
+        'admin.billing.preview',
+        'admin.orders.manual.quote',
     ];
 
     public function __construct(private readonly ActivityLogger $logger) {}
@@ -79,7 +96,8 @@ class LogAdminActivity
 
     private function shouldLog(Request $request, Response $response): bool
     {
-        if ($request->isMethodSafe() || ! $request->user() || $this->logger->loggedThisRequest()) {
+        if ($request->isMethodSafe() || ! $request->user() || $this->logger->loggedThisRequest()
+            || in_array($request->route()?->getName(), self::READ_ONLY, true)) {
             return false;
         }
 

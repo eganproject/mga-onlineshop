@@ -3,7 +3,7 @@
 @endphp
 <x-layouts.admin title="Sinkron stok gudang">
     <x-admin.page-header title="Sinkron stok gudang" description="Stok toko ditarik dari warehouse29 dan dicocokkan per SKU. Stok toko = stok gudang dikurangi pesanan website yang belum dikirim.">
-        <a href="{{ route('admin.stock.index') }}" class="btn btn-secondary"><x-icon name="arrow-left" class="size-4" /> Kembali ke stok</a>
+        <a href="{{ route('admin.stock.index') }}" class="btn btn-secondary whitespace-nowrap"><x-icon name="arrow-left" class="size-4" /> Kembali ke stok</a>
         @if ($configured)
             <form method="POST" action="{{ route('admin.stock.warehouse.sync') }}" data-confirm="Tarik ulang semua SKU dari gudang? Stok semua produk yang terhubung disamakan dengan gudang." data-confirm-title="Sinkron penuh" data-confirm-ok="Tarik semua">
                 @csrf
@@ -87,7 +87,7 @@
 
         @if ($items->isEmpty())
             @if ($counts['items'] === 0 && ! $lastSuccess)
-                <x-empty-state icon="archive" title="Belum ada data gudang" description="Tekan “Sinkron sekarang” untuk menarik daftar SKU dari warehouse29." />
+                <x-empty-state icon="archive" title="Belum ada data gudang" description="{{ $configured ? 'Tekan “Sinkron sekarang” untuk menarik daftar SKU dari warehouse29.' : 'Isi URL & token API warehouse29 di Integrasi dulu, lalu tekan “Sinkron sekarang” di halaman ini.' }}" />
             @elseif ($tab === 'belum')
                 <x-empty-state icon="check-circle" title="Semua SKU gudang sudah terhubung" description="Stok produk yang terhubung ikut berubah setiap kali stok di gudang berubah." />
             @else

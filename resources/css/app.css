@@ -109,6 +109,10 @@
     .label {
         @apply mb-1.5 block text-sm font-medium text-stone-700;
     }
+    /* Ruang untuk panah dropdown bawaan supaya teks pilihan tidak menabraknya. */
+    select.input {
+        @apply pr-9;
+    }
     .input {
         @apply block w-full rounded-xl border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-900 shadow-xs placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15;
     }
@@ -133,13 +137,15 @@
     /* Label + ikon tooltip sebaris (dipakai x-form.field & label manual). */
     /* Label + ikon (?): ikon ikut di ujung teks label, juga saat label turun ke baris kedua di HP. */
     .label-row {
-        @apply mb-1.5 block;
+        @apply mb-1.5 block text-sm/5;
     }
     .label-row > .label {
         @apply mb-0 inline;
     }
+    /* Setinggi satu baris teks (h-5, rata atas) supaya baris label tidak lebih tinggi dari
+       .label polos: input di kolom sebelahnya (dengan/tanpa tooltip) tetap sejajar. */
     .label-row > .tip {
-        @apply ml-1 align-middle;
+        @apply ml-1 h-5 items-center align-top;
     }
     .tip-trigger {
         @apply relative -my-1 inline-grid size-6 cursor-help place-items-center rounded-full text-stone-400 transition-colors hover:text-brand-600 focus-visible:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 aria-expanded:text-brand-600;

@@ -34,6 +34,19 @@ class ActivityLogTest extends TestCase
         $this->assertArrayNotHasKey('_token', $log->properties);
     }
 
+    public function test_read_only_previews_are_not_logged(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $product = \App\Models\Product::factory()->create(['price' => 20_000, 'stock' => 5]);
+
+        $this->actingAs($admin)->postJson(route('admin.orders.manual.quote'), [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]], 'shipping_mode' => 'pickup',
+        ])->assertOk();
+
+        $this->assertSame(0, ActivityLog::count());
+    }
+
     public function test_reads_failed_validation_and_forbidden_actions_are_not_logged(): void
     {
         $staff = User::factory()->staff(StaffRole::CustomerService)->create();
