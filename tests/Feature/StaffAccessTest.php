@@ -15,6 +15,30 @@ class StaffAccessTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_cancelling_orders_needs_its_own_permission(): void
+    {
+        $order = Order::factory()->create(['status' => OrderStatus::Paid, 'paid_at' => now()]);
+
+        // Staf Gudang memproses pesanan tapi tidak boleh membatalkan.
+        $warehouse = User::factory()->staff(StaffRole::Warehouse)->create();
+        $this->actingAs($warehouse)->get(route('admin.orders.show', $order))->assertOk()
+            ->assertSee('Diproses')->assertDontSee('value="cancelled"', false);
+        $this->patch(route('admin.orders.status', $order), ['status' => OrderStatus::Cancelled->value, 'note' => 'Stok habis'])->assertForbidden();
+        $this->assertSame(OrderStatus::Paid, $order->fresh()->status);
+
+        // Jabatan khusus yang hanya boleh membatalkan: tidak bisa memproses.
+        \App\Models\Role::findByKey('cs')->update(['permissions' => ['orders.view', 'orders.cancel']]);
+        $canceller = User::factory()->staff(StaffRole::CustomerService)->create();
+        $this->actingAs($canceller)->get(route('admin.orders.show', $order))->assertOk()
+            ->assertSee('value="cancelled"', false)->assertDontSee('value="processing"', false);
+        $this->patch(route('admin.orders.status', $order), ['status' => OrderStatus::Processing->value])->assertForbidden();
+        $this->patch(route('admin.orders.status', $order), ['status' => OrderStatus::Cancelled->value, 'note' => 'Stok habis'])->assertRedirect();
+        $this->assertSame(OrderStatus::Cancelled, $order->fresh()->status);
+
+        // Admin bawaan tetap bisa membatalkan.
+        $this->assertTrue(User::factory()->staff(StaffRole::Admin)->create()->can('orders.cancel'));
+    }
+
     public function test_warehouse_staff_can_process_orders_and_stock_but_not_catalog_or_reports(): void
     {
         $staff = User::factory()->staff(StaffRole::Warehouse)->create();
