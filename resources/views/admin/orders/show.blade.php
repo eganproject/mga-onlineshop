@@ -38,6 +38,9 @@
                                     @if ($item->isWholesale())
                                         <span class="badge bg-accent-50 text-accent-700">Grosir</span> <span class="text-stone-400 line-through">{{ \App\Support\Money::rupiah($item->regular_price) }}</span>
                                     @endif
+                                    @if ($item->hasCustomPrice())
+                                        <span class="badge bg-brand-50 text-brand-700" title="Harga diubah staf saat penjualan manual">Harga diubah</span> <span class="text-stone-400">web {{ \App\Support\Money::rupiah($item->list_price) }}</span>
+                                    @endif
                                 </p>
                                 <p class="mt-1 font-semibold text-stone-900 sm:hidden">@rupiah($item->subtotal)</p>
                             </div>

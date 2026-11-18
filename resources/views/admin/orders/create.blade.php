@@ -20,7 +20,7 @@
                 <div class="flex items-center gap-1.5">
                     <h2 class="font-bold text-stone-900">Produk</h2>
                     <x-tooltip label="Produk" text="Cari nama atau SKU. Harga grosir otomatis dipakai sesuai jumlah, dan stok langsung dipotong saat pesanan disimpan."
-                               :tips="['Stok kembali otomatis bila pesanan dibatalkan atau tidak dibayar sampai batas waktu.']" />
+                               :tips="['Harga per pcs bisa diubah per baris (harga nego). Kosongkan untuk memakai harga web; harga yang diubah tidak memakai tingkat grosir.', 'Stok kembali otomatis bila pesanan dibatalkan atau tidak dibayar sampai batas waktu.']" />
                 </div>
 
                 <div class="relative mt-4" x-on:click.outside="searchOpen = false">
@@ -73,8 +73,9 @@
                                     <p class="mt-1 text-xs text-stone-500">
                                         Stok <span x-text="stockOf(line)"></span>
                                         <template x-if="linePrice(index)">
-                                            <span>· <span x-text="rupiah(linePrice(index).price)"></span>/pcs
+                                            <span>· harga web <span x-text="rupiah(linePrice(index).web_price)" x-bind:class="linePrice(index).custom && 'line-through'"></span>/pcs
                                                 <span x-show="linePrice(index).regular_price" class="font-semibold text-accent-700">grosir</span>
+                                                <span x-show="linePrice(index).custom" class="font-semibold text-brand-700">· harga diubah</span>
                                             </span>
                                         </template>
                                     </p>
@@ -88,6 +89,17 @@
                                     </div>
                                     <p class="text-sm font-semibold text-stone-900 tabular-nums" x-text="linePrice(index) ? rupiah(linePrice(index).subtotal) : '—'"></p>
                                 </div>
+                            </div>
+                            <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1" x-bind:class="line.product.image && 'sm:pl-15'">
+                                <label class="relative block w-44">
+                                    <span class="sr-only">Harga per pcs</span>
+                                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-stone-400">Rp</span>
+                                    <input type="number" min="1" step="1" inputmode="numeric" x-model="line.price" x-bind:name="`items[${index}][price]`"
+                                           x-bind:placeholder="linePrice(index) ? linePrice(index).web_price : 'Harga web'"
+                                           class="input appearance-none py-1.5 pl-9 text-sm tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]" aria-label="Harga per pcs">
+                                </label>
+                                <span class="text-xs text-stone-500">/pcs · kosongkan = harga web</span>
+                                <button type="button" x-show="line.price !== '' && line.price !== null" x-on:click="line.price = ''" class="link-underline text-xs font-semibold text-stone-500 hover:text-ink">Pakai harga web</button>
                             </div>
                         </li>
                     </template>

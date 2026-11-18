@@ -38,7 +38,7 @@ export default function manualOrder({ urls, old = {} }) {
                 const products = await this.fetchProducts({ ids: items.map((i) => i.product_id).join(',') });
                 items.forEach((item) => {
                     const product = products.find((p) => String(p.id) === String(item.product_id));
-                    if (product) this.lines.push({ key: crypto.randomUUID?.() ?? Math.random(), product, variantId: item.variant_id ? String(item.variant_id) : '', quantity: Number(item.quantity) || 1 });
+                    if (product) this.lines.push({ key: crypto.randomUUID?.() ?? Math.random(), product, variantId: item.variant_id ? String(item.variant_id) : '', quantity: Number(item.quantity) || 1, price: item.price ? Number(item.price) : '' });
                 });
             }
             ['mode', 'voucherCode', 'manualDiscount', 'shippingCost', 'courierName', 'customerEmail', 'rate'].forEach((field) =>
@@ -75,7 +75,7 @@ export default function manualOrder({ urls, old = {} }) {
                 existing.quantity++;
             } else {
                 const firstVariant = product.variants.find((v) => v.active && v.stock > 0);
-                this.lines.push({ key: crypto.randomUUID?.() ?? Math.random(), product, variantId: firstVariant ? String(firstVariant.id) : '', quantity: 1 });
+                this.lines.push({ key: crypto.randomUUID?.() ?? Math.random(), product, variantId: firstVariant ? String(firstVariant.id) : '', quantity: 1, price: '' });
             }
             this.query = '';
             this.searchOpen = false;
@@ -129,7 +129,7 @@ export default function manualOrder({ urls, old = {} }) {
 
         payload() {
             return {
-                items: this.lines.map((l) => ({ product_id: l.product.id, variant_id: l.variantId || null, quantity: Number(l.quantity) || 0 })),
+                items: this.lines.map((l) => ({ product_id: l.product.id, variant_id: l.variantId || null, quantity: Number(l.quantity) || 0, price: Number(l.price) > 0 ? Number(l.price) : null })),
                 customer_email: this.customerEmail || null,
                 shipping_mode: this.mode,
                 district_id: this.destination || null,
