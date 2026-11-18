@@ -89,6 +89,9 @@ class OrderController extends Controller
             'note.required' => 'Tulis alasan pembatalan.',
         ]);
 
+        // Membatalkan butuh izin sendiri; status lain (diproses, dikirim, selesai) ikut "Proses pesanan".
+        Gate::authorize($data['status'] === OrderStatus::Cancelled->value ? 'orders.cancel' : 'orders.manage');
+
         try {
             $orders->transition(
                 $order,

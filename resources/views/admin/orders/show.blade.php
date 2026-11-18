@@ -110,7 +110,8 @@
             @endif
 
             {{-- Update status --}}
-            @if (auth()->user()->can('orders.manage') && ($next = $order->status->nextStatuses()))
+            @php($next = collect($order->status->nextStatuses())->filter(fn ($status) => auth()->user()->can($status === \App\Enums\OrderStatus::Cancelled ? 'orders.cancel' : 'orders.manage'))->values()->all())
+            @if ($next)
                 <div class="card p-5" x-data="{ status: @js(old('status', $next[0]->value)) }">
                     <h2 class="font-bold text-stone-900">Perbarui status</h2>
                     <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="mt-4 space-y-4">

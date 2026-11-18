@@ -216,7 +216,8 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         // Cetak packing slip cukup orders.view; aksi "proses" dicek lagi di controller.
         Route::post('/bulk', 'bulk')->name('bulk');
         Route::get('/{order}', 'show')->name('show');
-        Route::patch('/{order}/status', 'updateStatus')->name('status')->middleware('can:orders.manage');
+        // Izin dicek di controller: orders.cancel untuk Dibatalkan, orders.manage untuk status lain.
+        Route::patch('/{order}/status', 'updateStatus')->name('status');
         Route::patch('/{order}/tracking-number', 'updateTracking')->name('tracking-number')->middleware('can:orders.manage');
         Route::get('/{order}/tracking', 'tracking')->name('tracking')->middleware('throttle:30,1');
         Route::get('/{order}/invoice', 'invoice')->name('invoice');
