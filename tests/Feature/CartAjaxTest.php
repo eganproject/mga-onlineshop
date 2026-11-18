@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\StaffRole;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,6 +23,21 @@ class CartAjaxTest extends TestCase
         // Tambah 1 lagi: pesan menyebut 1 pcs, total (3) hanya sebagai keterangan.
         $this->post(route('cart.store', $product), ['quantity' => 1])
             ->assertSessionHas('success', '1 pcs Kabel Data ditambahkan ke keranjang. Total di keranjang sekarang 3 pcs.');
+    }
+
+    public function test_staff_cannot_reach_checkout_dead_end_from_cart(): void
+    {
+        $product = Product::factory()->create(['stock' => 5]);
+        $this->actingAs(User::factory()->staff(StaffRole::CustomerService)->create());
+
+        // "Beli sekarang" tidak membawa staf ke checkout (khusus pelanggan, 403), tapi ke keranjang.
+        $this->post(route('cart.store', $product), ['buy_now' => 1])->assertRedirect(route('cart.index'));
+        $this->postJson(route('cart.store', $product), ['buy_now' => 1])->assertJson(['redirect' => route('cart.index')]);
+
+        $this->get(route('cart.index'))->assertOk()
+            ->assertSee('Akun staf tidak bisa checkout')
+            ->assertSee(route('admin.orders.create'))
+            ->assertDontSee('href="'.route('checkout.index').'"', false);
     }
 
     public function test_add_to_cart_via_fetch_returns_json_without_redirect(): void

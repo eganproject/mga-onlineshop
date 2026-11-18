@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\FirebaseLoginService;
 use App\Services\Auth\FirebaseTokenVerifier;
 use App\Services\Auth\InvalidFirebaseToken;
+use App\Support\LoginRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,7 @@ class FirebaseLoginController extends Controller
         Auth::login($user, remember: true);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('account.dashboard'))->with('success', $created
+        return LoginRedirect::to($request, $user, route('account.dashboard'))->with('success', $created
             ? 'Selamat datang di MGA, '.$user->name.'!'
             : 'Halo lagi, '.$user->name.'!');
     }

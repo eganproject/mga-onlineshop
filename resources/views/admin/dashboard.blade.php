@@ -2,6 +2,7 @@
 @php
     $fmt = fn (int $n) => number_format($n, 0, ',', '.');
     $reportQuery = $period->toQuery();
+    $user = auth()->user();
 @endphp
 <x-layouts.admin title="Dashboard">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -10,12 +11,14 @@
             <h1 class="text-2xl font-extrabold tracking-tight text-stone-900">Halo, {{ \Illuminate\Support\Str::words(auth()->user()->name, 1, '') }}! ☕</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            @if ($user->can('reports.view') || $user->can('orders.view'))
             <nav class="inline-flex rounded-xl border border-stone-200 bg-white p-1 text-xs font-semibold" aria-label="Periode dashboard">
                 @foreach (\App\Http\Controllers\Admin\DashboardController::RANGES as $key => $label)
                     <a href="{{ route('admin.dashboard', ['range' => $key]) }}" @if ($range === $key) aria-current="page" @endif
                        @class(['rounded-lg px-3 py-1.5 transition', 'bg-stone-900 text-white' => $range === $key, 'text-stone-500 hover:text-stone-900' => $range !== $key])>{{ $label }}</a>
                 @endforeach
             </nav>
+            @endif
             @can('reports.view')
                 <a href="{{ route('admin.reports.index', $reportQuery) }}" class="btn btn-secondary"><x-icon name="chart" class="size-4" /> Laporan</a>
             @endcan
@@ -202,7 +205,15 @@
     @unless (auth()->user()->canAny(['orders.view', 'reports.view', 'stock.manage']))
         <div class="card mt-6 flex items-start gap-3 p-5 text-sm text-stone-600">
             <x-icon name="info" class="mt-0.5 size-5 shrink-0 text-brand-600" />
-            <p>Pilih menu di samping untuk mulai bekerja. Menu yang tampil sesuai hak akses jabatan Anda ({{ auth()->user()->staffRole()?->label() }}).</p>
+            @if (collect(\App\Enums\Permission::cases())->contains(fn ($permission) => auth()->user()->hasPermission($permission)))
+                <p>Pilih menu di samping untuk mulai bekerja. Menu yang tampil sesuai hak akses jabatan Anda ({{ auth()->user()->staffRole()?->label() }}).</p>
+            @else
+                {{-- Jabatan tanpa izin apa pun (atau jabatannya sudah dihapus): jangan biarkan staf bingung di halaman kosong. --}}
+                <div>
+                    <p class="font-semibold text-stone-800">Jabatan Anda belum punya hak akses ke menu apa pun.</p>
+                    <p class="mt-1">Minta Superadmin mencentang hak akses jabatan {{ auth()->user()->staffRole()?->label() ?? 'Anda' }} di Admin › Jabatan & Akses. Sementara itu Anda tetap bisa mengubah <a href="{{ route('admin.profile.edit') }}" class="font-semibold text-brand-700 underline">profil & password</a>.</p>
+                </div>
+            @endif
         </div>
     @endunless
 </x-layouts.admin>
