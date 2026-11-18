@@ -78,8 +78,7 @@
                             </div>
 
                             {{-- Varian, harga, jumlah, subtotal: kolom sejajar dengan label --}}
-                            <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 @lg:grid-cols-[10rem_9rem_minmax(0,1fr)]"
-                                 x-bind:class="line.product.has_variants && '@3xl:grid-cols-[minmax(0,1fr)_10rem_9rem_minmax(0,8rem)]'">
+                            <div class="mt-3 grid grid-cols-2 gap-x-3 gap-y-3 @lg:grid-cols-[10rem_9rem_minmax(0,1fr)] @3xl:grid-cols-[minmax(0,1fr)_10rem_9rem_minmax(0,8rem)]">
                                 <template x-if="line.product.has_variants">
                                     <label class="col-span-2 block min-w-0 @lg:col-span-3 @3xl:col-span-1">
                                         <span class="mb-1 block text-xs font-semibold text-stone-600">Varian</span>
@@ -92,6 +91,11 @@
                                         </select>
                                     </label>
                                 </template>
+                                {{-- Produk tanpa varian: kolom tetap ada di layar lebar supaya harga/jumlah/subtotal sejajar antarbaris. --}}
+                                <div x-show="!line.product.has_variants" class="hidden min-w-0 @3xl:block">
+                                    <span class="mb-1 block text-xs font-semibold text-stone-600">Varian</span>
+                                    <span class="flex h-10 items-center rounded-xl border border-dashed border-stone-200 bg-stone-50 px-3 text-sm text-stone-400">Tanpa varian</span>
+                                </div>
 
                                 <div class="min-w-0">
                                     <label x-bind:for="`price-${line.key}`" class="mb-1 block text-xs font-semibold text-stone-600">Harga / pcs</label>
