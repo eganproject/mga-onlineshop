@@ -69,7 +69,7 @@
                 <div class="relative mt-2 h-4 text-[11px] text-stone-400" aria-hidden="true">
                     @foreach (array_unique(array_merge($xLabels, $xLabelsMobile)) as $i)
                         @php($left = $metric['points'][$i]['left'] ?? 0)
-                        <span @class(['absolute whitespace-nowrap', 'hidden sm:block' => ! in_array($i, $xLabelsMobile, true), '-translate-x-1/2' => $left > 5 && $left < 95, '-translate-x-full' => $left >= 95]) style="left: {{ $left }}%">{{ $series[$i]['short'] }}</span>
+                        <span @class(['absolute whitespace-nowrap', 'hidden sm:block' => ! in_array($i, $xLabelsMobile, true), 'sm:hidden' => ! in_array($i, $xLabels, true), '-translate-x-1/2' => $left > 5 && $left < 95, '-translate-x-full' => $left >= 95]) style="left: {{ $left }}%">{{ $series[$i]['short'] }}</span>
                     @endforeach
                 </div>
             </div>

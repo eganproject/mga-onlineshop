@@ -18,12 +18,12 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Kategori</th><th>Produk</th><th class="hidden sm:table-cell">Urutan</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th>Kategori</th><th class="hidden sm:table-cell">Produk</th><th class="hidden sm:table-cell">Urutan</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($categories as $category)
                             <tr @class(['hover:bg-stone-50/50', 'bg-stone-50/30' => $category->parent_id])>
                                 <td>
-                                    <div @class(['flex min-w-44 items-center gap-3 sm:min-w-52', 'pl-8' => $category->parent_id && ! $search])>
+                                    <div @class(['flex items-center gap-3 sm:min-w-52', 'pl-4 sm:pl-8' => $category->parent_id && ! $search])>
                                         <div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-50 text-brand-500">
                                             @if ($category->imageUrl())
                                                 <img src="{{ $category->imageUrl() }}" alt="" class="size-full object-cover">
@@ -36,10 +36,11 @@
                                             <p class="text-xs text-stone-500">
                                                 @if ($category->parent){{ $category->parent->name }} › @endif/{{ $category->slug }}
                                             </p>
+                                            <p class="text-xs text-stone-500 sm:hidden">{{ $category->products_count }} produk</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="hidden sm:table-cell">
                                     <a href="{{ route('admin.products.index', ['kategori' => $category->id]) }}" class="font-semibold text-stone-700 hover:text-brand-700">{{ $category->products_count }}</a>
                                     @if (! $search && ! $category->parent_id && $category->children->sum('products_count'))
                                         <span class="text-xs text-stone-400">+{{ $category->children->sum('products_count') }} di subkategori</span>
@@ -60,7 +61,7 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <div class="flex justify-end gap-1">
+                                    <div class="flex flex-col items-end justify-end gap-1 sm:flex-row sm:items-center">
                                         <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-ghost btn-sm" title="Edit"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only lg:sr-only 2xl:not-sr-only">Edit</span></a>
                                         <x-confirm-delete compact :action="route('admin.categories.destroy', $category)" title="Hapus kategori {{ $category->name }}?" message="Produk & subkategori di dalamnya tidak ikut terhapus, hanya jadi tanpa kategori induk." />
                                     </div>

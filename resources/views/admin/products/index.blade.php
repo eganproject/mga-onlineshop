@@ -74,7 +74,7 @@
                                             </p>
                                             {{-- HP: harga & stok di bawah nama (kolomnya disembunyikan) --}}
                                             <p class="mt-0.5 text-xs sm:hidden">
-                                                <span class="font-semibold text-stone-900">@rupiah($product->price)</span>
+                                                @if ($product->price > 0)<span class="font-semibold text-stone-900">@rupiah($product->price)</span>@else<span class="font-semibold text-amber-600">Belum ada harga</span>@endif
                                                 · Stok <span @class(['font-semibold', 'text-rose-600' => $product->stock === 0, 'text-amber-600' => $product->stock > 0 && $product->isLowStock()])>{{ $product->stock }}</span>
                                                 @unless ($product->is_active) · <span class="text-stone-400">Nonaktif</span>@endunless
                                             </p>
@@ -83,8 +83,12 @@
                                 </td>
                                 <td class="hidden md:table-cell">{{ $product->category?->name ?? '—' }}</td>
                                 <td class="hidden whitespace-nowrap sm:table-cell">
-                                    @if ($product->has_variants)<p class="text-xs text-stone-400">mulai</p>@endif
-                                    <p class="font-semibold text-stone-900">@rupiah($product->price)</p>
+                                    @if ($product->price > 0)
+                                        @if ($product->has_variants)<p class="text-xs text-stone-400">mulai</p>@endif
+                                        <p class="font-semibold text-stone-900">@rupiah($product->price)</p>
+                                    @else
+                                        <p class="max-w-20 text-xs font-semibold whitespace-normal text-amber-600">Belum ada harga</p>
+                                    @endif
                                     @if ($product->isOnSale())<p class="text-xs text-stone-400 line-through">@rupiah($product->compare_at_price)</p>@endif
                                 </td>
                                 <td class="hidden sm:table-cell">

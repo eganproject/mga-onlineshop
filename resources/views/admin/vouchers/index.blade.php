@@ -25,25 +25,28 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="kode">Voucher</x-admin.sort-link></th><th>Manfaat</th><th><x-admin.sort-link column="pemakaian" desc>Pemakaian</x-admin.sort-link></th><th><x-admin.sort-link column="berakhir">Periode</x-admin.sort-link></th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th><x-admin.sort-link column="kode">Voucher</x-admin.sort-link></th><th class="hidden sm:table-cell">Manfaat</th><th class="hidden md:table-cell"><x-admin.sort-link column="pemakaian" desc>Pemakaian</x-admin.sort-link></th><th class="hidden lg:table-cell"><x-admin.sort-link column="berakhir">Periode</x-admin.sort-link></th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($vouchers as $voucher)
                             @php [$stateLabel, $stateClass] = Voucher::stateLabel($voucher->state($voucher->redemptions_count)); @endphp
                             <tr class="hover:bg-stone-50/50">
                                 <td>
-                                    <div class="min-w-44">
+                                    <div class="sm:min-w-44">
                                         <p class="font-mono font-bold tracking-wide text-stone-900">{{ $voucher->code }}</p>
                                         <p class="text-xs text-stone-500">{{ $voucher->name }}@unless ($voucher->is_public) · <span title="Tidak ditampilkan di checkout; pelanggan harus tahu kodenya">Tersembunyi</span>@endunless</p>
+                                        {{-- HP: ringkasan kolom yang disembunyikan --}}
+                                        <p class="mt-1 text-xs font-semibold text-stone-700 sm:hidden">{{ $voucher->benefitLabel() }}</p>
+                                        <p class="text-xs text-stone-500 md:hidden">Dipakai {{ number_format($voucher->redemptions_count, 0, ',', '.') }}{{ $voucher->quota ? ' / '.number_format($voucher->quota, 0, ',', '.') : '' }}× · s.d. {{ $voucher->ends_at?->translatedFormat('j M Y') ?? 'tanpa batas' }}</p>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="hidden sm:table-cell">
                                     <div class="min-w-40">
                                         <span class="badge {{ $voucher->type->badgeClasses() }}">{{ $voucher->type->label() }}</span>
                                         <p class="mt-1 text-sm font-semibold text-stone-800">{{ $voucher->benefitLabel() }}</p>
                                         <p class="text-xs text-stone-500">{{ $voucher->min_spend > 0 ? 'Min. belanja '.\App\Support\Money::rupiah($voucher->min_spend) : 'Tanpa minimum' }}</p>
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap">
+                                <td class="hidden whitespace-nowrap md:table-cell">
                                     <p class="font-semibold tabular-nums text-stone-900">{{ number_format($voucher->redemptions_count, 0, ',', '.') }}{{ $voucher->quota ? ' / '.number_format($voucher->quota, 0, ',', '.') : '' }}</p>
                                     @if ($voucher->quota)
                                         <div class="mt-1 h-1.5 w-24 rounded-full bg-stone-100"><div class="h-1.5 rounded-full bg-brand-500" style="width: {{ min(100, round($voucher->redemptions_count / $voucher->quota * 100)) }}%"></div></div>
@@ -52,7 +55,7 @@
                                         <p class="mt-1 text-xs text-stone-500">Diskon −@rupiah($total)</p>
                                     @endif
                                 </td>
-                                <td class="whitespace-nowrap text-xs text-stone-600">
+                                <td class="hidden whitespace-nowrap text-xs text-stone-600 lg:table-cell">
                                     {{ $voucher->starts_at?->translatedFormat('j M Y H:i') ?? 'Sekarang' }}<br>
                                     <span class="text-stone-400">s.d.</span> {{ $voucher->ends_at?->translatedFormat('j M Y H:i') ?? 'Tanpa batas' }}
                                 </td>
@@ -64,7 +67,7 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <div class="flex justify-end gap-1">
+                                    <div class="flex flex-col items-end justify-end gap-1 sm:flex-row sm:items-center">
                                         <a href="{{ route('admin.vouchers.edit', $voucher) }}" class="btn btn-ghost btn-sm" title="Edit"><x-icon name="pencil" class="size-4" /> <span class="sr-only sm:not-sr-only lg:sr-only 2xl:not-sr-only">Edit</span></a>
                                         <x-confirm-delete compact :action="route('admin.vouchers.destroy', $voucher)" title="Hapus voucher {{ $voucher->code }}?" message="Voucher tidak bisa dipakai lagi. Pesanan yang sudah memakainya tidak berubah." />
                                     </div>

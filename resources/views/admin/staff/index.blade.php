@@ -26,7 +26,7 @@
         @else
             <div class="relative overflow-x-auto">
                 <table class="table-base">
-                    <thead class="bg-stone-50/70"><tr><th>Staf</th><th>Jabatan</th><th>Login terakhir</th><th>Status</th><th></th></tr></thead>
+                    <thead class="bg-stone-50/70"><tr><th>Staf</th><th class="hidden sm:table-cell">Jabatan</th><th class="hidden md:table-cell">Login terakhir</th><th class="hidden sm:table-cell">Status</th><th></th></tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($staff as $member)
                             @php($role = $member->staffRole())
@@ -37,18 +37,23 @@
                                         <div class="min-w-0">
                                             <p class="truncate font-semibold text-stone-900">{{ $member->name }} @if ($member->is(auth()->user()))<span class="text-xs font-normal text-stone-400">(Anda)</span>@endif</p>
                                             <p class="truncate text-xs text-stone-500">{{ $member->email }}</p>
+                                            {{-- HP: jabatan & status di bawah nama (kolomnya disembunyikan) --}}
+                                            <p class="mt-1 flex flex-wrap gap-1 sm:hidden">
+                                                <span class="badge {{ $role?->badgeClass() ?? 'bg-rose-50 text-rose-700 ring-rose-600/20' }}">{{ $role?->label() ?? 'Tanpa jabatan' }}</span>
+                                                @unless ($member->is_active)<span class="badge bg-stone-100 text-stone-600 ring-stone-500/20">Nonaktif</span>@endunless
+                                            </p>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="hidden sm:table-cell">
                                     @if ($role)
                                         <span class="badge {{ $role->badgeClass() }}">{{ $role->label() }}</span>
                                     @else
                                         <span class="badge bg-rose-50 text-rose-700 ring-rose-600/20" title="Jabatan sudah tidak ada; akun ini tidak punya akses">Tanpa jabatan</span>
                                     @endif
                                 </td>
-                                <td class="whitespace-nowrap text-sm text-stone-600">{{ $member->last_login_at?->diffForHumans() ?? 'Belum pernah' }}</td>
-                                <td>
+                                <td class="hidden whitespace-nowrap text-sm text-stone-600 md:table-cell">{{ $member->last_login_at?->diffForHumans() ?? 'Belum pernah' }}</td>
+                                <td class="hidden sm:table-cell">
                                     @if ($member->is_active)
                                         <span class="badge bg-emerald-50 text-emerald-700 ring-emerald-600/20">Aktif</span>
                                     @else
@@ -56,7 +61,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="flex justify-end gap-2">
+                                    <div class="flex flex-col items-end justify-end gap-2 sm:flex-row">
                                         @if ($member->isOwner() && ! auth()->user()->isOwner())
                                             <span class="text-xs text-stone-400">Hanya Superadmin</span>
                                         @else

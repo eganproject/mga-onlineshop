@@ -28,6 +28,7 @@
                 <option value="">Semua stok</option>
                 <option value="menipis" @selected(request('status') === 'menipis')>Menipis (≤ {{ $threshold }})</option>
                 <option value="habis" @selected(request('status') === 'habis')>Habis</option>
+                <option value="nonaktif" @selected(request('status') === 'nonaktif')>Produk nonaktif</option>
             </select>
         </form>
 
@@ -45,14 +46,14 @@
                                     : collect([['variant' => null, 'name' => null, 'sku' => $product->sku, 'warehouse_sku' => $product->warehouse_sku, 'stock' => $product->stock, 'low' => $product->isLowStock(), 'active' => true]]);
                             @endphp
                             <tr class="bg-white">
-                                <td @if ($product->has_variants) colspan="2" @endif>
+                                <td @if ($product->has_variants) colspan="4" @endif>
                                     <div class="flex min-w-0 items-center gap-3 sm:min-w-56">
                                         <x-product-image :product="$product" class="size-10 shrink-0 rounded-lg" />
-                                        <div class="min-w-0 max-sm:max-w-[calc(100vw-11rem)]">
+                                        <div @class(['min-w-0', 'max-sm:max-w-[calc(100vw-13rem)]' => ! $product->has_variants])>
                                             @can('catalog.manage')
-                                                <a href="{{ route('admin.products.edit', $product) }}" class="block truncate font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</a>
+                                                <a href="{{ route('admin.products.edit', $product) }}" class="line-clamp-2 font-semibold text-stone-900 hover:text-brand-700">{{ $product->name }}</a>
                                             @else
-                                                <p class="truncate font-semibold text-stone-900">{{ $product->name }}</p>
+                                                <p class="line-clamp-2 font-semibold text-stone-900">{{ $product->name }}</p>
                                             @endcan
                                             <p class="text-xs text-stone-500">
                                                 {{ $product->category?->name ?? 'Tanpa kategori' }}
@@ -64,9 +65,6 @@
                                 </td>
                                 @unless ($product->has_variants)
                                     @include('admin.stock.partials.cells', ['product' => $product, 'row' => $rows->first()])
-                                @else
-                                    {{-- Di HP kolom SKU disembunyikan, jadi cukup satu sel kosong setelah colspan 2. --}}
-                                    <td class="max-sm:hidden"></td><td></td>
                                 @endunless
                             </tr>
                             @if ($product->has_variants)

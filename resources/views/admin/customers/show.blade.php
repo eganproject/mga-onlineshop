@@ -50,14 +50,14 @@
             @else
                 <div class="relative overflow-x-auto">
                     <table class="table-base">
-                        <thead class="bg-stone-50/70"><tr><th>Pesanan</th><th>Total</th><th>Status</th><th></th></tr></thead>
+                        <thead class="bg-stone-50/70"><tr><th>Pesanan</th><th class="hidden sm:table-cell">Total</th><th>Status</th><th class="hidden sm:table-cell"></th></tr></thead>
                         <tbody class="divide-y divide-stone-100">
                             @foreach ($orders as $order)
                                 <tr>
-                                    <td><p class="font-semibold text-stone-900">{{ $order->code }}</p><p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y') }}</p></td>
-                                    <td class="font-semibold">@rupiah($order->total)</td>
+                                    <td>@can('orders.view')<a href="{{ route('admin.orders.show', $order) }}" class="font-semibold whitespace-nowrap text-stone-900 hover:text-brand-700">{{ $order->code }}</a>@else<p class="font-semibold whitespace-nowrap text-stone-900">{{ $order->code }}</p>@endcan<p class="text-xs text-stone-500">{{ $order->created_at->translatedFormat('d M Y') }}<span class="font-semibold text-stone-700 sm:hidden"> · @rupiah($order->total)</span></p></td>
+                                    <td class="hidden font-semibold sm:table-cell">@rupiah($order->total)</td>
                                     <td><x-order-status :status="$order->status" /></td>
-                                    <td class="text-right">@can('orders.view')<a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a>@endcan</td>
+                                    <td class="hidden text-right sm:table-cell">@can('orders.view')<a href="{{ route('admin.orders.show', $order) }}" class="btn btn-ghost btn-sm">Detail</a>@endcan</td>
                                 </tr>
                             @endforeach
                         </tbody>
