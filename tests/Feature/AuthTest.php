@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\StaffRole;
 use App\Enums\UserRole;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,6 +19,33 @@ class AuthTest extends TestCase
         $this->get(route('register'))->assertOk();
         $this->get(route('password.request'))->assertOk();
         $this->get(route('password.reset', 'token'))->assertOk();
+    }
+
+    public function test_login_returns_to_the_page_that_asked_for_it_unless_it_is_for_another_role(): void
+    {
+        $product = Product::factory()->create(['stock' => 5]);
+        $customer = User::factory()->create(['password' => 'rahasia123']);
+        $staff = User::factory()->staff(StaffRole::CustomerService)->create(['password' => 'rahasia123']);
+
+        // Tamu menekan Checkout → login → kembali ke checkout.
+        $this->post(route('cart.store', $product));
+        $this->get(route('checkout.index'))->assertRedirect(route('login'));
+        $this->post(route('login'), ['email' => $customer->email, 'password' => 'rahasia123'])->assertRedirect(route('checkout.index'));
+        $this->post(route('logout'));
+
+        // Staf yang login dari tombol Checkout tidak dibawa ke halaman khusus pelanggan (403).
+        $this->get(route('checkout.index'))->assertRedirect(route('login'));
+        $this->post(route('login'), ['email' => $staff->email, 'password' => 'rahasia123'])->assertRedirect(route('admin.dashboard'));
+        $this->post(route('logout'));
+
+        // Pelanggan yang membuka link admin tidak dibawa ke 403 setelah login.
+        $this->get(route('admin.orders.index'))->assertRedirect(route('login'));
+        $this->post(route('login'), ['email' => $customer->email, 'password' => 'rahasia123'])->assertRedirect(route('account.dashboard'));
+        $this->post(route('logout'));
+
+        // Staf tetap kembali ke halaman admin yang diminta.
+        $this->get(route('admin.orders.index'))->assertRedirect(route('login'));
+        $this->post(route('login'), ['email' => $staff->email, 'password' => 'rahasia123'])->assertRedirect(route('admin.orders.index'));
     }
 
     public function test_registration_always_creates_a_customer(): void

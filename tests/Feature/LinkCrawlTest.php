@@ -2,39 +2,79 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission;
+use App\Enums\UserRole;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\CrawlsLinks;
 use Tests\TestCase;
 
 /**
  * Menjelajahi semua link internal (seperti pengunjung yang mengklik) untuk tiap peran,
- * memakai data demo lengkap. Setiap link yang tampil harus bisa dibuka: tidak boleh 404, 403, atau 500.
+ * memakai data demo lengkap. Setiap link yang tampil harus bisa dibuka: tidak boleh 404, 403, atau 500,
+ * dan setiap form/aksi yang tampil harus terdaftar & diizinkan untuk user itu.
  */
 class LinkCrawlTest extends TestCase
 {
+    use CrawlsLinks;
     use RefreshDatabase;
 
-    /** Jumlah variasi query string per path (paginasi, urutan, filter) yang ikut dijelajahi. */
-    private const QUERY_VARIANTS_PER_PATH = 2;
-
-    /** Halaman sejenis (pesanan, pelanggan, id) cukup dicek beberapa contoh saja. */
-    private const PAGES_PER_SHAPE = 4;
-
-    private const MAX_PAGES = 600;
+    private string $manualBillUrl;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->seed(DatabaseSeeder::class);
+        $this->createManualOrders();
+    }
+
+    /**
+     * Data demo belum punya penjualan manual: buat lewat form admin (seperti CS), supaya halaman
+     * pesanan manual, pembeli tanpa akun, dan link tagihan publik ikut dijelajahi.
+     */
+    private function createManualOrders(): void
+    {
+        $cs = User::where('email', 'cs@mga.test')->firstOrFail();
+        $products = Product::where('is_active', true)->where('has_variants', false)->where('stock', '>', 5)->take(3)->get();
+        $this->assertCount(3, $products, 'Data demo harus punya produk aktif tanpa varian.');
+
+        $this->actingAs($cs);
+        // Urutan: tanpa akun (tagihan QRIS), akun pelanggan (lunas tunai), akun pelanggan (belum dibayar).
+        foreach ([['Pembeli Tanpa Akun', null], ['Pelanggan Demo', 'pelanggan@mga.test'], ['Pelanggan Demo', 'pelanggan@mga.test']] as $i => [$name, $email]) {
+            $this->post(route('admin.orders.store'), [
+                'items' => [['product_id' => $products[$i]->id, 'quantity' => 1]],
+                'customer_name' => $name,
+                'customer_email' => $email,
+                'customer_phone' => '081234567890',
+                'shipping_mode' => 'pickup',
+            ])->assertSessionHasNoErrors();
+        }
+
+        [$guest, $linked] = Order::where('source', 'manual')->orderBy('id')->take(2)->get()->all();
+        $this->post(route('admin.orders.payment.choose', $guest), ['method' => 'qris'])->assertSessionHasNoErrors();
+        $this->post(route('admin.orders.payment.paid', $linked))->assertSessionHasNoErrors();
+
+        $this->manualBillUrl = $guest->refresh()->billUrl();
+        auth()->logout();
+        $this->flushSession();
+    }
+
+    public function test_manual_order_bill_link_is_not_broken(): void
+    {
+        // Halaman tagihan berdiri sendiri (tanpa menu), jadi ikut jelajahi toko dari beranda.
+        $this->assertNoBrokenLinks(null, [$this->manualBillUrl, '/']);
     }
 
     public function test_guest_links_are_not_broken(): void
     {
+        $this->fillCart();
         $this->assertNoBrokenLinks(null, ['/', '/produk', '/artikel', '/masuk', '/daftar', '/keranjang', '/sitemap.xml']);
     }
 
@@ -47,109 +87,73 @@ class LinkCrawlTest extends TestCase
         $ordered->forceFill(['is_active' => false])->save();
         $customer->wishlist()->syncWithoutDetaching([$ordered->id]);
 
-        $this->assertNoBrokenLinks('pelanggan@mga.test', ['/', '/produk', '/akun', '/keranjang', '/artikel']);
+        $this->fillCart();
+        $this->assertNoBrokenLinks($customer, ['/', '/produk', '/akun', '/keranjang', '/artikel', '/checkout']);
     }
 
     public function test_superadmin_links_are_not_broken(): void
     {
-        $this->assertNoBrokenLinks('admin@mga.test', ['/admin', '/']);
+        $this->fillCart();
+        $this->assertNoBrokenLinks(User::where('email', 'admin@mga.test')->firstOrFail(), ['/admin', '/']);
     }
 
     public function test_warehouse_staff_links_are_not_broken(): void
     {
-        $this->assertNoBrokenLinks('gudang@mga.test', ['/admin']);
+        $this->assertNoBrokenLinks(User::where('email', 'gudang@mga.test')->firstOrFail(), ['/admin']);
     }
 
     public function test_customer_service_links_are_not_broken(): void
     {
-        $this->assertNoBrokenLinks('cs@mga.test', ['/admin']);
+        $this->assertNoBrokenLinks(User::where('email', 'cs@mga.test')->firstOrFail(), ['/admin']);
+    }
+
+    /**
+     * Izin jabatan bisa dikombinasikan bebas di Admin › Jabatan & Akses, jadi tiap izin dicek sendirian
+     * (plus jabatan tanpa izin sama sekali): link & tombol menu lain tidak boleh muncul tanpa izinnya.
+     */
+    #[DataProvider('singlePermissions')]
+    public function test_role_with_single_permission_has_no_broken_links(?string $permission): void
+    {
+        $this->crawlPagesPerShape = 2;
+        $this->crawlQueryVariants = 1;
+        $this->crawlMaxPages = 250;
+
+        $role = new Role(['name' => 'Uji '.($permission ?? 'kosong'), 'permissions' => $permission ? Permission::normalize([$permission]) : []]);
+        $role->forceFill(['key' => Role::makeKey('uji '.($permission ?? 'kosong'))])->save();
+
+        $staff = User::create(['name' => 'Staf Uji', 'email' => 'uji@mga.test', 'password' => 'password']);
+        $staff->forceFill(['role' => UserRole::Admin, 'is_active' => true, 'staff_role' => $role->key, 'email_verified_at' => now()])->save();
+
+        if ($permission === null) {
+            $this->actingAs($staff->fresh())->get('/admin')->assertOk()->assertSee('belum punya hak akses');
+        }
+
+        $this->assertNoBrokenLinks($staff->fresh(), ['/admin', '/admin/profile']);
+    }
+
+    /** @return array<string, array{0: ?string}> */
+    public static function singlePermissions(): array
+    {
+        $cases = ['tanpa izin' => [null]];
+        foreach (Permission::cases() as $permission) {
+            $cases[$permission->value] = [$permission->value];
+        }
+
+        return $cases;
+    }
+
+    /** Isi keranjang (session) supaya tombol Checkout & langkah lanjutannya ikut dijelajahi. */
+    private function fillCart(): void
+    {
+        $product = Product::where('is_active', true)->where('has_variants', false)->where('stock', '>', 0)->where('min_order_qty', '<=', 1)->firstOrFail();
+        $this->withSession(['cart' => [(string) $product->id => 1]]);
     }
 
     /** @param  list<string>  $start */
-    private function assertNoBrokenLinks(?string $email, array $start): void
+    private function assertNoBrokenLinks(?User $user, array $start): void
     {
-        if ($email) {
-            $this->actingAs(User::where('email', $email)->firstOrFail());
-        }
+        $broken = $this->crawlForBrokenLinks($user, $start);
 
-        $host = parse_url(config('app.url'), PHP_URL_HOST);
-        $queue = array_map(fn ($path) => [$path, '(awal)'], $start);
-        $seen = array_fill_keys($start, true);
-        $variants = [];
-        $shapes = [];
-        $broken = [];
-        $visited = 0;
-
-        while ($queue && $visited < self::MAX_PAGES) {
-            [$url, $from] = array_shift($queue);
-            $visited++;
-
-            $response = $this->get($url);
-            $status = $response->getStatusCode();
-
-            // 429 = pembatas laju (mis. unduh PDF) bekerja sebagaimana mestinya.
-            if ($status >= 400 && $status !== 429) {
-                $broken[] = "{$status} {$url} (dari {$from})";
-
-                continue;
-            }
-
-            if ($status >= 300 || ! str_contains((string) $response->headers->get('Content-Type'), 'html')) {
-                continue;
-            }
-
-            preg_match_all('/<a\b[^>]*\bhref="([^"]+)"/i', (string) $response->getContent(), $matches);
-
-            foreach ($matches[1] as $href) {
-                $link = $this->normalize(html_entity_decode($href), $host);
-
-                if ($link === null || isset($seen[$link])) {
-                    continue;
-                }
-
-                $path = Str::before($link, '?');
-                $shape = preg_replace('#/(\d+|MGA-[A-Z0-9-]+)(?=/|$)#', '/*', $path);
-                $shapes[$shape] = ($shapes[$shape] ?? 0) + 1;
-                if ($shape !== $path && $shapes[$shape] > self::PAGES_PER_SHAPE) {
-                    continue;
-                }
-
-                if (str_contains($link, '?')) {
-                    $variants[$path] = ($variants[$path] ?? 0) + 1;
-                    if ($variants[$path] > self::QUERY_VARIANTS_PER_PATH) {
-                        continue;
-                    }
-                }
-
-                $seen[$link] = true;
-                $queue[] = [$link, $url];
-            }
-        }
-
-        $this->assertGreaterThan(count($start), $visited, 'Penjelajah tidak menemukan link apa pun.');
-        $this->assertSame([], $broken, 'Link rusak ditemukan ('.($email ?? 'tamu').'):'."\n".implode("\n", $broken));
-    }
-
-    private function normalize(string $href, ?string $host): ?string
-    {
-        $href = Str::before($href, '#');
-
-        if ($href === '' || preg_match('/[\\\\{}\s]|\'/', $href) || preg_match('/^(mailto|tel|javascript|data|whatsapp):/i', $href)) {
-            return null;
-        }
-
-        $parts = parse_url($href);
-        if ($parts === false || (isset($parts['host']) && $parts['host'] !== $host)) {
-            return null;
-        }
-
-        $path = '/'.ltrim($parts['path'] ?? '/', '/');
-
-        // Gambar/berkas statis bukan halaman aplikasi.
-        if (preg_match('#^/(storage|build|images|fonts)/#', $path) || preg_match('/\.(png|jpe?g|webp|svg|gif|ico|css|js)$/i', $path)) {
-            return null;
-        }
-
-        return $path.(isset($parts['query']) ? '?'.$parts['query'] : '');
+        $this->assertSame([], $broken, 'Link/aksi rusak ditemukan ('.($user?->email ?? 'tamu').'):'."\n".implode("\n", $broken));
     }
 }

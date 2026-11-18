@@ -97,7 +97,7 @@
                                     </button>
                                 </div>
                                 <p class="hint">Tempel di Midtrans Dashboard › Settings › Payment › Notification URL.</p>
-                                <p class="hint">Tarif biaya per metode, siapa yang menanggung, dan metode yang aktif diatur di <a href="{{ route('admin.billing.edit') }}" class="font-semibold text-brand-700 underline">Pajak & Biaya</a>.</p>
+                                <p class="hint">Tarif biaya per metode, siapa yang menanggung, dan metode yang aktif diatur di @can('billing.manage')<a href="{{ route('admin.billing.edit') }}" class="font-semibold text-brand-700 underline">Pajak & Biaya</a>@else<span class="font-semibold">Pajak & Biaya</span>@endcan.</p>
                             </div>
                         @elseif ($key === 'rajaongkir')
                             <x-form.select name="rajaongkir[driver]" id="rajaongkir_driver" label="Driver ongkir" :selected="$value('rajaongkir', 'driver')"
@@ -109,7 +109,11 @@
                             <div class="rounded-xl bg-stone-50 p-3 text-sm">
                                 <p class="text-xs text-stone-500">Kecamatan asal pengiriman</p>
                                 <p class="font-semibold text-stone-800">{{ $originLabel ?? 'Belum diatur' }}</p>
-                                <a href="{{ route('admin.store-settings.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-700 underline">Ubah asal & kurir di Pengaturan Toko</a>
+                                @can('settings.manage')
+                                    <a href="{{ route('admin.store-settings.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-700 underline">Ubah asal & kurir di Pengaturan Toko</a>
+                                @else
+                                    <p class="mt-1 text-xs text-stone-500">Asal & kurir diatur di Pengaturan Toko (butuh izin pengaturan toko).</p>
+                                @endcan
                             </div>
                         @elseif ($key === 'warehouse')
                             <x-form.switch card name="warehouse[enabled]" label="Sinkron stok otomatis" :checked="$value('warehouse', 'enabled')"

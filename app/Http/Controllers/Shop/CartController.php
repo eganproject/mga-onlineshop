@@ -55,9 +55,12 @@ class CartController extends Controller
         $added = max(0, $quantity - $before);
 
         if ($request->boolean('buy_now')) {
+            // Akun staf tidak bisa checkout di toko (khusus pelanggan): arahkan ke keranjang yang menjelaskannya.
+            $target = $request->user()?->isAdmin() ? route('cart.index') : route('checkout.index');
+
             return $request->expectsJson()
-                ? response()->json(['redirect' => route('checkout.index')])
-                : redirect()->route('checkout.index');
+                ? response()->json(['redirect' => $target])
+                : redirect()->to($target);
         }
 
         $name = $variant ? "{$product->name} ({$variant->name})" : $product->name;

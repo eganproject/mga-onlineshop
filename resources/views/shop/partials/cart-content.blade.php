@@ -104,6 +104,13 @@
                     @if (! empty($belowMinimum))
                         <button type="button" disabled class="btn btn-ink btn-pill mt-6 w-full py-4 opacity-50">Checkout <x-icon name="arrow-right" class="size-4" /></button>
                         <p class="mt-2 text-center text-xs text-amber-700">Penuhi minimal pembelian dulu untuk lanjut.</p>
+                    @elseif (auth()->user()?->isAdmin())
+                        {{-- Checkout khusus akun pelanggan; staf mencatat pesanan lewat penjualan manual. --}}
+                        <button type="button" disabled class="btn btn-ink btn-pill mt-6 w-full py-4 opacity-50">Checkout <x-icon name="arrow-right" class="size-4" /></button>
+                        <p class="mt-2 text-center text-xs text-amber-700">Akun staf tidak bisa checkout di toko. Masuk dengan akun pelanggan untuk mencoba belanja.</p>
+                        @can('orders.create')
+                            <a href="{{ route('admin.orders.create') }}" class="btn btn-secondary btn-pill mt-3 w-full">Catat lewat Penjualan manual</a>
+                        @endcan
                     @else
                         <a href="{{ route('checkout.index') }}" class="btn btn-ink btn-pill mt-6 w-full py-4">Checkout <x-icon name="arrow-right" class="size-4" /></a>
                     @endif
