@@ -66,7 +66,7 @@ class OrderController extends Controller
         }
 
         return view('admin.orders.show', [
-            'order' => $order->load('items.product', 'user', 'creator', 'payments', 'statusHistories.user'),
+            'order' => $order->load('items.product', 'user', 'creator', 'paymentRecorder', 'payments', 'statusHistories.user'),
             'canTrack' => $tracking->canTrack($order),
             'billing' => $billing,
         ]);

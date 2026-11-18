@@ -102,11 +102,9 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('admin.orders.payment.paid', $order) }}" class="border-t border-stone-100 pt-4"
-              data-confirm-title="Tandai lunas?" data-confirm-ok="Ya, sudah dibayar" data-confirm-tone="primary"
-              data-confirm="Pakai ini bila pembeli membayar tunai atau transfer langsung ke rekening toko. Tagihan Midtrans yang masih aktif dibatalkan.">
-            @csrf
-            <button class="link-underline text-sm font-semibold text-stone-600 hover:text-ink">Dibayar tunai / transfer langsung? Tandai lunas</button>
-        </form>
+        @can('payments.record')
+            <a href="#catat-pembayaran" x-on:click="document.getElementById('catat-pembayaran')?.dispatchEvent(new CustomEvent('open-record'))"
+               class="link-underline block border-t border-stone-100 pt-4 text-sm font-semibold text-stone-600 hover:text-ink">Dibayar tunai / transfer langsung / EDC? Catat pembayaran</a>
+        @endcan
     </div>
 </div>

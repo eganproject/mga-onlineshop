@@ -192,7 +192,6 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
             Route::post('/', 'choose')->name('choose')->middleware('throttle:20,1');
             Route::post('/check', 'check')->name('check')->middleware('throttle:20,1');
             Route::post('/reset', 'reset')->name('reset')->middleware('throttle:10,1');
-            Route::post('/paid', 'markPaid')->name('paid');
         });
         Route::controller(Admin\OrderWarehouseController::class)->prefix('/{order}/warehouse')->name('warehouse.')->middleware('throttle:20,1')->group(function () {
             Route::post('/', 'send')->name('send');
@@ -205,6 +204,12 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
             Route::get('/cities/{city}/districts', 'districts')->name('districts');
         });
     });
+
+    // Pembayaran di luar Midtrans (tunai, transfer langsung, EDC).
+    Route::post('/orders/{order}/offline-payment', [Admin\OrderOfflinePaymentController::class, 'store'])
+        ->name('orders.offline-payment')->middleware(['can:payments.record', 'throttle:20,1']);
+    Route::get('/orders/{order}/payment-proof', [Admin\OrderOfflinePaymentController::class, 'proof'])
+        ->name('orders.payment-proof')->middleware('can:orders.view');
 
     Route::controller(Admin\OrderController::class)->prefix('orders')->name('orders.')->middleware('can:orders.view')->group(function () {
         Route::get('/', 'index')->name('index');

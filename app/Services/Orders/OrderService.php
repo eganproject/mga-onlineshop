@@ -161,10 +161,42 @@ class OrderService
         $order->delivered_at ??= now();
     }
 
-    private function settleManually(Order $order): void
+    /**
+     * Staf mencatat pembayaran di luar Midtrans (tunai, transfer langsung,
+     * EDC, lainnya). Alurnya sama dengan lunas biasa (invoice, gudang, terjual);
+     * tagihan Midtrans yang masih aktif ditutup.
+     */
+    public function recordOfflinePayment(Order $order, string $method, CarbonInterface $paidAt, ?string $reference, ?string $proofPath, int $staffId, ?string $note): void
     {
+        DB::transaction(function () use ($order, $method, $paidAt, $reference, $proofPath, $staffId, $note) {
+            $this->lockFresh($order);
+
+            if ($order->status !== OrderStatus::PendingPayment) {
+                throw new InvalidArgumentException('Pesanan ini sudah tidak menunggu pembayaran.');
+            }
+
+            $label = Order::OFFLINE_METHODS[$method] ?? 'Lainnya';
+            $order->fill(['status' => OrderStatus::Paid])->withStatusNote(collect([
+                "Dibayar {$label}".($reference ? " (ref. {$reference})" : '').' — dicatat staf.',
+                $note,
+            ])->filter()->implode(' '));
+
+            $this->settleManually($order, $method, $paidAt);
+            $order->forceFill([
+                'payment_reference' => $reference,
+                'payment_proof' => $proofPath,
+                'payment_recorded_by' => $staffId,
+            ]);
+            $order->save();
+        });
+    }
+
+    private function settleManually(Order $order, string $method = 'manual', ?CarbonInterface $paidAt = null): void
+    {
+        $paidAt ??= now();
+
         // Dibayar di luar gateway (tunai/transfer langsung): tanpa biaya transaksi & potongan Midtrans.
-        $order->forceFill(['paid_at' => now(), 'payment_method' => 'manual', 'payment_fee' => 0, 'gateway_fee' => 0]);
+        $order->forceFill(['paid_at' => $paidAt, 'payment_method' => $method, 'payment_fee' => 0, 'gateway_fee' => 0]);
 
         $pending = $order->payments()->where('status', PaymentStatus::Pending)->get();
 

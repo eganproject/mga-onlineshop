@@ -218,6 +218,10 @@ enum PaymentMethod: string
 
         return self::tryFrom($value)?->label() ?? match ($value) {
             'manual' => 'Konfirmasi manual',
+            'cash' => 'Tunai',
+            'bank_transfer' => 'Transfer bank langsung',
+            'edc' => 'Kartu via EDC',
+            'other' => 'Pembayaran lain (di luar Midtrans)',
             default => ucwords(str_replace('_', ' ', $value)),
         };
     }

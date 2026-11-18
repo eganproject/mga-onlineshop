@@ -41,7 +41,7 @@ enum StaffRole: string
             self::Owner => Permission::cases(),
             self::Admin => array_values(array_filter(Permission::cases(), fn (Permission $p) => ! in_array($p, [Permission::StaffManage, Permission::IntegrationsManage], true))),
             self::Warehouse => [Permission::OrdersView, Permission::OrdersManage, Permission::StockManage],
-            self::CustomerService => [Permission::OrdersView, Permission::OrdersCreate, Permission::CustomersView, Permission::ReviewsManage],
+            self::CustomerService => [Permission::OrdersView, Permission::OrdersCreate, Permission::PaymentsRecord, Permission::CustomersView, Permission::ReviewsManage],
         };
     }
 
