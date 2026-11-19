@@ -132,6 +132,24 @@ class OrderManagementTest extends TestCase
         $this->get(route('admin.orders.index', ['from' => 'kemarin']))->assertOk();
     }
 
+    public function test_admin_order_list_shows_item_skus_and_searches_by_sku(): void
+    {
+        $order = $this->makeOrder(OrderStatus::Paid);
+        $order->items()->first()->update(['sku' => 'TRP-001']);
+        $order->items()->create(['product_name' => 'Akrilik A4', 'price' => 5000, 'quantity' => 3, 'subtotal' => 15000]);
+        $other = $this->makeOrder(OrderStatus::Paid);
+
+        $this->actingAs($this->admin);
+
+        $this->get(route('admin.orders.index'))->assertOk()
+            ->assertSee('TRP-001')->assertSee('× 2')
+            ->assertSee('Tanpa SKU')->assertSee('× 3')
+            ->assertDontSee('Akrilik A4');
+
+        $this->get(route('admin.orders.index', ['q' => 'TRP-001']))
+            ->assertSee($order->code)->assertDontSee($other->code);
+    }
+
     public function test_admin_bulk_process_and_print(): void
     {
         $paid = $this->makeOrder(OrderStatus::Paid);

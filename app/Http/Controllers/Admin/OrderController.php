@@ -30,8 +30,8 @@ class OrderController extends Controller
         $status = OrderStatus::tryFrom((string) $request->query('status'));
 
         $query = $this->filtered($request)
-            ->with('user')
-            ->withCount('items')
+            // Kolom "Item" hanya menampilkan SKU × jumlah per baris.
+            ->with(['user', 'items' => fn ($q) => $q->select('id', 'order_id', 'sku', 'quantity')->orderBy('id')])
             ->when($status, fn ($q) => $q->where('status', $status));
 
         AdminList::sort($query, $request, [
@@ -195,6 +195,7 @@ class OrderController extends Controller
                     ->orWhere('recipient_name', 'like', "%{$term}%")
                     ->orWhere('recipient_phone', 'like', "%{$term}%")
                     ->orWhere('tracking_number', 'like', "%{$term}%")
+                    ->orWhereHas('items', fn ($i) => $i->where('sku', 'like', "%{$term}%"))
                     ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$term}%")));
             })
             ->when(in_array($request->query('source'), [Order::SOURCE_WEBSITE, Order::SOURCE_MANUAL], true), fn ($q) => $q->where('source', $request->query('source')))

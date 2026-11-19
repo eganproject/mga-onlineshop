@@ -82,9 +82,10 @@
                                     <p class="mt-1 text-xs text-stone-600 md:hidden">{{ $order->customerName() }}</p>
                                     <p class="mt-0.5 text-sm font-semibold text-stone-900 sm:hidden">@rupiah($order->total)</p>
                                     <div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div>
+                                    <div class="mt-1.5 xl:hidden">@include('admin.orders.partials.item-skus')</div>
                                 </td>
                                 <td class="hidden md:table-cell"><p class="line-clamp-2 font-medium text-stone-800">{{ $order->customerName() }}</p><p class="text-xs text-stone-500">{{ $order->customerEmail() ?? $order->recipient_phone }}</p></td>
-                                <td class="hidden xl:table-cell">{{ $order->items_count }}</td>
+                                <td class="hidden xl:table-cell">@include('admin.orders.partials.item-skus')</td>
                                 <td class="hidden whitespace-nowrap font-semibold sm:table-cell">@rupiah($order->total)</td>
                                 <td class="hidden whitespace-nowrap text-xs lg:table-cell">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>
                                 <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>
