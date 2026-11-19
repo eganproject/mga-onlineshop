@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
     'payment_method', 'payment_fee', 'gateway_fee', 'payment_reference',
     'billing_name', 'billing_npwp', 'billing_address', 'billing_email',
     'recipient_name', 'recipient_phone', 'shipping_address', 'destination_id',
+    'destination_postal_code', 'destination_latitude', 'destination_longitude',
     'courier', 'courier_service', 'shipping_etd', 'tracking_number', 'notes', 'payment_due_at',
     'paid_at', 'shipped_at', 'delivered_at', 'completed_at', 'cancelled_at', 'cancellation_reason',
 ])]
@@ -130,6 +131,8 @@ class Order extends Model
             'payment_fee' => 'integer',
             'gateway_fee' => 'integer',
             'invoice_issued_at' => 'datetime',
+            'shipment_price' => 'integer',
+            'shipment_booked_at' => 'datetime',
             'warehouse_outbound_sent_at' => 'datetime',
             'warehouse_outbound_approved_at' => 'datetime',
             'payment_due_at' => 'datetime',

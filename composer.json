@@ -12,6 +12,7 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "openspout/openspout": "^5.3",
+        "picqer/php-barcode-generator": "^3.3",
         "symfony/html-sanitizer": "^7.4"
     },
     "require-dev": {

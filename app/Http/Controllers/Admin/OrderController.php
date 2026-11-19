@@ -9,8 +9,10 @@ use App\Services\Billing\FeeCalculator;
 use App\Services\Billing\InvoiceRenderer;
 use App\Services\Orders\OrderService;
 use App\Services\Payment\PaymentService;
+use App\Services\Shipping\BiteshipShipment;
 use App\Services\Shipping\TrackingService;
 use App\Support\AdminList;
+use App\Support\ShippingConfig;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +52,7 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders', 'status', 'counts', 'couriers'));
     }
 
-    public function show(Request $request, Order $order, TrackingService $tracking, PaymentService $payments, FeeCalculator $fees): View
+    public function show(Request $request, Order $order, TrackingService $tracking, PaymentService $payments, FeeCalculator $fees, BiteshipShipment $shipments): View
     {
         $billing = null;
 
@@ -69,6 +71,11 @@ class OrderController extends Controller
             'order' => $order->load('items.product', 'user', 'creator', 'paymentRecorder', 'payments', 'statusHistories.user'),
             'canTrack' => $tracking->canTrack($order),
             'billing' => $billing,
+            // Kartu "Pengiriman Biteship": tampil di mode Biteship atau bila pesanan pernah dikirim lewat Biteship.
+            'shipment' => ShippingConfig::isBiteship() || $order->shipment_id ? [
+                'blocker' => $shipments->blocker($order),
+                'instant' => $shipments->isInstant($order),
+            ] : null,
         ]);
     }
 

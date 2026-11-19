@@ -225,6 +225,13 @@ Route::middleware(['auth', 'role:admin', 'log.activity'])->prefix('admin')->name
         Route::get('/{order}/packing-slip', 'packingSlip')->name('packing-slip');
     });
 
+    // Pengiriman Biteship: pesan kurir (memotong saldo Biteship) dan cetak label resi.
+    Route::controller(Admin\OrderShipmentController::class)->prefix('orders/{order}')->name('orders.')->group(function () {
+        Route::post('/shipment', 'store')->name('shipment.store')->middleware(['can:orders.manage', 'throttle:10,1']);
+        Route::post('/shipment/refresh', 'refresh')->name('shipment.refresh')->middleware(['can:orders.manage', 'throttle:20,1']);
+        Route::get('/shipping-label', 'label')->name('shipping-label')->middleware('can:orders.view');
+    });
+
     Route::middleware('can:customers.view')->group(function () {
         Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/{customer}', [Admin\CustomerController::class, 'show'])->name('customers.show');

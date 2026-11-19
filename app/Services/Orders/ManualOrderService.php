@@ -173,6 +173,7 @@ class ManualOrderService
                 'recipient_phone' => trim($data['customer_phone']),
                 'shipping_address' => $shipping['address'],
                 'destination_id' => $shipping['district_id'],
+                'destination_postal_code' => preg_match('/^\d{5}$/', (string) ($data['postal_code'] ?? '')) ? $data['postal_code'] : null,
                 'courier' => $shipping['courier'],
                 'courier_service' => $shipping['service'],
                 'shipping_etd' => $shipping['etd'],
