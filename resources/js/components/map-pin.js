@@ -22,6 +22,7 @@ export default ({ lat = null, lng = null } = {}) => ({
     searching: false,
     searched: false,
     results: [],
+    expanded: false,
 
     get hasPin() {
         return this.lat !== null && this.lng !== null;
@@ -52,7 +53,20 @@ export default ({ lat = null, lng = null } = {}) => ({
     },
 
     destroy() {
+        document.documentElement.classList.remove('overflow-hidden');
         this.map?.remove();
+    },
+
+    /** Buka/tutup peta selebar layar; di mode ini roda mouse ikut memperbesar peta. */
+    toggleExpanded(open = !this.expanded) {
+        const center = this.map?.getCenter();
+        this.expanded = open;
+        document.documentElement.classList.toggle('overflow-hidden', open);
+        this.map?.scrollWheelZoom[open ? 'enable' : 'disable']();
+        this.$nextTick(() => {
+            this.map?.invalidateSize();
+            if (center) this.map.setView(this.hasPin ? [this.lat, this.lng] : center, this.map.getZoom(), { animate: false });
+        });
     },
 
     place(lat, lng, zoom = null) {

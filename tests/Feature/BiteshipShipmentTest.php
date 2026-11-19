@@ -221,7 +221,7 @@ class BiteshipShipmentTest extends TestCase
 
         $this->get(route('admin.store-settings.edit'))->assertOk()
             ->assertSeeInOrder(['Lokasi gudang', 'Alamat lengkap gudang', 'Jl. Tebet Raya No. 1', 'Kode pos gudang', 'Pin lokasi gudang', 'Kontak pengirim untuk kurir', 'Kurir reguler', 'Kurir instan', 'Pelacakan'])
-            ->assertSee('Cari alamat di peta')
+            ->assertSee('Cari alamat di peta')->assertSee('Perbesar peta')
             ->assertDontSee('wajib terisi sebelum pengiriman Biteship');
 
         config(['shop.whatsapp' => null]);
