@@ -7,6 +7,9 @@
         <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> {{ $order->paid_at ? 'Invoice' : 'Tagihan' }}</a>
         <a href="{{ route('admin.orders.invoice.pdf', $order) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4" /> PDF</a>
         <a href="{{ route('admin.orders.packing-slip', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> Packing slip</a>
+        @if ($order->tracking_number)
+            <a href="{{ route('admin.orders.shipping-label', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="qr-code" class="size-4" /> Label resi</a>
+        @endif
     </x-admin.page-header>
 
     @if ($order->status === \App\Enums\OrderStatus::Cancelled && $order->paid_at)
@@ -107,6 +110,10 @@
 
             @if ($order->warehouse_outbound_status || config('services.warehouse.outbound_enabled'))
                 @include('admin.orders.partials.warehouse')
+            @endif
+
+            @if ($shipment)
+                @include('admin.orders.partials.shipment')
             @endif
 
             {{-- Update status --}}
