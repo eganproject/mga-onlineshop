@@ -44,7 +44,12 @@ final readonly class ShippingRate implements JsonSerializable
     /** Estimasi tercepat dalam hari (angka pertama di etd), untuk penanda "Tercepat". */
     public function minDays(): ?int
     {
-        return $this->etd && preg_match('/\d+/', $this->etd, $m) ? (int) $m[0] : null;
+        if (! $this->etd || ! preg_match('/\d+/', $this->etd, $m)) {
+            return null;
+        }
+
+        // Kurir instan (estimasi jam/menit) = sampai hari ini.
+        return preg_match('/jam|menit/', $this->etd) ? 0 : (int) $m[0];
     }
 
     public function jsonSerialize(): array

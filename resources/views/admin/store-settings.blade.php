@@ -164,6 +164,35 @@
                     <x-input-error for="couriers" />
                 </div>
 
+                @if ($shippingDriver === 'biteship')
+                    {{-- Kurir instan: tarif dari koordinat gudang ke pin lokasi alamat pembeli. --}}
+                    <div class="space-y-4 rounded-xl border border-stone-200 p-4">
+                        <input type="hidden" name="instant_submitted" value="1">
+                        <div>
+                            <div class="label-row">
+                                <p class="label">Kurir instan</p>
+                                <x-tooltip label="Kurir instan" text="Kurir yang mengantar di hari yang sama dalam kota (Lalamove, Gojek, Grab). Tarifnya dihitung dari titik gudang ke pin lokasi pembeli, bukan dari kode pos."
+                                           :tips="['Hanya muncul di checkout untuk pembeli yang menaruh pin lokasi di alamatnya dan berjarak maksimal '.config('shop.shipping.biteship.instant_max_km', 40).' km dari gudang.', 'Toko hanya menampilkan tarifnya. Driver tetap dipesan sendiri lewat aplikasi kurir atau dashboard Biteship setelah pesanan dibayar.', 'Kurir yang dicentang harus aktif di akun Biteship.']" />
+                            </div>
+                            @php($selectedInstant = old('instant_couriers', $instant['couriers']))
+                            <div class="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-3">
+                                @foreach ($instantCouriers as $code => $label)
+                                    <label class="flex cursor-pointer items-start gap-2.5 rounded-xl border border-stone-200 px-3 py-2.5 text-sm transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+                                        <input type="checkbox" name="instant_couriers[]" value="{{ $code }}" class="checkbox mt-0.5" @checked(in_array($code, $selectedInstant, true))>
+                                        <span class="min-w-0"><span class="block font-semibold text-stone-700">{{ $label }}</span><span class="block text-[11px] text-stone-400">Butuh pin lokasi pembeli</span></span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <x-input-error for="instant_couriers" />
+                        </div>
+                        <x-form.map-pin label="Pin lokasi gudang" lat-name="origin_latitude" lng-name="origin_longitude"
+                                        :latitude="$instant['latitude']" :longitude="$instant['longitude']"
+                                        tooltip="Titik tepat gudang/lokasi penjemputan. Kurir instan menghitung ongkir dan menjemput paket dari titik ini."
+                                        tooltip-tips="Perbesar peta sampai bangunan gudang terlihat, lalu ketuk tepat di pintu masuknya."
+                                        hint="Wajib diisi bila ada kurir instan yang dicentang." />
+                    </div>
+                @endif
+
                 <x-form.switch card name="tracking_sync" label="Cek resi otomatis" :checked="$values['tracking_sync']"
                                description="Setiap 3 jam status resi pesanan “Dikirim” dicek ke kurir; yang sudah sampai ditandai otomatis. Butuh cron scheduler aktif." />
             </section>

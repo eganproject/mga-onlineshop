@@ -29,6 +29,9 @@ class AddressRequest extends FormRequest
             'district_id' => ['required', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]{5}$/'],
             'address_line' => ['required', 'string', 'max:500'],
+            // Pin lokasi di peta (opsional, untuk kurir instan).
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
             'is_default' => ['sometimes', 'boolean'],
         ];
     }
@@ -68,6 +71,8 @@ class AddressRequest extends FormRequest
             'district' => $this->region['district']->name,
             'postal_code' => $data['postal_code'] ?? $this->region['district']->postalCode,
             'region_source' => ShippingConfig::regionSource(),
+            'latitude' => filled($data['latitude'] ?? null) ? round((float) $data['latitude'], 7) : null,
+            'longitude' => filled($data['longitude'] ?? null) ? round((float) $data['longitude'], 7) : null,
             'is_default' => $this->boolean('is_default'),
         ];
     }

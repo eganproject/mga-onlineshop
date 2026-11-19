@@ -726,3 +726,19 @@
         @apply ring-4 ring-brand-500/40;
     }
 }
+
+/* Peta pin lokasi (<x-form.map-pin>): lapisan Leaflet tidak boleh menutupi header/save bar. */
+.map-pin {
+    isolation: isolate;
+    z-index: 0;
+}
+.map-pin-marker span {
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--color-brand-600);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+}

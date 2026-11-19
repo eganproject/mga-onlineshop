@@ -99,7 +99,7 @@ class FakeShippingProvider implements ShippingProvider
             ->values()->all();
     }
 
-    public function rates(string $districtId, int $weight, ?string $postalCode = null): array
+    public function rates(string $districtId, int $weight, ?string $postalCode = null, ?array $coordinates = null): array
     {
         $destination = $this->locate($districtId);
 

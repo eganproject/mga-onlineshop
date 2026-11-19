@@ -366,4 +366,138 @@ class BiteshipTest extends TestCase
             && $r->hasHeader('Authorization', 'kunci')
             && str_ends_with($r->url(), '/v1/trackings/IDE123/couriers/idexpress'));
     }
+
+    // ---------------------------------------------------------------
+    // Kurir instan (Lalamove, Gojek, Grab): butuh koordinat gudang + pin alamat
+    // ---------------------------------------------------------------
+
+    private function useInstant(): void
+    {
+        $this->useBiteship([
+            'shop.shipping.biteship.origin_latitude' => '-6.2260000',
+            'shop.shipping.biteship.origin_longitude' => '106.8530000',
+            'shop.shipping.biteship.instant_couriers' => ['lalamove', 'gojek'],
+            'shop.shipping.biteship.instant_max_km' => 40,
+        ]);
+
+        Http::fake([self::BASE.'/v1/rates/couriers' => fn (Request $r) => isset($r['destination_latitude'])
+            ? Http::response(['success' => true, 'pricing' => [
+                ['courier_name' => 'Lalamove', 'courier_code' => 'lalamove', 'courier_service_name' => 'Motorcycle', 'courier_service_code' => 'motorcycle',
+                    'shipment_duration_range' => '1 - 3', 'shipment_duration_unit' => 'hours', 'service_type' => 'instant', 'price' => 25000],
+            ]])
+            : Http::response(['success' => true, 'pricing' => [
+                ['courier_name' => 'JNE', 'courier_code' => 'jne', 'courier_service_name' => 'Reguler', 'courier_service_code' => 'reg',
+                    'shipment_duration_range' => '1 - 2', 'shipment_duration_unit' => 'days', 'service_type' => 'standard', 'price' => 11000],
+            ]]),
+        ]);
+    }
+
+    public function test_instant_couriers_are_offered_for_pinned_address_in_range(): void
+    {
+        $this->useInstant();
+
+        $pinned = Address::factory()->create(['district_id' => self::TEBET, 'region_source' => 'biteship', 'latitude' => -6.2400000, 'longitude' => 106.8600000]);
+        $rates = app(ShippingService::class)->rates($pinned, 1000);
+
+        $this->assertSame(['jne|REG', 'lalamove|MOTORCYCLE'], array_map(fn ($r) => $r->key(), $rates));
+        $this->assertSame('1-3 jam', $rates[1]->etd);
+        $this->assertSame(0, $rates[1]->minDays());
+
+        Http::assertSent(fn (Request $r) => ($r['origin_latitude'] ?? null) === -6.226
+            && $r['destination_longitude'] === 106.86
+            && $r['couriers'] === 'lalamove,gojek'
+            && ! isset($r['destination_postal_code']));
+
+        // Tanpa pin: hanya kurir reguler, tanpa permintaan kedua.
+        Http::swap(new Factory);
+        $this->useInstant();
+        $plain = Address::factory()->create(['district_id' => self::TEBET, 'region_source' => 'biteship']);
+        $this->assertSame(['jne|REG'], array_map(fn ($r) => $r->key(), app(ShippingService::class)->rates($plain, 1000)));
+        Http::assertSentCount(1);
+    }
+
+    public function test_instant_couriers_skip_far_address_and_never_break_regular_rates(): void
+    {
+        $this->useInstant();
+
+        // Bandung: jauh di luar jangkauan 40 km dari gudang di Jakarta.
+        $far = Address::factory()->create(['district_id' => self::COBLONG, 'region_source' => 'biteship', 'latitude' => -6.8900000, 'longitude' => 107.6100000]);
+        $this->assertSame(['jne|REG'], array_map(fn ($r) => $r->key(), app(ShippingService::class)->rates($far, 1000)));
+        Http::assertSentCount(1);
+
+        // API kurir instan gagal: tarif reguler tetap tampil.
+        Http::swap(new Factory);
+        $this->useInstant();
+        Http::swap(new Factory);
+        Http::fake([self::BASE.'/v1/rates/couriers' => fn (Request $r) => isset($r['destination_latitude'])
+            ? Http::response(['success' => false, 'error' => 'No courier available'], 400)
+            : Http::response(['success' => true, 'pricing' => [
+                ['courier_name' => 'JNE', 'courier_code' => 'jne', 'courier_service_name' => 'Reguler', 'courier_service_code' => 'reg', 'price' => 11000],
+            ]]),
+        ]);
+        $near = Address::factory()->create(['district_id' => self::TEBET, 'region_source' => 'biteship', 'latitude' => -6.2300000, 'longitude' => 106.8500000]);
+        $this->assertSame(['jne|REG'], array_map(fn ($r) => $r->key(), app(ShippingService::class)->rates($near, 1000)));
+    }
+
+    public function test_address_form_saves_pin_and_shows_map_only_when_instant_is_ready(): void
+    {
+        $customer = User::factory()->create();
+        $this->useBiteship();
+        $this->actingAs($customer)->get(route('account.addresses.create'))->assertOk()->assertDontSee('Pin lokasi');
+
+        $this->useInstant();
+        $this->get(route('account.addresses.create'))->assertOk()->assertSee('Pin lokasi')->assertSee('x-data="mapPin(', false);
+
+        $payload = [
+            'label' => 'Rumah', 'recipient_name' => 'Budi', 'phone' => '081234567890',
+            'province_id' => '31', 'city_id' => '3174', 'district_id' => self::TEBET, 'address_line' => 'Jl. Tebet 1',
+        ];
+        $this->post(route('account.addresses.store'), $payload + ['latitude' => '-6.2412345678', 'longitude' => '106.8612'])->assertSessionHasNoErrors();
+
+        $address = $customer->addresses()->sole();
+        $this->assertSame([-6.2412346, 106.8612], $address->coordinates());
+
+        $this->post(route('account.addresses.store'), $payload + ['latitude' => '-6.24', 'longitude' => ''])->assertSessionHasErrors('longitude');
+        $this->post(route('account.addresses.store'), $payload + ['latitude' => '123', 'longitude' => '106'])->assertSessionHasErrors('latitude');
+
+        // Pin dihapus saat alamat disimpan tanpa koordinat.
+        $this->put(route('account.addresses.update', $address), $payload + ['latitude' => '', 'longitude' => ''])->assertSessionHasNoErrors();
+        $this->assertNull($address->fresh()->coordinates());
+    }
+
+    public function test_store_settings_save_instant_couriers_with_warehouse_pin(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        app(StoreSettings::class)->save(['shop.shipping.driver' => 'biteship', 'services.biteship.api_key' => 'biteship_test.kunci']);
+
+        $payload = fn (array $overrides) => $overrides + [
+            'name' => 'MGA', 'full_name' => 'Media Gudang Acc', 'whatsapp_button' => '1',
+            'province_id' => '', 'city_id' => '', 'district_id' => '', 'couriers' => ['jne'],
+            'tracking_sync' => '0', 'payment_expiry_hours' => 12, 'auto_complete_days' => 5, 'instant_submitted' => '1',
+        ];
+
+        $this->get(route('admin.store-settings.edit'))->assertOk()->assertSee('Lalamove')->assertSee('Pin lokasi gudang');
+
+        // Kurir instan tanpa pin gudang ditolak.
+        $this->put(route('admin.store-settings.update'), $payload(['instant_couriers' => ['lalamove']]))->assertSessionHasErrors('origin_latitude');
+        $this->put(route('admin.store-settings.update'), $payload(['instant_couriers' => ['jne']]))->assertSessionHasErrors('instant_couriers.0');
+
+        $this->put(route('admin.store-settings.update'), $payload([
+            'instant_couriers' => ['lalamove', 'grab'], 'origin_latitude' => '-6.226', 'origin_longitude' => '106.853',
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertSame(['lalamove', 'grab'], ShippingConfig::instantCouriers());
+        $this->assertSame([-6.226, 106.853], ShippingConfig::originCoordinates());
+        $this->assertTrue(ShippingConfig::instantEnabled());
+
+        // Semua centang dilepas = kurir instan mati, kurir reguler tidak tersentuh.
+        $this->put(route('admin.store-settings.update'), $payload(['origin_latitude' => '-6.226', 'origin_longitude' => '106.853']))->assertSessionHasNoErrors();
+        $this->assertFalse(ShippingConfig::instantEnabled());
+        $this->assertSame(['jne'], ShippingConfig::couriers());
+
+        // Di luar Biteship kurir instan tidak pernah aktif.
+        app(StoreSettings::class)->save(['shop.shipping.driver' => 'fake']);
+        $this->assertSame([], ShippingConfig::instantCouriers());
+        $this->get(route('admin.store-settings.edit'))->assertOk()->assertDontSee('Pin lokasi gudang');
+    }
 }

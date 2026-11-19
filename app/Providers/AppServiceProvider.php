@@ -64,6 +64,9 @@ class AppServiceProvider extends ServiceProvider
                 ShippingConfig::origin('district_id'),
                 ShippingConfig::origin('postal_code'),
                 ShippingConfig::couriers(),
+                originCoordinates: ShippingConfig::originCoordinates(),
+                instantCouriers: ShippingConfig::instantCouriers(),
+                instantMaxKm: (int) config('shop.shipping.biteship.instant_max_km', 40),
             ),
             default => new FakeShippingProvider(config('shop.shipping.origin_district_id')),
         });
