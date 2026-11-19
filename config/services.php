@@ -62,6 +62,11 @@ return [
         'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
     ],
 
+    'biteship' => [
+        'api_key' => env('BITESHIP_API_KEY'),
+        'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
+    ],
+
     // Sinkron stok dari sistem gudang warehouse29 (GET /api/v1/stocks, token
     // Bearer). Bisa diatur superadmin di Admin › Integrasi.
     'warehouse' => [

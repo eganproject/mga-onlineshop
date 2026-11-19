@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Exceptions\ShippingUnavailableException;
 use App\Services\Shipping\ShippingService;
+use App\Support\ShippingConfig;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -66,6 +67,7 @@ class AddressRequest extends FormRequest
             'city' => $this->region['city']->name,
             'district' => $this->region['district']->name,
             'postal_code' => $data['postal_code'] ?? $this->region['district']->postalCode,
+            'region_source' => ShippingConfig::regionSource(),
             'is_default' => $this->boolean('is_default'),
         ];
     }

@@ -72,7 +72,9 @@ return [
     |
     | origin_district_id: ID kecamatan gudang asal pengiriman sesuai data
     | RajaOngkir. Cari ID-nya dengan `php artisan ongkir:wilayah`.
-    | Driver "fake" dipakai untuk development lokal tanpa API key.
+    | Driver: "fake" (development lokal tanpa API key), "rajaongkir", atau
+    | "biteship". Baca asal & kurir lewat App\Support\ShippingConfig supaya
+    | mengikuti driver yang aktif.
     | cache_minutes: lama hasil cek ongkir disimpan (hemat kuota API).
     |
     */
@@ -88,6 +90,19 @@ return [
         // Lacak resi: lama hasil disimpan, dan apakah dicek otomatis terjadwal.
         'tracking_cache_minutes' => (int) env('TRACKING_CACHE_MINUTES', 60),
         'tracking_sync' => (bool) env('TRACKING_SYNC', false),
+
+        // Biteship memakai data wilayah sendiri (kode Kemendagri, database/data/
+        // indonesia-regions.json) dan kode kurir sendiri, jadi asal & kurirnya
+        // disimpan terpisah. Pindah driver tidak menghapus pengaturan driver lain.
+        'biteship' => [
+            'origin_province_id' => null,
+            'origin_city_id' => null,
+            'origin_district_id' => env('BITESHIP_ORIGIN_DISTRICT_ID'),
+            'origin_label' => null,
+            // Kode pos gudang; kosong = kode pos bawaan kecamatan asal.
+            'origin_postal_code' => env('BITESHIP_ORIGIN_POSTAL_CODE'),
+            'couriers' => array_values(array_filter(explode(':', env('BITESHIP_COURIERS', 'jne:sicepat:jnt:anteraja:tiki')))),
+        ],
     ],
 
     /*

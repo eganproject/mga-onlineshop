@@ -20,6 +20,7 @@ use App\Services\Catalog\Wholesale;
 use App\Services\Promo\VoucherService;
 use App\Services\Shipping\ShippingService;
 use App\Support\OrderSummary;
+use App\Support\ShippingConfig;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -427,7 +428,8 @@ class ManualOrderService
 
     private function destination(string $districtId): Address
     {
-        return (new Address)->forceFill(['district_id' => $districtId]);
+        // Kecamatan baru saja dipilih dari data wilayah driver yang aktif.
+        return (new Address)->forceFill(['district_id' => $districtId, 'region_source' => ShippingConfig::regionSource()]);
     }
 
     private function label(Product $product, ?ProductVariant $variant): string

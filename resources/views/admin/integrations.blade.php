@@ -11,7 +11,7 @@
     $value = fn (string $integration, string $name) => $fields[$integration][$name]['value'];
     $cards = [
         'midtrans' => ['Midtrans', 'Payment gateway (Snap): transfer bank, e-wallet, kartu kredit, QRIS.', 'credit-card', 'bg-brand-50 text-brand-600'],
-        'rajaongkir' => ['RajaOngkir', 'Cek ongkos kirim & lacak resi JNE, SiCepat, J&T, POS, TIKI, dan lainnya.', 'truck', 'bg-sky-50 text-sky-600'],
+        'rajaongkir' => ['Ekspedisi (RajaOngkir / Biteship)', 'Cek ongkos kirim & lacak resi JNE, SiCepat, J&T, POS, TIKI, dan lainnya. Pilih salah satu penyedia.', 'truck', 'bg-sky-50 text-sky-600'],
         'firebase' => ['Login Google (Firebase)', 'Pelanggan masuk/daftar dengan akun Google. Panduan: docs/FIREBASE.md.', 'user', 'bg-amber-50 text-amber-600'],
         'warehouse' => ['Stok gudang (warehouse29)', 'Stok toko ditarik otomatis dari API stok warehouse29, dicocokkan per SKU.', 'archive', 'bg-teal-50 text-teal-600'],
     ];
@@ -100,14 +100,25 @@
                                 <p class="hint">Tarif biaya per metode, siapa yang menanggung, dan metode yang aktif diatur di @can('billing.manage')<a href="{{ route('admin.billing.edit') }}" class="font-semibold text-brand-700 underline">Pajak & Biaya</a>@else<span class="font-semibold">Pajak & Biaya</span>@endcan.</p>
                             </div>
                         @elseif ($key === 'rajaongkir')
-                            <x-form.select name="rajaongkir[driver]" id="rajaongkir_driver" label="Driver ongkir" :selected="$value('rajaongkir', 'driver')"
-                                           :options="['fake' => 'Simulasi (tarif contoh)', 'rajaongkir' => 'RajaOngkir (Komerce)']" :hint="$source('rajaongkir', 'driver')"
-                                           tooltip="Simulasi: tarif ongkir contoh untuk uji coba. RajaOngkir: tarif asli dari kurir sesuai berat & alamat, plus lacak resi." />
-                            @include('admin.partials.secret-input', ['integration' => 'rajaongkir', 'name' => 'api_key', 'label' => 'API key', 'placeholder' => 'API key dari dashboard Komerce',
-                                'tooltip' => 'Kunci akses RajaOngkir dari dashboard Komerce (menu API Key). Dipakai untuk cek ongkir, daftar wilayah, dan lacak resi.',
-                                'tooltipTips' => 'Setelah disimpan, atur kecamatan asal di Pengaturan Toko lalu tekan Tes koneksi.'])
+                            {{-- Kunci kedua penyedia tetap tersimpan; yang dipakai = penyedia yang dipilih. --}}
+                            <div class="space-y-5" x-data="{ driver: @js(old('rajaongkir.driver', $value('rajaongkir', 'driver'))) }">
+                                <x-form.select name="rajaongkir[driver]" id="rajaongkir_driver" label="Penyedia ongkir" :selected="$value('rajaongkir', 'driver')" x-model="driver"
+                                               :options="['fake' => 'Simulasi (tarif contoh)', 'rajaongkir' => 'RajaOngkir (Komerce)', 'biteship' => 'Biteship']" :hint="$source('rajaongkir', 'driver')"
+                                               tooltip="Simulasi: tarif ongkir contoh untuk uji coba. RajaOngkir atau Biteship: tarif asli dari kurir sesuai berat & alamat, plus lacak resi. Hanya satu yang aktif."
+                                               :tooltip-tips="['Kecamatan asal dan daftar kurir disimpan terpisah per penyedia. Setelah mengganti penyedia, buka Pengaturan Toko untuk memilih kecamatan asal dan kurirnya.', 'Alamat pelanggan yang sudah tersimpan tetap bisa dipakai di Biteship (dihitung dari kode pos). Saat kembali ke RajaOngkir, alamat yang dibuat di masa Biteship perlu dipilih ulang kecamatannya.']" />
+                                <div x-show="driver !== 'biteship'">
+                                    @include('admin.partials.secret-input', ['integration' => 'rajaongkir', 'name' => 'api_key', 'label' => 'API key RajaOngkir', 'placeholder' => 'API key dari dashboard Komerce',
+                                        'tooltip' => 'Kunci akses RajaOngkir dari dashboard Komerce (menu API Key). Dipakai untuk cek ongkir, daftar wilayah, dan lacak resi.',
+                                        'tooltipTips' => 'Setelah disimpan, atur kecamatan asal di Pengaturan Toko lalu tekan Tes koneksi.'])
+                                </div>
+                                <div x-show="driver === 'biteship'" x-cloak>
+                                    @include('admin.partials.secret-input', ['integration' => 'rajaongkir', 'name' => 'biteship_api_key', 'label' => 'API key Biteship', 'placeholder' => 'biteship_live.xxxxx',
+                                        'tooltip' => 'Kunci akses Biteship dari dashboard Biteship › Integrasi › API. Dipakai untuk cek ongkir dan lacak resi.',
+                                        'tooltipTips' => ['Kunci berawalan “biteship_test.” hanya untuk uji coba; pakai “biteship_live.” untuk tarif sungguhan.', 'Setelah disimpan, pilih kecamatan asal & kurir di Pengaturan Toko lalu tekan Tes koneksi.']])
+                                </div>
+                            </div>
                             <div class="rounded-xl bg-stone-50 p-3 text-sm">
-                                <p class="text-xs text-stone-500">Kecamatan asal pengiriman</p>
+                                <p class="text-xs text-stone-500">Kecamatan asal pengiriman ({{ $shippingProvider }})</p>
                                 <p class="font-semibold text-stone-800">{{ $originLabel ?? 'Belum diatur' }}</p>
                                 @can('settings.manage')
                                     <a href="{{ route('admin.store-settings.edit') }}" class="mt-1 inline-block text-xs font-semibold text-brand-700 underline">Ubah asal & kurir di Pengaturan Toko</a>

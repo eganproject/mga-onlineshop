@@ -4,6 +4,7 @@ namespace App\Services\Settings;
 
 use App\Services\Warehouse\WarehouseApiException;
 use App\Services\Warehouse\WarehouseClient;
+use App\Support\ShippingConfig;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -81,9 +82,17 @@ class IntegrationTester
         };
     }
 
-    /** @return Result */
+    /**
+     * Kartu ekspedisi: yang dites = penyedia yang sedang dipilih.
+     *
+     * @return Result
+     */
     private function rajaongkir(): array
     {
+        if (ShippingConfig::isBiteship()) {
+            return $this->biteship();
+        }
+
         $apiKey = (string) config('services.rajaongkir.api_key');
 
         if ($apiKey === '') {
@@ -109,6 +118,46 @@ class IntegrationTester
         }
 
         return $this->result(false, 'RajaOngkir menjawab: '.$this->apiMessage($response, 'meta.message'), $notes);
+    }
+
+    /**
+     * Cari area lewat Maps API Biteship (gratis): memastikan API key diterima.
+     *
+     * @return Result
+     */
+    private function biteship(): array
+    {
+        $apiKey = (string) config('services.biteship.api_key');
+
+        if ($apiKey === '') {
+            return $this->result(false, 'API key Biteship belum diisi.');
+        }
+
+        $response = Http::baseUrl((string) config('services.biteship.base_url'))
+            ->withHeaders(['Authorization' => $apiKey])
+            ->acceptJson()
+            ->timeout(15)
+            ->get('/v1/maps/areas', ['countries' => 'ID', 'input' => 'Jakarta Selatan', 'type' => 'single']);
+
+        $notes = [];
+
+        if (blank(ShippingConfig::origin('district_id'))) {
+            $notes[] = 'Kecamatan asal pengiriman untuk Biteship belum dipilih (Pengaturan Toko).';
+        }
+
+        if (Str::startsWith($apiKey, 'biteship_test.')) {
+            $notes[] = 'Ini kunci uji coba (biteship_test). Ganti dengan kunci biteship_live sebelum berjualan.';
+        }
+
+        if ($response->successful() && $response->json('success') !== false) {
+            return $this->result(true, 'API key diterima Biteship.', $notes);
+        }
+
+        $message = $this->apiMessage($response, 'error');
+
+        return in_array($response->status(), [401, 403], true)
+            ? $this->result(false, 'API key ditolak Biteship: '.$message, $notes)
+            : $this->result(false, 'Biteship menjawab: '.$message, $notes);
     }
 
     /**

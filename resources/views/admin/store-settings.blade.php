@@ -69,11 +69,18 @@
                          provinceId: @js($val('province_id')),
                          cityId: @js($val('city_id')),
                          districtId: @js($val('district_id')),
+                         postalCode: @js($val('origin_postal_code')),
                      })">
                 <div class="flex items-center gap-3">
                     <span class="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-600"><x-icon name="truck" /></span>
-                    <div><h2 class="font-bold text-stone-900">Pengiriman</h2><p class="text-xs text-stone-500">Asal pengiriman dipakai untuk menghitung ongkir di checkout.</p></div>
+                    <div><h2 class="font-bold text-stone-900">Pengiriman</h2><p class="text-xs text-stone-500">Asal pengiriman dipakai untuk menghitung ongkir di checkout. Penyedia ongkir aktif: <span class="font-semibold text-stone-700">{{ $shippingProvider }}</span>.</p></div>
                 </div>
+
+                @if ($shippingKeyMissing)
+                    <p class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"><x-icon name="warning" class="size-4 shrink-0" /> API key {{ $shippingProvider }} belum diisi di Admin › Integrasi, jadi ongkir belum bisa dihitung.</p>
+                @elseif ($shippingDriver !== 'fake' && blank($values['district_id']))
+                    <p class="flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"><x-icon name="warning" class="size-4 shrink-0" /> Kecamatan asal untuk {{ $shippingProvider }} belum dipilih. Pilih di bawah lalu simpan agar ongkir bisa dihitung. RajaOngkir dan Biteship memakai data wilayah berbeda, jadi asal dan kurir disimpan terpisah per penyedia.</p>
+                @endif
 
                 <div class="rounded-xl bg-stone-50 p-3 text-sm">
                     <p class="text-xs text-stone-500">Kecamatan asal saat ini</p>
@@ -88,19 +95,26 @@
                     ] as [$ref, $field, $text])
                         <x-form.field :label="$text" :for="$field" :name="$field"
                                       :tooltip="$ref === 'district' ? 'Kecamatan gudang/lokasi pengiriman. Ongkir di checkout dihitung dari kecamatan ini ke alamat pelanggan.' : null"
-                                      :tooltip-tips="$ref === 'district' ? 'Wajib diisi sebelum memakai RajaOngkir; salah kecamatan = ongkir yang ditampilkan salah.' : null">
+                                      :tooltip-tips="$ref === 'district' ? 'Wajib diisi sebelum memakai RajaOngkir atau Biteship; salah kecamatan = ongkir yang ditampilkan salah.' : null">
                             <select id="{{ $field }}" name="{{ $field }}" x-ref="{{ $ref }}" @class(['input', 'input-error' => $errors->has($field)])></select>
                         </x-form.field>
                     @endforeach
                 </div>
                 <p x-show="error" x-cloak x-text="error" class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"></p>
                 <p class="hint">Biarkan seperti semula bila kecamatan asal tidak berubah.</p>
+                @if ($shippingDriver === 'biteship')
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                        <x-form.input name="origin_postal_code" label="Kode pos gudang" optional x-model="postalCode" inputmode="numeric" maxlength="5" placeholder="5 digit"
+                                      tooltip="Biteship menghitung ongkir dari kode pos gudang ke kode pos tujuan. Terisi otomatis saat kecamatan dipilih."
+                                      tooltip-tips="Ganti dengan kode pos gudang yang sebenarnya supaya tarif lebih tepat. Kosong = kode pos umum kecamatan asal." />
+                    </div>
+                @endif
 
                 <div x-data="courierRecommendation({ url: @js(route('admin.store-settings.couriers')) })">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="label-row">
                             <p class="label">Kurir yang ditawarkan di checkout</p>
-                            <x-tooltip label="Kurir" text="Hanya kurir yang dicentang yang muncul sebagai pilihan ongkir pelanggan. Daftar ini = semua kurir yang didukung RajaOngkir."
+                            <x-tooltip label="Kurir" text="Hanya kurir yang dicentang yang muncul sebagai pilihan ongkir pelanggan. Daftar ini = kurir yang didukung {{ $shippingProvider === 'Biteship' ? 'Biteship (kurir instan seperti Gojek/Grab tidak termasuk)' : 'RajaOngkir' }}."
                                        :tips="['Klik “Cek rekomendasi” untuk melihat kurir yang benar-benar punya tarif dari kecamatan asal (ke sekitar gudang & ke kota besar di provinsi lain).', 'Pilih kurir yang melayani pickup/drop-off di dekat gudang. Terlalu banyak pilihan membuat checkout lebih lambat.']" />
                         </div>
                         @if ($canRecommend)
@@ -141,7 +155,9 @@
                         @endforeach
                     </div>
                     @if ($shippingDriver === 'fake')
-                        <p class="mt-1.5 text-xs text-stone-400">Mode simulasi hanya punya tarif contoh JNE, SiCepat, J&T, POS, dan TIKI. Rekomendasi kurir aktif setelah RajaOngkir diatur di Admin › Integrasi.</p>
+                        <p class="mt-1.5 text-xs text-stone-400">Mode simulasi hanya punya tarif contoh JNE, SiCepat, J&T, POS, dan TIKI. Kurir lain aktif setelah RajaOngkir atau Biteship dipilih di Admin › Integrasi.</p>
+                    @elseif ($shippingDriver === 'biteship')
+                        <p class="mt-1.5 text-xs text-stone-400">Kurir yang dicentang juga harus aktif di akun Biteship (dashboard Biteship › Pengaturan kurir). Rekomendasi kurir otomatis hanya tersedia untuk RajaOngkir.</p>
                     @elseif (! $canRecommend)
                         <p class="mt-1.5 text-xs text-stone-400">Isi API key RajaOngkir di Admin › Integrasi untuk melihat rekomendasi kurir.</p>
                     @endif
@@ -184,9 +200,9 @@
             <div class="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
                 <x-icon name="info" class="size-5 shrink-0" />
                 @can('integrations.manage')
-                    <p>Driver & kunci API Midtrans, RajaOngkir, dan Firebase diatur di <a href="{{ route('admin.integrations.index') }}" class="font-semibold underline">Integrasi</a>.</p>
+                    <p>Driver & kunci API Midtrans, ekspedisi (RajaOngkir/Biteship), dan Firebase diatur di <a href="{{ route('admin.integrations.index') }}" class="font-semibold underline">Integrasi</a>.</p>
                 @else
-                    <p>Driver & kunci API Midtrans, RajaOngkir, dan Firebase hanya bisa diatur oleh Superadmin.</p>
+                    <p>Driver & kunci API Midtrans, ekspedisi (RajaOngkir/Biteship), dan Firebase hanya bisa diatur oleh Superadmin.</p>
                 @endcan
             </div>
 

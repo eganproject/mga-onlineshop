@@ -152,7 +152,7 @@
             <section class="card space-y-4 p-5 sm:p-6">
                 <h2 class="font-bold text-stone-900">Pengiriman</h2>
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    @foreach (['courier' => ['truck', 'Cek ongkir kurir', 'Tarif RajaOngkir ke kecamatan tujuan'], 'custom' => ['pencil', 'Ongkir manual', 'Isi kurir & ongkir sendiri'], 'pickup' => ['storefront', 'Ambil di toko', 'Tanpa ongkir']] as $value => [$icon, $title, $desc])
+                    @foreach (['courier' => ['truck', 'Cek ongkir kurir', $shippingProvider === 'Simulasi' ? 'Tarif contoh ke kecamatan tujuan' : 'Tarif '.$shippingProvider.' ke kecamatan tujuan'], 'custom' => ['pencil', 'Ongkir manual', 'Isi kurir & ongkir sendiri'], 'pickup' => ['storefront', 'Ambil di toko', 'Tanpa ongkir']] as $value => [$icon, $title, $desc])
                         <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 p-3 text-sm transition has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                             <input type="radio" name="shipping_mode" value="{{ $value }}" x-model="mode" class="mt-0.5 text-brand-600 focus:ring-brand-500/30">
                             <span><span class="flex items-center gap-1.5 font-semibold text-stone-800"><x-icon :name="$icon" class="size-4" /> {{ $title }}</span><span class="block text-xs text-stone-500">{{ $desc }}</span></span>

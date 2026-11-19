@@ -7,6 +7,7 @@ use App\Data\Region;
 use App\Data\ShippingRate;
 use App\Exceptions\ShippingUnavailableException;
 use App\Models\Address;
+use App\Support\ShippingConfig;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -66,12 +67,24 @@ class ShippingService
             throw new ShippingUnavailableException('Alamat ini belum lengkap. Edit alamat dan pilih provinsi, kota, dan kecamatan.');
         }
 
+        // Alamat dipilih dari data wilayah penyedia lain: Biteship masih bisa
+        // menghitung dari kode pos, RajaOngkir butuh kecamatan dipilih ulang.
+        $foreign = ! $address->regionMatchesDriver();
+        $postalCode = preg_match('/^\d{5}$/', (string) $address->postal_code) ? (string) $address->postal_code : null;
+
+        if ($foreign && ! (ShippingConfig::isBiteship() && $postalCode)) {
+            throw new ShippingUnavailableException('Alamat ini perlu diperbarui. Edit alamat lalu pilih ulang provinsi, kota, dan kecamatan.');
+        }
+
+        $districtId = $foreign ? '' : (string) $address->district_id;
         $weight = max(1, $weight);
         $key = 'shipping:rates:'.md5(implode('|', [
-            config('shop.shipping.driver'),
-            config('shop.shipping.origin_district_id'),
-            implode(':', config('shop.shipping.couriers')),
-            $address->district_id,
+            ShippingConfig::driver(),
+            ShippingConfig::origin('district_id'),
+            ShippingConfig::origin('postal_code'),
+            implode(':', ShippingConfig::couriers()),
+            $districtId,
+            ShippingConfig::isBiteship() ? $postalCode : '',
             $weight,
         ]));
 
@@ -81,7 +94,7 @@ class ShippingService
         if (is_array($cached)) {
             $rates = array_map(ShippingRate::fromArray(...), $cached);
         } else {
-            $rates = $this->guard(fn () => $this->provider->rates($address->district_id, $weight), 'Ongkos kirim');
+            $rates = $this->guard(fn () => $this->provider->rates($districtId, $weight, $postalCode), 'Ongkos kirim');
             usort($rates, fn (ShippingRate $a, ShippingRate $b) => $a->cost <=> $b->cost);
 
             if ($rates !== []) {

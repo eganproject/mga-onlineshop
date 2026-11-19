@@ -62,7 +62,7 @@ class TooltipTest extends TestCase
             'admin.vouchers.create' => ['Info: Kuota total', 'Info: Batas per pelanggan', 'Info: Maksimal diskon'],
             'admin.storefront.edit' => ['Info: Foto utama (desktop)', 'Info: Foto versi HP', 'Info: Best Seller'],
             'admin.store-settings.edit' => ['Info: Kecamatan', 'Info: Pesan pembuka chat', 'Info: Batas waktu bayar'],
-            'admin.integrations.index' => ['Info: Server key', 'Info: Mode Midtrans', 'Info: API key'],
+            'admin.integrations.index' => ['Info: Server key', 'Info: Mode Midtrans', 'Info: API key RajaOngkir', 'Info: API key Biteship', 'Info: Penyedia ongkir'],
             'admin.articles.create' => ['Info: Judul SEO', 'Info: Gambar sampul'],
             'admin.staff.create' => ['Info: Jabatan'],
         ] as $route => $labels) {

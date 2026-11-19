@@ -109,6 +109,8 @@ php artisan ongkir:wilayah --kota=ID       # daftar kecamatan (salin ID-nya)
 
 Data wilayah RajaOngkir disimpan di cache 30 hari agar hemat kuota.
 
+Penyedia ongkir bisa diganti ke **Biteship** di Admin › Integrasi (`SHIPPING_DRIVER=biteship`, `BITESHIP_API_KEY`). Biteship memakai data wilayah bawaan (`database/data/indonesia-regions.json`) dan menghitung ongkir per kode pos; kecamatan asal & kurirnya diatur terpisah di Pengaturan Toko.
+
 URL notifikasi Midtrans: `https://domain-anda/webhooks/midtrans` (juga tampil di Admin › Integrasi). Di dashboard Midtrans isi juga *Finish Redirect URL* bebas; aplikasi sudah mengirim URL kembali per transaksi.
 
 ### Alur pembayaran

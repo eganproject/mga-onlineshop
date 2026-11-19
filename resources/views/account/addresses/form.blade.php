@@ -1,4 +1,6 @@
 @php($editing = $address->exists)
+{{-- Wilayah dipilih saat penyedia ongkir lain aktif: ID-nya tidak dikenal penyedia sekarang. --}}
+@php($regionStale = $editing && $address->canShip() && ! $address->regionMatchesDriver())
 <x-layouts.account :title="$editing ? 'Edit Alamat' : 'Tambah Alamat'" :heading="$editing ? 'Edit alamat' : 'Tambah alamat'">
     <form method="POST" action="{{ $editing ? route('account.addresses.update', $address) : route('account.addresses.store') }}"
           class="card space-y-5 p-6"
@@ -8,9 +10,9 @@
                   cities: @js(route('account.regions.cities', '__ID__')),
                   districts: @js(route('account.regions.districts', '__ID__')),
               },
-              provinceId: @js(old('province_id', $address->province_id)),
-              cityId: @js(old('city_id', $address->city_id)),
-              districtId: @js(old('district_id', $address->district_id)),
+              provinceId: @js(old('province_id', $regionStale ? null : $address->province_id)),
+              cityId: @js(old('city_id', $regionStale ? null : $address->city_id)),
+              districtId: @js(old('district_id', $regionStale ? null : $address->district_id)),
               postalCode: @js(old('postal_code', $address->postal_code)),
           })">
         @csrf
@@ -26,7 +28,9 @@
             <x-form.phone name="phone" label="No. HP penerima" :value="$address->phone ?? auth()->user()->phone" required />
         </div>
 
-        @if ($editing && ! $address->canShip())
+        @if ($regionStale)
+            <p class="flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"><x-icon name="warning" class="size-4 shrink-0" /> Data wilayah kami diperbarui. Pilih ulang provinsi, kota, dan kecamatan ({{ collect([$address->district, $address->city, $address->province])->filter()->implode(', ') }}) agar ongkir dihitung tepat.</p>
+        @elseif ($editing && ! $address->canShip())
             <p class="flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"><x-icon name="warning" class="size-4 shrink-0" /> Alamat ini dibuat dengan format lama ({{ collect([$address->district, $address->city, $address->province])->filter()->implode(', ') }}). Pilih ulang provinsi, kota, dan kecamatan agar ongkir bisa dihitung.</p>
         @endif
 

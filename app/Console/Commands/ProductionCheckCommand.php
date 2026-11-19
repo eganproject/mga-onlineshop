@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\ShippingConfig;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -35,7 +36,7 @@ class ProductionCheckCommand extends Command
         $this->check('Mailer sungguhan', ! in_array(config('mail.default'), ['log', 'array'], true), 'Isi MAIL_* dengan SMTP asli', warn: true);
         $this->check('LOG_LEVEL bukan debug', config('logging.channels.daily.level', 'debug') !== 'debug' || ! $production, 'Set LOG_LEVEL=warning', warn: true);
         $this->check('Payment bukan driver "fake"', config('shop.payment.driver') !== 'fake', 'Set PAYMENT_DRIVER=midtrans');
-        $this->check('Ongkir bukan driver "fake"', config('shop.shipping.driver') !== 'fake', 'Set SHIPPING_DRIVER=rajaongkir');
+        $this->check('Ongkir bukan driver "fake"', config('shop.shipping.driver') !== 'fake', 'Pilih RajaOngkir atau Biteship di Admin → Integrasi');
 
         if (config('shop.payment.driver') === 'midtrans') {
             $this->check('Kunci Midtrans terisi', filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key')), 'Isi MIDTRANS_SERVER_KEY & MIDTRANS_CLIENT_KEY');
@@ -44,6 +45,10 @@ class ProductionCheckCommand extends Command
 
         if (config('shop.shipping.driver') === 'rajaongkir') {
             $this->check('RajaOngkir siap', filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_district_id')), 'Isi RAJAONGKIR_API_KEY & kecamatan asal (Admin → Pengaturan Toko)');
+        }
+
+        if (config('shop.shipping.driver') === 'biteship') {
+            $this->check('Biteship siap', filled(config('services.biteship.api_key')) && filled(ShippingConfig::origin('district_id')), 'Isi API key Biteship (Admin → Integrasi) & kecamatan asal (Admin → Pengaturan Toko)');
         }
 
         $this->table(['Status', 'Pemeriksaan', 'Saran'], $this->rows);
