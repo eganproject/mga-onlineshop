@@ -220,11 +220,12 @@ class BiteshipShipmentTest extends TestCase
         $this->actingAs(User::factory()->staff(StaffRole::Owner)->create());
 
         $this->get(route('admin.store-settings.edit'))->assertOk()
-            ->assertSee('Data pengirim')->assertSee('Jl. Tebet Raya No. 1')->assertSee('Ubah di kartu Identitas toko');
+            ->assertSeeInOrder(['Lokasi gudang', 'Alamat lengkap gudang', 'Jl. Tebet Raya No. 1', 'Kode pos gudang', 'Pin lokasi gudang', 'Kontak pengirim untuk kurir', 'Kurir reguler', 'Kurir instan', 'Pelacakan'])
+            ->assertDontSee('wajib terisi sebelum pengiriman Biteship');
 
-        config(['shop.address' => null]);
+        config(['shop.whatsapp' => null]);
         $this->get(route('admin.store-settings.edit'))->assertOk()
-            ->assertSee('Isi di kartu Identitas toko')->assertSee('wajib terisi sebelum pengiriman Biteship');
+            ->assertSee('Isi No. WhatsApp di kartu Kontak')->assertSee('wajib terisi sebelum pengiriman Biteship');
     }
 
     public function test_only_staff_who_manage_orders_can_create_shipments(): void

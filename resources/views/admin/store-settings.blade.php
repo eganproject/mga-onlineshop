@@ -29,9 +29,6 @@
                 <x-form.input name="tagline" label="Tagline" :value="$values['tagline']" maxlength="160" optional
                               tooltip="Kalimat pendek tentang toko yang tampil di footer semua halaman."
                               tooltip-tips="Tulis tanpa titik di akhir (titik ditambahkan otomatis), mis. “Grosir aksesoris HP original”." />
-                <x-form.textarea name="address" label="Alamat gudang / pengirim" :value="$values['address']" rows="3" maxlength="500" optional
-                                 placeholder="Jl. ..., Kecamatan, Kota, Kode pos"
-                                 :hint="trim('Dicetak di invoice, packing slip, dan label resi. Juga dipakai sebagai alamat jemput kurir Biteship. '.$envHint('address'))" />
             </section>
 
             {{-- Kontak & sosial --}}
@@ -82,11 +79,13 @@
                     <p class="flex gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"><x-icon name="warning" class="size-4 shrink-0" /> Kecamatan asal untuk {{ $shippingProvider }} belum dipilih. Pilih di bawah lalu simpan agar ongkir bisa dihitung. RajaOngkir dan Biteship memakai data wilayah berbeda, jadi asal dan kurir disimpan terpisah per penyedia.</p>
                 @endif
 
-                <div class="rounded-xl bg-stone-50 p-3 text-sm">
-                    <p class="text-xs text-stone-500">Kecamatan asal saat ini</p>
-                    <p class="font-semibold text-stone-800">{{ $values['origin_label'] ?: ($values['district_id'] ? 'ID '.$values['district_id'] : 'Belum diatur') }}</p>
+                <div class="flex items-start gap-3 border-t border-stone-100 pt-5">
+                    <span class="grid size-6 shrink-0 place-items-center rounded-full bg-stone-900 text-xs font-bold text-white">1</span>
+                    <div><h3 class="text-sm font-bold text-stone-900">Lokasi gudang</h3><p class="text-xs text-stone-500">Alamat pengirim dan asal pengiriman untuk menghitung ongkir.</p></div>
                 </div>
-
+                <x-form.textarea name="address" label="Alamat lengkap gudang" :value="$values['address']" rows="3" maxlength="500" optional
+                                 placeholder="Jl. ..., Kecamatan, Kota, Kode pos"
+                                 :hint="trim('Dicetak di invoice, packing slip, dan label resi. Kurir menjemput paket di alamat ini. '.$envHint('address'))" />
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                     @foreach ([
                         ['province', 'province_id', 'Provinsi'],
@@ -101,55 +100,36 @@
                     @endforeach
                 </div>
                 <p x-show="error" x-cloak x-text="error" class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"></p>
-                <p class="hint">Biarkan seperti semula bila kecamatan asal tidak berubah.</p>
+                <p class="hint">Kecamatan asal saat ini: <span class="font-semibold text-stone-700">{{ $values['origin_label'] ?: ($values['district_id'] ? 'ID '.$values['district_id'] : 'belum diatur') }}</span>. Biarkan seperti semula bila tidak berubah.</p>
                 @if ($shippingDriver === 'biteship')
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                         <x-form.input name="origin_postal_code" label="Kode pos gudang" optional x-model="postalCode" inputmode="numeric" maxlength="5" placeholder="5 digit"
                                       tooltip="Biteship menghitung ongkir dari kode pos gudang ke kode pos tujuan. Terisi otomatis saat kecamatan dipilih."
                                       tooltip-tips="Ganti dengan kode pos gudang yang sebenarnya supaya tarif lebih tepat. Kosong = kode pos umum kecamatan asal." />
                     </div>
-
-                    {{-- Ringkasan data pengirim yang dikirim ke Biteship saat membuat pengiriman; isiannya ada di kartu lain. --}}
-                    <div class="rounded-xl border border-stone-200 p-4 text-sm">
-                        <div class="label-row">
-                            <p class="label">Data pengirim</p>
-                            <x-tooltip label="Data pengirim" text="Dikirim ke Biteship saat membuat pengiriman dari detail pesanan dan dicetak di label resi. Kecamatan dan kode pos di atas hanya untuk menghitung ongkir." />
-                        </div>
-                        <dl class="mt-2 space-y-2">
-                            @foreach ([
-                                ['Alamat lengkap gudang', $values['address'], '#identitas-toko', 'Identitas toko'],
-                                ['No. WhatsApp pengirim', $values['whatsapp'], '#kontak-toko', 'Kontak & media sosial'],
-                            ] as [$senderLabel, $senderValue, $senderAnchor, $senderCard])
-                                <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-                                    <dt class="text-stone-500">{{ $senderLabel }}</dt>
-                                    <dd class="min-w-0 text-right">
-                                        @if (filled($senderValue))
-                                            <span class="font-semibold text-stone-800">{{ $senderValue }}</span>
-                                        @else
-                                            <span class="badge bg-amber-50 text-amber-700 ring-amber-600/20">Belum diisi</span>
-                                        @endif
-                                        <a href="{{ $senderAnchor }}" class="ml-1 text-xs font-semibold text-brand-600 hover:underline">{{ filled($senderValue) ? 'Ubah' : 'Isi' }} di kartu {{ $senderCard }}</a>
-                                    </dd>
-                                </div>
-                            @endforeach
-                            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-                                <dt class="text-stone-500">Pin lokasi gudang</dt>
-                                <dd class="text-right">
-                                    @if ($instant['latitude'] && $instant['longitude'])
-                                        <span class="font-semibold text-stone-800">Sudah dipasang</span>
-                                    @else
-                                        <span class="badge bg-stone-100 text-stone-600 ring-stone-500/20">Belum dipasang</span>
-                                    @endif
-                                    <a href="#pin-gudang" class="ml-1 text-xs font-semibold text-brand-600 hover:underline">Atur di bawah (untuk kurir instan)</a>
-                                </dd>
-                            </div>
-                        </dl>
-                        @if (blank($values['address']) || blank($values['whatsapp']))
-                            <p class="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Alamat lengkap dan nomor WhatsApp wajib terisi sebelum pengiriman Biteship bisa dibuat.</p>
+                    <x-form.map-pin label="Pin lokasi gudang" lat-name="origin_latitude" lng-name="origin_longitude"
+                                    :latitude="$instant['latitude']" :longitude="$instant['longitude']"
+                                    tooltip="Titik tepat gudang/lokasi penjemputan. Kurir instan menghitung ongkir dan menjemput paket dari titik ini."
+                                    tooltip-tips="Perbesar peta sampai bangunan gudang terlihat, lalu ketuk tepat di pintu masuknya."
+                                    hint="Dipakai kurir instan untuk menghitung ongkir dan menjemput paket. Wajib bila ada kurir instan yang dicentang." />
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-stone-50 p-3 text-xs text-stone-600">
+                        <span>Kontak pengirim untuk kurir:</span>
+                        @if (filled($values['whatsapp']))
+                            <span class="font-semibold text-stone-800">{{ $values['whatsapp'] }}</span>
+                        @else
+                            <span class="badge bg-amber-50 text-amber-700 ring-amber-600/20">Belum diisi</span>
                         @endif
-                    </div>
+                        <a href="#kontak-toko" class="font-semibold text-brand-600 hover:underline">{{ filled($values['whatsapp']) ? 'Ubah' : 'Isi' }} No. WhatsApp di kartu Kontak</a>
+                    </p>
+                    @if (blank($values['address']) || blank($values['whatsapp']))
+                        <p class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Alamat lengkap gudang dan nomor WhatsApp wajib terisi sebelum pengiriman Biteship bisa dibuat.</p>
+                    @endif
                 @endif
 
+                <div class="flex items-start gap-3 border-t border-stone-100 pt-5">
+                    <span class="grid size-6 shrink-0 place-items-center rounded-full bg-stone-900 text-xs font-bold text-white">2</span>
+                    <div><h3 class="text-sm font-bold text-stone-900">Kurir reguler</h3><p class="text-xs text-stone-500">Kurir yang muncul sebagai pilihan ongkir di checkout.</p></div>
+                </div>
                 <div x-data="courierRecommendation({ url: @js(route('admin.store-settings.couriers')) })">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="label-row">
@@ -206,11 +186,15 @@
 
                 @if ($shippingDriver === 'biteship')
                     {{-- Kurir instan: tarif dari koordinat gudang ke pin lokasi alamat pembeli. --}}
-                    <div id="pin-gudang" class="scroll-mt-24 space-y-4 rounded-xl border border-stone-200 p-4">
+                <div class="flex items-start gap-3 border-t border-stone-100 pt-5">
+                    <span class="grid size-6 shrink-0 place-items-center rounded-full bg-stone-900 text-xs font-bold text-white">3</span>
+                    <div><h3 class="text-sm font-bold text-stone-900">Kurir instan</h3><p class="text-xs text-stone-500">Antar di hari yang sama dalam kota. Butuh pin lokasi gudang di bagian 1.</p></div>
+                </div>
+                    <div class="space-y-4">
                         <input type="hidden" name="instant_submitted" value="1">
                         <div>
                             <div class="label-row">
-                                <p class="label">Kurir instan</p>
+                                <p class="label">Kurir instan yang ditawarkan</p>
                                 <x-tooltip label="Kurir instan" text="Kurir yang mengantar di hari yang sama dalam kota (Lalamove, Gojek, Grab). Tarifnya dihitung dari titik gudang ke pin lokasi pembeli, bukan dari kode pos."
                                            :tips="['Hanya muncul di checkout untuk pembeli yang menaruh pin lokasi di alamatnya dan berjarak maksimal '.config('shop.shipping.biteship.instant_max_km', 40).' km dari gudang.', 'Toko hanya menampilkan tarifnya. Driver tetap dipesan sendiri lewat aplikasi kurir atau dashboard Biteship setelah pesanan dibayar.', 'Kurir yang dicentang harus aktif di akun Biteship.']" />
                             </div>
@@ -225,14 +209,13 @@
                             </div>
                             <x-input-error for="instant_couriers" />
                         </div>
-                        <x-form.map-pin label="Pin lokasi gudang" lat-name="origin_latitude" lng-name="origin_longitude"
-                                        :latitude="$instant['latitude']" :longitude="$instant['longitude']"
-                                        tooltip="Titik tepat gudang/lokasi penjemputan. Kurir instan menghitung ongkir dan menjemput paket dari titik ini."
-                                        tooltip-tips="Perbesar peta sampai bangunan gudang terlihat, lalu ketuk tepat di pintu masuknya."
-                                        hint="Wajib diisi bila ada kurir instan yang dicentang." />
                     </div>
                 @endif
 
+                <div class="flex items-start gap-3 border-t border-stone-100 pt-5">
+                    <span class="grid size-6 shrink-0 place-items-center rounded-full bg-stone-900 text-xs font-bold text-white">{{ $shippingDriver === 'biteship' ? 4 : 3 }}</span>
+                    <div><h3 class="text-sm font-bold text-stone-900">Pelacakan</h3><p class="text-xs text-stone-500">Status resi setelah paket dikirim.</p></div>
+                </div>
                 <x-form.switch card name="tracking_sync" label="Cek resi otomatis" :checked="$values['tracking_sync']"
                                description="Setiap 3 jam status resi pesanan “Dikirim” dicek ke kurir; yang sudah sampai ditandai otomatis. Butuh cron scheduler aktif." />
             </section>
