@@ -215,6 +215,18 @@ class BiteshipShipmentTest extends TestCase
         $this->get(route('admin.orders.shipping-label', $this->order()))->assertNotFound();
     }
 
+    public function test_store_settings_show_where_the_sender_details_are_set(): void
+    {
+        $this->actingAs(User::factory()->staff(StaffRole::Owner)->create());
+
+        $this->get(route('admin.store-settings.edit'))->assertOk()
+            ->assertSee('Data pengirim')->assertSee('Jl. Tebet Raya No. 1')->assertSee('Ubah di kartu Identitas toko');
+
+        config(['shop.address' => null]);
+        $this->get(route('admin.store-settings.edit'))->assertOk()
+            ->assertSee('Isi di kartu Identitas toko')->assertSee('wajib terisi sebelum pengiriman Biteship');
+    }
+
     public function test_only_staff_who_manage_orders_can_create_shipments(): void
     {
         Http::fake();

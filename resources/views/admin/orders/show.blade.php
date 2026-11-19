@@ -166,12 +166,14 @@
                             <button type="button" class="btn btn-ghost btn-sm" @click="edit = !edit" x-text="edit ? 'Batal' : 'Ubah'">Ubah</button>
                         @endcan
                     </div>
+                    @can('orders.manage')
                     <form x-show="edit" x-cloak method="POST" action="{{ route('admin.orders.tracking-number', $order) }}" class="mt-4 space-y-3">
                         @csrf
                         @method('PATCH')
                         <input name="tracking_number" value="{{ $order->tracking_number }}" required maxlength="64" class="input font-mono" aria-label="Nomor resi baru">
                         <button class="btn btn-primary w-full">Simpan resi</button>
                     </form>
+                    @endcan
                 </div>
             @endif
 
