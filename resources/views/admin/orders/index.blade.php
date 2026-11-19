@@ -70,7 +70,7 @@
                         <th class="w-10"><input type="checkbox" class="checkbox" aria-label="Pilih semua"
                             :checked="selected.length && selected.length === $root.querySelectorAll('input[name=\'orders[]\']').length"
                             @change="selected = $event.target.checked ? [...$root.querySelectorAll('input[name=\'orders[]\']')].map(i => i.value) : []"></th>
-                        <th><x-admin.sort-link column="tanggal" desc>Pesanan</x-admin.sort-link></th><th class="hidden md:table-cell">Pelanggan</th><th class="hidden xl:table-cell">Item</th><th class="hidden sm:table-cell"><x-admin.sort-link column="total" desc>Total</x-admin.sort-link></th><th class="hidden lg:table-cell">Pengiriman</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th>
+                        <th><x-admin.sort-link column="tanggal" desc>Pesanan</x-admin.sort-link></th><th class="hidden md:table-cell">Pelanggan</th><th class="hidden 2xl:table-cell">Item</th><th class="hidden sm:table-cell"><x-admin.sort-link column="total" desc>Total</x-admin.sort-link></th><th class="hidden lg:table-cell">Pengiriman</th><th class="hidden sm:table-cell">Status</th><th class="hidden sm:table-cell"></th>
                     </tr></thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach ($orders as $order)
@@ -82,9 +82,10 @@
                                     <p class="mt-1 text-xs text-stone-600 md:hidden">{{ $order->customerName() }}</p>
                                     <p class="mt-0.5 text-sm font-semibold text-stone-900 sm:hidden">@rupiah($order->total)</p>
                                     <div class="mt-1 sm:hidden"><x-order-status :status="$order->status" /></div>
+                                    <div class="mt-1.5 2xl:hidden">@include('admin.orders.partials.item-skus')</div>
                                 </td>
                                 <td class="hidden md:table-cell"><p class="line-clamp-2 font-medium text-stone-800">{{ $order->customerName() }}</p><p class="text-xs text-stone-500">{{ $order->customerEmail() ?? $order->recipient_phone }}</p></td>
-                                <td class="hidden xl:table-cell">{{ $order->items_count }}</td>
+                                <td class="hidden 2xl:table-cell">@include('admin.orders.partials.item-skus')</td>
                                 <td class="hidden whitespace-nowrap font-semibold sm:table-cell">@rupiah($order->total)</td>
                                 <td class="hidden whitespace-nowrap text-xs lg:table-cell">{{ $order->courierLabel() ?? '—' }}@if ($order->tracking_number)<p class="font-mono text-stone-500">{{ $order->tracking_number }}</p>@endif</td>
                                 <td class="hidden sm:table-cell"><x-order-status :status="$order->status" /></td>
