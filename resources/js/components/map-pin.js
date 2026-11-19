@@ -1,6 +1,7 @@
 /**
  * Pin lokasi di peta (Leaflet + OpenStreetMap, di-import dinamis) untuk
- * <x-form.map-pin>. Ketuk peta atau geser pin untuk menandai lokasi; nilai
+ * <x-form.map-pin>. Ketuk peta, geser pin, atau cari alamat (Nominatim, hanya
+ * saat tombol Cari/Enter ditekan sesuai aturan pakainya) untuk menandai lokasi; nilai
  * tersimpan di input tersembunyi lintang/bujur. Dipakai untuk tarif kurir
  * instan Biteship (form alamat pembeli & koordinat gudang di Pengaturan Toko).
  *
@@ -17,6 +18,10 @@ export default ({ lat = null, lng = null } = {}) => ({
     L: null,
     locating: false,
     notice: '',
+    query: '',
+    searching: false,
+    searched: false,
+    results: [],
 
     get hasPin() {
         return this.lat !== null && this.lng !== null;
@@ -96,6 +101,38 @@ export default ({ lat = null, lng = null } = {}) => ({
             },
             { enableHighAccuracy: true, timeout: 10000 },
         );
+    },
+
+    /** Cari alamat/nama tempat di Indonesia; hasilnya dipilih pengguna untuk menaruh pin. */
+    async search() {
+        const q = this.query.trim();
+        if (q.length < 3 || this.searching) return;
+
+        this.searching = true;
+        this.searched = false;
+        this.notice = '';
+        this.results = [];
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?${new URLSearchParams({ format: 'json', limit: '5', countrycodes: 'id', 'accept-language': 'id', q })}`, {
+                headers: { Accept: 'application/json' },
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            this.results = (await res.json())
+                .filter((hit) => hit.lat && hit.lon)
+                .map((hit) => ({ label: hit.display_name, lat: Number(hit.lat), lng: Number(hit.lon) }));
+            this.searched = true;
+        } catch (e) {
+            this.notice = 'Pencarian alamat sedang tidak bisa dipakai. Ketuk peta untuk menaruh pin.';
+        } finally {
+            this.searching = false;
+        }
+    },
+
+    choose(result) {
+        this.place(result.lat, result.lng, 17);
+        this.results = [];
+        this.searched = false;
     },
 
     /** Geser peta ke kecamatan terpilih (tanpa menaruh pin). */
