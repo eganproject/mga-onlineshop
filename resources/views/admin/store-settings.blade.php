@@ -15,7 +15,7 @@
 
         <div class="space-y-6 lg:col-span-2">
             {{-- Identitas --}}
-            <section class="card space-y-5 p-6">
+            <section id="identitas-toko" class="card scroll-mt-24 space-y-5 p-6">
                 <div class="flex items-center gap-3">
                     <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="storefront" /></span>
                     <div><h2 class="font-bold text-stone-900">Identitas toko</h2><p class="text-xs text-stone-500">Tampil di judul halaman, email, invoice, dan footer.</p></div>
@@ -31,11 +31,11 @@
                               tooltip-tips="Tulis tanpa titik di akhir (titik ditambahkan otomatis), mis. “Grosir aksesoris HP original”." />
                 <x-form.textarea name="address" label="Alamat gudang / pengirim" :value="$values['address']" rows="3" maxlength="500" optional
                                  placeholder="Jl. ..., Kecamatan, Kota, Kode pos"
-                                 :hint="trim('Dicetak di invoice dan packing slip. '.$envHint('address'))" />
+                                 :hint="trim('Dicetak di invoice, packing slip, dan label resi. Juga dipakai sebagai alamat jemput kurir Biteship. '.$envHint('address'))" />
             </section>
 
             {{-- Kontak & sosial --}}
-            <section class="card space-y-5 p-6">
+            <section id="kontak-toko" class="card scroll-mt-24 space-y-5 p-6">
                 <div class="flex items-center gap-3">
                     <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="chat" /></span>
                     <div><h2 class="font-bold text-stone-900">Kontak & media sosial</h2><p class="text-xs text-stone-500">Dipakai untuk tombol WhatsApp dan tautan profil toko.</p></div>
@@ -108,6 +108,46 @@
                                       tooltip="Biteship menghitung ongkir dari kode pos gudang ke kode pos tujuan. Terisi otomatis saat kecamatan dipilih."
                                       tooltip-tips="Ganti dengan kode pos gudang yang sebenarnya supaya tarif lebih tepat. Kosong = kode pos umum kecamatan asal." />
                     </div>
+
+                    {{-- Ringkasan data pengirim yang dikirim ke Biteship saat membuat pengiriman; isiannya ada di kartu lain. --}}
+                    <div class="rounded-xl border border-stone-200 p-4 text-sm">
+                        <div class="label-row">
+                            <p class="label">Data pengirim</p>
+                            <x-tooltip label="Data pengirim" text="Dikirim ke Biteship saat membuat pengiriman dari detail pesanan dan dicetak di label resi. Kecamatan dan kode pos di atas hanya untuk menghitung ongkir." />
+                        </div>
+                        <dl class="mt-2 space-y-2">
+                            @foreach ([
+                                ['Alamat lengkap gudang', $values['address'], '#identitas-toko', 'Identitas toko'],
+                                ['No. WhatsApp pengirim', $values['whatsapp'], '#kontak-toko', 'Kontak & media sosial'],
+                            ] as [$senderLabel, $senderValue, $senderAnchor, $senderCard])
+                                <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                                    <dt class="text-stone-500">{{ $senderLabel }}</dt>
+                                    <dd class="min-w-0 text-right">
+                                        @if (filled($senderValue))
+                                            <span class="font-semibold text-stone-800">{{ $senderValue }}</span>
+                                        @else
+                                            <span class="badge bg-amber-50 text-amber-700 ring-amber-600/20">Belum diisi</span>
+                                        @endif
+                                        <a href="{{ $senderAnchor }}" class="ml-1 text-xs font-semibold text-brand-600 hover:underline">{{ filled($senderValue) ? 'Ubah' : 'Isi' }} di kartu {{ $senderCard }}</a>
+                                    </dd>
+                                </div>
+                            @endforeach
+                            <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                                <dt class="text-stone-500">Pin lokasi gudang</dt>
+                                <dd class="text-right">
+                                    @if ($instant['latitude'] && $instant['longitude'])
+                                        <span class="font-semibold text-stone-800">Sudah dipasang</span>
+                                    @else
+                                        <span class="badge bg-stone-100 text-stone-600 ring-stone-500/20">Belum dipasang</span>
+                                    @endif
+                                    <a href="#pin-gudang" class="ml-1 text-xs font-semibold text-brand-600 hover:underline">Atur di bawah (untuk kurir instan)</a>
+                                </dd>
+                            </div>
+                        </dl>
+                        @if (blank($values['address']) || blank($values['whatsapp']))
+                            <p class="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Alamat lengkap dan nomor WhatsApp wajib terisi sebelum pengiriman Biteship bisa dibuat.</p>
+                        @endif
+                    </div>
                 @endif
 
                 <div x-data="courierRecommendation({ url: @js(route('admin.store-settings.couriers')) })">
@@ -166,7 +206,7 @@
 
                 @if ($shippingDriver === 'biteship')
                     {{-- Kurir instan: tarif dari koordinat gudang ke pin lokasi alamat pembeli. --}}
-                    <div class="space-y-4 rounded-xl border border-stone-200 p-4">
+                    <div id="pin-gudang" class="scroll-mt-24 space-y-4 rounded-xl border border-stone-200 p-4">
                         <input type="hidden" name="instant_submitted" value="1">
                         <div>
                             <div class="label-row">
