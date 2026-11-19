@@ -20,6 +20,7 @@ import infiniteScroll from './components/infinite-scroll';
 import paymentPage from './components/payment-page';
 import manualOrder from './components/manual-order';
 import fitViewport from './components/fit-viewport';
+import mapPin from './components/map-pin';
 
 window.Alpine = Alpine;
 
@@ -49,6 +50,7 @@ Alpine.data('bestSellerPicker', bestSellerPicker);
 Alpine.data('billingPreview', billingPreview);
 Alpine.data('paymentPage', paymentPage);
 Alpine.data('manualOrder', manualOrder);
+Alpine.data('mapPin', mapPin);
 
 // Infinite scroll daftar pelanggan (<x-infinite-list>); sebelum Alpine.start supaya
 // item yang dipulihkan saat Back ikut diinisialisasi Alpine.

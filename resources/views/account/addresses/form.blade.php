@@ -48,6 +48,10 @@
             <x-form.input name="postal_code" label="Kode pos" x-model="postalCode" inputmode="numeric" maxlength="5" placeholder="5 digit" />
         </div>
         <p x-show="error" x-text="error" x-cloak class="flex gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700"></p>
+        @if (\App\Support\ShippingConfig::instantEnabled())
+            <x-form.map-pin label="Pin lokasi" :latitude="$address->latitude" :longitude="$address->longitude"
+                            hint="Taruh pin tepat di lokasi penerima supaya kurir instan (mis. Lalamove, Gojek, Grab) bisa dipilih saat checkout. Tanpa pin, hanya kurir reguler yang tampil." />
+        @endif
         <x-form.textarea name="address_line" label="Alamat lengkap" :value="$address->address_line" rows="3" maxlength="500" required
                          placeholder="Nama jalan, nomor rumah, RT/RW, patokan" />
         <label class="flex items-center gap-2 text-sm text-stone-600">

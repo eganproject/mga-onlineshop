@@ -102,6 +102,12 @@ return [
             // Kode pos gudang; kosong = kode pos bawaan kecamatan asal.
             'origin_postal_code' => env('BITESHIP_ORIGIN_POSTAL_CODE'),
             'couriers' => array_values(array_filter(explode(':', env('BITESHIP_COURIERS', 'jne:sicepat:jnt:anteraja:tiki')))),
+            // Kurir instan (Lalamove, Gojek, Grab): tarif dihitung dari titik koordinat
+            // gudang ke pin lokasi alamat pembeli, hanya dalam jarak instant_max_km.
+            'origin_latitude' => env('BITESHIP_ORIGIN_LATITUDE'),
+            'origin_longitude' => env('BITESHIP_ORIGIN_LONGITUDE'),
+            'instant_couriers' => array_values(array_filter(explode(':', (string) env('BITESHIP_INSTANT_COURIERS', '')))),
+            'instant_max_km' => (int) env('BITESHIP_INSTANT_MAX_KM', 40),
         ],
     ],
 

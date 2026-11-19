@@ -24,8 +24,10 @@ interface ShippingProvider
      * Hitung ongkir dari gudang ke kecamatan tujuan untuk berat tertentu (gram).
      * $postalCode = kode pos di alamat tujuan; dipakai driver berbasis kode pos
      * (Biteship) bila ID kecamatannya berasal dari penyedia lain.
+     * $coordinates = pin lokasi tujuan [lat, lng] bila ada (kurir instan Biteship).
      *
+     * @param  array{0: float, 1: float}|null  $coordinates
      * @return list<ShippingRate>
      */
-    public function rates(string $districtId, int $weight, ?string $postalCode = null): array;
+    public function rates(string $districtId, int $weight, ?string $postalCode = null, ?array $coordinates = null): array;
 }

@@ -75,6 +75,62 @@ class ShippingConfig
         return $couriers ?: ['jne'];
     }
 
+    /**
+     * Titik koordinat gudang [lat, lng] untuk kurir instan; null bila belum diatur
+     * atau driver bukan Biteship.
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    public static function originCoordinates(): ?array
+    {
+        if (! self::isBiteship()) {
+            return null;
+        }
+
+        return self::coordinates(config('shop.shipping.biteship.origin_latitude'), config('shop.shipping.biteship.origin_longitude'));
+    }
+
+    /** Kurir instan yang dicentang admin (hanya Biteship). */
+    public static function instantCouriers(): array
+    {
+        if (! self::isBiteship()) {
+            return [];
+        }
+
+        return array_values(array_intersect((array) config('shop.shipping.biteship.instant_couriers'), array_keys(StoreSettings::BITESHIP_INSTANT_COURIERS)));
+    }
+
+    /** Kurir instan siap ditawarkan: ada yang dicentang dan koordinat gudang terisi. */
+    public static function instantEnabled(): bool
+    {
+        return self::instantCouriers() !== [] && self::originCoordinates() !== null;
+    }
+
+    /**
+     * Pasangan lintang/bujur yang valid, atau null.
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    public static function coordinates(mixed $latitude, mixed $longitude): ?array
+    {
+        if (! is_numeric($latitude) || ! is_numeric($longitude)) {
+            return null;
+        }
+
+        [$lat, $lng] = [(float) $latitude, (float) $longitude];
+
+        return abs($lat) <= 90 && abs($lng) <= 180 && ($lat != 0.0 || $lng != 0.0) ? [$lat, $lng] : null;
+    }
+
+    /** Jarak garis lurus dua titik [lat, lng] dalam km (haversine). */
+    public static function distanceKm(array $from, array $to): float
+    {
+        [$lat1, $lng1, $lat2, $lng2] = array_map('deg2rad', [$from[0], $from[1], $to[0], $to[1]]);
+        $a = sin(($lat2 - $lat1) / 2) ** 2 + cos($lat1) * cos($lat2) * sin(($lng2 - $lng1) / 2) ** 2;
+
+        return 6371 * 2 * asin(min(1, sqrt($a)));
+    }
+
     /** Kunci API driver aktif terisi (simulasi tidak butuh kunci). */
     public static function hasApiKey(): bool
     {

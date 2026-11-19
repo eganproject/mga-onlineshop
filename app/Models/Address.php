@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'label', 'recipient_name', 'phone', 'province_id', 'province', 'city_id', 'city',
-    'district_id', 'district', 'postal_code', 'address_line', 'is_default', 'region_source',
+    'district_id', 'district', 'postal_code', 'address_line', 'is_default', 'region_source', 'latitude', 'longitude',
 ])]
 class Address extends Model
 {
@@ -39,6 +39,16 @@ class Address extends Model
     public function regionMatchesDriver(): bool
     {
         return ($this->region_source === ShippingConfig::BITESHIP) === ShippingConfig::isBiteship();
+    }
+
+    /**
+     * Pin lokasi [lat, lng] bila pembeli menandainya di peta.
+     *
+     * @return array{0: float, 1: float}|null
+     */
+    public function coordinates(): ?array
+    {
+        return ShippingConfig::coordinates($this->latitude, $this->longitude);
     }
 
     /** Alamat lengkap dalam satu baris, dipakai sebagai salinan di pesanan. */

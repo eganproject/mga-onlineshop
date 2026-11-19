@@ -81,6 +81,9 @@
                     @if ($addresses->isEmpty())
                         <p class="mt-4 text-sm text-stone-500">Tambahkan alamat untuk melihat pilihan kurir.</p>
                     @else
+                        @if (\App\Support\ShippingConfig::instantEnabled() && $addresses->contains(fn ($item) => ! $item->coordinates()))
+                            <p class="mt-3 flex gap-2 text-xs text-stone-500"><x-icon name="map-pin" class="size-4 shrink-0" /> Ingin kurir instan di hari yang sama? Tekan “Ubah” pada alamat lalu taruh pin lokasi di peta. Kurir instan hanya tersedia untuk alamat ber-pin di sekitar gudang.</p>
+                        @endif
                         {{-- Memuat --}}
                         <div x-show="loading" x-cloak class="mt-4 grid gap-2">
                             @for ($i = 0; $i < 3; $i++)

@@ -51,6 +51,9 @@ class StoreSettings
         'shop.shipping.biteship.origin_label' => 'string',
         'shop.shipping.biteship.origin_postal_code' => 'string',
         'shop.shipping.biteship.couriers' => 'array',
+        'shop.shipping.biteship.origin_latitude' => 'string',
+        'shop.shipping.biteship.origin_longitude' => 'string',
+        'shop.shipping.biteship.instant_couriers' => 'array',
         'shop.payment.expiry_hours' => 'int',
         'shop.orders.auto_complete_days' => 'int',
         'shop.wholesale.voucher_combinable' => 'bool',
@@ -174,6 +177,15 @@ class StoreSettings
         'jdl' => 'JDL Express',
         'sentralcargo' => 'Sentral Cargo',
         'paxel' => 'Paxel',
+    ];
+
+    /** Kurir instan/sameday Biteship: tarifnya butuh titik koordinat asal & tujuan. */
+    public const BITESHIP_INSTANT_COURIERS = [
+        'lalamove' => 'Lalamove',
+        'gojek' => 'Gojek',
+        'grab' => 'Grab',
+        'borzo' => 'Borzo',
+        'deliveree' => 'Deliveree',
     ];
 
     /** Kurir aktif yang dikenal driver ongkir saat ini (kode lama/tak dikenal dibuang). */

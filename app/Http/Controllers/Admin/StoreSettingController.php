@@ -62,6 +62,9 @@ class StoreSettingController extends Controller
         'shop.shipping.biteship.origin_label' => 'Wilayah asal (Biteship)',
         'shop.shipping.biteship.origin_postal_code' => 'Kode pos gudang (Biteship)',
         'shop.shipping.biteship.couriers' => 'Kurir aktif (Biteship)',
+        'shop.shipping.biteship.instant_couriers' => 'Kurir instan (Biteship)',
+        'shop.shipping.biteship.origin_latitude' => 'Koordinat gudang (lintang)',
+        'shop.shipping.biteship.origin_longitude' => 'Koordinat gudang (bujur)',
         'shop.payment.expiry_hours' => 'Batas waktu bayar (jam)',
         'shop.wholesale.voucher_combinable' => 'Voucher untuk harga grosir',
         'shop.orders.auto_complete_days' => 'Selesai otomatis (hari)',
@@ -83,6 +86,12 @@ class StoreSettingController extends Controller
             'shippingDriver' => ShippingConfig::driver(),
             'shippingProvider' => ShippingConfig::providerName(),
             'shippingKeyMissing' => ! ShippingConfig::hasApiKey(),
+            'instantCouriers' => StoreSettings::BITESHIP_INSTANT_COURIERS,
+            'instant' => [
+                'couriers' => (array) config('shop.shipping.biteship.instant_couriers'),
+                'latitude' => config('shop.shipping.biteship.origin_latitude'),
+                'longitude' => config('shop.shipping.biteship.origin_longitude'),
+            ],
             'canRecommend' => CourierRecommender::available(),
         ]);
     }
@@ -111,6 +120,10 @@ class StoreSettingController extends Controller
             'city_id' => ['nullable', 'string', 'max:20'],
             'district_id' => ['nullable', 'string', 'max:20'],
             'origin_postal_code' => ['nullable', 'regex:/^\d{5}$/'],
+            'instant_couriers' => ['nullable', 'array'],
+            'instant_couriers.*' => [Rule::in(array_keys(StoreSettings::BITESHIP_INSTANT_COURIERS))],
+            'origin_latitude' => ['nullable', 'required_with:origin_longitude', 'numeric', 'between:-90,90'],
+            'origin_longitude' => ['nullable', 'required_with:origin_latitude', 'numeric', 'between:-180,180'],
             'couriers' => ['required', 'array', 'min:1'],
             'couriers.*' => [Rule::in(array_keys(ShippingConfig::courierNames()))],
             'tracking_sync' => ['boolean'],
@@ -146,6 +159,19 @@ class StoreSettingController extends Controller
         // Biteship menghitung ongkir dari kode pos; kosong = kode pos bawaan kecamatan asal.
         if (ShippingConfig::isBiteship() && $request->has('origin_postal_code')) {
             $values[ShippingConfig::key('origin_postal_code')] = $data['origin_postal_code'] ?? null;
+        }
+
+        // Kurir instan Biteship: butuh titik koordinat gudang.
+        if (ShippingConfig::isBiteship() && $request->has('instant_submitted')) {
+            $instant = array_values($data['instant_couriers'] ?? []);
+
+            if ($instant !== [] && blank($data['origin_latitude'] ?? null)) {
+                throw ValidationException::withMessages(['origin_latitude' => 'Taruh pin lokasi gudang di peta sebelum mengaktifkan kurir instan.']);
+            }
+
+            $values['shop.shipping.biteship.instant_couriers'] = $instant;
+            $values['shop.shipping.biteship.origin_latitude'] = filled($data['origin_latitude'] ?? null) ? (string) round((float) $data['origin_latitude'], 7) : null;
+            $values['shop.shipping.biteship.origin_longitude'] = filled($data['origin_longitude'] ?? null) ? (string) round((float) $data['origin_longitude'], 7) : null;
         }
 
         $changes = $this->settings->save($values);

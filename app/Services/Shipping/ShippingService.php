@@ -77,6 +77,8 @@ class ShippingService
         }
 
         $districtId = $foreign ? '' : (string) $address->district_id;
+        // Pin lokasi hanya dikirim bila kurir instan aktif (Biteship + koordinat gudang).
+        $coordinates = ShippingConfig::instantEnabled() ? $address->coordinates() : null;
         $weight = max(1, $weight);
         $key = 'shipping:rates:'.md5(implode('|', [
             ShippingConfig::driver(),
@@ -85,6 +87,7 @@ class ShippingService
             implode(':', ShippingConfig::couriers()),
             $districtId,
             ShippingConfig::isBiteship() ? $postalCode : '',
+            $coordinates ? implode(',', [...$coordinates, ...ShippingConfig::originCoordinates(), ...ShippingConfig::instantCouriers()]) : '',
             $weight,
         ]));
 
@@ -94,7 +97,7 @@ class ShippingService
         if (is_array($cached)) {
             $rates = array_map(ShippingRate::fromArray(...), $cached);
         } else {
-            $rates = $this->guard(fn () => $this->provider->rates($districtId, $weight, $postalCode), 'Ongkos kirim');
+            $rates = $this->guard(fn () => $this->provider->rates($districtId, $weight, $postalCode, $coordinates), 'Ongkos kirim');
             usort($rates, fn (ShippingRate $a, ShippingRate $b) => $a->cost <=> $b->cost);
 
             if ($rates !== []) {
