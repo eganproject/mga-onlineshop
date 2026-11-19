@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Activity\ActivityLogger;
 use App\Services\Settings\IntegrationTester;
 use App\Services\Settings\StoreSettings;
+use App\Support\ShippingConfig;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -15,8 +16,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
- * Admin › Integrasi (khusus superadmin): driver & kunci Midtrans, RajaOngkir,
- * dan Firebase. Disimpan lewat StoreSettings (rahasia terenkripsi); kosong =
+ * Admin › Integrasi (khusus superadmin): driver & kunci Midtrans, ekspedisi
+ * (RajaOngkir atau Biteship), dan Firebase. Disimpan lewat StoreSettings (rahasia terenkripsi); kosong =
  * memakai .env. Nilai rahasia tidak pernah dikirim balik ke browser maupun log.
  */
 class IntegrationController extends Controller
@@ -33,6 +34,7 @@ class IntegrationController extends Controller
         'rajaongkir' => [
             'driver' => 'shop.shipping.driver',
             'api_key' => 'services.rajaongkir.api_key',
+            'biteship_api_key' => 'services.biteship.api_key',
         ],
         'firebase' => [
             'login_enabled' => 'services.firebase.login_enabled',
@@ -54,9 +56,9 @@ class IntegrationController extends Controller
     public const WAREHOUSE_INTERVALS = [5, 10, 15, 30, 60];
 
     /** Kolom rahasia per integrasi: input kosong = tidak diubah. */
-    private const SECRETS = ['midtrans' => ['server_key'], 'rajaongkir' => ['api_key'], 'warehouse' => ['token']];
+    private const SECRETS = ['midtrans' => ['server_key'], 'rajaongkir' => ['api_key', 'biteship_api_key'], 'warehouse' => ['token']];
 
-    public const NAMES = ['midtrans' => 'Midtrans', 'rajaongkir' => 'RajaOngkir', 'firebase' => 'Login Google (Firebase)', 'warehouse' => 'Stok gudang (warehouse29)'];
+    public const NAMES = ['midtrans' => 'Midtrans', 'rajaongkir' => 'Ekspedisi (RajaOngkir / Biteship)', 'firebase' => 'Login Google (Firebase)', 'warehouse' => 'Stok gudang (warehouse29)'];
 
     public const LABELS = [
         'shop.payment.driver' => 'Driver pembayaran',
@@ -64,7 +66,8 @@ class IntegrationController extends Controller
         'services.midtrans.merchant_id' => 'Merchant ID',
         'services.midtrans.client_key' => 'Client key',
         'services.midtrans.server_key' => 'Server key',
-        'shop.shipping.driver' => 'Driver ongkir',
+        'shop.shipping.driver' => 'Penyedia ongkir',
+        'services.biteship.api_key' => 'API key Biteship',
         'services.rajaongkir.api_key' => 'API key RajaOngkir',
         'services.firebase.login_enabled' => 'Tombol login Google',
         'services.firebase.api_key' => 'API key Firebase',
@@ -102,12 +105,13 @@ class IntegrationController extends Controller
             ])->all())->all(),
             'status' => [
                 'midtrans' => $this->status(config('shop.payment.driver') === 'midtrans', filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key'))),
-                'rajaongkir' => $this->status(config('shop.shipping.driver') === 'rajaongkir', filled(config('services.rajaongkir.api_key')) && filled(config('shop.shipping.origin_district_id'))),
+                'rajaongkir' => $this->status(ShippingConfig::driver() !== 'fake', ShippingConfig::hasApiKey() && filled(ShippingConfig::origin('district_id'))),
                 'firebase' => $this->status((bool) config('services.firebase.login_enabled') && (filled(config('services.firebase.api_key')) || filled(config('services.firebase.project_id'))), (bool) config('services.firebase.enabled'), 'Nonaktif'),
                 'warehouse' => $this->status((bool) config('services.warehouse.enabled'), filled(config('services.warehouse.base_url')) && filled(config('services.warehouse.token')), 'Nonaktif'),
             ],
             'intervals' => self::WAREHOUSE_INTERVALS,
-            'originLabel' => config('shop.shipping.origin_label') ?: (config('shop.shipping.origin_district_id') ? 'ID '.config('shop.shipping.origin_district_id') : null),
+            'originLabel' => ShippingConfig::origin('label') ?: (ShippingConfig::origin('district_id') ? 'ID '.ShippingConfig::origin('district_id') : null),
+            'shippingProvider' => ShippingConfig::providerName(),
             'webhook' => route('webhooks.midtrans'),
             'results' => session('integration_test', []),
         ]);
@@ -118,7 +122,7 @@ class IntegrationController extends Controller
         // Isian tiap kartu bernama "{integrasi}[kolom]" agar error & old() tidak tertukar antar kartu.
         $attributes = [
             'driver' => 'driver', 'is_production' => 'mode', 'merchant_id' => 'merchant ID', 'client_key' => 'client key',
-            'server_key' => 'server key', 'api_key' => 'API key', 'auth_domain' => 'auth domain', 'project_id' => 'project ID', 'app_id' => 'app ID',
+            'server_key' => 'server key', 'api_key' => 'API key', 'biteship_api_key' => 'API key Biteship', 'auth_domain' => 'auth domain', 'project_id' => 'project ID', 'app_id' => 'app ID',
             'base_url' => 'URL', 'token' => 'token', 'interval' => 'interval',
         ];
         $prefix = fn (array $items) => collect($items)->mapWithKeys(fn ($v, string $k) => ["{$integration}.{$k}" => $v])->all();
@@ -191,8 +195,9 @@ class IntegrationController extends Controller
                 'server_key' => $key,
             ],
             'rajaongkir' => [
-                'driver' => ['required', Rule::in(['fake', 'rajaongkir'])],
+                'driver' => ['required', Rule::in(['fake', 'rajaongkir', 'biteship'])],
                 'api_key' => $key,
+                'biteship_api_key' => $key,
             ],
             'firebase' => [
                 'login_enabled' => ['boolean'],
@@ -225,6 +230,9 @@ class IntegrationController extends Controller
             ]),
             $integration === 'rajaongkir' && $values['shop.shipping.driver'] === 'rajaongkir' => array_filter([
                 'api_key' => blank($effective('services.rajaongkir.api_key')) ? 'Isi API key sebelum mengaktifkan RajaOngkir.' : null,
+            ]),
+            $integration === 'rajaongkir' && $values['shop.shipping.driver'] === 'biteship' => array_filter([
+                'biteship_api_key' => blank($effective('services.biteship.api_key')) ? 'Isi API key Biteship sebelum mengaktifkan Biteship.' : null,
             ]),
             $integration === 'firebase' && $values['services.firebase.login_enabled'] => array_filter([
                 'project_id' => filled($effective('services.firebase.api_key')) && blank($effective('services.firebase.project_id')) ? 'Project ID wajib diisi bila API key diisi.' : null,
@@ -263,6 +271,7 @@ class IntegrationController extends Controller
     {
         return match ($key) {
             'services.midtrans.is_production' => $value ? 'Production' : 'Sandbox',
+            'shop.shipping.driver' => ['fake' => 'Simulasi', 'rajaongkir' => 'RajaOngkir', 'biteship' => 'Biteship'][$value] ?? $value,
             'services.firebase.login_enabled', 'services.warehouse.enabled' => $value ? 'Aktif' : 'Nonaktif',
             default => $value,
         };

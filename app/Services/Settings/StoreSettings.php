@@ -3,6 +3,7 @@
 namespace App\Services\Settings;
 
 use App\Models\Setting;
+use App\Support\ShippingConfig;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +19,7 @@ use Throwable;
  * nilai dari tabel `settings` (di-cache) menimpa config; bila tidak ada isinya,
  * nilai dari .env/config/shop.php yang dipakai.
  *
- * Kunci bertipe "secret" (server key Midtrans, API key RajaOngkir) disimpan
+ * Kunci bertipe "secret" (server key Midtrans, API key RajaOngkir/Biteship) disimpan
  * terenkripsi dengan APP_KEY, baik di database maupun di cache.
  */
 class StoreSettings
@@ -44,6 +45,12 @@ class StoreSettings
         'shop.shipping.origin_label' => 'string',
         'shop.shipping.couriers' => 'array',
         'shop.shipping.tracking_sync' => 'bool',
+        'shop.shipping.biteship.origin_province_id' => 'string',
+        'shop.shipping.biteship.origin_city_id' => 'string',
+        'shop.shipping.biteship.origin_district_id' => 'string',
+        'shop.shipping.biteship.origin_label' => 'string',
+        'shop.shipping.biteship.origin_postal_code' => 'string',
+        'shop.shipping.biteship.couriers' => 'array',
         'shop.payment.expiry_hours' => 'int',
         'shop.orders.auto_complete_days' => 'int',
         'shop.wholesale.voucher_combinable' => 'bool',
@@ -109,6 +116,7 @@ class StoreSettings
         'services.midtrans.server_key' => 'secret',
         'shop.shipping.driver' => 'string',
         'services.rajaongkir.api_key' => 'secret',
+        'services.biteship.api_key' => 'secret',
         'services.firebase.login_enabled' => 'bool',
         'services.firebase.api_key' => 'string',
         'services.firebase.auth_domain' => 'string',
@@ -145,12 +153,33 @@ class StoreSettings
     /** Kurir yang resinya bisa dilacak lewat RajaOngkir. */
     public const TRACKABLE_COURIERS = ['jne', 'jnt', 'pos', 'tiki', 'spx', 'ninja', 'lion', 'sap', 'wahana'];
 
-    /** Kurir aktif yang dikenal RajaOngkir (kode lama/tak dikenal dibuang). */
+    /**
+     * Kode kurir Biteship => nama tampilan (biteship.com/id/docs, bagian Kurir).
+     * Hanya kurir reguler/kargo; kurir instan (Gojek, Grab, Lalamove) butuh titik
+     * koordinat sehingga tidak ditawarkan. Kurir juga harus aktif di akun Biteship.
+     */
+    public const BITESHIP_COURIERS = [
+        'jne' => 'JNE',
+        'sicepat' => 'SiCepat',
+        'jnt' => 'J&T Express',
+        'anteraja' => 'AnterAja',
+        'tiki' => 'TIKI',
+        'pos' => 'POS Indonesia',
+        'ninja' => 'Ninja Xpress',
+        'lion' => 'Lion Parcel',
+        'idexpress' => 'ID Express',
+        'sap' => 'SAP Express',
+        'rpx' => 'RPX',
+        'wahana' => 'Wahana',
+        'jdl' => 'JDL Express',
+        'sentralcargo' => 'Sentral Cargo',
+        'paxel' => 'Paxel',
+    ];
+
+    /** Kurir aktif yang dikenal driver ongkir saat ini (kode lama/tak dikenal dibuang). */
     public static function activeCouriers(): array
     {
-        $couriers = array_values(array_intersect((array) config('shop.shipping.couriers'), array_keys(self::COURIERS)));
-
-        return $couriers ?: ['jne'];
+        return ShippingConfig::couriers();
     }
 
     /** Nilai config sebelum ditimpa (= isi .env / config/shop.php). */

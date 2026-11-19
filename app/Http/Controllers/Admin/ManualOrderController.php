@@ -10,6 +10,7 @@ use App\Services\Activity\ActivityLogger;
 use App\Services\Catalog\Wholesale;
 use App\Services\Orders\ManualOrderService;
 use App\Support\Money;
+use App\Support\ShippingConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class ManualOrderController extends Controller
     public function create(): View
     {
         return view('admin.orders.create', [
-            'shippingReady' => (bool) config('shop.shipping.origin_district_id') || config('shop.shipping.driver') === 'fake',
+            'shippingReady' => filled(ShippingConfig::origin('district_id')) || ShippingConfig::driver() === 'fake',
+            'shippingProvider' => ShippingConfig::providerName(),
         ]);
     }
 
@@ -73,7 +75,7 @@ class ManualOrderController extends Controller
         ])]);
     }
 
-    /** Ongkir ke kecamatan tujuan (RajaOngkir), termurah dulu. */
+    /** Ongkir ke kecamatan tujuan dari driver ongkir aktif, termurah dulu. */
     public function rates(Request $request): JsonResponse
     {
         $data = $request->validate([

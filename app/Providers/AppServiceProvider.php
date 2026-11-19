@@ -19,12 +19,15 @@ use App\Services\Payment\FakePaymentGateway;
 use App\Services\Payment\MidtransPaymentGateway;
 use App\Services\Payment\PaymentService;
 use App\Services\Settings\StoreSettings;
+use App\Services\Shipping\BiteshipShipmentTracker;
+use App\Services\Shipping\BiteshipShippingProvider;
 use App\Services\Shipping\FakeShipmentTracker;
 use App\Services\Shipping\FakeShippingProvider;
 use App\Services\Shipping\RajaOngkirShipmentTracker;
 use App\Services\Shipping\RajaOngkirShippingProvider;
 use App\Services\Warehouse\WarehouseOutbound;
 use App\Support\Money;
+use App\Support\ShippingConfig;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
@@ -55,6 +58,13 @@ class AppServiceProvider extends ServiceProvider
                 config('shop.shipping.origin_district_id'),
                 StoreSettings::activeCouriers(),
             ),
+            'biteship' => new BiteshipShippingProvider(
+                config('services.biteship.api_key'),
+                (string) config('services.biteship.base_url'),
+                ShippingConfig::origin('district_id'),
+                ShippingConfig::origin('postal_code'),
+                ShippingConfig::couriers(),
+            ),
             default => new FakeShippingProvider(config('shop.shipping.origin_district_id')),
         });
 
@@ -62,6 +72,10 @@ class AppServiceProvider extends ServiceProvider
             'rajaongkir' => new RajaOngkirShipmentTracker(
                 config('services.rajaongkir.api_key'),
                 config('services.rajaongkir.base_url'),
+            ),
+            'biteship' => new BiteshipShipmentTracker(
+                config('services.biteship.api_key'),
+                (string) config('services.biteship.base_url'),
             ),
             default => new FakeShipmentTracker,
         });

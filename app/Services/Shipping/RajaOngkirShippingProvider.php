@@ -46,7 +46,7 @@ class RajaOngkirShippingProvider implements ShippingProvider
         return $this->regions("districts:{$cityId}", '/destination/district/'.rawurlencode($cityId));
     }
 
-    public function rates(string $districtId, int $weight): array
+    public function rates(string $districtId, int $weight, ?string $postalCode = null): array
     {
         if (! $this->originId) {
             throw new RuntimeException('SHOP_ORIGIN_DISTRICT_ID belum diatur.');

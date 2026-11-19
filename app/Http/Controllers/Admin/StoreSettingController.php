@@ -8,6 +8,7 @@ use App\Services\Activity\ActivityLogger;
 use App\Services\Settings\StoreSettings;
 use App\Services\Shipping\CourierRecommender;
 use App\Services\Shipping\ShippingService;
+use App\Support\ShippingConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +33,6 @@ class StoreSettingController extends Controller
         'instagram' => 'shop.instagram',
         'tiktok' => 'shop.tiktok',
         'facebook' => 'shop.facebook',
-        'couriers' => 'shop.shipping.couriers',
         'tracking_sync' => 'shop.shipping.tracking_sync',
         'payment_expiry_hours' => 'shop.payment.expiry_hours',
         'auto_complete_days' => 'shop.orders.auto_complete_days',
@@ -58,6 +58,10 @@ class StoreSettingController extends Controller
         'shop.shipping.origin_label' => 'Wilayah asal',
         'shop.shipping.couriers' => 'Kurir aktif',
         'shop.shipping.tracking_sync' => 'Cek resi otomatis',
+        'shop.shipping.biteship.origin_district_id' => 'Kecamatan asal Biteship (kode)',
+        'shop.shipping.biteship.origin_label' => 'Wilayah asal (Biteship)',
+        'shop.shipping.biteship.origin_postal_code' => 'Kode pos gudang (Biteship)',
+        'shop.shipping.biteship.couriers' => 'Kurir aktif (Biteship)',
         'shop.payment.expiry_hours' => 'Batas waktu bayar (jam)',
         'shop.wholesale.voucher_combinable' => 'Voucher untuk harga grosir',
         'shop.orders.auto_complete_days' => 'Selesai otomatis (hari)',
@@ -68,13 +72,17 @@ class StoreSettingController extends Controller
     public function edit(): View
     {
         return view('admin.store-settings', [
+            // Asal & kurir mengikuti driver ongkir aktif (RajaOngkir dan Biteship disimpan terpisah).
             'values' => collect(self::FORM)->map(fn (string $key) => config($key))->all()
-                + collect(['province_id' => 'origin_province_id', 'city_id' => 'origin_city_id', 'district_id' => 'origin_district_id', 'origin_label' => 'origin_label'])
-                    ->map(fn (string $key) => config('shop.shipping.'.$key))->all(),
+                + ['couriers' => ShippingConfig::couriers()]
+                + collect(['province_id' => 'origin_province_id', 'city_id' => 'origin_city_id', 'district_id' => 'origin_district_id', 'origin_label' => 'origin_label', 'origin_postal_code' => 'origin_postal_code'])
+                    ->map(fn (string $key) => config(ShippingConfig::key($key)))->all(),
             'defaults' => collect(self::FORM)->map(fn (string $key) => $this->settings->default($key))->all(),
-            'couriers' => StoreSettings::COURIERS,
-            'trackableCouriers' => StoreSettings::TRACKABLE_COURIERS,
-            'shippingDriver' => config('shop.shipping.driver'),
+            'couriers' => ShippingConfig::courierNames(),
+            'trackableCouriers' => ShippingConfig::trackableCouriers(),
+            'shippingDriver' => ShippingConfig::driver(),
+            'shippingProvider' => ShippingConfig::providerName(),
+            'shippingKeyMissing' => ! ShippingConfig::hasApiKey(),
             'canRecommend' => CourierRecommender::available(),
         ]);
     }
@@ -102,8 +110,9 @@ class StoreSettingController extends Controller
             'province_id' => ['nullable', 'string', 'max:20'],
             'city_id' => ['nullable', 'string', 'max:20'],
             'district_id' => ['nullable', 'string', 'max:20'],
+            'origin_postal_code' => ['nullable', 'regex:/^\d{5}$/'],
             'couriers' => ['required', 'array', 'min:1'],
-            'couriers.*' => [Rule::in(array_keys(StoreSettings::COURIERS))],
+            'couriers.*' => [Rule::in(array_keys(ShippingConfig::courierNames()))],
             'tracking_sync' => ['boolean'],
             'payment_expiry_hours' => ['required', 'integer', 'min:1', 'max:168'],
             'auto_complete_days' => ['required', 'integer', 'min:1', 'max:30'],
@@ -113,6 +122,7 @@ class StoreSettingController extends Controller
             'instagram.regex' => 'Isi username saja, tanpa spasi. Contoh: mga.official.',
             'tiktok.regex' => 'Isi username saja, tanpa spasi. Contoh: mga.official.',
             'couriers.required' => 'Pilih minimal satu kurir.',
+            'origin_postal_code.regex' => 'Kode pos gudang harus 5 digit angka.',
         ], [
             'name' => 'nama singkat', 'full_name' => 'nama lengkap', 'district_id' => 'kecamatan asal',
             'payment_expiry_hours' => 'batas waktu bayar', 'auto_complete_days' => 'selesai otomatis',
@@ -121,15 +131,21 @@ class StoreSettingController extends Controller
 
         $values = collect(self::FORM)
             ->mapWithKeys(fn (string $key, string $field) => [$key => $data[$field] ?? null])
+            ->put(ShippingConfig::key('couriers'), $data['couriers'])
             ->put('shop.shipping.tracking_sync', $request->boolean('tracking_sync'))
             ->put('shop.whatsapp_button', $request->boolean('whatsapp_button'))
             ->put('shop.wholesale.voucher_combinable', $request->boolean('wholesale_voucher'))
             ->all();
 
         // Kecamatan asal (hanya bila dipilih lengkap): nama wilayah dicocokkan ke
-        // data RajaOngkir di server. Pilihan tidak lengkap = tidak diubah.
+        // data wilayah penyedia ongkir di server. Pilihan tidak lengkap = tidak diubah.
         if (filled($data['province_id'] ?? null) && filled($data['city_id'] ?? null) && filled($data['district_id'] ?? null)) {
             $values += $this->origin($shipping, $data['province_id'], $data['city_id'], $data['district_id']);
+        }
+
+        // Biteship menghitung ongkir dari kode pos; kosong = kode pos bawaan kecamatan asal.
+        if (ShippingConfig::isBiteship() && $request->has('origin_postal_code')) {
+            $values[ShippingConfig::key('origin_postal_code')] = $data['origin_postal_code'] ?? null;
         }
 
         $changes = $this->settings->save($values);
@@ -137,7 +153,7 @@ class StoreSettingController extends Controller
         if ($changes) {
             $logger->log('settings.update', 'Mengubah pengaturan toko', properties: [
                 'perubahan' => collect($changes)
-                    ->except(['shop.shipping.origin_province_id', 'shop.shipping.origin_city_id'])
+                    ->except(['shop.shipping.origin_province_id', 'shop.shipping.origin_city_id', 'shop.shipping.biteship.origin_province_id', 'shop.shipping.biteship.origin_city_id'])
                     ->mapWithKeys(fn (array $pair, string $key) => [self::LABELS[$key] ?? $key => ['dari' => $this->display($pair[0]), 'menjadi' => $this->display($pair[1])]])
                     ->all(),
             ]);
@@ -171,7 +187,7 @@ class StoreSettingController extends Controller
     /** @return array<string, string> */
     private function origin(ShippingService $shipping, string $provinceId, string $cityId, string $districtId): array
     {
-        if ((string) config('shop.shipping.origin_district_id') === $districtId) {
+        if (ShippingConfig::origin('district_id') === $districtId) {
             return [];
         }
 
@@ -186,10 +202,10 @@ class StoreSettingController extends Controller
         }
 
         return [
-            'shop.shipping.origin_province_id' => $provinceId,
-            'shop.shipping.origin_city_id' => $cityId,
-            'shop.shipping.origin_district_id' => $districtId,
-            'shop.shipping.origin_label' => "{$region['district']->name}, {$region['city']->name}, {$region['province']->name}",
+            ShippingConfig::key('origin_province_id') => $provinceId,
+            ShippingConfig::key('origin_city_id') => $cityId,
+            ShippingConfig::key('origin_district_id') => $districtId,
+            ShippingConfig::key('origin_label') => "{$region['district']->name}, {$region['city']->name}, {$region['province']->name}",
         ];
     }
 
