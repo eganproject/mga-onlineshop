@@ -8,7 +8,7 @@
     </x-admin.page-header>
 
     <div class="card overflow-hidden" x-data="{ selected: [], all: @js($products->pluck('id')) }">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:flex-wrap" x-data @change="$el.submit()">
             <x-admin.keep-query />
             <div class="relative flex-1 sm:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -22,6 +22,15 @@
                     <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
+            <select name="jenis" class="input sm:w-52" aria-label="Filter jenis produk">
+                <option value="">Semua jenis</option>
+                @foreach ($types as $value => $label)
+                    <option value="{{ $value }}" @selected(request('jenis') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @if (request()->hasAny(['q', 'kategori', 'status', 'jenis']))
+                <a href="{{ route('admin.products.index') }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /> <span class="sm:sr-only">Hapus filter</span></a>
+            @endif
         </form>
 
         {{-- Aksi massal --}}

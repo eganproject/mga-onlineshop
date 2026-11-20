@@ -5,15 +5,29 @@
     </x-admin.page-header>
 
     <div class="card overflow-hidden">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:items-center">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:flex-wrap lg:items-center" x-data @change="$el.submit()">
+            @if ($state)<input type="hidden" name="status" value="{{ $state }}">@endif
             <div class="relative max-w-xs flex-1">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
                 <input type="search" name="q" value="{{ $search }}" placeholder="Cari kode / nama..." class="input pl-10">
             </div>
+            <div class="grid grid-cols-2 gap-3 lg:flex">
+                <select name="jenis" class="input lg:w-44" aria-label="Filter jenis voucher">
+                    <option value="">Semua jenis</option>
+                    @foreach (\App\Enums\VoucherType::cases() as $type)
+                        <option value="{{ $type->value }}" @selected(request('jenis') === $type->value)>{{ $type->label() }}</option>
+                    @endforeach
+                </select>
+                <select name="tampil" class="input lg:w-48" aria-label="Filter tampil di toko">
+                    <option value="">Publik & tersembunyi</option>
+                    <option value="publik" @selected(request('tampil') === 'publik')>Tampil di toko</option>
+                    <option value="tersembunyi" @selected(request('tampil') === 'tersembunyi')>Kode rahasia</option>
+                </select>
+            </div>
             <div class="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1">
-                <a href="{{ route('admin.vouchers.index', array_filter(['q' => $search])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => ! $state, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state])>Semua</a>
+                <a href="{{ route('admin.vouchers.index', array_filter(['q' => $search, 'jenis' => request('jenis'), 'tampil' => request('tampil')])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => ! $state, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state])>Semua</a>
                 @foreach (VoucherController::STATES as $key => $label)
-                    <a href="{{ route('admin.vouchers.index', array_filter(['q' => $search, 'status' => $key])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => $state === $key, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state !== $key])>{{ $label }}</a>
+                    <a href="{{ route('admin.vouchers.index', array_filter(['q' => $search, 'status' => $key, 'jenis' => request('jenis'), 'tampil' => request('tampil')])) }}" @class(['shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold', 'bg-stone-900 text-white' => $state === $key, 'bg-stone-100 text-stone-600 hover:bg-stone-200' => $state !== $key])>{{ $label }}</a>
                 @endforeach
             </div>
         </form>

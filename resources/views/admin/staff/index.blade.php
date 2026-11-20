@@ -19,6 +19,14 @@
                     <option value="{{ $role->key }}" @selected(request('jabatan') === $role->key)>{{ $role->label() }}</option>
                 @endforeach
             </select>
+            <select name="status" class="input sm:w-40" aria-label="Filter status akun">
+                <option value="">Semua status</option>
+                <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
+                <option value="nonaktif" @selected(request('status') === 'nonaktif')>Nonaktif</option>
+            </select>
+            @if (request()->hasAny(['q', 'jabatan', 'status']))
+                <a href="{{ route('admin.staff.index') }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /> <span class="sm:sr-only">Hapus filter</span></a>
+            @endif
         </form>
 
         @if ($staff->isEmpty())

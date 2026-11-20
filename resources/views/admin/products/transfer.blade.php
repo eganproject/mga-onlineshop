@@ -5,7 +5,7 @@
         {{-- Ekspor --}}
         <div class="card min-w-0 p-6" x-data="{ format: 'xlsx' }">
             <div class="flex items-center gap-3">
-                <span class="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-700"><x-icon name="download" class="size-5" /></span>
+                <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="download" class="size-5" /></span>
                 <div>
                     <h2 class="font-bold text-stone-900">Ekspor</h2>
                     <p class="text-sm text-stone-500">Unduh katalog atau daftar stok.</p>
@@ -44,7 +44,7 @@
         @if ($canProducts)
         <div class="card min-w-0 p-6">
             <div class="flex items-center gap-3">
-                <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><x-icon name="cube" class="size-5" /></span>
+                <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="cube" class="size-5" /></span>
                 <div>
                     <h2 class="font-bold text-stone-900">Impor produk</h2>
                     <p class="text-sm text-stone-500">Produk, varian, kategori, stok & foto.</p>
@@ -78,7 +78,7 @@
         @if ($canStock)
         <div class="card min-w-0 p-6" id="stok">
             <div class="flex items-center gap-3">
-                <span class="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-700"><x-icon name="archive" class="size-5" /></span>
+                <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="archive" class="size-5" /></span>
                 <div>
                     <h2 class="font-bold text-stone-900">Update stok massal</h2>
                     <p class="text-sm text-stone-500">Stock opname atau barang masuk sekaligus.</p>

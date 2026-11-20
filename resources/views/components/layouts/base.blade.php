@@ -8,6 +8,7 @@
     'type' => 'website',
     'noindex' => false,
     'viewportFit' => false,
+    'adminTheme' => null,
 ])
 @php
     // seoTitle = isi <title> utuh (mis. beranda); selain itu "Judul · MGA - Nama toko".
@@ -21,7 +22,8 @@
     $analyticsId = $isAdminPage ? null : \App\Support\Seo::analyticsId();
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
+{{-- Panel admin: tema (terang/gelap/ikuti perangkat) dari cookie, dipasang di server supaya tidak berkedip. --}}
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['h-full scroll-smooth', 'admin-ui' => $adminTheme]) @if ($adminTheme) data-theme="{{ $adminTheme }}" @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1{{ $viewportFit ? ', viewport-fit=cover' : '' }}">

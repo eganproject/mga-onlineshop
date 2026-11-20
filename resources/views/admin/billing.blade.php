@@ -22,7 +22,7 @@
             {{-- PPN --}}
             <section class="card space-y-5 p-6" x-data="{ tax: @js((bool) $val('tax_enabled')), dpp: @js($val('tax_dpp')), rate: @js((string) $val('tax_rate')) }">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="percent" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="percent" /></span>
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Pajak (PPN)</h2><p class="text-xs text-stone-500">Dihitung di checkout, ditampilkan di invoice, dan dikirim ke Midtrans sebagai rincian tagihan.</p></div>
                 </div>
 
@@ -93,7 +93,7 @@
             {{-- Biaya layanan & pembulatan --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-amber-50 text-amber-600"><x-icon name="receipt" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="receipt" /></span>
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Biaya layanan & pembulatan</h2><p class="text-xs text-stone-500">Biaya tambahan per pesanan dan pembulatan total tagihan.</p></div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -112,7 +112,7 @@
             {{-- Biaya transaksi Midtrans --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-600"><x-icon name="credit-card" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="credit-card" /></span>
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Biaya transaksi pembayaran (Midtrans)</h2><p class="text-xs text-stone-500">Tarif potongan Midtrans per metode, dan siapa yang menanggungnya.</p></div>
                 </div>
 
@@ -188,7 +188,7 @@
             {{-- Penerbit invoice --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="storefront" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="storefront" /></span>
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Penerbit invoice</h2><p class="text-xs text-stone-500">Identitas usaha di kepala invoice. Kosongkan untuk memakai data Pengaturan Toko.</p></div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -213,7 +213,7 @@
             {{-- Nomor & isi invoice --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-600"><x-icon name="list-number" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="list-number" /></span>
                     <div class="min-w-0"><h2 class="font-bold text-stone-900">Nomor & isi invoice</h2><p class="text-xs text-stone-500">Nomor invoice berurutan tanpa celah, terpisah dari kode pesanan.</p></div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">

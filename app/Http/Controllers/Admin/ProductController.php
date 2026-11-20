@@ -17,6 +17,15 @@ class ProductController extends Controller
 {
     public function __construct(private readonly ProductService $products) {}
 
+    /** Filter "Jenis" di daftar produk. */
+    public const TYPE_FILTERS = [
+        'bervarian' => 'Bervarian',
+        'tanpa-varian' => 'Tanpa varian',
+        'grosir' => 'Ada harga grosir',
+        'tanpa-harga' => 'Harga belum diisi',
+        'gudang-belum' => 'Belum terhubung gudang',
+    ];
+
     public function index(Request $request): View
     {
         $threshold = config('shop.low_stock_threshold');
@@ -34,7 +43,15 @@ class ProductController extends Controller
             ->when($request->query('status') === 'stok-menipis', fn ($q) => $q->where(fn ($q) => $q
                 ->where('stock', '<=', $threshold)
                 ->orWhereHas('variants', fn ($v) => $v->where('is_active', true)->where('stock', '<=', $threshold))))
-            ->when($request->query('status') === 'stok-habis', fn ($q) => $q->where('stock', 0));
+            ->when($request->query('status') === 'stok-habis', fn ($q) => $q->where('stock', 0))
+            ->when($request->query('jenis') === 'bervarian', fn ($q) => $q->where('has_variants', true))
+            ->when($request->query('jenis') === 'tanpa-varian', fn ($q) => $q->where('has_variants', false))
+            ->when($request->query('jenis') === 'grosir', fn ($q) => $q->wholesale())
+            ->when($request->query('jenis') === 'tanpa-harga', fn ($q) => $q->where('price', '<=', 0))
+            // Belum terhubung ke SKU gudang (warehouse29): produk tanpa varian tanpa warehouse_sku, atau ada varian aktif tanpa warehouse_sku.
+            ->when($request->query('jenis') === 'gudang-belum', fn ($q) => $q->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('has_variants', false)->whereNull('warehouse_sku'))
+                ->orWhere(fn ($q) => $q->where('has_variants', true)->whereHas('variants', fn ($v) => $v->where('is_active', true)->whereNull('warehouse_sku')))));
 
         AdminList::sort($query, $request, [
             'nama' => 'name',
@@ -48,6 +65,7 @@ class ProductController extends Controller
         return view('admin.products.index', [
             'products' => $products,
             'categories' => $this->categoryOptions(),
+            'types' => self::TYPE_FILTERS,
         ]);
     }
 

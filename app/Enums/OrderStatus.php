@@ -58,9 +58,9 @@ enum OrderStatus: string
         return match ($this) {
             self::PendingPayment => 'bg-amber-50 text-amber-700 ring-amber-600/20',
             self::Paid => 'bg-sky-50 text-sky-700 ring-sky-600/20',
-            self::Processing => 'bg-indigo-50 text-indigo-700 ring-indigo-600/20',
-            self::Shipped => 'bg-violet-50 text-violet-700 ring-violet-600/20',
-            self::Delivered => 'bg-teal-50 text-teal-700 ring-teal-600/20',
+            // Warna = arti: kuning menunggu pembeli, biru perlu tindakan toko, abu-abu sedang berjalan, hijau selesai, merah batal.
+            self::Processing, self::Shipped => 'bg-stone-100 text-stone-700 ring-stone-500/20',
+            self::Delivered => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
             self::Completed => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
             self::Cancelled => 'bg-rose-50 text-rose-700 ring-rose-600/20',
         };

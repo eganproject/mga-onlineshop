@@ -17,7 +17,7 @@
             {{-- Identitas --}}
             <section id="identitas-toko" class="card scroll-mt-24 space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="storefront" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="storefront" /></span>
                     <div><h2 class="font-bold text-stone-900">Identitas toko</h2><p class="text-xs text-stone-500">Tampil di judul halaman, email, invoice, dan footer.</p></div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -34,7 +34,7 @@
             {{-- Kontak & sosial --}}
             <section id="kontak-toko" class="card scroll-mt-24 space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="chat" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="chat" /></span>
                     <div><h2 class="font-bold text-stone-900">Kontak & media sosial</h2><p class="text-xs text-stone-500">Dipakai untuk tombol WhatsApp dan tautan profil toko.</p></div>
                 </div>
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -69,7 +69,7 @@
                          postalCode: @js($val('origin_postal_code')),
                      })">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-600"><x-icon name="truck" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="truck" /></span>
                     <div><h2 class="font-bold text-stone-900">Pengiriman</h2><p class="text-xs text-stone-500">Asal pengiriman dipakai untuk menghitung ongkir di checkout. Penyedia ongkir aktif: <span class="font-semibold text-stone-700">{{ $shippingProvider }}</span>.</p></div>
                 </div>
 
@@ -225,7 +225,7 @@
             {{-- Pesanan & pembayaran --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-violet-50 text-violet-600"><x-icon name="clock" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="clock" /></span>
                     <div><h2 class="font-bold text-stone-900">Pesanan & pembayaran</h2></div>
                 </div>
                 <x-form.number name="payment_expiry_hours" label="Batas waktu bayar" :value="$values['payment_expiry_hours']" min="1" max="168" required suffix="jam"
@@ -240,7 +240,7 @@
             {{-- Grosir --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-accent-50 text-accent-600"><x-icon name="tag" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="tag" /></span>
                     <div><h2 class="font-bold text-stone-900">Grosir</h2><p class="text-xs text-stone-500">Harga grosir diatur per produk di form produk.</p></div>
                 </div>
                 <x-form.switch card name="wholesale_voucher" label="Voucher berlaku untuk harga grosir" :checked="$values['wholesale_voucher']"

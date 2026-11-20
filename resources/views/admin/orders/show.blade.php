@@ -2,7 +2,7 @@
     <x-admin.page-header :title="$order->code" :description="'Dipesan '.$order->created_at->translatedFormat('d F Y, H:i')" :back="route('admin.orders.index')">
         <x-order-status :status="$order->status" class="px-3 py-1 text-sm" />
         @if ($order->isManual())
-            <span class="badge bg-violet-50 px-3 py-1 text-sm text-violet-700 ring-violet-600/20">Manual</span>
+            <span class="badge bg-stone-100 px-3 py-1 text-sm text-stone-600 ring-stone-500/20">Manual</span>
         @endif
         <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4" /> {{ $order->paid_at ? 'Invoice' : 'Tagihan' }}</a>
         <a href="{{ route('admin.orders.invoice.pdf', $order) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4" /> PDF</a>

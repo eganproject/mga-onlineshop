@@ -196,7 +196,7 @@
         @endif
 
         {{-- Modal pilih produk/varian untuk SKU gudang --}}
-        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-stone-900/40 p-4 backdrop-blur-sm sm:items-center" @keydown.escape.window="open = false">
+        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center" @keydown.escape.window="open = false">
             <form method="POST" action="{{ route('admin.stock.warehouse.link') }}" @click.outside="open = false" x-transition
                   class="w-full max-w-lg space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
                 @csrf

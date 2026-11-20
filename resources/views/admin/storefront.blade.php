@@ -14,7 +14,7 @@
             {{-- Foto hero --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="photo" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="photo" /></span>
                     <div><h2 class="font-bold text-stone-900">Foto hero</h2><p class="text-xs text-stone-500">Tampil selebar layar. Tanpa foto, beranda memakai ilustrasi bawaan MGA.</p></div>
                 </div>
                 <x-form.image-upload name="hero_image" label="Foto utama (desktop)" optional :current="$images['hero_image']"
@@ -36,7 +36,7 @@
             {{-- Teks hero --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-accent-50 text-accent-600"><x-icon name="sparkles" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="sparkles" /></span>
                     <div><h2 class="font-bold text-stone-900">Judul & tombol</h2><p class="text-xs text-stone-500">Teks yang tampil di atas foto hero.</p></div>
                 </div>
                 <x-form.input name="hero_eyebrow" label="Teks kecil di atas judul" :value="$values['hero_eyebrow']" maxlength="60" optional :hint="$hint('hero_eyebrow')"
@@ -60,7 +60,7 @@
             {{-- Topbar --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-amber-50 text-amber-600"><x-icon name="megaphone" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="megaphone" /></span>
                     <div><h2 class="font-bold text-stone-900">Pengumuman topbar</h2><p class="text-xs text-stone-500">Bergantian tiap beberapa detik di bar paling atas.</p></div>
                 </div>
                 <x-form.textarea name="announcements" label="Pengumuman" :value="$values['announcements']" rows="5" maxlength="1000" optional
@@ -94,7 +94,7 @@
 
         <section class="card space-y-5 p-6">
             <div class="flex flex-wrap items-center gap-3">
-                <span class="grid size-10 place-items-center rounded-xl bg-rose-50 text-rose-600"><x-icon name="trending-up" /></span>
+                <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="trending-up" /></span>
                 <div class="min-w-0 flex-1">
                     <h2 class="flex items-center gap-1 font-bold text-stone-900">Best Seller
                         <x-tooltip label="Best Seller" text="Otomatis: produk terlaris 90 hari terakhir dari pesanan yang sudah dibayar, diperbarui tiap 30 menit. Manual: Anda pilih & urutkan sendiri."

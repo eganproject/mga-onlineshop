@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\StockMovementType;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Services\Catalog\StockService;
@@ -36,6 +37,16 @@ class StockController extends Controller
             ->when($status === 'menipis', fn ($q) => $stockFilter($q->where('is_active', true), '<=', $threshold))
             ->when($status === 'habis', fn ($q) => $stockFilter($q->where('is_active', true), '=', 0))
             ->when($status === 'nonaktif', fn ($q) => $q->where('is_active', false))
+            ->when($request->filled('kategori'), function ($q) use ($request) {
+                $category = Category::find($request->integer('kategori'));
+                $q->whereIn('category_id', $category ? $category->familyIds() : [0]);
+            })
+            ->when($request->query('gudang') === 'terhubung', fn ($q) => $q->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('has_variants', false)->whereNotNull('warehouse_sku'))
+                ->orWhere(fn ($q) => $q->where('has_variants', true)->whereDoesntHave('variants', fn ($v) => $v->where('is_active', true)->whereNull('warehouse_sku')))))
+            ->when($request->query('gudang') === 'belum', fn ($q) => $q->where(fn ($q) => $q
+                ->where(fn ($q) => $q->where('has_variants', false)->whereNull('warehouse_sku'))
+                ->orWhere(fn ($q) => $q->where('has_variants', true)->whereHas('variants', fn ($v) => $v->where('is_active', true)->whereNull('warehouse_sku')))))
             // Produk nonaktif (mis. katalog tanpa harga) di bawah supaya tidak menutupi yang dijual.
             ->orderByDesc('is_active');
 
@@ -56,6 +67,8 @@ class StockController extends Controller
                 'low' => $stockFilter(Product::where('is_active', true), '<=', $threshold)->count(),
             ],
             'types' => StockMovementType::manual(),
+            'categories' => Category::root()->with('children')->orderBy('sort_order')->orderBy('name')->get()
+                ->flatMap(fn (Category $c) => [$c, ...$c->children->each(fn ($child) => $child->setRelation('parent', $c))]),
         ]);
     }
 

@@ -7,48 +7,60 @@
 
     {{-- Tab status --}}
     <div class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:overflow-visible">
-        <div class="inline-flex gap-1 rounded-2xl bg-white p-1 ring-1 ring-stone-200/70 lg:flex-wrap">
+        <div class="inline-flex gap-0.5 rounded-xl bg-white p-1 ring-1 ring-stone-200 lg:flex-wrap">
             <a href="{{ route('admin.orders.index', request()->except('status', 'page')) }}"
-               @class(['whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition', 'bg-stone-900 text-white' => ! $status, 'text-stone-600 hover:bg-stone-50' => $status])>
-                Semua <span class="ml-1 opacity-60">{{ $counts->sum() }}</span>
+               @class(['whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition', 'bg-stone-100 font-semibold text-stone-900' => ! $status, 'text-stone-500 hover:bg-stone-50 hover:text-stone-800' => $status])>
+                Semua <span class="ml-1 text-stone-400 tabular-nums">{{ $counts->sum() }}</span>
             </a>
             @foreach (\App\Enums\OrderStatus::cases() as $case)
                 <a href="{{ route('admin.orders.index', ['status' => $case->value] + request()->except('status', 'page')) }}"
-                   @class(['whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition', 'bg-stone-900 text-white' => $status === $case, 'text-stone-600 hover:bg-stone-50' => $status !== $case])>
-                    {{ $case->label() }} <span class="ml-1 opacity-60">{{ $counts[$case->value] ?? 0 }}</span>
+                   @class(['whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition', 'bg-stone-100 font-semibold text-stone-900' => $status === $case, 'text-stone-500 hover:bg-stone-50 hover:text-stone-800' => $status !== $case])>
+                    {{ $case->label() }} <span @class(['ml-1 tabular-nums', 'font-bold text-sky-600' => $case === \App\Enums\OrderStatus::Paid && ($counts[$case->value] ?? 0) > 0, 'text-stone-400' => ! ($case === \App\Enums\OrderStatus::Paid && ($counts[$case->value] ?? 0) > 0)])>{{ $counts[$case->value] ?? 0 }}</span>
                 </a>
             @endforeach
         </div>
     </div>
 
     <div class="card overflow-hidden">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 lg:flex-row lg:items-end">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4">
             <x-admin.keep-query />
             @if ($status)<input type="hidden" name="status" value="{{ $status->value }}">@endif
-            <div class="relative flex-1 lg:max-w-sm">
-                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                <input type="search" name="q" value="{{ request('q') }}" placeholder="Kode, nama, HP, email, atau resi..." class="input pl-10" aria-label="Cari pesanan">
+            <div class="flex gap-2">
+                <div class="relative min-w-0 flex-1 lg:max-w-md">
+                    <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Kode, nama, HP, email, SKU, atau resi..." class="input pl-10" aria-label="Cari pesanan">
+                </div>
+                <button class="btn btn-dark shrink-0"><x-icon name="filter" class="size-4" /> Saring</button>
+                @if (request()->hasAny(['q', 'from', 'to', 'courier', 'source', 'bayar', 'gudang']))
+                    <a href="{{ route('admin.orders.index', array_filter(['status' => $status?->value])) }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /><span class="sr-only">Hapus filter</span></a>
+                @endif
             </div>
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
                 <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()"
-                                   placeholder="Semua tanggal" wrapper-class="col-span-2 lg:w-64" aria-label="Rentang tanggal" />
-                <select name="source" class="input lg:w-40" aria-label="Sumber pesanan">
+                                   placeholder="Semua tanggal" aria-label="Rentang tanggal" />
+                <select name="source" class="input" aria-label="Sumber pesanan">
                     <option value="">Semua sumber</option>
                     <option value="website" @selected(request('source') === 'website')>Website</option>
                     <option value="manual" @selected(request('source') === 'manual')>Manual</option>
                 </select>
-                <select name="courier" class="input lg:w-44" x-data x-searchable aria-label="Kurir">
+                <select name="courier" class="input" x-data x-searchable aria-label="Kurir">
                     <option value="">Semua kurir</option>
                     @foreach ($couriers as $courier)
                         <option value="{{ $courier }}" @selected(request('courier') === $courier)>{{ strtoupper($courier) }}</option>
                     @endforeach
                 </select>
-                <div class="flex gap-2">
-                    <button class="btn btn-dark flex-1"><x-icon name="filter" class="size-4" /> Saring</button>
-                    @if (request()->hasAny(['q', 'from', 'to', 'courier', 'source']))
-                        <a href="{{ route('admin.orders.index', array_filter(['status' => $status?->value])) }}" class="btn btn-ghost" title="Hapus filter"><x-icon name="x" class="size-4" /></a>
-                    @endif
-                </div>
+                <select name="bayar" class="input" x-data x-searchable aria-label="Cara bayar">
+                    <option value="">Semua cara bayar</option>
+                    @foreach ($paymentOptions as $value => $label)
+                        <option value="{{ $value }}" @selected(request('bayar') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <select name="gudang" class="input" aria-label="Status kirim ke gudang">
+                    <option value="">Semua status gudang</option>
+                    @foreach ($warehouseOptions as $value => $label)
+                        <option value="{{ $value }}" @selected(request('gudang') === $value)>Gudang: {{ $label }}</option>
+                    @endforeach
+                </select>
             </div>
         </form>
 

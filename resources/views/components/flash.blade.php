@@ -66,7 +66,7 @@
      @keydown.escape.window="$store.confirm.open && $store.confirm.close(false)"
      class="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center"
      role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
-    <div x-show="$store.confirm.open" x-transition.opacity @click="$store.confirm.close(false)" class="absolute inset-0 bg-stone-900/50 backdrop-blur-sm"></div>
+    <div x-show="$store.confirm.open" x-transition.opacity @click="$store.confirm.close(false)" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
     <div x-show="$store.confirm.open"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"

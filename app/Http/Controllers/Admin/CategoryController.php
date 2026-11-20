@@ -18,19 +18,27 @@ class CategoryController extends Controller
     public function index(Request $request): View
     {
         $search = $request->string('q')->trim()->value();
+        $status = in_array($request->query('status'), ['aktif', 'nonaktif'], true) ? $request->query('status') : null;
+        $level = in_array($request->query('tingkat'), ['induk', 'sub'], true) ? $request->query('tingkat') : null;
+        $flat = $search || $status || $level;
 
-        // Tampilkan sebagai pohon: kategori induk (dipaginasi) lalu subkategorinya.
-        $paginator = $search
-            ? AdminList::paginate(Category::withCount('products')->with('parent')->where('name', 'like', "%{$search}%")->orderBy('name'), $request)
+        // Tampilkan sebagai pohon: kategori induk (dipaginasi) lalu subkategorinya. Saat disaring: daftar datar.
+        $paginator = $flat
+            ? AdminList::paginate(Category::withCount('products')->with('parent')
+                ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
+                ->when($status, fn ($q) => $q->where('is_active', $status === 'aktif'))
+                ->when($level === 'induk', fn ($q) => $q->whereNull('parent_id'))
+                ->when($level === 'sub', fn ($q) => $q->whereNotNull('parent_id'))
+                ->orderBy('name'), $request)
             : AdminList::paginate(Category::root()->withCount('products')
                 ->with(['children' => fn ($q) => $q->withCount('products')])
                 ->orderBy('sort_order')->orderBy('name'), $request);
 
-        $categories = $search
+        $categories = $flat
             ? $paginator->getCollection()
             : $paginator->getCollection()->flatMap(fn (Category $c) => [$c, ...$c->children->each->setRelation('parent', $c)]);
 
-        return view('admin.categories.index', ['categories' => $categories, 'paginator' => $paginator, 'search' => $search]);
+        return view('admin.categories.index', ['categories' => $categories, 'paginator' => $paginator, 'search' => $search, 'flat' => $flat]);
     }
 
     public function create(): View
