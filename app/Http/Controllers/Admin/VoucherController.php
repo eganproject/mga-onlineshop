@@ -34,7 +34,10 @@ class VoucherController extends Controller
             ->when($state === 'running', fn ($q) => $q->running())
             ->when($state === 'scheduled', fn ($q) => $q->where('is_active', true)->where('starts_at', '>', now()))
             ->when($state === 'ended', fn ($q) => $q->where('ends_at', '<', now()))
-            ->when($state === 'inactive', fn ($q) => $q->where('is_active', false));
+            ->when($state === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when(VoucherType::tryFrom((string) $request->query('jenis')), fn ($q, VoucherType $type) => $q->where('type', $type))
+            ->when($request->query('tampil') === 'publik', fn ($q) => $q->where('is_public', true))
+            ->when($request->query('tampil') === 'tersembunyi', fn ($q) => $q->where('is_public', false));
 
         AdminList::sort($vouchers, $request, [
             'kode' => 'code',

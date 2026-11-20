@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Billing\FeeCalculator;
@@ -49,7 +50,11 @@ class OrderController extends Controller
 
         $couriers = Order::whereNotNull('courier')->distinct()->orderBy('courier')->pluck('courier');
 
-        return view('admin.orders.index', compact('orders', 'status', 'counts', 'couriers'));
+        return view('admin.orders.index', [
+            ...compact('orders', 'status', 'counts', 'couriers'),
+            'paymentOptions' => self::paymentFilterOptions(),
+            'warehouseOptions' => self::WAREHOUSE_FILTERS,
+        ]);
     }
 
     public function show(Request $request, Order $order, TrackingService $tracking, PaymentService $payments, FeeCalculator $fees, BiteshipShipment $shipments): View
@@ -183,6 +188,27 @@ class OrderController extends Controller
         return back()->with('success', "{$processed} pesanan diproses.".($skipped ? " {$skipped} dilewati karena statusnya bukan Dibayar." : ''));
     }
 
+    /** Pilihan filter status kirim ke gudang (kolom orders.warehouse_outbound_status). */
+    public const WAREHOUSE_FILTERS = [
+        'belum' => 'Belum dikirim',
+        'queued' => 'Dalam antrean',
+        'pending' => 'Menunggu persetujuan',
+        'approved' => 'Disetujui gudang',
+        'failed' => 'Gagal',
+        'deleted' => 'Dihapus di gudang',
+    ];
+
+    /** @return array<string, string> nilai orders.payment_method => label */
+    public static function paymentFilterOptions(): array
+    {
+        $options = [];
+        foreach (PaymentMethod::cases() as $method) {
+            $options[$method->value] = $method->label();
+        }
+
+        return $options + Order::OFFLINE_METHODS;
+    }
+
     private function filtered(Request $request): Builder
     {
         $from = $this->date($request->query('from'));
@@ -200,6 +226,11 @@ class OrderController extends Controller
             })
             ->when(in_array($request->query('source'), [Order::SOURCE_WEBSITE, Order::SOURCE_MANUAL], true), fn ($q) => $q->where('source', $request->query('source')))
             ->when($request->filled('courier'), fn ($q) => $q->where('courier', $request->string('courier')->value()))
+            // Cara bayar: metode Midtrans (PaymentMethod) atau pembayaran yang dicatat staf (Order::OFFLINE_METHODS).
+            ->when(array_key_exists((string) $request->query('bayar'), self::paymentFilterOptions()), fn ($q) => $q->where('payment_method', $request->query('bayar')))
+            // Status kirim ke gudang (warehouse29); "belum" = sudah lunas tapi belum pernah dikirim.
+            ->when($request->query('gudang') === 'belum', fn ($q) => $q->whereNotNull('paid_at')->whereNull('warehouse_outbound_status')->where('status', '!=', OrderStatus::Cancelled))
+            ->when(array_key_exists((string) $request->query('gudang'), self::WAREHOUSE_FILTERS) && $request->query('gudang') !== 'belum', fn ($q) => $q->where('warehouse_outbound_status', $request->query('gudang')))
             ->when($from, fn ($q) => $q->where('created_at', '>=', $from->startOfDay()))
             ->when($to, fn ($q) => $q->where('created_at', '<=', $to->endOfDay()));
     }

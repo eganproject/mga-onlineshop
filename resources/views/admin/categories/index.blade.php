@@ -4,15 +4,31 @@
     </x-admin.page-header>
 
     <div class="card overflow-hidden">
-        <form method="GET" class="border-b border-stone-100 p-4">
-            <div class="relative max-w-xs">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:flex-wrap" x-data @change="$el.submit()">
+            <x-admin.keep-query />
+            <div class="relative flex-1 sm:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
-                <input type="search" name="q" value="{{ $search }}" placeholder="Cari kategori..." class="input pl-10">
+                <input type="search" name="q" value="{{ $search }}" placeholder="Cari kategori..." class="input pl-10" aria-label="Cari kategori">
             </div>
+            <div class="grid grid-cols-2 gap-3 sm:flex">
+                <select name="status" class="input sm:w-40" aria-label="Filter status kategori">
+                    <option value="">Semua status</option>
+                    <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
+                    <option value="nonaktif" @selected(request('status') === 'nonaktif')>Nonaktif</option>
+                </select>
+                <select name="tingkat" class="input sm:w-44" aria-label="Filter tingkat kategori">
+                    <option value="">Semua tingkat</option>
+                    <option value="induk" @selected(request('tingkat') === 'induk')>Kategori induk</option>
+                    <option value="sub" @selected(request('tingkat') === 'sub')>Subkategori</option>
+                </select>
+            </div>
+            @if ($flat)
+                <a href="{{ route('admin.categories.index') }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /> <span class="sm:sr-only">Hapus filter</span></a>
+            @endif
         </form>
 
         @if ($categories->isEmpty())
-            <x-empty-state icon="tag" :title="$search ? 'Kategori tidak ditemukan' : 'Belum ada kategori'" description="Buat kategori pertama, misalnya Tripod Banner atau Frame Akrilik.">
+            <x-empty-state icon="tag" :title="$flat ? 'Kategori tidak ditemukan' : 'Belum ada kategori'" description="Buat kategori pertama, misalnya Tripod Banner atau Frame Akrilik.">
                 <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">Tambah kategori</a>
             </x-empty-state>
         @else
@@ -23,7 +39,7 @@
                         @foreach ($categories as $category)
                             <tr @class(['hover:bg-stone-50/50', 'bg-stone-50/30' => $category->parent_id])>
                                 <td>
-                                    <div @class(['flex items-center gap-3 sm:min-w-52', 'pl-4 sm:pl-8' => $category->parent_id && ! $search])>
+                                    <div @class(['flex items-center gap-3 sm:min-w-52', 'pl-4 sm:pl-8' => $category->parent_id && ! $flat])>
                                         <div class="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-50 text-brand-500">
                                             @if ($category->imageUrl())
                                                 <img src="{{ $category->imageUrl() }}" alt="" class="size-full object-cover">
@@ -42,7 +58,7 @@
                                 </td>
                                 <td class="hidden sm:table-cell">
                                     <a href="{{ route('admin.products.index', ['kategori' => $category->id]) }}" class="font-semibold text-stone-700 hover:text-brand-700">{{ $category->products_count }}</a>
-                                    @if (! $search && ! $category->parent_id && $category->children->sum('products_count'))
+                                    @if (! $flat && ! $category->parent_id && $category->children->sum('products_count'))
                                         <span class="text-xs text-stone-400">+{{ $category->children->sum('products_count') }} di subkategori</span>
                                     @endif
                                 </td>
@@ -71,7 +87,7 @@
                     </tbody>
                 </table>
             </div>
-            <x-admin.pagination :paginator="$paginator" :label="$search ? 'kategori' : 'kategori induk'" />
+            <x-admin.pagination :paginator="$paginator" :label="$flat ? 'kategori' : 'kategori induk'" />
         @endif
     </div>
 </x-layouts.admin>

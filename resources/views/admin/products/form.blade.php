@@ -107,7 +107,7 @@
                     <template x-for="upload in uploads" :key="upload.url">
                         <div class="relative aspect-square overflow-hidden rounded-2xl border-2 border-dashed border-brand-300">
                             <img :src="upload.url" :alt="upload.name" class="size-full object-cover">
-                            <span class="absolute left-2 top-2 rounded-lg bg-stone-900/70 px-2 py-0.5 text-[10px] font-semibold text-white">Baru</span>
+                            <span class="absolute left-2 top-2 rounded-lg bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white">Baru</span>
                         </div>
                     </template>
                     <label x-show="remainingSlots > 0" class="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 text-stone-400 transition hover:border-brand-300 hover:bg-brand-50/40 hover:text-brand-600">

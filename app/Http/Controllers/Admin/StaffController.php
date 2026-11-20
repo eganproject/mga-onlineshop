@@ -35,6 +35,8 @@ class StaffController extends Controller
                 ->when(Role::findByKey($request->string('jabatan')->value() ?: null), fn ($q, Role $role) => $role->isOwner()
                     ? $q->where(fn ($q) => $q->where('staff_role', $role->key)->orWhereNull('staff_role'))
                     : $q->where('staff_role', $role->key))
+                ->when($request->query('status') === 'aktif', fn ($q) => $q->where('is_active', true))
+                ->when($request->query('status') === 'nonaktif', fn ($q) => $q->where('is_active', false))
                 ->with('staffRoleRecord')
                 ->orderByDesc('is_active')
                 ->orderBy('name'), $request, 25),

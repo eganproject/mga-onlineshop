@@ -2,7 +2,7 @@
     <x-admin.page-header title="Pelanggan" description="Daftar pelanggan yang terdaftar di toko." />
 
     <div class="card overflow-hidden">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:flex-wrap" x-data @change="$el.submit()">
             <x-admin.keep-query />
             <div class="relative flex-1 sm:max-w-sm">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -13,6 +13,21 @@
                 <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
                 <option value="diblokir" @selected(request('status') === 'diblokir')>Diblokir</option>
             </select>
+            <select name="belanja" class="input sm:w-48" aria-label="Filter riwayat belanja">
+                <option value="">Semua pelanggan</option>
+                <option value="pernah" @selected(request('belanja') === 'pernah')>Pernah belanja</option>
+                <option value="belum" @selected(request('belanja') === 'belum')>Belum pernah belanja</option>
+            </select>
+            <select name="login" class="input sm:w-44" aria-label="Filter cara masuk">
+                <option value="">Semua cara masuk</option>
+                <option value="email" @selected(request('login') === 'email')>Email & password</option>
+                <option value="google" @selected(request('login') === 'google')>Google</option>
+            </select>
+            <x-form.date-range from="from" to="to" :from-value="request('from')" :to-value="request('to')" :max="today()"
+                               placeholder="Tanggal daftar" wrapper-class="sm:w-60" aria-label="Rentang tanggal daftar" />
+            @if (request()->hasAny(['q', 'status', 'belanja', 'login', 'from', 'to']))
+                <a href="{{ route('admin.customers.index') }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /> <span class="sm:sr-only">Hapus filter</span></a>
+            @endif
         </form>
 
         @if ($customers->isEmpty())

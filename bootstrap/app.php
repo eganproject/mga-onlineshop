@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
         // Preferensi tampilan sidebar admin (dibaca Blade, ditulis JS) tidak perlu dienkripsi.
-        $middleware->encryptCookies(except: ['admin_sidebar']);
+        $middleware->encryptCookies(except: ['admin_sidebar', 'admin_theme']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

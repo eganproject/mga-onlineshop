@@ -1,10 +1,10 @@
 @php
     $groupTone = [
-        'auth' => 'bg-stone-100 text-stone-600', 'orders' => 'bg-sky-50 text-sky-600', 'products' => 'bg-brand-50 text-brand-600',
-        'categories' => 'bg-brand-50 text-brand-600', 'stock' => 'bg-amber-50 text-amber-600', 'vouchers' => 'bg-rose-50 text-rose-600', 'banners' => 'bg-rose-50 text-rose-600', 'reviews' => 'bg-violet-50 text-violet-600',
-        'customers' => 'bg-emerald-50 text-emerald-600', 'settings' => 'bg-stone-900 text-white', 'staff' => 'bg-stone-900 text-white', 'roles' => 'bg-stone-900 text-white',
-        'articles' => 'bg-sky-50 text-sky-600', 'article-categories' => 'bg-sky-50 text-sky-600', 'storefront' => 'bg-rose-50 text-rose-600',
-        'imports' => 'bg-brand-50 text-brand-600', 'integrations' => 'bg-stone-900 text-white',
+        'auth' => 'bg-stone-100 text-stone-600', 'orders' => 'bg-stone-100 text-stone-600', 'products' => 'bg-stone-100 text-stone-600',
+        'categories' => 'bg-stone-100 text-stone-600', 'stock' => 'bg-stone-100 text-stone-600', 'vouchers' => 'bg-stone-100 text-stone-600', 'banners' => 'bg-stone-100 text-stone-600', 'reviews' => 'bg-stone-100 text-stone-600',
+        'customers' => 'bg-stone-100 text-stone-600', 'settings' => 'bg-stone-100 text-stone-600', 'staff' => 'bg-stone-100 text-stone-600', 'roles' => 'bg-stone-100 text-stone-600',
+        'articles' => 'bg-stone-100 text-stone-600', 'article-categories' => 'bg-stone-100 text-stone-600', 'storefront' => 'bg-stone-100 text-stone-600',
+        'imports' => 'bg-stone-100 text-stone-600', 'integrations' => 'bg-stone-100 text-stone-600',
     ];
     $groupIcon = [
         'auth' => 'lock', 'orders' => 'receipt', 'products' => 'cube', 'categories' => 'tag', 'stock' => 'archive', 'vouchers' => 'ticket', 'banners' => 'megaphone',

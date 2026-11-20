@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\ReviewStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\ProductReview;
 use App\Models\User;
 use App\Services\Reports\LowStockReport;
 use App\Services\Reports\ReportPeriod;
@@ -36,7 +38,42 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        // "Perlu tindakan": hal yang menunggu staf, hanya untuk jabatan yang boleh menindaklanjutinya.
+        $user = $request->user();
+        $lowStockCount = $canStock ? $lowStock->count() : 0;
+        $actions = array_values(array_filter([
+            $user->can('orders.view') ? [
+                'count' => (int) ($open[OrderStatus::Paid->value] ?? 0),
+                'title' => 'Pesanan perlu diproses',
+                'hint' => 'Sudah dibayar, belum dikemas',
+                'url' => route('admin.orders.index', ['status' => OrderStatus::Paid->value]),
+                'tone' => 'sky',
+            ] : null,
+            $canStock ? [
+                'count' => $lowStockCount,
+                'title' => 'Stok menipis / habis',
+                'hint' => 'Produk aktif di bawah batas stok',
+                'url' => route('admin.stock.index', ['status' => 'menipis']),
+                'tone' => 'amber',
+            ] : null,
+            $user->can('reviews.manage') ? [
+                'count' => ProductReview::where('status', ReviewStatus::Pending)->count(),
+                'title' => 'Ulasan menunggu',
+                'hint' => 'Belum tampil di toko',
+                'url' => route('admin.reviews.index', ['status' => ReviewStatus::Pending->value]),
+                'tone' => 'stone',
+            ] : null,
+            $user->can('orders.view') ? [
+                'count' => Order::where('warehouse_outbound_status', 'failed')->count(),
+                'title' => 'Kirim ke gudang gagal',
+                'hint' => 'Perlu dicek lalu dikirim ulang',
+                'url' => route('admin.orders.index', ['gudang' => 'failed']),
+                'tone' => 'rose',
+            ] : null,
+        ]));
+
         return view('admin.dashboard', [
+            'actions' => $actions,
             'range' => $range,
             'period' => $period,
             'summary' => $summary,
@@ -53,7 +90,7 @@ class DashboardController extends Controller
             'ordersToday' => Order::whereDate('created_at', today())->count(),
             'recentOrders' => Order::with('user:id,name')->latest()->take(6)->get(),
             'lowStock' => $canStock ? $lowStock->items(6) : collect(),
-            'lowStockCount' => $canStock ? $lowStock->count() : 0,
+            'lowStockCount' => $lowStockCount,
         ]);
     }
 }

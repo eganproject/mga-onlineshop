@@ -19,7 +19,7 @@
             {{-- Beranda --}}
             <section class="card space-y-5 p-6" x-data="{ homeTitle: @js((string) $val('home_title')), description: @js((string) $val('description')) }">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><x-icon name="search" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="search" /></span>
                     <div><h2 class="font-bold text-stone-900">Beranda di Google</h2><p class="text-xs text-stone-500">Judul & deskripsi saat orang mencari nama toko.</p></div>
                 </div>
                 <div class="rounded-xl border border-stone-200 bg-white p-4" aria-hidden="true">
@@ -40,7 +40,7 @@
             {{-- Gambar bagikan --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-amber-50 text-amber-600"><x-icon name="share" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="share" /></span>
                     <div><h2 class="font-bold text-stone-900">Gambar saat link dibagikan</h2><p class="text-xs text-stone-500">Untuk halaman tanpa foto sendiri (beranda, katalog, kategori).</p></div>
                 </div>
                 <x-form.image-upload name="default_image" label="Gambar bagikan bawaan" optional :current="$image" :remove-name="$customImage ? 'remove_default_image' : null" aspect="aspect-[1200/630]"
@@ -52,7 +52,7 @@
             {{-- Verifikasi & analitik --}}
             <section class="card space-y-5 p-6">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><x-icon name="chart" /></span>
+                    <span class="grid size-10 place-items-center rounded-xl bg-stone-100 text-stone-500"><x-icon name="chart" /></span>
                     <div><h2 class="font-bold text-stone-900">Verifikasi & analitik</h2><p class="text-xs text-stone-500">Hubungkan toko ke Google Search Console, Bing, dan Google Analytics.</p></div>
                 </div>
                 <x-form.input name="google_verification" label="Kode verifikasi Google Search Console" optional :value="$val('google_verification')" maxlength="300"

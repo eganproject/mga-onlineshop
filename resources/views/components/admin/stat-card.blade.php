@@ -1,21 +1,11 @@
 @props(['label', 'value', 'icon', 'tone' => 'brand', 'hint' => null, 'change' => false, 'changeLabel' => 'vs periode sebelumnya'])
-@php
-    $tones = [
-        'brand' => 'bg-brand-50 text-brand-600',
-        'sky' => 'bg-sky-50 text-sky-600',
-        'emerald' => 'bg-emerald-50 text-emerald-600',
-        'violet' => 'bg-violet-50 text-violet-600',
-        'amber' => 'bg-amber-50 text-amber-600',
-    ];
-@endphp
-<div {{ $attributes->class('card min-w-0 p-4 sm:p-5') }}>
-    <div class="flex items-start justify-between gap-3">
+{{-- Netral: ikon abu-abu kecil, warna hanya untuk naik/turun. `tone` dibiarkan demi kompatibilitas. --}}
+<div {{ $attributes->class('card min-w-0 p-4') }}>
+    <div class="flex items-center justify-between gap-3">
         <p class="text-xs font-medium text-stone-500 sm:text-sm">{{ $label }}</p>
-        <span class="hidden size-10 shrink-0 sm:grid place-items-center rounded-xl {{ $tones[$tone] ?? $tones['brand'] }}">
-            <x-icon :name="$icon" class="size-5" />
-        </span>
+        <x-icon :name="$icon" class="hidden size-4 shrink-0 text-stone-400 sm:block" />
     </div>
-    <p class="mt-2 text-xl font-extrabold sm:text-2xl tracking-tight text-stone-900 tabular-nums">{{ $value }}</p>
+    <p class="mt-1.5 truncate text-lg font-semibold tracking-tight text-stone-900 tabular-nums sm:text-xl">{{ $value }}</p>
     @if ($change !== false)
         <div class="mt-1 text-xs text-stone-500">
             @if (is_null($change))

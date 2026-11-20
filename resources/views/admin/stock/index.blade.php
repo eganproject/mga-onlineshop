@@ -18,7 +18,7 @@
     <div class="card overflow-hidden"
          x-data="{ open: false, item: {}, mode: 'add' }"
          @adjust-stock.window="item = $event.detail; mode = 'add'; open = true; $nextTick(() => document.getElementById('adjust-qty')?.focus())">
-        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row" x-data @change="$el.submit()">
+        <form method="GET" class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:flex-wrap" x-data @change="$el.submit()">
             <x-admin.keep-query />
             <div class="relative flex-1 sm:max-w-xs">
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
@@ -30,6 +30,16 @@
                 <option value="habis" @selected(request('status') === 'habis')>Habis</option>
                 <option value="nonaktif" @selected(request('status') === 'nonaktif')>Produk nonaktif</option>
             </select>
+            <x-form.category-select name="kategori" :categories="$categories" :selected="request('kategori')" placeholder="Semua kategori"
+                                    wrapper-class="sm:w-56" aria-label="Filter kategori" />
+            <select name="gudang" class="input sm:w-52" aria-label="Filter hubungan SKU gudang">
+                <option value="">Semua (gudang)</option>
+                <option value="terhubung" @selected(request('gudang') === 'terhubung')>Terhubung ke gudang</option>
+                <option value="belum" @selected(request('gudang') === 'belum')>Belum terhubung gudang</option>
+            </select>
+            @if (request()->hasAny(['q', 'status', 'kategori', 'gudang']))
+                <a href="{{ route('admin.stock.index') }}" class="btn btn-ghost shrink-0" title="Hapus filter"><x-icon name="x" class="size-4" /> <span class="sm:sr-only">Hapus filter</span></a>
+            @endif
         </form>
 
         @if ($products->isEmpty())
@@ -88,7 +98,7 @@
         @endif
 
         {{-- Modal penyesuaian stok --}}
-        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-stone-900/40 p-4 backdrop-blur-sm sm:items-center" @keydown.escape.window="open = false">
+        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center" @keydown.escape.window="open = false">
             <form method="POST" action="{{ route('admin.stock.adjust') }}" @click.outside="open = false" x-transition
                   class="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
                 @csrf

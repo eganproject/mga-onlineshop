@@ -5,18 +5,18 @@
     $user = auth()->user();
 @endphp
 <x-layouts.admin title="Dashboard">
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-sm font-medium text-stone-500">{{ now()->translatedFormat('l, d F Y') }}</p>
-            <h1 class="text-2xl font-extrabold tracking-tight text-stone-900">Halo, {{ \Illuminate\Support\Str::words(auth()->user()->name, 1, '') }}! ☕</h1>
+            <p class="text-xs font-medium text-stone-500 sm:text-sm">{{ now()->translatedFormat('l, d F Y') }}</p>
+            <h1 class="font-display text-xl font-semibold tracking-tight text-stone-900 sm:text-[1.4rem]">Halo, {{ \Illuminate\Support\Str::words(auth()->user()->name, 1, '') }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             {{-- Periode hanya mengubah angka penjualan, jadi tanpa akses laporan tidak ditampilkan. --}}
             @if ($user->can('reports.view'))
-            <nav class="inline-flex rounded-xl border border-stone-200 bg-white p-1 text-xs font-semibold" aria-label="Periode dashboard">
+            <nav class="inline-flex rounded-lg bg-stone-200/60 p-0.5 text-xs font-medium" aria-label="Periode dashboard">
                 @foreach (\App\Http\Controllers\Admin\DashboardController::RANGES as $key => $label)
                     <a href="{{ route('admin.dashboard', ['range' => $key]) }}" @if ($range === $key) aria-current="page" @endif
-                       @class(['rounded-lg px-3 py-1.5 transition', 'bg-stone-900 text-white' => $range === $key, 'text-stone-500 hover:text-stone-900' => $range !== $key])>{{ $label }}</a>
+                       @class(['rounded-md px-3 py-1.5 transition', 'bg-white font-semibold text-stone-900 shadow-xs' => $range === $key, 'text-stone-500 hover:text-stone-900' => $range !== $key])>{{ $label }}</a>
                 @endforeach
             </nav>
             @endif
@@ -26,20 +26,63 @@
         </div>
     </div>
 
-    {{-- Angka penjualan hanya untuk jabatan yang boleh melihat laporan. --}}
+    {{-- Perlu tindakan: hal yang menunggu staf (sesuai hak akses), paling atas supaya langsung terlihat. --}}
+    @if ($actions)
+        <section aria-label="Perlu tindakan" @class(['card mb-4 grid grid-cols-1 gap-px overflow-hidden bg-stone-200 sm:grid-cols-2', 'xl:grid-cols-4' => count($actions) === 4, 'xl:grid-cols-3' => count($actions) === 3])>
+            @foreach ($actions as $action)
+                <a href="{{ $action['url'] }}" @class([
+                    'group flex items-center gap-3 bg-white px-4 py-3 transition hover:bg-stone-50',
+                    'sm:col-span-2 xl:col-span-1' => count($actions) % 2 === 1 && $loop->last,
+                ])>
+                    <span @class([
+                        'min-w-7 text-xl font-semibold tabular-nums',
+                        'text-stone-300' => $action['count'] === 0,
+                        'text-sky-600' => $action['count'] > 0 && $action['tone'] === 'sky',
+                        'text-amber-600' => $action['count'] > 0 && $action['tone'] === 'amber',
+                        'text-rose-600' => $action['count'] > 0 && $action['tone'] === 'rose',
+                        'text-stone-900' => $action['count'] > 0 && $action['tone'] === 'stone',
+                    ])>{{ $fmt($action['count']) }}</span>
+                    <span class="min-w-0 flex-1 text-sm leading-snug">
+                        <span class="block font-semibold text-stone-800">{{ $action['title'] }}</span>
+                        <span class="block truncate text-xs text-stone-500">{{ $action['hint'] }}</span>
+                    </span>
+                    <x-icon name="chevron-right" class="size-4 shrink-0 text-stone-300 transition group-hover:translate-x-0.5 group-hover:text-stone-500" />
+                </a>
+            @endforeach
+        </section>
+    @endif
+
+    {{-- Angka penjualan hanya untuk jabatan yang boleh melihat laporan: satu panel, tanpa kartu berwarna. --}}
     @can('reports.view')
-    {{-- KPI --}}
-    <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <x-admin.stat-card label="Pendapatan" :value="Money::rupiah($summary['revenue'])" icon="banknotes" :change="$changes['revenue']" />
-        <x-admin.stat-card label="Pesanan dibayar" :value="$fmt($summary['orders'])" icon="receipt" tone="sky" :change="$changes['orders']" />
-        <x-admin.stat-card label="Rata-rata per pesanan" :value="Money::rupiah($summary['average'])" icon="trending-up" tone="violet" :change="$changes['average']" />
-        <x-admin.stat-card label="Produk terjual" :value="$fmt($summary['items']).' pcs'" icon="cube" tone="emerald" :change="$changes['items']" />
-    </div>
+    @php
+        $kpis = [
+            ['Pendapatan', Money::rupiah($summary['revenue']), $changes['revenue']],
+            ['Pesanan dibayar', $fmt($summary['orders']), $changes['orders']],
+            ['Rata-rata per pesanan', Money::rupiah($summary['average']), $changes['average']],
+            ['Produk terjual', $fmt($summary['items']).' pcs', $changes['items']],
+        ];
+    @endphp
+    <section aria-label="Ringkasan penjualan" class="card grid grid-cols-2 gap-px overflow-hidden bg-stone-200 xl:grid-cols-4">
+        @foreach ($kpis as [$label, $value, $change])
+            <div class="min-w-0 bg-white p-4">
+                <p class="text-xs font-medium text-stone-500">{{ $label }}</p>
+                <p class="mt-1 truncate text-lg font-semibold tracking-tight text-stone-900 tabular-nums sm:text-xl">{{ $value }}</p>
+                <p class="mt-0.5 text-xs text-stone-500">
+                    @if (is_null($change))
+                        Belum ada pembanding
+                    @else
+                        <span @class(['font-semibold', 'text-emerald-600' => $change > 0, 'text-rose-600' => $change < 0, 'text-stone-600' => $change == 0])>{{ $change > 0 ? '+' : ($change < 0 ? '−' : '') }}{{ str_replace('.', ',', (string) abs($change)) }}%</span>
+                        <span class="hidden sm:inline">vs periode sebelumnya</span>
+                    @endif
+                </p>
+            </div>
+        @endforeach
+    </section>
     <p class="mt-2 text-xs text-stone-400">Periode {{ $period->label() }}, dibandingkan {{ $period->days() }} hari sebelumnya. Dihitung dari pesanan yang sudah dibayar.</p>
     @endcan
 
     {{-- Tanpa akses laporan: pesanan berjalan & stok menipis tampil berdampingan dalam satu grid. --}}
-    <div @class(['mt-6 grid gap-6', 'xl:grid-cols-3' => auth()->user()->can('reports.view'), 'lg:grid-cols-2' => auth()->user()->cannot('reports.view')])>
+    <div @class(['mt-4 grid gap-4', 'xl:grid-cols-3' => auth()->user()->can('reports.view'), 'lg:grid-cols-2' => auth()->user()->cannot('reports.view')])>
         {{-- Grafik penjualan --}}
         @can('reports.view')
         <div class="card min-w-0 p-5 xl:col-span-2">
@@ -69,7 +112,7 @@
                                     <span class="text-xs font-semibold text-brand-600">perlu diproses</span>
                                 @endif
                             </span>
-                            <span class="text-lg font-extrabold tabular-nums text-stone-900">{{ $fmt($row['count']) }}</span>
+                            <span class="text-base font-semibold tabular-nums text-stone-900">{{ $fmt($row['count']) }}</span>
                         </a>
                     </li>
                 @endforeach
@@ -89,7 +132,7 @@
     @can('reports.view')
     </div>
 
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {{-- Produk terlaris --}}
         <div class="card min-w-0 p-5">
             <div class="flex items-center justify-between">
@@ -135,7 +178,7 @@
                                 <span class="shrink-0 font-semibold tabular-nums text-stone-900">{{ Money::compact($row->revenue) }} <span class="font-normal text-stone-400">· {{ str_replace('.', ',', (string) $row->share) }}%</span></span>
                             </div>
                             <div class="mt-1.5 h-2 rounded-full bg-stone-100">
-                                <div class="h-2 rounded-full bg-brand-500" style="width: {{ max(2, $row->share) }}%"></div>
+                                <div class="h-2 rounded-full bg-stone-400" style="width: {{ max(2, $row->share) }}%"></div>
                             </div>
                         </li>
                     @endforeach
@@ -165,7 +208,7 @@
                         </span>
                     </li>
                 @empty
-                    <li class="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">Semua stok aman 👍</li>
+                    <li class="rounded-lg bg-stone-50 p-4 text-sm text-stone-500">Semua stok aman.</li>
                 @endforelse
             </ul>
         </div>
@@ -174,7 +217,7 @@
 
     {{-- Pesanan terbaru --}}
     @can('orders.view')
-    <div class="card mt-6 overflow-hidden">
+    <div class="card mt-4 overflow-hidden">
         <div class="flex items-center justify-between p-5">
             <h2 class="font-bold text-stone-900">Pesanan terbaru</h2>
             <a href="{{ route('admin.orders.index') }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Lihat semua</a>

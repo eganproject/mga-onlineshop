@@ -204,7 +204,7 @@ class AdminListsTest extends TestCase
     {
         $this->actingAs($this->owner);
 
-        $this->get(route('admin.dashboard'))->assertSee('Ciutkan menu')->assertSee('lg:w-72');
+        $this->get(route('admin.dashboard'))->assertSee('Ciutkan menu')->assertSee('lg:w-60');
         $this->withUnencryptedCookie('admin_sidebar', 'collapsed')->get(route('admin.dashboard'))
             ->assertSee('collapsed: true', false);
     }
