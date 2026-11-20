@@ -87,7 +87,7 @@
             <div :class="{ 'lg:justify-center lg:px-0': collapsed }" @class(['flex h-14 shrink-0 items-center justify-between border-b border-stone-200 px-4', 'lg:justify-center lg:px-0' => $collapsed])>
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5" aria-label="Dashboard admin">
                     <x-logo x-bind:class="{ 'lg:hidden': collapsed }" @class(['h-7', 'lg:hidden' => $collapsed]) />
-                    <x-logo variant="mark" x-bind:class="{ 'lg:block': collapsed }" @class(['hidden h-auto w-10', 'lg:block' => $collapsed]) />
+                    <x-logo variant="mark" x-bind:class="{ 'lg:block': collapsed }" @class(['hidden h-5', 'lg:block' => $collapsed]) />
                     <span :class="{ 'lg:hidden': collapsed }" @class(['text-xs font-medium text-stone-500', 'lg:hidden' => $collapsed])>Admin</span>
                 </a>
                 <button @click="sidebar = false" class="btn btn-ghost p-2 lg:hidden" aria-label="Tutup menu"><x-icon name="x" /></button>
